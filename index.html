@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kutu Açma Pro v8 - Online</title>
+  <title>Kutu Açma Pro - Online</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -21,28 +21,196 @@
     }
 
     body {
-      background-color: #05070d;
+      background-color: #05020a;
       color: #ffffff;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
     }
 
     #app-container {
       width: 100%;
       max-width: 420px;
       height: 100vh;
-      max-height: 100vh;
-      background: radial-gradient(circle at center, #0d1b2a 0%, #000814 100%);
+      background: radial-gradient(circle at 50% 20%, #1e0b36 0%, #08020f 100%);
       position: relative;
       display: flex;
       flex-direction: column;
-      padding: 10px;
-      border: 1px solid #1f293d;
+      padding: 12px;
+      border: 1px solid #2d1254;
       overflow: hidden;
     }
 
+    /* --- GİRİŞ EKRANI (GÖRSEL TASARIMI) --- */
+    #auth-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      padding: 10px 6px;
+      overflow-y: auto;
+    }
+
+    .auth-header-logo {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .chest-icon {
+      font-size: 50px;
+      filter: drop-shadow(0 0 20px #a855f7);
+      animation: floatChest 3s ease-in-out infinite;
+    }
+
+    @keyframes floatChest {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .brand-title {
+      font-size: 32px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 0 15px #c084fc, 0 0 30px #9333ea;
+      letter-spacing: 1px;
+      line-height: 1.1;
+      margin-top: 4px;
+    }
+
+    .brand-sub {
+      font-size: 26px;
+      font-weight: 900;
+      color: #e879f9;
+      text-shadow: 0 0 15px #db2777;
+    }
+
+    .auth-card-panel {
+      width: 100%;
+      background: rgba(18, 7, 34, 0.75);
+      border: 2px solid #a855f7;
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.35), inset 0 0 15px rgba(168, 85, 247, 0.2);
+      border-radius: 20px;
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .auth-tab-switch {
+      display: flex;
+      background: rgba(10, 3, 20, 0.8);
+      border-radius: 12px;
+      padding: 4px;
+      border: 1px solid #3b1466;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 10px 0;
+      text-align: center;
+      font-size: 13px;
+      font-weight: bold;
+      color: #a855f7;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .auth-tab.active {
+      background: linear-gradient(135deg, #9333ea, #c026d3);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(192, 38, 211, 0.6);
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap-icon {
+      position: absolute;
+      left: 14px;
+      font-size: 15px;
+      color: #c084fc;
+    }
+
+    .neon-input {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      background: #0d041a;
+      border: 1.5px solid #6b21a8;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
+    }
+
+    .neon-input:focus {
+      border-color: #d946ef;
+      box-shadow: 0 0 10px rgba(217, 70, 239, 0.4);
+    }
+
+    .btn-neon-action {
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(217, 70, 239, 0.5);
+      letter-spacing: 0.5px;
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #a855f7;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .auth-divider::before, .auth-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #4c1d95;
+    }
+
+    .auth-divider:not(:empty)::before { margin-right: .6em; }
+    .auth-divider:not(:empty)::after { margin-left: .6em; }
+
+    .btn-alt-action {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1.5px solid #a855f7;
+      background: rgba(46, 16, 84, 0.4);
+      color: #f0abfc;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .auth-footer-note {
+      font-size: 11px;
+      color: #c084fc;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      line-height: 1.3;
+    }
+
+    /* --- OYUN MENÜSÜ & İÇ EKRANLAR --- */
     .top-header {
       display: flex;
       justify-content: space-between;
@@ -52,15 +220,11 @@
     }
 
     .app-title { font-size: 16px; font-weight: 800; color: #fff; }
-
-    .header-actions {
-      display: flex;
-      gap: 4px;
-    }
+    .header-actions { display: flex; gap: 4px; }
 
     .icon-btn {
-      background: #1b263b;
-      border: 1px solid #415a77;
+      background: #1b0e2f;
+      border: 1px solid #6b21a8;
       color: #fff;
       padding: 5px 8px;
       border-radius: 6px;
@@ -69,20 +233,14 @@
       cursor: pointer;
     }
 
-    .exit-btn {
-      background: #7f1d1d;
-      border-color: #ef4444;
-      color: #fff;
-    }
+    .exit-btn { background: #7f1d1d; border-color: #ef4444; color: #fff; }
 
-    /* --- MENÜ EKRANI --- */
-    #menu-screen {
-      display: flex;
+    #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, #mines-game-screen, #catch-summary-screen {
+      display: none;
       flex-direction: column;
-      justify-content: space-between;
       height: 100%;
-      overflow-y: auto;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 6px;
     }
 
     .menu-center {
@@ -91,19 +249,14 @@
       gap: 6px;
       align-items: center;
       margin: auto 0;
-    }
-
-    .main-logo {
-      font-size: 22px;
-      font-weight: 900;
-      color: #38bdf8;
-      text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+      width: 100%;
     }
 
     .user-greeting {
-      font-size: 12px;
+      font-size: 13px;
       color: #34d399;
       font-weight: bold;
+      text-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
     }
 
     .mode-grid {
@@ -114,10 +267,10 @@
     }
 
     .mode-btn {
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: #94a3b8;
-      padding: 6px 10px;
+      background: #0f071a;
+      border: 1px solid #3b1466;
+      color: #cbd5e1;
+      padding: 7px 10px;
       border-radius: 8px;
       font-size: 11px;
       cursor: pointer;
@@ -125,30 +278,19 @@
     }
 
     .mode-btn.active {
-      background: #0284c7;
+      background: linear-gradient(90deg, #7e22ce, #a855f7);
       color: #fff;
-      border-color: #38bdf8;
+      border-color: #d946ef;
       font-weight: bold;
     }
 
     .menu-preview-box {
       width: 100%;
-      background: rgba(11, 19, 41, 0.85);
-      border: 1px solid #1e293b;
+      background: rgba(15, 6, 26, 0.9);
+      border: 1px solid #3b1466;
       border-radius: 8px;
       padding: 6px 8px;
       font-size: 10px;
-    }
-
-    .input-field {
-      width: 100%;
-      padding: 9px;
-      border-radius: 8px;
-      border: 1px solid #334155;
-      background-color: #0b1329;
-      color: #fff;
-      font-size: 12px;
-      outline: none;
     }
 
     .btn-start {
@@ -156,12 +298,12 @@
       padding: 12px;
       border-radius: 8px;
       border: none;
-      background: #10b981;
+      background: linear-gradient(135deg, #10b981, #059669);
       color: white;
       font-size: 14px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
       flex-shrink: 0;
     }
 
@@ -183,8 +325,8 @@
     }
 
     .stat-card {
-      background: #0d1527;
-      border: 1px solid #1e293b;
+      background: #110521;
+      border: 1px solid #4c1d95;
       padding: 4px 8px;
       border-radius: 6px;
     }
@@ -195,20 +337,11 @@
     .stat-val { font-size: 14px; font-weight: bold; }
     .timer-val { color: #f87171; }
     .score-val { color: #34d399; }
-    .user-tag { font-size: 9px; color: #38bdf8; }
-
-    /* --- OYUN ALANLARI --- */
-    #game-screen, #catch-game-screen, #inventory-screen, #mines-game-screen, #catch-summary-screen {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      justify-content: space-between;
-      gap: 6px;
-    }
+    .user-tag { font-size: 9px; color: #c084fc; }
 
     .rates-box {
-      background: rgba(13, 21, 39, 0.95);
-      border: 1px solid #334155;
+      background: rgba(17, 5, 33, 0.95);
+      border: 1px solid #4c1d95;
       border-radius: 6px;
       padding: 4px 6px;
       font-size: 9px;
@@ -227,9 +360,9 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: #060b17;
+      background: #080210;
       border-radius: 10px;
-      border: 1px solid #1e293b;
+      border: 1px solid #3b1466;
       position: relative;
       overflow: hidden;
       min-height: 120px;
@@ -241,9 +374,9 @@
       position: relative;
       display: none;
       overflow: hidden;
-      border-top: 2px solid #334155;
-      border-bottom: 2px solid #334155;
-      background: rgba(2, 6, 23, 0.6);
+      border-top: 2px solid #4c1d95;
+      border-bottom: 2px solid #4c1d95;
+      background: rgba(5, 1, 10, 0.8);
     }
 
     .roulette-needle {
@@ -275,7 +408,7 @@
       align-items: center;
       justify-content: center;
       border-right: 1px solid rgba(255,255,255,0.1);
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(22, 9, 41, 0.9);
       font-size: 9px;
       text-align: center;
       padding: 2px;
@@ -291,8 +424,8 @@
     }
 
     .drop-result-badge {
-      background: #0b1329;
-      border: 1px solid #334155;
+      background: #110521;
+      border: 1px solid #4c1d95;
       border-radius: 6px;
       padding: 4px 8px;
       font-size: 10px;
@@ -306,22 +439,24 @@
       font-weight: bold;
       border-radius: 8px;
       border: none;
-      background: #0284c7;
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
       color: white;
       cursor: pointer;
       flex-shrink: 0;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
     }
 
     .btn-action:disabled {
-      background: #334155;
+      background: #231038;
       color: #64748b;
       cursor: not-allowed;
+      box-shadow: none;
     }
 
     .catch-arena {
       flex: 1;
-      background: #050a14;
-      border: 2px dashed #1e293b;
+      background: #080210;
+      border: 2px dashed #4c1d95;
       border-radius: 8px;
       position: relative;
       overflow: hidden;
@@ -352,9 +487,9 @@
       flex: 1;
       overflow-y: auto;
       padding: 4px;
-      background: #060b17;
+      background: #080210;
       border-radius: 8px;
-      border: 1px solid #1e293b;
+      border: 1px solid #3b1466;
       align-content: start;
     }
 
@@ -369,7 +504,7 @@
       font-weight: bold;
       cursor: pointer;
       border: 2px solid;
-      background: #0d1527;
+      background: #110521;
       text-align: center;
       padding: 2px;
     }
@@ -377,7 +512,7 @@
     .inv-card.opened {
       opacity: 0.3;
       cursor: not-allowed;
-      border-color: #334155 !important;
+      border-color: #3b1466 !important;
     }
 
     .mines-grid {
@@ -385,8 +520,8 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 6px;
       flex: 1;
-      background: #060b17;
-      border: 1px solid #1e293b;
+      background: #080210;
+      border: 1px solid #3b1466;
       border-radius: 8px;
       padding: 6px;
       align-content: center;
@@ -394,8 +529,8 @@
 
     .mine-card {
       aspect-ratio: 1;
-      background: #0d1527;
-      border: 2px solid #334155;
+      background: #110521;
+      border: 2px solid #4c1d95;
       border-radius: 6px;
       display: flex;
       flex-direction: column;
@@ -409,12 +544,12 @@
     .mine-card.safe { border-color: #10b981; background: #064e3b; }
     .mine-card.bomb { border-color: #ef4444; background: #7f1d1d; }
 
-    /* MODALLAR */
+    /* MODAL */
     .modal-overlay {
       display: none;
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.92);
       z-index: 50;
       padding: 10px;
       flex-direction: column;
@@ -422,13 +557,14 @@
     }
 
     .modal-card {
-      background: #0b1329;
-      border: 1px solid #1e293b;
-      border-radius: 10px;
-      padding: 10px;
+      background: #110521;
+      border: 1.5px solid #6b21a8;
+      border-radius: 12px;
+      padding: 12px;
       max-height: 90%;
       display: flex;
       flex-direction: column;
+      box-shadow: 0 0 20px rgba(107, 33, 168, 0.5);
     }
 
     .modal-header {
@@ -437,21 +573,6 @@
       font-size: 14px;
       margin-bottom: 6px;
       color: #f8fafc;
-    }
-
-    .auth-box {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .auth-toggle-txt {
-      font-size: 11px;
-      color: #38bdf8;
-      cursor: pointer;
-      text-align: center;
-      margin-top: 4px;
     }
 
     .filter-tabs {
@@ -463,9 +584,9 @@
     }
 
     .tab-btn {
-      background: #111c35;
-      border: 1px solid #1e293b;
-      color: #94a3b8;
+      background: #1c0b33;
+      border: 1px solid #4c1d95;
+      color: #c084fc;
       padding: 4px 6px;
       border-radius: 4px;
       font-size: 9px;
@@ -474,7 +595,7 @@
     }
 
     .tab-btn.active {
-      background: #0284c7;
+      background: #9333ea;
       color: #fff;
       font-weight: bold;
     }
@@ -494,7 +615,7 @@
       align-items: center;
       padding: 5px 8px;
       border-radius: 6px;
-      background: #111c35;
+      background: #18082d;
       font-size: 10px;
     }
 
@@ -503,15 +624,7 @@
     .rank-2 { background: #cbd5e1; color: #000; }
     .rank-3 { background: #f97316; color: #fff; }
     .rank-green { background: #22c55e; color: #000; }
-    .rank-rest { background: #1e293b; color: #94a3b8; }
-
-    .pagination-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10px;
-      margin-top: 4px;
-    }
+    .rank-rest { background: #200c3b; color: #c084fc; }
 
     .btn-modal {
       padding: 8px;
@@ -522,7 +635,7 @@
     }
 
     .btn-close { background: #ef4444; color: #fff; }
-    .btn-secondary { background: #0284c7; color: #fff; margin-bottom: 4px; }
+    .btn-secondary { background: #9333ea; color: #fff; margin-bottom: 4px; }
     .btn-danger { background: #b91c1c; color: #fff; margin-top: 6px; }
   </style>
 </head>
@@ -530,20 +643,55 @@
 
 <div id="app-container">
 
-  <!-- ==================== ANA MENÜ ==================== -->
+  <!-- ==================== 1. GİRİŞ / KAYIT ANA EKRANI ==================== -->
+  <div id="auth-screen">
+    <div class="auth-header-logo">
+      <div class="chest-icon">👑📦</div>
+      <div class="brand-title">Kutu Açma</div>
+      <div class="brand-sub">Pro</div>
+    </div>
+
+    <div class="auth-card-panel">
+      <div class="auth-tab-switch">
+        <div class="auth-tab active" id="tab-login" onclick="setAuthTab('login')">🎮 Giriş</div>
+        <div class="auth-tab" id="tab-register" onclick="setAuthTab('register')">👤+ Kayıt</div>
+      </div>
+
+      <div class="input-wrap">
+        <span class="input-wrap-icon">👤</span>
+        <input type="text" id="auth-username" class="neon-input" placeholder="Kullanıcı Adı">
+      </div>
+
+      <div class="input-wrap">
+        <span class="input-wrap-icon">🔒</span>
+        <input type="password" id="auth-password" class="neon-input" placeholder="Şifre">
+      </div>
+
+      <button class="btn-neon-action" id="auth-submit-btn" onclick="executeAuth()">🎮 Giriş Yap</button>
+
+      <div class="auth-divider">veya</div>
+
+      <button class="btn-alt-action" id="auth-switch-btn" onclick="toggleAuthTab()">👤+ Yeni Hesap Oluştur</button>
+    </div>
+
+    <div class="auth-footer-note">
+      <span>🛡️</span> Güvenli ve hızlı oyun deneyimi için kutu açma dünyasına katıl!
+    </div>
+  </div>
+
+  <!-- ==================== 2. OYUN ANA MENÜSÜ ==================== -->
   <div id="menu-screen">
     <div class="top-header">
       <div class="app-title">Kutu Açma Pro</div>
       <div class="header-actions">
-        <button class="icon-btn" onclick="openAdminModal()">🔑 Admin</button>
-        <button class="icon-btn" onclick="openAuthModal()" id="btn-auth-menu">👤 Giriş</button>
-        <button class="icon-btn" onclick="openLeaderboard()">🏆 Sıralama</button>
+        <button class="icon-btn" onclick="openLeaderboard()">🏆 Sıralama (İlk 10)</button>
+        <button class="icon-btn exit-btn" onclick="handleSignOut()">🚪 Çıkış</button>
       </div>
     </div>
 
     <div class="menu-center">
-      <div class="main-logo">KUTU AÇMA</div>
-      <div class="user-greeting" id="menu-user-greeting">Giriş Yapılmadı</div>
+      <div style="font-size:24px; font-weight:900; color:#d946ef; text-shadow:0 0 15px #d946ef;">KUTU AÇMA</div>
+      <div class="user-greeting" id="menu-user-greeting">👤 Oyuncu</div>
       
       <div class="mode-grid">
         <button class="mode-btn active" onclick="selectMode('standard', this)">
@@ -579,11 +727,11 @@
     </div>
   </div>
 
-  <!-- ==================== KLASİK / 10 KUTU / ŞANS YÜKSELTME ==================== -->
+  <!-- ==================== 3. OYUN EKRANLARI ==================== -->
   <div id="game-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:12px; font-weight:bold; color:#38bdf8;" id="game-mode-name-txt">Kasa</div>
+      <div style="font-size:12px; font-weight:bold; color:#d946ef;" id="game-mode-name-txt">Kasa</div>
       <div></div>
     </div>
 
@@ -593,7 +741,6 @@
         <div class="stat-val timer-val" id="timer-txt">30s</div>
         <div class="user-tag" id="user-tag-txt">@User</div>
       </div>
-
       <div class="stat-card score">
         <div class="stat-title">PUAN</div>
         <div class="stat-val score-val" id="score-txt">0</div>
@@ -607,7 +754,6 @@
         <div class="ready-banner" id="ready-banner-txt">HAZIR!</div>
         <div class="ready-sub" id="mode-badge-txt">Kasayı Aç!</div>
       </div>
-
       <div id="roulette-view" class="roulette-wrapper">
         <div class="roulette-needle"></div>
         <div id="roulette-track" class="roulette-track"></div>
@@ -615,19 +761,17 @@
     </div>
 
     <div class="drop-info-panel">
-      <div class="drop-result-badge" id="drop-result-txt">
-        Son Düşen: <span style="color:#64748b;">-</span>
-      </div>
+      <div class="drop-result-badge" id="drop-result-txt">Son Düşen: <span style="color:#64748b;">-</span></div>
     </div>
 
     <button id="open-case-btn" class="btn-action" onclick="openCase()">KASAYI AÇ (3s)</button>
   </div>
 
-  <!-- ==================== YAKALA & AÇ: 1. AŞAMA ==================== -->
+  <!-- YAKALA & AÇ: 1. AŞAMA -->
   <div id="catch-game-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:12px; font-weight:bold; color:#38bdf8;">Yakala & Aç</div>
+      <div style="font-size:12px; font-weight:bold; color:#d946ef;">Yakala & Aç</div>
       <div></div>
     </div>
 
@@ -637,7 +781,6 @@
         <div class="stat-val timer-val" id="catch-timer-txt">15s</div>
         <div class="user-tag" id="catch-user-tag">@User</div>
       </div>
-
       <div class="stat-card score">
         <div class="stat-title">YAKALANAN</div>
         <div class="stat-val score-val" id="caught-count-txt">0</div>
@@ -645,17 +788,14 @@
     </div>
 
     <div class="catch-arena" id="catch-arena"></div>
-
-    <div style="font-size:11px; color:#fbbf24; text-align:center; padding:2px;">
-      ⚡ Düşen kutulara dokunarak topla!
-    </div>
+    <div style="font-size:11px; color:#fbbf24; text-align:center; padding:2px;">⚡ Düşen kutulara dokunarak topla!</div>
   </div>
 
-  <!-- ==================== YAKALA & AÇ: 2. AŞAMA ==================== -->
+  <!-- YAKALA & AÇ: 2. AŞAMA -->
   <div id="inventory-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:12px; font-weight:bold; color:#38bdf8;">Kutuları Aç</div>
+      <div style="font-size:12px; font-weight:bold; color:#d946ef;">Kutuları Aç</div>
       <div></div>
     </div>
 
@@ -664,7 +804,6 @@
         <div class="stat-title">KALAN KUTU</div>
         <div class="stat-val score-val" id="inv-remaining-txt">0</div>
       </div>
-
       <div class="stat-card score">
         <div class="stat-title">TOPLAM PUAN</div>
         <div class="stat-val score-val" id="inv-score-txt">0</div>
@@ -681,17 +820,15 @@
       </div>
     </div>
 
-    <div style="font-size:10px; color:#38bdf8; font-weight:bold;">
-      📦 Yakaladığın Kutular:
-    </div>
+    <div style="font-size:10px; color:#d946ef; font-weight:bold;">📦 Yakaladığın Kutular:</div>
     <div class="inv-grid" id="inv-grid-container"></div>
   </div>
 
-  <!-- ==================== MAYINLI KASA ==================== -->
+  <!-- MAYINLI KASA -->
   <div id="mines-game-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:12px; font-weight:bold; color:#38bdf8;">Mayınlı Kasa</div>
+      <div style="font-size:12px; font-weight:bold; color:#d946ef;">Mayınlı Kasa</div>
       <div></div>
     </div>
 
@@ -701,7 +838,6 @@
         <div class="stat-val timer-val" id="mine-status-txt">1 Mayın Var!</div>
         <div class="user-tag" id="mine-user-tag">@User</div>
       </div>
-
       <div class="stat-card score">
         <div class="stat-title">BİRİKEN PUAN</div>
         <div class="stat-val score-val" id="mine-score-txt">0</div>
@@ -709,13 +845,10 @@
     </div>
 
     <div class="mines-grid" id="mines-grid"></div>
-
-    <button id="cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutMines()">
-      💰 Puanı Al ve Çık
-    </button>
+    <button id="cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
   </div>
 
-  <!-- ==================== ÖZET EKRANI ==================== -->
+  <!-- ÖZET EKRANI -->
   <div id="catch-summary-screen">
     <div class="modal-header" id="summary-title-txt">OYUN ÖZETİ</div>
     
@@ -730,15 +863,13 @@
       </div>
     </div>
 
-    <div style="font-size:10px; color:#fbbf24; font-weight:bold;">
-      📋 Çıkan Eşyalar:
-    </div>
+    <div style="font-size:10px; color:#fbbf24; font-weight:bold;">📋 Çıkan Eşyalar:</div>
     <div class="scroll-list" id="summary-drops-list"></div>
 
     <button class="btn-modal btn-close" onclick="exitToMenu()">🚪 Ana Menüye Dön</button>
   </div>
 
-  <!-- ==================== OYUN BİTTİ MODALI ==================== -->
+  <!-- OYUN BİTTİ MODALI -->
   <div id="game-over-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">OYUN BİTTİ</div>
@@ -753,10 +884,10 @@
     </div>
   </div>
 
-  <!-- ==================== SIRALAMA MODALI ==================== -->
+  <!-- SIRALAMA MODALI (İLK 10 & ADMİN SIFIRLAMA) -->
   <div id="leaderboard-modal" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-header">🏆 SIRALAMA TABLOSU</div>
+      <div class="modal-header">🏆 SIRALAMA TABLOSU (İLK 10)</div>
       
       <div class="filter-tabs">
         <button class="tab-btn active" onclick="filterLeaderboard('all', this)">Tümü</button>
@@ -769,71 +900,31 @@
 
       <div class="scroll-list" id="lb-list-container"></div>
       
-      <div class="pagination-bar">
-        <button class="icon-btn" onclick="prevPage()">‹ Geri</button>
-        <span id="page-indicator">Sayfa 1 / 1</span>
-        <button class="icon-btn" onclick="nextPage()">İleri ›</button>
+      <!-- Sadece Admin Girişi Yapıldığında Görünen Sıfırlama Butonu -->
+      <div id="admin-lb-controls" style="display:none; margin-top:6px;">
+        <button class="btn-modal btn-danger" style="width:100%;" onclick="confirmClearLeaderboard()">
+          🗑️ Tabloyu Sıfırla (Admin)
+        </button>
       </div>
+
       <button class="btn-modal btn-close" style="margin-top:6px;" onclick="closeLeaderboard()">Kapat</button>
     </div>
   </div>
 
-  <!-- ==================== DETAY MODALI ==================== -->
+  <!-- KASA DETAY MODALI -->
   <div id="details-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header" id="details-header-txt">Kasa Geçmişi</div>
-      <div style="font-size:11px; color:#38bdf8; text-align:center;" id="details-mode-txt"></div>
+      <div style="font-size:11px; color:#d946ef; text-align:center;" id="details-mode-txt"></div>
       <div style="font-size:10px; color:#94a3b8; text-align:center; margin-bottom:6px;" id="details-date-txt"></div>
       <div class="scroll-list" id="details-list-container"></div>
       <button class="btn-modal btn-close" onclick="closeDetailsModal()">Geri</button>
     </div>
   </div>
 
-  <!-- ==================== GİRİŞ MODALI ==================== -->
-  <div id="auth-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header" id="auth-modal-title">GİRİŞ YAP</div>
-      
-      <div class="auth-box">
-        <input type="text" id="auth-username" class="input-field" placeholder="Kullanıcı Adı (Örn: Mecaga)">
-        <input type="password" id="auth-password" class="input-field" placeholder="Şifre (Min. 6 Karakter)">
-        
-        <button id="auth-action-btn" class="btn-modal btn-secondary" onclick="handleAuthAction()">Giriş Yap</button>
-        
-        <div class="auth-toggle-txt" id="auth-toggle-btn" onclick="toggleAuthMode()">
-          Hesabın yok mu? Kayıt Ol
-        </div>
-      </div>
-
-      <button class="btn-modal btn-close" style="margin-top:8px;" onclick="closeAuthModal()">Kapat</button>
-    </div>
-  </div>
-
-  <!-- ==================== ADMIN MODALI ==================== -->
-  <div id="admin-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">🔑 ADMIN PANELİ</div>
-
-      <div id="admin-login-view" class="auth-box">
-        <input type="text" id="admin-user-input" class="input-field" placeholder="Kullanıcı Adı">
-        <input type="password" id="admin-pass-input" class="input-field" placeholder="Şifre">
-        <button class="btn-modal btn-secondary" onclick="loginAdmin()">Giriş Yap</button>
-      </div>
-
-      <div id="admin-control-view" style="display:none; text-align:center; padding:10px 0;">
-        <div style="color:#34d399; font-weight:bold; margin-bottom:10px;">Hoş Geldin, Admin!</div>
-        <button class="btn-modal btn-danger" style="width:100%;" onclick="clearOnlineLeaderboard()">
-          🗑️ Skor Tablosunu Sıfırla
-        </button>
-      </div>
-
-      <button class="btn-modal btn-close" style="margin-top:10px;" onclick="closeAdminModal()">Kapat</button>
-    </div>
-  </div>
-
 </div>
 
-<!-- JAVASCRIPT & OYUN MOTORU -->
+<!-- JAVASCRIPT MOTORU & FIREBASE ENTEGRASYONU -->
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
@@ -854,7 +945,7 @@
     db = firebase.database();
     firebaseReady = true;
   } catch (err) {
-    console.warn("Firebase durumu:", err);
+    console.warn("Firebase hazır değil:", err);
   }
 
   const GAME_MODES = {
@@ -907,9 +998,9 @@
   };
 
   let leaderboardData = JSON.parse(localStorage.getItem('kutu_leaderboard') || '[]');
-  let currentUser = localStorage.getItem('kutu_current_user') || "Misafir";
-  let authMode = "login";
+  let currentUser = null;
   let isAdmin = false;
+  let authMode = "login";
 
   let selectedModeKey = 'standard';
   let currentScore = 0;
@@ -917,8 +1008,6 @@
   let timerInterval = null;
   let isOpening = false;
   let currentSessionDrops = [];
-  let currentPage = 1;
-  const itemsPerPage = 10;
   let selectedFilterMode = 'all';
 
   let remainingBoxes = 10;
@@ -930,7 +1019,18 @@
   let mineField = [];
   let safePicksCount = 0;
 
-  // Realtime Database Senkronizasyonu
+  // Sayfa yenilendiğinde oturumu kapatıp doğrudan Giriş Ekranına başlatır
+  window.onload = function() {
+    if (auth) {
+      try { auth.signOut(); } catch(e){}
+    }
+    currentUser = null;
+    isAdmin = false;
+    showScreen('auth-screen');
+    updateAdminUI();
+  };
+
+  // Realtime Database Dinleme
   if (firebaseReady && db) {
     try {
       db.ref('leaderboard').on('value', (snapshot) => {
@@ -943,67 +1043,48 @@
           localStorage.setItem('kutu_leaderboard', JSON.stringify(leaderboardData));
           validateLeaderboard();
           renderLeaderboard();
+        } else {
+          leaderboardData = [];
+          localStorage.setItem('kutu_leaderboard', '[]');
+          renderLeaderboard();
         }
-      }, (e) => console.log(e));
+      });
     } catch (e) {}
   }
 
-  // Auth Takibi
-  if (firebaseReady && auth) {
-    try {
-      auth.onAuthStateChanged((user) => {
-        const greetingEl = document.getElementById('menu-user-greeting');
-        const authBtn = document.getElementById('btn-auth-menu');
-
-        if (user) {
-          if (db) {
-            db.ref(`users/${user.uid}/username`).once('value').then(snap => {
-              currentUser = snap.val() || user.email.split('@')[0];
-              localStorage.setItem('kutu_current_user', currentUser);
-              greetingEl.innerText = `👤 ${currentUser}`;
-              authBtn.innerText = "🚪 Çıkış";
-              authBtn.onclick = handleSignOut;
-            }).catch(() => {
-              currentUser = user.email.split('@')[0];
-              localStorage.setItem('kutu_current_user', currentUser);
-              greetingEl.innerText = `👤 ${currentUser}`;
-              authBtn.innerText = "🚪 Çıkış";
-              authBtn.onclick = handleSignOut;
-            });
-          }
-        } else {
-          currentUser = localStorage.getItem('kutu_current_user') || "Misafir";
-          greetingEl.innerText = currentUser !== "Misafir" ? `👤 ${currentUser}` : "Giriş Yapılmadı";
-          authBtn.innerText = "👤 Giriş";
-          authBtn.onclick = openAuthModal;
-        }
-      });
-    } catch(e) {}
-  } else {
-    document.getElementById('menu-user-greeting').innerText = currentUser !== "Misafir" ? `👤 ${currentUser}` : "Giriş Yapılmadı";
+  // --- GİRİŞ & KAYIT SİSTEMİ ---
+  function setAuthTab(tab) {
+    authMode = tab;
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    document.getElementById('auth-submit-btn').innerText = tab === 'login' ? "🎮 Giriş Yap" : "👤+ Kayıt Ol";
+    document.getElementById('auth-switch-btn').innerText = tab === 'login' ? "👤+ Yeni Hesap Oluştur" : "🎮 Zaten Hesabım Var";
   }
 
-  function openAuthModal() { document.getElementById('auth-modal').style.display = 'flex'; }
-  function closeAuthModal() { document.getElementById('auth-modal').style.display = 'none'; }
-
-  function toggleAuthMode() {
-    authMode = authMode === 'login' ? 'register' : 'login';
-    document.getElementById('auth-modal-title').innerText = authMode === 'login' ? "GİRİŞ YAP" : "KAYIT OL";
-    document.getElementById('auth-action-btn').innerText = authMode === 'login' ? "Giriş Yap" : "Kayıt Ol";
-    document.getElementById('auth-toggle-btn').innerText = authMode === 'login' ? "Hesabın yok mu? Kayıt Ol" : "Zaten hesabın var mı? Giriş Yap";
+  function toggleAuthTab() {
+    setAuthTab(authMode === 'login' ? 'register' : 'login');
   }
 
-  function handleAuthAction() {
+  function executeAuth() {
     const rawUser = document.getElementById('auth-username').value.trim();
-    const pass = document.getElementById('auth-password').value;
+    const pass = document.getElementById('auth-password').value.trim();
 
     if (!rawUser || !pass) {
-      alert("Lütfen kullanıcı adı ve şifre girin.");
+      alert("Lütfen kullanıcı adı ve şifre giriniz!");
+      return;
+    }
+
+    // Admin Giriş Kontrolü
+    if (rawUser === "admin" && pass === "54321") {
+      currentUser = "Admin";
+      isAdmin = true;
+      alert("👑 Admin olarak giriş yapıldı! Tüm modları oynayabilir ve tabloyu sıfırlayabilirsiniz.");
+      loginSuccess();
       return;
     }
 
     if (pass.length < 6) {
-      alert("Şifre en az 6 karakter olmalıdır.");
+      alert("Şifre en az 6 karakter olmalıdır!");
       return;
     }
 
@@ -1011,11 +1092,7 @@
     const email = `${cleanUser}@kutupro.com`;
 
     if (!firebaseReady || !auth) {
-      currentUser = rawUser;
-      localStorage.setItem('kutu_current_user', currentUser);
-      document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}`;
-      alert(`Hoş geldin, ${currentUser}!`);
-      closeAuthModal();
+      alert("Firebase bağlantısı hazır değil, lütfen internetinizi kontrol edin.");
       return;
     }
 
@@ -1024,73 +1101,98 @@
         .then((cred) => {
           if (db) db.ref(`users/${cred.user.uid}`).set({ username: rawUser, createdAt: Date.now() });
           currentUser = rawUser;
-          localStorage.setItem('kutu_current_user', currentUser);
-          alert("Kayıt başarılı, giriş yapıldı!");
-          closeAuthModal();
+          isAdmin = false;
+          alert("Kayıt başarıyla oluşturuldu, hoş geldin!");
+          loginSuccess();
         })
-        .catch(() => {
-          currentUser = rawUser;
-          localStorage.setItem('kutu_current_user', currentUser);
-          document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}`;
-          alert(`Giriş yapıldı: ${currentUser}`);
-          closeAuthModal();
+        .catch(err => {
+          if (err.code === 'auth/email-already-in-use') {
+            alert("Bu kullanıcı adı zaten kayıtlı! Lütfen 'Giriş' sekmesinden giriş yapın.");
+          } else {
+            alert("Kayıt Hatası: " + err.message);
+          }
         });
     } else {
       auth.signInWithEmailAndPassword(email, pass)
         .then(() => {
-          alert("Giriş başarılı!");
-          closeAuthModal();
-        })
-        .catch(() => {
           currentUser = rawUser;
-          localStorage.setItem('kutu_current_user', currentUser);
-          document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}`;
-          alert(`Giriş yapıldı: ${currentUser}`);
-          closeAuthModal();
+          isAdmin = false;
+          loginSuccess();
+        })
+        .catch(err => {
+          alert("Giriş Başarısız! Hesap kayıtlı değil veya şifre hatalı. Lütfen önce kayıt olun.");
         });
     }
   }
 
-  function handleSignOut() {
-    if (auth) auth.signOut().catch(()=>{});
-    currentUser = "Misafir";
-    localStorage.removeItem('kutu_current_user');
-    document.getElementById('menu-user-greeting').innerText = "Giriş Yapılmadı";
-    document.getElementById('btn-auth-menu').innerText = "👤 Giriş";
-    document.getElementById('btn-auth-menu').onclick = openAuthModal;
-    alert("Çıkış yapıldı.");
+  function loginSuccess() {
+    document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}` + (isAdmin ? " (👑 Admin)" : "");
+    updateAdminUI();
+    showScreen('menu-screen');
   }
 
-  function openAdminModal() { document.getElementById('admin-modal').style.display = 'flex'; }
-  function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
+  function handleSignOut() {
+    if (auth) {
+      try { auth.signOut(); } catch(e){}
+    }
+    currentUser = null;
+    isAdmin = false;
+    document.getElementById('auth-username').value = "";
+    document.getElementById('auth-password').value = "";
+    setAuthTab('login');
+    updateAdminUI();
+    showScreen('auth-screen');
+  }
 
-  function loginAdmin() {
-    const u = document.getElementById('admin-user-input').value.trim();
-    const p = document.getElementById('admin-pass-input').value.trim();
-
-    if (u === "admin" && p === "54321") {
-      isAdmin = true;
-      document.getElementById('admin-login-view').style.display = 'none';
-      document.getElementById('admin-control-view').style.display = 'block';
-    } else {
-      alert("Admin bilgileri hatalı!");
+  function updateAdminUI() {
+    const adminControls = document.getElementById('admin-lb-controls');
+    if (adminControls) {
+      adminControls.style.display = isAdmin ? 'block' : 'none';
     }
   }
 
-  function clearOnlineLeaderboard() {
+  // --- ADMİN TABLO SIFIRLAMA (ONAYLI) ---
+  function confirmClearLeaderboard() {
     if (!isAdmin) return;
-    if (confirm("Skor tablosundaki tüm veriler silinsin mi?")) {
+    
+    const isConfirmed = confirm("DİKKAT: Sıralama tablosundaki tüm veriler kalıcı olarak silinecektir!\n\nOnaylıyor musunuz?");
+    if (isConfirmed) {
       leaderboardData = [];
       localStorage.removeItem('kutu_leaderboard');
       if (firebaseReady && db) {
-        try { db.ref('leaderboard').remove(); } catch(e) {}
+        db.ref('leaderboard').remove()
+          .then(() => alert("Sıralama tablosu başarıyla sıfırlandı!"))
+          .catch(e => alert("Yerel sıfırlandı, Firebase hata: " + e.message));
+      } else {
+        alert("Sıralama tablosu sıfırlandı!");
       }
-      alert("Skor tablosu sıfırlandı!");
       renderLeaderboard();
-      closeAdminModal();
     }
   }
 
+  // --- EKRAN GEÇİŞ YÖNETİMİ ---
+  function showScreen(screenId) {
+    const screens = [
+      'auth-screen', 'menu-screen', 'game-screen',
+      'catch-game-screen', 'inventory-screen', 'mines-game-screen', 'catch-summary-screen'
+    ];
+    screens.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = (id === screenId) ? 'flex' : 'none';
+    });
+  }
+
+  function exitToMenu() {
+    clearInterval(timerInterval);
+    clearInterval(spawnInterval);
+    catchAnimationFrames.forEach(cancelAnimationFrame);
+    catchAnimationFrames = [];
+
+    document.getElementById('game-over-modal').style.display = 'none';
+    showScreen('menu-screen');
+  }
+
+  // --- OYUN MEKANİKLERİ ---
   function updateMenuRatesPreview() {
     const preview = document.getElementById('menu-rates-preview');
     const currentTiers = GAME_MODES[selectedModeKey].tiers;
@@ -1123,11 +1225,15 @@
   }
 
   function startGame() {
+    if (!currentUser) {
+      alert("Oyunu oynamak için lütfen giriş yapınız!");
+      showScreen('auth-screen');
+      return;
+    }
+
     currentScore = 0;
     currentSessionDrops = [];
     isOpening = false;
-
-    document.getElementById('menu-screen').style.display = 'none';
 
     if (selectedModeKey === 'standard') startStandardMode();
     else if (selectedModeKey === 'ten_cases') startTenCasesMode();
@@ -1148,7 +1254,7 @@
 
     renderGameRatesTable();
     resetStandardCaseUI();
-    document.getElementById('game-screen').style.display = 'flex';
+    showScreen('game-screen');
 
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
@@ -1175,7 +1281,7 @@
 
     renderGameRatesTable();
     resetStandardCaseUI();
-    document.getElementById('game-screen').style.display = 'flex';
+    showScreen('game-screen');
   }
 
   function startUpgradeMode() {
@@ -1191,7 +1297,7 @@
 
     renderGameRatesTable();
     resetStandardCaseUI();
-    document.getElementById('game-screen').style.display = 'flex';
+    showScreen('game-screen');
   }
 
   function resetStandardCaseUI() {
@@ -1325,7 +1431,7 @@
     const arena = document.getElementById('catch-arena');
     arena.innerHTML = '';
 
-    document.getElementById('catch-game-screen').style.display = 'flex';
+    showScreen('catch-game-screen');
 
     clearInterval(spawnInterval);
     spawnInterval = setInterval(() => spawnFallingBox(), 1000);
@@ -1369,7 +1475,7 @@
     box.style.left = `${startX}px`;
     box.style.top = `${posY}px`;
     box.style.borderColor = dropTier.color;
-    box.style.background = `radial-gradient(circle, ${dropTier.color}44 0%, #0b1329 90%)`;
+    box.style.background = `radial-gradient(circle, ${dropTier.color}44 0%, #110521 90%)`;
     box.innerHTML = `
       <span style="font-size:14px;">📦</span>
       <span style="color:${dropTier.color}; font-size:7px;">${dropTier.tier}</span>
@@ -1407,9 +1513,7 @@
   }
 
   function startCatchModePhase2() {
-    document.getElementById('catch-game-screen').style.display = 'none';
-    document.getElementById('inventory-screen').style.display = 'flex';
-
+    showScreen('inventory-screen');
     currentScore = 0;
     currentSessionDrops = [];
     renderInventoryGrid();
@@ -1515,7 +1619,7 @@
     }
 
     renderMinesGrid();
-    document.getElementById('mines-game-screen').style.display = 'flex';
+    showScreen('mines-game-screen');
   }
 
   function renderMinesGrid() {
@@ -1569,10 +1673,7 @@
   }
 
   function startSummaryScreen(title) {
-    document.getElementById('inventory-screen').style.display = 'none';
-    document.getElementById('mines-game-screen').style.display = 'none';
-    const summaryScreen = document.getElementById('catch-summary-screen');
-    summaryScreen.style.display = 'flex';
+    showScreen('catch-summary-screen');
 
     document.getElementById('summary-title-txt').innerText = title;
     document.getElementById('summary-final-score').innerText = currentScore;
@@ -1623,9 +1724,7 @@
     localStorage.setItem('kutu_leaderboard', JSON.stringify(leaderboardData));
 
     if (firebaseReady && db) {
-      try {
-        db.ref('leaderboard').push(record);
-      } catch (e) {}
+      try { db.ref('leaderboard').push(record); } catch (e) {}
     }
   }
 
@@ -1638,32 +1737,17 @@
     leaderboardData.sort((a, b) => b.score - a.score);
   }
 
-  function exitToMenu() {
-    clearInterval(timerInterval);
-    clearInterval(spawnInterval);
-    catchAnimationFrames.forEach(cancelAnimationFrame);
-    catchAnimationFrames = [];
-
-    document.getElementById('game-over-modal').style.display = 'none';
-    document.getElementById('game-screen').style.display = 'none';
-    document.getElementById('catch-game-screen').style.display = 'none';
-    document.getElementById('inventory-screen').style.display = 'none';
-    document.getElementById('mines-game-screen').style.display = 'none';
-    document.getElementById('catch-summary-screen').style.display = 'none';
-    document.getElementById('menu-screen').style.display = 'flex';
-  }
-
+  // --- SIRALAMA TABLOSU (SADECE İLK 10) ---
   function filterLeaderboard(modeKey, btn) {
     selectedFilterMode = modeKey;
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    currentPage = 1;
     renderLeaderboard();
   }
 
   function openLeaderboard() {
-    currentPage = 1;
     renderLeaderboard();
+    updateAdminUI();
     document.getElementById('leaderboard-modal').style.display = 'flex';
   }
 
@@ -1683,32 +1767,28 @@
 
     filtered.sort((a, b) => b.score - a.score);
 
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const pageItems = filtered.slice(start, end);
-    const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+    // Her kategoride sadece İLK 10 kişiyi listele
+    const top10 = filtered.slice(0, 10);
 
-    document.getElementById('page-indicator').innerText = `Sayfa ${currentPage} / ${totalPages}`;
-
-    if (pageItems.length === 0) {
-      list.innerHTML = `<div style="text-align:center; color:#64748b; padding:15px;">Kayıt bulunamadı.</div>`;
+    if (top10.length === 0) {
+      list.innerHTML = `<div style="text-align:center; color:#64748b; padding:15px;">Kayıtlı skor bulunamadı.</div>`;
       return;
     }
 
-    pageItems.forEach((item, index) => {
-      const globalRank = start + index + 1;
+    top10.forEach((item, index) => {
+      const rank = index + 1;
       const row = document.createElement('div');
       row.className = 'item-row lb-row';
 
-      if (globalRank === 1) row.classList.add('rank-1');
-      else if (globalRank === 2) row.classList.add('rank-2');
-      else if (globalRank === 3) row.classList.add('rank-3');
-      else if (globalRank === 4 || globalRank === 5) row.classList.add('rank-green');
+      if (rank === 1) row.classList.add('rank-1');
+      else if (rank === 2) row.classList.add('rank-2');
+      else if (rank === 3) row.classList.add('rank-3');
+      else if (rank === 4 || rank === 5) row.classList.add('rank-green');
       else row.classList.add('rank-rest');
 
       row.innerHTML = `
         <div>
-          <span>${globalRank}. ${item.name}</span>
+          <span>${rank}. ${item.name}</span>
           <span style="font-size:8px; opacity:0.8; margin-left:4px;">(${item.modeName || 'Normal'})</span>
         </div>
         <span>${item.score} P</span>
@@ -1716,24 +1796,6 @@
       row.onclick = () => openHistoryDetails(item);
       list.appendChild(row);
     });
-  }
-
-  function prevPage() {
-    if (currentPage > 1) {
-      currentPage--;
-      renderLeaderboard();
-    }
-  }
-
-  function nextPage() {
-    let filtered = selectedFilterMode === 'all' 
-      ? leaderboardData 
-      : leaderboardData.filter(d => d.modeKey === selectedFilterMode);
-    const totalPages = Math.ceil(filtered.length / itemsPerPage);
-    if (currentPage < totalPages) {
-      currentPage++;
-      renderLeaderboard();
-    }
   }
 
   function openHistoryDetails(target) {
