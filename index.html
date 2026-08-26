@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Kutu Açma Pro v8 - Online</title>
 
   <!-- Firebase SDK (v9 Compat) -->
@@ -23,23 +23,24 @@
     body {
       background-color: #05070d;
       color: #ffffff;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
     }
 
     #app-container {
       width: 100%;
       max-width: 420px;
       height: 100vh;
+      max-height: 100vh;
       background: radial-gradient(circle at center, #0d1b2a 0%, #000814 100%);
       position: relative;
       display: flex;
       flex-direction: column;
-      padding: 12px;
+      padding: 10px;
       border: 1px solid #1f293d;
+      overflow: hidden;
     }
 
     .top-header {
@@ -47,13 +48,14 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 6px;
+      flex-shrink: 0;
     }
 
-    .app-title { font-size: 17px; font-weight: 800; color: #fff; }
+    .app-title { font-size: 16px; font-weight: 800; color: #fff; }
 
     .header-actions {
       display: flex;
-      gap: 5px;
+      gap: 4px;
     }
 
     .icon-btn {
@@ -61,19 +63,26 @@
       border: 1px solid #415a77;
       color: #fff;
       padding: 5px 8px;
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 11px;
       font-weight: bold;
       cursor: pointer;
     }
 
+    .exit-btn {
+      background: #7f1d1d;
+      border-color: #ef4444;
+      color: #fff;
+    }
+
+    /* --- MENÜ EKRANI --- */
     #menu-screen {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       height: 100%;
-      text-align: center;
       overflow-y: auto;
+      gap: 8px;
     }
 
     .menu-center {
@@ -85,23 +94,22 @@
     }
 
     .main-logo {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 900;
       color: #38bdf8;
-      text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+      text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
     }
 
     .user-greeting {
       font-size: 12px;
       color: #34d399;
       font-weight: bold;
-      margin-bottom: 2px;
     }
 
     .mode-grid {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
       width: 100%;
     }
 
@@ -145,7 +153,7 @@
 
     .btn-start {
       width: 100%;
-      padding: 11px;
+      padding: 12px;
       border-radius: 8px;
       border: none;
       background: #10b981;
@@ -154,57 +162,63 @@
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      flex-shrink: 0;
     }
 
     .footer-credits {
       font-size: 10px;
       color: #64748b;
       text-align: left;
-      line-height: 1.3;
+      line-height: 1.2;
+      flex-shrink: 0;
     }
 
+    /* --- STAT BAR --- */
     .game-stats-top {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
+      margin-bottom: 4px;
+      flex-shrink: 0;
     }
 
     .stat-card {
       background: #0d1527;
       border: 1px solid #1e293b;
-      padding: 5px 10px;
-      border-radius: 8px;
+      padding: 4px 8px;
+      border-radius: 6px;
     }
 
     .stat-card.timer { border-color: #ef4444; }
     .stat-card.score { border-color: #10b981; text-align: right; }
     .stat-title { font-size: 9px; color: #94a3b8; }
-    .stat-val { font-size: 15px; font-weight: bold; }
+    .stat-val { font-size: 14px; font-weight: bold; }
     .timer-val { color: #f87171; }
     .score-val { color: #34d399; }
-    .user-tag { font-size: 10px; color: #38bdf8; }
+    .user-tag { font-size: 9px; color: #38bdf8; }
 
+    /* --- OYUN ALANLARI --- */
     #game-screen, #catch-game-screen, #inventory-screen, #mines-game-screen, #catch-summary-screen {
       display: none;
       flex-direction: column;
       height: 100%;
       justify-content: space-between;
+      gap: 6px;
     }
 
     .rates-box {
       background: rgba(13, 21, 39, 0.95);
       border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 5px 8px;
-      margin-top: 4px;
-      font-size: 10px;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 9px;
+      flex-shrink: 0;
     }
 
     .rate-row {
       display: flex;
       justify-content: space-between;
       padding: 1px 0;
-      font-weight: 500;
     }
 
     .case-container {
@@ -213,18 +227,17 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      margin: 6px 0;
       background: #060b17;
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid #1e293b;
       position: relative;
       overflow: hidden;
-      min-height: 150px;
+      min-height: 120px;
     }
 
     .roulette-wrapper {
       width: 100%;
-      height: 90px;
+      height: 80px;
       position: relative;
       display: none;
       overflow: hidden;
@@ -238,24 +251,24 @@
       left: 50%;
       top: 0;
       bottom: 0;
-      width: 4px;
+      width: 3px;
       background: #ef4444;
       transform: translateX(-50%);
       z-index: 10;
-      box-shadow: 0 0 12px #ef4444;
+      box-shadow: 0 0 10px #ef4444;
     }
 
     .roulette-track {
       display: flex;
       position: absolute;
       left: 0;
-      top: 5px;
-      height: 80px;
+      top: 2px;
+      height: 76px;
     }
 
     .roulette-item {
-      width: 80px;
-      height: 80px;
+      width: 75px;
+      height: 75px;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
@@ -263,26 +276,26 @@
       justify-content: center;
       border-right: 1px solid rgba(255,255,255,0.1);
       background: rgba(15, 23, 42, 0.85);
-      font-size: 10px;
+      font-size: 9px;
       text-align: center;
-      padding: 4px;
+      padding: 2px;
     }
 
-    .ready-banner { font-size: 22px; font-weight: 900; color: #fff; text-align: center; }
-    .ready-sub { font-size: 12px; color: #fbbf24; margin-top: 3px; text-align: center; }
+    .ready-banner { font-size: 20px; font-weight: 900; color: #fff; text-align: center; }
+    .ready-sub { font-size: 11px; color: #fbbf24; margin-top: 2px; text-align: center; }
 
     .drop-info-panel {
       display: flex;
       justify-content: flex-end;
-      margin-bottom: 5px;
+      flex-shrink: 0;
     }
 
     .drop-result-badge {
       background: #0b1329;
       border: 1px solid #334155;
       border-radius: 6px;
-      padding: 5px 10px;
-      font-size: 11px;
+      padding: 4px 8px;
+      font-size: 10px;
       text-align: right;
     }
 
@@ -291,11 +304,12 @@
       padding: 12px;
       font-size: 14px;
       font-weight: bold;
-      border-radius: 10px;
+      border-radius: 8px;
       border: none;
       background: #0284c7;
       color: white;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     .btn-action:disabled {
@@ -308,57 +322,56 @@
       flex: 1;
       background: #050a14;
       border: 2px dashed #1e293b;
-      border-radius: 10px;
+      border-radius: 8px;
       position: relative;
       overflow: hidden;
-      margin: 8px 0;
       touch-action: manipulation;
     }
 
     .falling-box {
       position: absolute;
-      width: 55px;
-      height: 55px;
-      border-radius: 10px;
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 10px;
+      font-size: 9px;
       cursor: pointer;
       z-index: 20;
-      box-shadow: 0 0 12px rgba(0,0,0,0.8);
+      box-shadow: 0 0 10px rgba(0,0,0,0.8);
       border: 2px solid;
     }
 
     .inv-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      gap: 6px;
       flex: 1;
       overflow-y: auto;
-      padding: 6px;
+      padding: 4px;
       background: #060b17;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid #1e293b;
       align-content: start;
     }
 
     .inv-card {
-      height: 75px;
-      border-radius: 8px;
+      height: 65px;
+      border-radius: 6px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: bold;
       cursor: pointer;
       border: 2px solid;
       background: #0d1527;
       text-align: center;
-      padding: 4px;
+      padding: 2px;
     }
 
     .inv-card.opened {
@@ -370,13 +383,12 @@
     .mines-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      gap: 6px;
       flex: 1;
-      margin: 8px 0;
       background: #060b17;
       border: 1px solid #1e293b;
-      border-radius: 10px;
-      padding: 8px;
+      border-radius: 8px;
+      padding: 6px;
       align-content: center;
     }
 
@@ -384,12 +396,12 @@
       aspect-ratio: 1;
       background: #0d1527;
       border: 2px solid #334155;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: bold;
       cursor: pointer;
     }
@@ -397,13 +409,14 @@
     .mine-card.safe { border-color: #10b981; background: #064e3b; }
     .mine-card.bomb { border-color: #ef4444; background: #7f1d1d; }
 
+    /* MODALLAR */
     .modal-overlay {
       display: none;
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.88);
-      z-index: 30;
-      padding: 12px;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 50;
+      padding: 10px;
       flex-direction: column;
       justify-content: center;
     }
@@ -411,8 +424,8 @@
     .modal-card {
       background: #0b1329;
       border: 1px solid #1e293b;
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: 10px;
+      padding: 10px;
       max-height: 90%;
       display: flex;
       flex-direction: column;
@@ -429,8 +442,8 @@
     .auth-box {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 6px;
+      margin-top: 6px;
     }
 
     .auth-toggle-txt {
@@ -453,9 +466,9 @@
       background: #111c35;
       border: 1px solid #1e293b;
       color: #94a3b8;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 10px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 9px;
       white-space: nowrap;
       cursor: pointer;
     }
@@ -479,10 +492,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 8px;
+      padding: 5px 8px;
       border-radius: 6px;
       background: #111c35;
-      font-size: 11px;
+      font-size: 10px;
     }
 
     .lb-row { cursor: pointer; font-weight: bold; }
@@ -496,12 +509,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 11px;
+      font-size: 10px;
       margin-top: 4px;
     }
 
     .btn-modal {
-      padding: 9px;
+      padding: 8px;
       border-radius: 6px;
       font-weight: bold;
       border: none;
@@ -509,7 +522,7 @@
     }
 
     .btn-close { background: #ef4444; color: #fff; }
-    .btn-secondary { background: #0284c7; color: #fff; margin-bottom: 6px; }
+    .btn-secondary { background: #0284c7; color: #fff; margin-bottom: 4px; }
     .btn-danger { background: #b91c1c; color: #fff; margin-top: 6px; }
   </style>
 </head>
@@ -517,7 +530,7 @@
 
 <div id="app-container">
 
-  <!-- ANA MENÜ -->
+  <!-- ==================== ANA MENÜ ==================== -->
   <div id="menu-screen">
     <div class="top-header">
       <div class="app-title">Kutu Açma Pro</div>
@@ -566,8 +579,14 @@
     </div>
   </div>
 
-  <!-- KLASİK EKRAN -->
+  <!-- ==================== KLASİK / 10 KUTU / ŞANS YÜKSELTME ==================== -->
   <div id="game-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:12px; font-weight:bold; color:#38bdf8;" id="game-mode-name-txt">Kasa</div>
+      <div></div>
+    </div>
+
     <div class="game-stats-top">
       <div class="stat-card timer">
         <div class="stat-title" id="stat-timer-title">SÜRE</div>
@@ -604,8 +623,14 @@
     <button id="open-case-btn" class="btn-action" onclick="openCase()">KASAYI AÇ (3s)</button>
   </div>
 
-  <!-- YAKALA & AÇ: 1. AŞAMA -->
+  <!-- ==================== YAKALA & AÇ: 1. AŞAMA ==================== -->
   <div id="catch-game-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:12px; font-weight:bold; color:#38bdf8;">Yakala & Aç</div>
+      <div></div>
+    </div>
+
     <div class="game-stats-top">
       <div class="stat-card timer">
         <div class="stat-title">TOPLAMA SÜRESİ</div>
@@ -621,13 +646,19 @@
 
     <div class="catch-arena" id="catch-arena"></div>
 
-    <div style="font-size:11px; color:#fbbf24; text-align:center; padding:4px;">
+    <div style="font-size:11px; color:#fbbf24; text-align:center; padding:2px;">
       ⚡ Düşen kutulara dokunarak topla!
     </div>
   </div>
 
-  <!-- YAKALA & AÇ: 2. AŞAMA -->
+  <!-- ==================== YAKALA & AÇ: 2. AŞAMA ==================== -->
   <div id="inventory-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:12px; font-weight:bold; color:#38bdf8;">Kutuları Aç</div>
+      <div></div>
+    </div>
+
     <div class="game-stats-top">
       <div class="stat-card score">
         <div class="stat-title">KALAN KUTU</div>
@@ -640,9 +671,9 @@
       </div>
     </div>
 
-    <div class="case-container" style="min-height: 120px; flex:none; margin: 6px 0;">
+    <div class="case-container" style="min-height: 100px; flex:none;">
       <div id="inv-ready-view" style="text-align:center;">
-        <div style="font-size:13px; color:#94a3b8;">Açmak istediğin kutuya dokun!</div>
+        <div style="font-size:12px; color:#94a3b8;">Açmak istediğin kutuya dokun!</div>
       </div>
       <div id="inv-roulette-view" class="roulette-wrapper">
         <div class="roulette-needle"></div>
@@ -650,14 +681,20 @@
       </div>
     </div>
 
-    <div style="font-size:11px; color:#38bdf8; font-weight:bold; margin-bottom:4px;">
+    <div style="font-size:10px; color:#38bdf8; font-weight:bold;">
       📦 Yakaladığın Kutular:
     </div>
     <div class="inv-grid" id="inv-grid-container"></div>
   </div>
 
-  <!-- MAYINLI KASA -->
+  <!-- ==================== MAYINLI KASA ==================== -->
   <div id="mines-game-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:12px; font-weight:bold; color:#38bdf8;">Mayınlı Kasa</div>
+      <div></div>
+    </div>
+
     <div class="game-stats-top">
       <div class="stat-card timer">
         <div class="stat-title">DURUM</div>
@@ -678,11 +715,11 @@
     </button>
   </div>
 
-  <!-- ÖZET EKRANI -->
+  <!-- ==================== ÖZET EKRANI ==================== -->
   <div id="catch-summary-screen">
     <div class="modal-header" id="summary-title-txt">OYUN ÖZETİ</div>
     
-    <div style="display:flex; justify-content:space-around; margin-bottom:8px;">
+    <div style="display:flex; justify-content:space-around; margin-bottom:6px;">
       <div class="stat-card score" style="flex:1; margin-right:4px; text-align:center;">
         <div class="stat-title">TOPLAM PUAN</div>
         <div class="stat-val score-val" id="summary-final-score">0</div>
@@ -693,7 +730,7 @@
       </div>
     </div>
 
-    <div style="font-size:11px; color:#fbbf24; font-weight:bold; margin-bottom:4px;">
+    <div style="font-size:10px; color:#fbbf24; font-weight:bold;">
       📋 Çıkan Eşyalar:
     </div>
     <div class="scroll-list" id="summary-drops-list"></div>
@@ -701,14 +738,14 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">🚪 Ana Menüye Dön</button>
   </div>
 
-  <!-- OYUN BİTTİ MODALI -->
+  <!-- ==================== OYUN BİTTİ MODALI ==================== -->
   <div id="game-over-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">OYUN BİTTİ</div>
       <div style="text-align:center; margin-bottom:10px;">
-        <div style="font-size:11px; color:#94a3b8;" id="modal-mod-info">Oynanan Mod: Normal Kasa</div>
+        <div style="font-size:11px; color:#94a3b8;" id="modal-mod-info">Normal Kasa</div>
         <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Toplam Skorun</div>
-        <div style="font-size:28px; font-weight:bold; color:#10b981;" id="final-score-txt">0</div>
+        <div style="font-size:26px; font-weight:bold; color:#10b981;" id="final-score-txt">0</div>
       </div>
 
       <button class="btn-modal btn-secondary" onclick="openHistoryDetails('current')">📦 Çıkan Eşyaları Gör</button>
@@ -716,7 +753,7 @@
     </div>
   </div>
 
-  <!-- SIRALAMA MODALI -->
+  <!-- ==================== SIRALAMA MODALI ==================== -->
   <div id="leaderboard-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">🏆 SIRALAMA TABLOSU</div>
@@ -741,7 +778,7 @@
     </div>
   </div>
 
-  <!-- DETAY MODALI -->
+  <!-- ==================== DETAY MODALI ==================== -->
   <div id="details-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header" id="details-header-txt">Kasa Geçmişi</div>
@@ -752,7 +789,7 @@
     </div>
   </div>
 
-  <!-- GİRİŞ MODALI -->
+  <!-- ==================== GİRİŞ MODALI ==================== -->
   <div id="auth-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header" id="auth-modal-title">GİRİŞ YAP</div>
@@ -772,7 +809,7 @@
     </div>
   </div>
 
-  <!-- ADMIN MODALI -->
+  <!-- ==================== ADMIN MODALI ==================== -->
   <div id="admin-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">🔑 ADMIN PANELİ</div>
@@ -796,11 +833,8 @@
 
 </div>
 
-<!-- ========================================== -->
-<!-- JAVASCRIPT & FIREBASE BAŞLANGICI           -->
-<!-- ========================================== -->
+<!-- JAVASCRIPT & OYUN MOTORU -->
 <script>
-  // FIREBASE CONFIG BURADA TANIMLI:
   const firebaseConfig = {
     apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
     authDomain: "kutu-acma-pro.firebaseapp.com",
@@ -820,10 +854,9 @@
     db = firebase.database();
     firebaseReady = true;
   } catch (err) {
-    console.warn("Firebase bağlantı uyarısı:", err);
+    console.warn("Firebase durumu:", err);
   }
 
-  // OYUN MODLARI & ORANLAR
   const GAME_MODES = {
     standard: {
       name: "Normal Kasa",
@@ -897,7 +930,7 @@
   let mineField = [];
   let safePicksCount = 0;
 
-  // FIREBASE DİNLEYİCİLERİ
+  // Realtime Database Senkronizasyonu
   if (firebaseReady && db) {
     try {
       db.ref('leaderboard').on('value', (snapshot) => {
@@ -911,10 +944,11 @@
           validateLeaderboard();
           renderLeaderboard();
         }
-      }, (e) => console.log("DB read notice:", e));
+      }, (e) => console.log(e));
     } catch (e) {}
   }
 
+  // Auth Takibi
   if (firebaseReady && auth) {
     try {
       auth.onAuthStateChanged((user) => {
@@ -949,7 +983,6 @@
     document.getElementById('menu-user-greeting').innerText = currentUser !== "Misafir" ? `👤 ${currentUser}` : "Giriş Yapılmadı";
   }
 
-  // AUTH İŞLEMLERİ
   function openAuthModal() { document.getElementById('auth-modal').style.display = 'flex'; }
   function closeAuthModal() { document.getElementById('auth-modal').style.display = 'none'; }
 
@@ -1028,7 +1061,6 @@
     alert("Çıkış yapıldı.");
   }
 
-  // ADMIN PANELİ
   function openAdminModal() { document.getElementById('admin-modal').style.display = 'flex'; }
   function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
 
@@ -1051,9 +1083,7 @@
       leaderboardData = [];
       localStorage.removeItem('kutu_leaderboard');
       if (firebaseReady && db) {
-        try {
-          db.ref('leaderboard').remove();
-        } catch(e) {}
+        try { db.ref('leaderboard').remove(); } catch(e) {}
       }
       alert("Skor tablosu sıfırlandı!");
       renderLeaderboard();
@@ -1061,7 +1091,6 @@
     }
   }
 
-  // OYUN MOTORU & ORANLAR
   function updateMenuRatesPreview() {
     const preview = document.getElementById('menu-rates-preview');
     const currentTiers = GAME_MODES[selectedModeKey].tiers;
@@ -1084,7 +1113,7 @@
   function renderGameRatesTable() {
     const container = document.getElementById('rates-box-container');
     const currentTiers = GAME_MODES[selectedModeKey].tiers;
-    let html = `<div style="color:#fbbf24; font-weight:bold; margin-bottom:3px;">${GAME_MODES[selectedModeKey].name.toUpperCase()}</div>`;
+    let html = `<div style="color:#fbbf24; font-weight:bold; margin-bottom:2px;">${GAME_MODES[selectedModeKey].name.toUpperCase()}</div>`;
     currentTiers.forEach(t => {
       html += `<div class="rate-row" style="color:${t.color};">
         <span>${t.name} (%${t.rate})</span><span>${t.minP}-${t.maxP} P</span>
@@ -1109,6 +1138,7 @@
 
   function startStandardMode() {
     timeLeft = 30;
+    document.getElementById('game-mode-name-txt').innerText = "Normal Kasa";
     document.getElementById('stat-timer-title').innerText = "SÜRE";
     document.getElementById('timer-txt').innerText = timeLeft + "s";
     document.getElementById('user-tag-txt').innerText = "@" + currentUser;
@@ -1135,6 +1165,7 @@
 
   function startTenCasesMode() {
     remainingBoxes = 10;
+    document.getElementById('game-mode-name-txt').innerText = "10 Kutu Modu";
     document.getElementById('stat-timer-title').innerText = "KALAN HAK";
     document.getElementById('timer-txt').innerText = remainingBoxes + " Kutu";
     document.getElementById('user-tag-txt').innerText = "@" + currentUser;
@@ -1150,8 +1181,9 @@
   function startUpgradeMode() {
     remainingBoxes = 7;
     upgradeStep = 1;
+    document.getElementById('game-mode-name-txt').innerText = "Şans Yükseltme";
     document.getElementById('stat-timer-title').innerText = "KALAN HAK";
-    document.getElementById('timer-txt').innerText = `${remainingBoxes} (Kademe ${upgradeStep})`;
+    document.getElementById('timer-txt').innerText = `${remainingBoxes} (x${upgradeStep})`;
     document.getElementById('user-tag-txt').innerText = "@" + currentUser;
     document.getElementById('score-txt').innerText = "0";
     document.getElementById('mode-badge-txt').innerText = "Şans Yükseltme Modu";
@@ -1213,7 +1245,7 @@
     } else if (selectedModeKey === 'upgrade_mode') {
       remainingBoxes--;
       upgradeStep++;
-      document.getElementById('timer-txt').innerText = `${remainingBoxes} Kutu (Şans x${upgradeStep})`;
+      document.getElementById('timer-txt').innerText = `${remainingBoxes} (x${upgradeStep})`;
     }
 
     document.getElementById('ready-view').style.display = 'none';
@@ -1238,7 +1270,7 @@
       card.style.borderBottom = `3px solid ${drop.color}`;
       card.innerHTML = `
         <span style="color:${drop.color};font-weight:bold;">${drop.tier}</span>
-        <span style="color:#cbd5e1;margin:2px 0;font-size:9px;">${drop.item}</span>
+        <span style="color:#cbd5e1;margin:1px 0;font-size:8px;">${drop.item}</span>
         <span style="color:#94a3b8;">+${drop.points}P</span>
       `;
       track.appendChild(card);
@@ -1246,8 +1278,8 @@
 
     setTimeout(() => {
       track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
-      const itemWidth = 80;
-      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 20 - 10);
+      const itemWidth = 75;
+      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 16 - 8);
       track.style.transform = `translateX(${target}px)`;
     }, 20);
 
@@ -1281,7 +1313,7 @@
   }
 
   function triggerDelayedGameOver() {
-    setTimeout(() => endGame(), 3000);
+    setTimeout(() => endGame(), 1500);
   }
 
   function startCatchModePhase1() {
@@ -1312,10 +1344,10 @@
         arena.innerHTML = `
           <div style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fbbf24; font-weight:bold; font-size:16px;">
             SÜRE DOLDU! ⏳<br>
-            <span style="font-size:12px; color:#94a3b8; margin-top:6px;">Kutular açılıyor...</span>
+            <span style="font-size:11px; color:#94a3b8; margin-top:4px;">Kutular açılıyor...</span>
           </div>
         `;
-        setTimeout(() => startCatchModePhase2(), 2500);
+        setTimeout(() => startCatchModePhase2(), 1200);
       }
     }, 1000);
   }
@@ -1330,8 +1362,8 @@
     
     const arenaWidth = arena.offsetWidth || 340;
     const arenaHeight = arena.offsetHeight || 380;
-    const startX = Math.random() * (arenaWidth - 65);
-    let posY = -60;
+    const startX = Math.random() * (arenaWidth - 55);
+    let posY = -55;
     const speed = 2.0;
 
     box.style.left = `${startX}px`;
@@ -1339,8 +1371,8 @@
     box.style.borderColor = dropTier.color;
     box.style.background = `radial-gradient(circle, ${dropTier.color}44 0%, #0b1329 90%)`;
     box.innerHTML = `
-      <span style="font-size:16px;">📦</span>
-      <span style="color:${dropTier.color}; font-size:8px;">${dropTier.tier}</span>
+      <span style="font-size:14px;">📦</span>
+      <span style="color:${dropTier.color}; font-size:7px;">${dropTier.tier}</span>
     `;
 
     const handleBoxCatch = (e) => {
@@ -1393,7 +1425,7 @@
 
     if (caughtBoxes.length === 0) {
       grid.innerHTML = `<div style="grid-column: span 3; text-align:center; color:#64748b; padding:20px;">Hiç kutu yakalayamadın!</div>`;
-      setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ ÖZETİ"), 1500);
+      setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ ÖZETİ"), 1000);
       return;
     }
 
@@ -1402,9 +1434,9 @@
       card.className = 'inv-card' + (box.opened ? ' opened' : '');
       card.style.borderColor = box.color;
       card.innerHTML = `
-        <span style="font-size:16px;">📦</span>
+        <span style="font-size:14px;">📦</span>
         <span style="color:${box.color};">${box.tier}</span>
-        <span style="font-size:8px; color:#94a3b8;">${box.opened ? 'AÇILDI' : 'DOKUN VE AÇ'}</span>
+        <span style="font-size:7px; color:#94a3b8;">${box.opened ? 'AÇILDI' : 'DOKUN VE AÇ'}</span>
       `;
 
       if (!box.opened) card.onclick = () => openSpecificCaughtBox(index);
@@ -1439,7 +1471,7 @@
       card.style.borderBottom = `3px solid ${drop.color}`;
       card.innerHTML = `
         <span style="color:${drop.color};font-weight:bold;">${drop.tier}</span>
-        <span style="color:#cbd5e1;margin:2px 0;font-size:9px;">${drop.item}</span>
+        <span style="color:#cbd5e1;margin:1px 0;font-size:8px;">${drop.item}</span>
         <span style="color:#94a3b8;">+${drop.points}P</span>
       `;
       track.appendChild(card);
@@ -1447,8 +1479,8 @@
 
     setTimeout(() => {
       track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
-      const itemWidth = 80;
-      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 20 - 10);
+      const itemWidth = 75;
+      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 16 - 8);
       track.style.transform = `translateX(${target}px)`;
     }, 20);
 
@@ -1462,7 +1494,7 @@
 
       const remaining = caughtBoxes.filter(b => !b.opened).length;
       if (remaining === 0) {
-        setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ ÖZETİ"), 1200);
+        setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ ÖZETİ"), 1000);
       }
     }, 3100);
   }
@@ -1493,7 +1525,7 @@
     mineField.forEach((tile, index) => {
       const card = document.createElement('div');
       card.className = 'mine-card';
-      card.innerHTML = `<span style="font-size:22px;">📦</span>`;
+      card.innerHTML = `<span style="font-size:20px;">📦</span>`;
       card.onclick = () => pickMineCard(index, card);
       grid.appendChild(card);
     });
@@ -1506,12 +1538,12 @@
 
     if (tile.isBomb) {
       cardEl.classList.add('bomb');
-      cardEl.innerHTML = `<span style="font-size:24px;">💣</span><span style="font-size:9px;color:#fca5a5;">PATLADIN!</span>`;
+      cardEl.innerHTML = `<span style="font-size:22px;">💣</span><span style="font-size:8px;color:#fca5a5;">PATLADIN!</span>`;
       document.getElementById('cashout-btn').disabled = true;
       document.getElementById('mine-status-txt').innerText = "BOMBA PATLADI!";
       currentScore = 0;
       currentSessionDrops = [{ tier: "Mayın", item: "Patlama (Puan Sıfırlandı)", points: 0, color: "#ef4444" }];
-      setTimeout(() => startSummaryScreen("💣 MAYIN PATLADI - 0 PUAN"), 1500);
+      setTimeout(() => startSummaryScreen("💣 MAYIN PATLADI - 0 PUAN"), 1200);
     } else {
       safePicksCount++;
       const drop = getRandomDrop('mines_mode');
@@ -1520,7 +1552,7 @@
 
       cardEl.classList.add('safe');
       cardEl.innerHTML = `
-        <span style="color:#a7f3d0; font-size:9px; font-weight:bold;">${drop.item}</span>
+        <span style="color:#a7f3d0; font-size:8px; font-weight:bold;">${drop.item}</span>
         <span style="color:#34d399; font-weight:bold;">+${drop.points}P</span>
       `;
 
@@ -1607,6 +1639,11 @@
   }
 
   function exitToMenu() {
+    clearInterval(timerInterval);
+    clearInterval(spawnInterval);
+    catchAnimationFrames.forEach(cancelAnimationFrame);
+    catchAnimationFrames = [];
+
     document.getElementById('game-over-modal').style.display = 'none';
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('catch-game-screen').style.display = 'none';
@@ -1672,7 +1709,7 @@
       row.innerHTML = `
         <div>
           <span>${globalRank}. ${item.name}</span>
-          <span style="font-size:9px; opacity:0.8; margin-left:4px;">(${item.modeName || 'Normal'})</span>
+          <span style="font-size:8px; opacity:0.8; margin-left:4px;">(${item.modeName || 'Normal'})</span>
         </div>
         <span>${item.score} P</span>
       `;
