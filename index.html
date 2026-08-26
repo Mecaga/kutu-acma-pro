@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kutu Açma Pro - Cloud Sync</title>
+  <title>Kutu Açma Pro - Cloud Master</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -23,7 +23,7 @@
     body {
       background-color: #05020a;
       color: #ffffff;
-      min-height: 100vh;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -33,7 +33,7 @@
     #app-container {
       width: 100%;
       max-width: 420px;
-      height: 100vh;
+      height: 100%;
       background: radial-gradient(circle at 50% 20%, #1e0b36 0%, #08020f 100%);
       position: relative;
       display: flex;
@@ -168,12 +168,14 @@
 
     /* EKRANLAR */
     #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, 
-    #mines-game-screen, #fire-game-screen, #catch-summary-screen, #chat-screen, #friends-screen, #achievements-screen {
+    #mines-game-screen, #fire-game-screen, #wheel-game-screen, #catch-summary-screen, 
+    #chat-screen, #friends-screen, #achievements-screen, #settings-screen {
       display: none;
       flex-direction: column;
       height: 100%;
       justify-content: space-between;
       gap: 4px;
+      overflow: hidden;
     }
 
     .menu-center {
@@ -188,19 +190,19 @@
 
     .nav-extra-bar {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3px;
       width: 100%;
       flex-shrink: 0;
     }
 
     .nav-extra-btn {
-      padding: 6px 2px;
+      padding: 6px 1px;
       background: #190a30;
       border: 1px solid #6b21a8;
       border-radius: 6px;
       color: #e879f9;
-      font-size: 9px;
+      font-size: 8px;
       font-weight: bold;
       cursor: pointer;
       text-align: center;
@@ -301,7 +303,7 @@
       border: 1px solid #3b1466;
       position: relative;
       overflow: hidden;
-      min-height: 90px;
+      min-height: 85px;
     }
 
     .roulette-wrapper {
@@ -489,7 +491,7 @@
     }
 
     .msg-bubble {
-      max-width: 75%;
+      max-width: 80%;
       padding: 6px 9px;
       border-radius: 8px;
       font-size: 11px;
@@ -513,6 +515,7 @@
     }
 
     .msg-sender { font-size: 9px; font-weight: bold; color: #53bdeb; margin-bottom: 2px; }
+    .msg-title-tag { font-size: 7px; background: #3b1466; padding: 1px 4px; border-radius: 4px; margin-left: 2px; }
     .msg-time { font-size: 7px; color: #8696a0; align-self: flex-end; margin-top: 2px; }
 
     .whatsapp-input-bar {
@@ -640,6 +643,7 @@
       <div class="app-title">Kutu Açma Pro</div>
       <div class="header-actions">
         <button class="icon-btn" onclick="openLeaderboard()">🏆 Sıralama</button>
+        <button class="icon-btn" onclick="openSettings()">⚙️ Ayarlar</button>
         <button class="icon-btn exit-btn" onclick="handleSignOut()">🚪 Çıkış</button>
       </div>
     </div>
@@ -656,6 +660,7 @@
           <div class="badge-dot" id="friend-badge"></div>
         </div>
         <div class="nav-extra-btn" onclick="openAchievements()">🏆 Görevler</div>
+        <div class="nav-extra-btn" style="color:#fbbf24;" onclick="openLuckyWheel()">🎰 Çark</div>
       </div>
 
       <div class="mode-grid">
@@ -700,7 +705,7 @@
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
       <div style="font-size:10px; font-weight:bold; color:#d946ef;" id="game-mode-name-txt">Kasa</div>
-      <div></div>
+      <button class="icon-btn" id="turbo-toggle-btn" onclick="toggleTurbo()">⚡ Turbo: KAPALI</button>
     </div>
 
     <div class="game-stats-top">
@@ -732,7 +737,7 @@
       <div class="drop-result-badge" id="drop-result-txt">Son Düşen: <span style="color:#64748b;">-</span></div>
     </div>
 
-    <button id="open-case-btn" class="btn-action" onclick="openCase()">KASAYI AÇ (3s)</button>
+    <button id="open-case-btn" class="btn-action" onclick="openCase()">KASAYI AÇ</button>
   </div>
 
   <!-- 4. YAKALA & AÇ: 1. AŞAMA -->
@@ -844,7 +849,24 @@
     <button id="fire-cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutFire()">💰 Puanı Güvenle Al</button>
   </div>
 
-  <!-- 8. WHATSAPP SOHBET -->
+  <!-- 8. ŞANS ÇARKI MODU -->
+  <div id="wheel-game-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:10px; font-weight:bold; color:#fbbf24;">🎰 Günlük Şans Çarkı</div>
+      <div></div>
+    </div>
+
+    <div class="case-container" style="padding: 10px; text-align:center;">
+      <div style="font-size:40px; margin-bottom:10px;">🎡</div>
+      <div style="font-size:12px; font-weight:bold; color:#fbbf24;" id="wheel-result-txt">Günün Şansını Yakala!</div>
+      <div style="font-size:9px; color:#94a3b8; margin-top:4px;">50 ile 500 arasında anında puan kazan!</div>
+    </div>
+
+    <button id="spin-wheel-btn" class="btn-action" style="background:linear-gradient(135deg,#f59e0b,#d97706);" onclick="spinLuckyWheel()">🎡 Çarkı Çevir</button>
+  </div>
+
+  <!-- 9. WHATSAPP SOHBET -->
   <div id="chat-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -860,7 +882,7 @@
     </div>
   </div>
 
-  <!-- 9. ARKADAŞLAR VE İSTEKLER -->
+  <!-- 10. ARKADAŞLAR VE İSTEKLER -->
   <div id="friends-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -869,7 +891,7 @@
     </div>
 
     <div style="display:flex; gap:4px;">
-      <input type="text" id="add-friend-input" class="neon-input" placeholder="Kullanıcı Adı Girin">
+      <input type="text" id="add-friend-input" class="neon-input" placeholder="Kayıtlı Kullanıcı Adı">
       <button class="icon-btn" style="background:#10b981;" onclick="sendFriendRequest()">İstek At</button>
     </div>
 
@@ -880,7 +902,7 @@
     <div class="scroll-list" id="friends-list-container"></div>
   </div>
 
-  <!-- 10. GÖREVLER -->
+  <!-- 11. GÖREVLER -->
   <div id="achievements-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -890,6 +912,22 @@
 
     <div class="scroll-list" id="achievements-list-container"></div>
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
+  </div>
+
+  <!-- 12. AYARLAR & UNVAN SEÇİMİ -->
+  <div id="settings-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">⚙️ Bulut Ayarları</div>
+      <div></div>
+    </div>
+
+    <div class="case-container" style="padding: 10px; gap:8px;">
+      <div style="font-size:11px; font-weight:bold; color:#38bdf8;">Aktif Unvanını Seç:</div>
+      <div style="display:flex; flex-direction:column; gap:4px; width:100%;" id="titles-container"></div>
+    </div>
+
+    <button class="btn-modal btn-close" onclick="exitToMenu()">Kaydet & Kapat</button>
   </div>
 
   <!-- ÖZET VE MODALLAR -->
@@ -1076,21 +1114,24 @@
   };
 
   const ACHIEVEMENTS_DEF = [
-    { id: 'first_game', title: 'İlk Adım', desc: 'Herhangi bir modu tamamla', icon: '🎮' },
-    { id: 'godly_find', title: 'Tanrısal Dokunuş', desc: 'Bir kutudan Godly eşya çıkar', icon: '👑' },
-    { id: 'score_100', title: 'Puan Avcısı', desc: 'Tek oyunda 100+ puan topla', icon: '🔥' },
-    { id: 'mines_master', title: 'Mayın Uzmanı', desc: 'Mayınlı modda 5 güvenli kasa aç', icon: '💣' },
-    { id: 'fire_master', title: 'Alev Terbiyecisi', desc: 'Ateş Çemberinde x3 çarpanına ulaş', icon: '🔥' }
+    { id: 'first_game', title: 'İlk Adım', desc: 'Herhangi bir modu tamamla', icon: '🎮', titleReward: 'Çaylak' },
+    { id: 'godly_find', title: 'Tanrısal Dokunuş', desc: 'Bir kutudan Godly eşya çıkar', icon: '👑', titleReward: 'Tanrısal' },
+    { id: 'score_100', title: 'Puan Avcısı', desc: 'Tek oyunda 100+ puan topla', icon: '🔥', titleReward: 'Avcı' },
+    { id: 'mines_master', title: 'Mayın Uzmanı', desc: 'Mayınlı modda 5 güvenli kasa aç', icon: '💣', titleReward: 'Bomba İmha' },
+    { id: 'fire_master', title: 'Alev Terbiyecisi', desc: 'Ateş Çemberinde x3 çarpanına ulaş', icon: '🔥', titleReward: 'Alev Efendisi' }
   ];
 
   let leaderboardData = [];
   let userAchievements = [];
   let userFriends = [];
+  let userTitles = ['Çaylak'];
+  let currentTitle = 'Çaylak';
   let currentUser = null;
   let currentUid = null;
   let isAdmin = false;
   let authMode = "login";
   let activeChatTarget = "global";
+  let isTurbo = false;
 
   let selectedModeKey = 'standard';
   let currentScore = 0;
@@ -1112,7 +1153,7 @@
   let fireScore = 20;
   let fireMultiplier = 1.5;
 
-  // Sayfa yenilendiğinde Firebase Auth oturumu otomatik algılanır
+  // Oturum Durumu Takibi
   if (firebaseReady && auth) {
     auth.onAuthStateChanged((user) => {
       if (user) {
@@ -1170,9 +1211,13 @@
           currentUid = cred.user.uid;
           currentUser = rawUser;
           isAdmin = false;
-          // Kullanıcı kaydı ve username indeksi
           if (db) {
-            db.ref(`users/${cred.user.uid}`).set({ username: rawUser, createdAt: Date.now() });
+            db.ref(`users/${cred.user.uid}`).set({ 
+              username: rawUser, 
+              createdAt: Date.now(),
+              title: 'Çaylak',
+              titles: ['Çaylak']
+            });
             db.ref(`usernames/${cleanUser}`).set(cred.user.uid);
           }
           loginSuccess();
@@ -1195,8 +1240,8 @@
   }
 
   function loginSuccess() {
-    document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}` + (isAdmin ? " (👑 Admin)" : "");
-    document.getElementById('menu-uid-tag').innerText = `ID: ${currentUid ? currentUid.slice(0, 10) + '...' : 'Admin'}`;
+    document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser} [${currentTitle}]` + (isAdmin ? " (👑 Admin)" : "");
+    document.getElementById('menu-uid-tag').innerText = `ID: ${currentUid ? currentUid.slice(0, 8) + '...' : 'Admin'}`;
     if (document.getElementById('admin-lb-controls')) {
       document.getElementById('admin-lb-controls').style.display = isAdmin ? 'block' : 'none';
     }
@@ -1216,7 +1261,8 @@
     const screens = [
       'auth-screen', 'menu-screen', 'game-screen',
       'catch-game-screen', 'inventory-screen', 'mines-game-screen', 
-      'fire-game-screen', 'catch-summary-screen', 'chat-screen', 'friends-screen', 'achievements-screen'
+      'fire-game-screen', 'wheel-game-screen', 'catch-summary-screen', 
+      'chat-screen', 'friends-screen', 'achievements-screen', 'settings-screen'
     ];
     screens.forEach(id => {
       const el = document.getElementById(id);
@@ -1233,6 +1279,13 @@
     showScreen('menu-screen');
   }
 
+  function toggleTurbo() {
+    isTurbo = !isTurbo;
+    const btn = document.getElementById('turbo-toggle-btn');
+    btn.innerText = isTurbo ? "⚡ Turbo: AÇIK" : "⚡ Turbo: KAPALI";
+    btn.style.color = isTurbo ? "#34d399" : "#fff";
+  }
+
   // FIREBASE BULUT SENKRONİZASYONU
   function listenFirebaseData() {
     if (!firebaseReady || !db || !currentUid) return;
@@ -1247,12 +1300,22 @@
       }
     });
 
-    // Kullanıcı Başarımları (Buluttan Çekilir)
+    // Profil & Unvanlar
+    db.ref(`users/${currentUid}`).on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        currentTitle = data.title || 'Çaylak';
+        userTitles = data.titles || ['Çaylak'];
+        document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser} [${currentTitle}]` + (isAdmin ? " (👑 Admin)" : "");
+      }
+    });
+
+    // Başarımlar
     db.ref(`users/${currentUid}/achievements`).on('value', (snapshot) => {
       userAchievements = snapshot.val() || [];
     });
 
-    // Arkadaş Listesi (Buluttan Çekilir)
+    // Arkadaş Listesi
     db.ref(`users/${currentUid}/friends`).on('value', (snapshot) => {
       userFriends = snapshot.val() ? Object.values(snapshot.val()) : [];
       renderFriendsList();
@@ -1304,6 +1367,7 @@
     const chatData = {
       sender: currentUser,
       senderUid: currentUid,
+      title: currentTitle,
       isAdmin: isAdmin,
       message: msg,
       time: timeStr,
@@ -1338,7 +1402,7 @@
       const bubble = document.createElement('div');
       bubble.className = `msg-bubble ${isMe ? 'msg-outgoing' : 'msg-incoming'}`;
       bubble.innerHTML = `
-        ${!isMe ? `<div class="msg-sender">${m.isAdmin ? '👑 ' : ''}${m.sender}</div>` : ''}
+        ${!isMe ? `<div class="msg-sender">${m.isAdmin ? '👑 ' : ''}${m.sender} <span class="msg-title-tag">[${m.title || 'Çaylak'}]</span></div>` : ''}
         <div>${escapeHtml(m.message)}</div>
         <div class="msg-time">${m.time || ''}</div>
       `;
@@ -1349,7 +1413,7 @@
 
   function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
-  // --- KAYITLI KULLANICI KONTROLLÜ ARKADAŞLIK SİSTEMİ ---
+  // --- ARKADAŞLIK İSTEĞİ SİSTEMİ ---
   function openFriendsScreen() {
     renderFriendsList();
     showScreen('friends-screen');
@@ -1368,7 +1432,6 @@
     const cleanTarget = target.toLowerCase().replace(/[^a-z0-9]/g, '');
 
     if (firebaseReady && db) {
-      // Hedef kullanıcının veritabanında kayıtlı olup olmadığını kontrol et
       db.ref(`usernames/${cleanTarget}`).once('value').then(snapshot => {
         const targetUid = snapshot.val();
         if (!targetUid) {
@@ -1376,7 +1439,6 @@
           return;
         }
 
-        // İstek gönderme
         db.ref(`friend_requests/${targetUid}/${currentUid}`).set({
           sender: currentUser,
           senderUid: currentUid,
@@ -1416,7 +1478,6 @@
 
   function acceptFriend(friendName, friendUid) {
     if (firebaseReady && db && currentUid) {
-      // Karşılıklı bulut arkadaş listesine ekleme
       db.ref(`users/${currentUid}/friends/${friendUid}`).set({ username: friendName, uid: friendUid });
       db.ref(`users/${friendUid}/friends/${currentUid}`).set({ username: currentUser, uid: currentUid });
       db.ref(`friend_requests/${currentUid}/${friendUid}`).remove();
@@ -1462,6 +1523,58 @@
       `;
       list.appendChild(row);
     });
+  }
+
+  // --- ŞANS ÇARKI MODU ---
+  function openLuckyWheel() {
+    showScreen('wheel-game-screen');
+  }
+
+  function spinLuckyWheel() {
+    const btn = document.getElementById('spin-wheel-btn');
+    btn.disabled = true;
+
+    AudioEngine.playGodly();
+    triggerScreenShake();
+
+    const bonusPoints = Math.floor(Math.random() * 450) + 50;
+    document.getElementById('wheel-result-txt').innerText = `🎉 Tebrikler! +${bonusPoints} Puan Kazandın!`;
+
+    currentScore = bonusPoints;
+    currentSessionDrops = [{ tier: "Bonus Çark", item: `${bonusPoints} Puanlık Şans`, points: bonusPoints, color: "#fbbf24" }];
+
+    setTimeout(() => {
+      saveScoreToLeaderboard();
+      alert(`Çark Sonucu: +${bonusPoints} Puan Sıralama Tablosuna Eklendi!`);
+      btn.disabled = false;
+      exitToMenu();
+    }, 1500);
+  }
+
+  // --- AYARLAR & UNVAN DEĞİŞTİRME ---
+  function openSettings() {
+    const container = document.getElementById('titles-container');
+    container.innerHTML = '';
+
+    userTitles.forEach(t => {
+      const isCurrent = t === currentTitle;
+      const btn = document.createElement('button');
+      btn.className = 'btn-action';
+      btn.style.background = isCurrent ? '#10b981' : '#231038';
+      btn.innerText = `${t} ${isCurrent ? '(Seçili)' : ''}`;
+      btn.onclick = () => selectTitle(t);
+      container.appendChild(btn);
+    });
+
+    showScreen('settings-screen');
+  }
+
+  function selectTitle(titleName) {
+    currentTitle = titleName;
+    if (firebaseReady && db && currentUid) {
+      db.ref(`users/${currentUid}/title`).set(titleName);
+    }
+    openSettings();
   }
 
   // --- ATEŞ ÇEMBERİ ---
@@ -1546,7 +1659,7 @@
           <span>${ach.icon}</span>
           <div>
             <b style="color:${unlocked ? '#34d399' : '#fff'};">${ach.title}</b>
-            <div style="font-size:7px; color:#94a3b8;">${ach.desc}</div>
+            <div style="font-size:7px; color:#94a3b8;">${ach.desc} (Unvan: ${ach.titleReward})</div>
           </div>
         </div>
         <b style="color:${unlocked ? '#34d399' : '#64748b'};">${unlocked ? '✓ Tamam' : 'Kilitli'}</b>
@@ -1559,8 +1672,14 @@
   function unlockAchievement(id) {
     if (!userAchievements.includes(id)) {
       userAchievements.push(id);
+      const ach = ACHIEVEMENTS_DEF.find(a => a.id === id);
+      if (ach && !userTitles.includes(ach.titleReward)) {
+        userTitles.push(ach.titleReward);
+      }
+
       if (firebaseReady && db && currentUid) {
         db.ref(`users/${currentUid}/achievements`).set(userAchievements);
+        db.ref(`users/${currentUid}/titles`).set(userTitles);
       }
       AudioEngine.playGodly();
     }
@@ -1673,7 +1792,7 @@
   function resetStandardCaseUI() {
     isOpening = false;
     document.getElementById('open-case-btn').disabled = false;
-    document.getElementById('open-case-btn').innerText = "KASAYI AÇ (3s)";
+    document.getElementById('open-case-btn').innerText = "KASAYI AÇ";
     document.getElementById('ready-view').style.display = 'block';
     document.getElementById('ready-banner-txt').innerText = "HAZIR!";
     document.getElementById('roulette-view').style.display = 'none';
@@ -1752,11 +1871,12 @@
       track.appendChild(card);
     }
 
-    let tickInterval = setInterval(() => AudioEngine.playTick(), 100);
-    setTimeout(() => clearInterval(tickInterval), 2800);
+    const spinDuration = isTurbo ? 1000 : 3000;
+    let tickInterval = setInterval(() => AudioEngine.playTick(), isTurbo ? 50 : 100);
+    setTimeout(() => clearInterval(tickInterval), spinDuration - 200);
 
     setTimeout(() => {
-      track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
+      track.style.transition = `transform ${spinDuration/1000}s cubic-bezier(0.12, 0.8, 0.2, 1)`;
       const itemWidth = 65;
       const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 10 - 5);
       track.style.transform = `translateX(${target}px)`;
@@ -1792,7 +1912,7 @@
       } else {
         document.getElementById('open-case-btn').disabled = false;
       }
-    }, 3100);
+    }, spinDuration + 100);
   }
 
   function triggerScreenShake() {
@@ -1956,11 +2076,12 @@
       track.appendChild(card);
     }
 
-    let tickInterval = setInterval(() => AudioEngine.playTick(), 100);
-    setTimeout(() => clearInterval(tickInterval), 2800);
+    const spinDuration = isTurbo ? 1000 : 3000;
+    let tickInterval = setInterval(() => AudioEngine.playTick(), isTurbo ? 50 : 100);
+    setTimeout(() => clearInterval(tickInterval), spinDuration - 200);
 
     setTimeout(() => {
-      track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
+      track.style.transition = `transform ${spinDuration/1000}s cubic-bezier(0.12, 0.8, 0.2, 1)`;
       const itemWidth = 65;
       const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 10 - 5);
       track.style.transform = `translateX(${target}px)`;
@@ -1984,7 +2105,7 @@
       if (remaining === 0) {
         setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ ÖZETİ"), 1000);
       }
-    }, 3100);
+    }, spinDuration + 100);
   }
 
   function startMinesMode() {
@@ -2095,6 +2216,7 @@
     const record = {
       name: currentUser,
       uid: currentUid,
+      title: currentTitle,
       modeKey: selectedModeKey,
       modeName: GAME_MODES[selectedModeKey].name,
       score: currentScore,
@@ -2159,7 +2281,7 @@
       else row.classList.add('rank-rest');
 
       row.innerHTML = `
-        <div><span>${rank}. ${item.name}</span> <span style="font-size:7px; opacity:0.8;">(${item.modeName || 'Normal'})</span></div>
+        <div><span>${rank}. ${item.name}</span> <span style="font-size:7px; opacity:0.8;">[${item.title || 'Çaylak'}] (${item.modeName || 'Normal'})</span></div>
         <b>${item.score} P</b>
       `;
       list.appendChild(row);
