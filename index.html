@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <title>Kutu Açma Pro - Cloud Master</title>
+  <title>Kutu Açma Pro - Ultimate Social</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -192,7 +192,7 @@
     /* EKRANLAR */
     #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, 
     #mines-game-screen, #catch-summary-screen, 
-    #chats-hub-screen, #chat-screen, #friends-screen, #achievements-screen, #quests-screen, #profile-screen, #user-inspect-screen, #settings-screen {
+    #chats-hub-screen, #chat-screen, #group-manage-screen, #friends-screen, #achievements-screen, #quests-screen, #profile-screen, #user-inspect-screen, #settings-screen {
       display: none;
       flex-direction: column;
       height: 100%;
@@ -896,7 +896,7 @@
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="openChatsHub()">‹ Sohbetler</button>
       <div style="font-size:11px; font-weight:bold; color:#25D366;" id="chat-header-title">💬 Sohbet</div>
-      <div></div>
+      <button class="icon-btn" id="group-manage-btn" style="display:none; background:#9333ea;" onclick="openGroupManageScreen()">⚙️ Yönet</button>
     </div>
 
     <div class="whatsapp-chat-box" id="chat-messages-box"></div>
@@ -905,6 +905,30 @@
       <input type="text" id="chat-message-input" class="whatsapp-input" placeholder="Bir mesaj yazın...">
       <button class="whatsapp-send-btn" onclick="sendChatMessage()">➤</button>
     </div>
+  </div>
+
+  <!-- 8.1 GRUP YÖNETİM EKRANI -->
+  <div id="group-manage-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="backToGroupChat()">‹ Geri</button>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">⚙️ Grup Yönetimi</div>
+      <div></div>
+    </div>
+
+    <div class="case-container" style="padding: 10px; gap:8px; overflow-y:auto;">
+      <div style="font-size:12px; font-weight:bold; color:#fbbf24;" id="manage-group-name-txt">Grup Adı</div>
+      
+      <div id="group-admin-tools" style="display:none; width:100%; flex-direction:column; gap:4px;">
+        <button class="icon-btn" style="background:#0284c7; width:100%; padding:8px;" onclick="renameCurrentGroup()">✏️ Grup Adını Değiştir</button>
+        <button class="icon-btn" style="background:#10b981; width:100%; padding:8px;" onclick="addMemberToCurrentGroup()">👤 Gruba Arkadaş Ekle</button>
+        <button class="icon-btn exit-btn" style="width:100%; padding:8px;" onclick="deleteCurrentGroup()">🗑️ Grubu Tamamen Sil</button>
+      </div>
+
+      <div style="font-size:9px; color:#a855f7; font-weight:bold; width:100%; margin-top:4px;">GRUPTAKİ ÜYELER:</div>
+      <div class="scroll-list" id="group-members-list" style="width:100%; max-height:140px;"></div>
+    </div>
+
+    <button class="btn-modal btn-close" onclick="backToGroupChat()">Kapat</button>
   </div>
 
   <!-- 9. ARKADAŞLAR VE ARKADAŞ SKOR SIRALAMASI -->
@@ -1021,8 +1045,13 @@
     </div>
 
     <div class="case-container" style="padding: 10px; gap:8px;">
-      <div style="font-size:11px; font-weight:bold; color:#38bdf8;">Aktif Unvanını Seç:</div>
-      <div style="display:flex; flex-direction:column; gap:4px; width:100%;" id="titles-container"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+        <span style="font-size:11px; font-weight:bold;">🔊 Ses Efektleri:</span>
+        <button class="icon-btn" id="audio-toggle-btn" onclick="toggleAudioSetting()">Açık</button>
+      </div>
+
+      <div style="font-size:11px; font-weight:bold; color:#38bdf8; width:100%; margin-top:6px;">Kazanılan Unvanlar:</div>
+      <div class="scroll-list" style="width:100%; gap:4px;" id="titles-container"></div>
     </div>
 
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kaydet & Kapat</button>
@@ -1052,7 +1081,11 @@
       </div>
     </div>
     <div class="scroll-list" id="summary-drops-list"></div>
-    <button class="btn-modal btn-close" onclick="exitToMenu()">🚪 Ana Menüye Dön</button>
+    
+    <div style="display:flex; gap:4px; margin-top:4px;">
+      <button class="icon-btn" style="background:#0284c7; flex:1;" onclick="shareDropsSummaryToChat()">💬 Sohbette Paylaş</button>
+      <button class="btn-modal btn-close" style="flex:1;" onclick="exitToMenu()">🚪 Ana Menü</button>
+    </div>
   </div>
 
   <div id="game-over-modal" class="modal-overlay">
@@ -1089,10 +1122,13 @@
 
 <!-- JAVASCRIPT & CLOUD SYNC -->
 <script>
+  let isAudioEnabled = true;
+
   const AudioEngine = {
     ctx: null,
     init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
     playTick() {
+      if (!isAudioEnabled) return;
       try {
         this.init();
         const osc = this.ctx.createOscillator();
@@ -1108,24 +1144,26 @@
       } catch(e){}
     },
     playGodly() {
+      if (!isAudioEnabled) return;
       try {
         this.init();
         const now = this.ctx.currentTime;
-        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+        [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, i) => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, now + i * 0.1);
-          gain.gain.setValueAtTime(0.15, now + i * 0.1);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.4);
+          osc.frequency.setValueAtTime(freq, now + i * 0.09);
+          gain.gain.setValueAtTime(0.15, now + i * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.4);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
-          osc.start(now + i * 0.1);
-          osc.stop(now + i * 0.1 + 0.4);
+          osc.start(now + i * 0.09);
+          osc.stop(now + i * 0.09 + 0.4);
         });
       } catch(e){}
     },
     playExplosion() {
+      if (!isAudioEnabled) return;
       try {
         this.init();
         const osc = this.ctx.createOscillator();
@@ -1142,6 +1180,13 @@
       } catch(e){}
     }
   };
+
+  function toggleAudioSetting() {
+    isAudioEnabled = !isAudioEnabled;
+    const btn = document.getElementById('audio-toggle-btn');
+    btn.innerText = isAudioEnabled ? "Açık" : "Kapalı";
+    btn.style.color = isAudioEnabled ? "#34d399" : "#ef4444";
+  }
 
   function showToast(msg) {
     const el = document.getElementById('toast-notification');
@@ -1199,8 +1244,9 @@
         { name: 'Classic Kasa', rate: 45.0, minP: 2, maxP: 5, color: '#ffffff', items: ['Deri Çanta', 'Taş Kolye', 'Bakır Hançer'] },
         { name: 'Super Kasa',   rate: 30.0, minP: 6, maxP: 18, color: '#38bdf8', items: ['Buz Asası', 'Rüzgar Pelerini', 'Platin Kalkan'] },
         { name: 'Ultra Kasa',   rate: 15.0, minP: 25, maxP: 60, color: '#c084fc', items: ['Gök Gürültüsü Baltası', 'Anka Tüyü'] },
-        { name: 'Omega Kasa',   rate: 8.0,  minP: 80, maxP: 250, color: '#fb923c', items: ['Ejderha Kalbi', 'Gölge Tacı'] },
-        { name: 'Godly Kasa',   rate: 2.0,  minP: 750, maxP: 1500, color: '#f43f5e', items: ['Kainatın Asası', 'Ebedi Yıldız Taşı'] }
+        { name: 'Omega Kasa',   rate: 7.99, minP: 80, maxP: 250, color: '#fb923c', items: ['Ejderha Kalbi', 'Gölge Tacı'] },
+        { name: 'Godly Kasa',   rate: 2.0,  minP: 750, maxP: 1500, color: '#f43f5e', items: ['Kainatın Asası', 'Ebedi Yıldız Taşı'] },
+        { name: 'Uranus (Gizemli)', rate: 0.01, minP: 2000, maxP: 2000, color: '#00ffff', items: ['Uranus Kozmik Matrisi', 'Göklerin Gözü'] }
       ]
     },
     upgrade_mode: {
@@ -1221,32 +1267,23 @@
     }
   };
 
-  // 7 KADEMELİ ZORLUK BAŞARIMLARI
   const ACHIEVEMENTS_DEF = [
-    // Kolay
     { id: 'ez_1', tier: 'Kolay', title: 'İlk Adım', desc: 'Toplam 10 kasa aç', icon: '🌱', target: 10, titleReward: 'Çırak' },
     { id: 'ez_2', tier: 'Kolay', title: 'Sohbetçi', desc: 'Sohbette 5 mesaj gönder', icon: '💬', target: 5, titleReward: 'Konuşkan' },
-    // Orta
     { id: 'med_1', tier: 'Orta', title: 'Kasa Bağımlısı', desc: 'Toplam 25 kasa aç', icon: '📦', target: 25, titleReward: 'Kutucu' },
     { id: 'med_2', tier: 'Orta', title: 'Puan Avcısı', desc: 'Tek oyunda 100+ puan topla', icon: '🔥', target: 100, titleReward: 'Avcı' },
-    // Zor
     { id: 'hard_1', tier: 'Zor', title: 'Mayın Uzmanı', desc: 'Mayın modunda 5 güvenli kasa aç', icon: '💣', target: 5, titleReward: 'Bomba İmha' },
     { id: 'hard_2', tier: 'Zor', title: 'Kasa Ustası', desc: 'Toplam 50 kasa açılışı yap', icon: '💎', target: 50, titleReward: 'Üstat' },
-    // Ultra Zor
     { id: 'ultra_1', tier: 'Ultra Zor', title: 'Tanrısal Dokunuş', desc: '1 adet Godly eşya düşür', icon: '👑', target: 1, titleReward: 'Tanrısal' },
     { id: 'ultra_2', tier: 'Ultra Zor', title: 'Hazine Zengini', desc: 'Tek oyunda 300+ puan topla', icon: '💰', target: 300, titleReward: 'Milyoner' },
-    // Uzay Zor
     { id: 'space_1', tier: 'Uzay Zor', title: 'Yıldız Gezgini', desc: 'Toplam 100 kasa açılışı yap', icon: '🚀', target: 100, titleReward: 'Astronot' },
     { id: 'space_2', tier: 'Uzay Zor', title: 'Galaksi Lideri', desc: 'Tek oyunda 500+ puana ulaş', icon: '🌌', target: 500, titleReward: 'Galaktik' },
-    // Kozmik Zor
     { id: 'cosmic_1', tier: 'Kozmik Zor', title: 'Kozmik Hükümdar', desc: 'Toplam 200 kasa açılışı yap', icon: '🪐', target: 200, titleReward: 'Kozmik Efendi' },
     { id: 'cosmic_2', tier: 'Kozmik Zor', title: 'Evrenin Zirvesi', desc: 'Tek oyunda 750+ puan topla', icon: '✨', target: 750, titleReward: 'Evrenin Hakimi' },
-    // Kuantum Zor
     { id: 'quantum_1', tier: 'Kuantum Zor', title: 'Kuantum Tanrısı', desc: 'Toplam 500 kasa açılışı yap', icon: '⚛️', target: 500, titleReward: 'Kuantum Varlığı' },
     { id: 'quantum_2', tier: 'Kuantum Zor', title: 'Sonsuzluk Matrisi', desc: 'Tek oyunda 1000+ puan topla', icon: '♾️', target: 1000, titleReward: 'Ölümsüz' }
   ];
 
-  // AYRI GÜNLÜK & HAFTALIK GÖREVLER
   const QUESTS_DEF = [
     { id: 'd_1', type: 'Günlük', title: 'Günün Kutu Avı', desc: 'Bugün 5 kasa aç', target: 5, rewardP: 50 },
     { id: 'd_2', type: 'Günlük', title: 'Sohbet Vakti', desc: 'Bugün sohbete 3 mesaj yaz', target: 3, rewardP: 30 },
@@ -1267,6 +1304,7 @@
   let isAdmin = false;
   let authMode = "login";
   let activeChatTarget = "global";
+  let currentActiveGroupId = null;
 
   let totalBoxesOpened = 0;
   let userHighScore = 0;
@@ -1403,8 +1441,8 @@
     const screens = [
       'auth-screen', 'menu-screen', 'game-screen',
       'catch-game-screen', 'inventory-screen', 'mines-game-screen', 
-      'catch-summary-screen', 'chats-hub-screen', 'chat-screen', 'friends-screen', 
-      'achievements-screen', 'quests-screen', 'profile-screen', 'settings-screen'
+      'catch-summary-screen', 'chats-hub-screen', 'chat-screen', 'group-manage-screen', 
+      'friends-screen', 'achievements-screen', 'quests-screen', 'profile-screen', 'settings-screen'
     ];
     screens.forEach(id => {
       const el = document.getElementById(id);
@@ -1477,7 +1515,6 @@
     });
   }
 
-  // --- KENDİ PROFİL & MOD BAZLI KAZANMA İSTATİSTİKLERİ ---
   function openProfileScreen() {
     document.getElementById('prof-name-txt').innerText = currentUser || "Oyuncu";
     document.getElementById('prof-title-txt').innerText = `Unvan: ${currentTitle}`;
@@ -1514,7 +1551,6 @@
     showScreen('profile-screen');
   }
 
-  // --- OYUNCU İNCELEME KARTI (ARKADAŞ EKLEME & ÇIKIŞ TUŞLU) ---
   function inspectPlayer(targetUserObj) {
     currentlyInspectingUser = targetUserObj;
     document.getElementById('inspect-name-txt').innerText = targetUserObj.name;
@@ -1589,7 +1625,10 @@
         name: groupName.trim(),
         createdBy: currentUser,
         creatorUid: currentUid,
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        members: {
+          [currentUid]: { username: currentUser, uid: currentUid, role: 'owner' }
+        }
       };
 
       db.ref(`groups/${newGroupId}`).set(groupData);
@@ -1616,12 +1655,12 @@
           <span style="font-size:18px;">👥</span>
           <div>
             <div style="font-weight:bold; color:#d946ef; font-size:11px;">${g.name}</div>
-            <div style="font-size:8px; color:#8696a0;">Kurucu: ${g.createdBy}</div>
+            <div style="font-size:8px; color:#8696a0;">Kurucu: 👑 ${g.createdBy}</div>
           </div>
         </div>
         <span style="font-size:12px; color:#d946ef;">›</span>
       `;
-      item.onclick = () => openGroupChat(g.id, g.name);
+      item.onclick = () => openGroupChat(g.id, g.name, g.creatorUid === currentUid);
       container.appendChild(item);
     });
   }
@@ -1656,7 +1695,9 @@
 
   function openGlobalChat() {
     activeChatTarget = "global";
+    currentActiveGroupId = null;
     document.getElementById('chat-header-title').innerText = "🌐 Genel Sohbet";
+    document.getElementById('group-manage-btn').style.display = 'none';
     showScreen('chat-screen');
 
     if (firebaseReady && db) {
@@ -1666,9 +1707,11 @@
     }
   }
 
-  function openGroupChat(groupId, groupName) {
+  function openGroupChat(groupId, groupName, isOwner) {
     activeChatTarget = `group_${groupId}`;
-    document.getElementById('chat-header-title').innerText = `👥 Grup: ${groupName}`;
+    currentActiveGroupId = groupId;
+    document.getElementById('chat-header-title').innerText = `👥 ${groupName}`;
+    document.getElementById('group-manage-btn').style.display = 'block';
     showScreen('chat-screen');
 
     if (firebaseReady && db) {
@@ -1678,9 +1721,121 @@
     }
   }
 
+  function openGroupManageScreen() {
+    if (!currentActiveGroupId || !db) return;
+
+    db.ref(`groups/${currentActiveGroupId}`).once('value').then(snap => {
+      const gData = snap.val();
+      if (!gData) return;
+
+      document.getElementById('manage-group-name-txt').innerText = gData.name;
+      const isOwner = (gData.creatorUid === currentUid);
+      document.getElementById('group-admin-tools').style.display = isOwner ? 'flex' : 'none';
+
+      const list = document.getElementById('group-members-list');
+      list.innerHTML = '';
+
+      const members = gData.members || {};
+      Object.values(members).forEach(m => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        const isMOwner = (m.role === 'owner');
+        row.innerHTML = `
+          <div>
+            <span>${isMOwner ? '👑 ' : '👤 '}<b>${m.username}</b></span>
+          </div>
+          ${(isOwner && !isMOwner) ? `<button class="icon-btn exit-btn" onclick="removeMemberFromGroup('${m.uid}')">Çıkar</button>` : ''}
+        `;
+        list.appendChild(row);
+      });
+
+      showScreen('group-manage-screen');
+    });
+  }
+
+  function backToGroupChat() {
+    showScreen('chat-screen');
+  }
+
+  function renameCurrentGroup() {
+    const newName = prompt("Yeni grup adını girin:");
+    if (!newName || !newName.trim()) return;
+
+    if (db && currentActiveGroupId) {
+      db.ref(`groups/${currentActiveGroupId}/name`).set(newName.trim());
+      db.ref(`users/${currentUid}/my_groups/${currentActiveGroupId}/name`).set(newName.trim());
+      document.getElementById('manage-group-name-txt').innerText = newName.trim();
+      document.getElementById('chat-header-title').innerText = `👥 ${newName.trim()}`;
+      showToast("Grup adı güncellendi!");
+    }
+  }
+
+  function addMemberToCurrentGroup() {
+    if (userFriends.length === 0) {
+      alert("Gruba eklemek için önce arkadaş edinmelisiniz!");
+      return;
+    }
+
+    const friendNames = userFriends.map(f => f.username).join('\n');
+    const targetName = prompt(`Gruba eklemek istediğiniz arkadaşınızın tam adını girin:\n\n${friendNames}`);
+    if (!targetName) return;
+
+    const friendObj = userFriends.find(f => f.username.toLowerCase() === targetName.trim().toLowerCase());
+    if (!friendObj) {
+      alert("Bu isimde bir arkadaşınız bulunamadı!");
+      return;
+    }
+
+    if (db && currentActiveGroupId) {
+      db.ref(`groups/${currentActiveGroupId}/members/${friendObj.uid}`).set({
+        username: friendObj.username,
+        uid: friendObj.uid,
+        role: 'member'
+      });
+
+      db.ref(`groups/${currentActiveGroupId}`).once('value').then(snap => {
+        const gData = snap.val();
+        db.ref(`users/${friendObj.uid}/my_groups/${currentActiveGroupId}`).set(gData);
+      });
+
+      showToast(`${friendObj.username} gruba eklendi!`);
+      openGroupManageScreen();
+    }
+  }
+
+  function removeMemberFromGroup(memberUid) {
+    if (confirm("Bu üyeyi gruptan çıkarmak istediğinize emin misiniz?")) {
+      if (db && currentActiveGroupId) {
+        db.ref(`groups/${currentActiveGroupId}/members/${memberUid}`).remove();
+        db.ref(`users/${memberUid}/my_groups/${currentActiveGroupId}`).remove();
+        openGroupManageScreen();
+      }
+    }
+  }
+
+  function deleteCurrentGroup() {
+    if (confirm("DİKKAT: Bu grup ve tüm mesajları kalıcı olarak silinecek! Onaylıyor musunuz?")) {
+      if (db && currentActiveGroupId) {
+        db.ref(`groups/${currentActiveGroupId}`).once('value').then(snap => {
+          const gData = snap.val() || {};
+          const members = gData.members || {};
+          Object.keys(members).forEach(mUid => {
+            db.ref(`users/${mUid}/my_groups/${currentActiveGroupId}`).remove();
+          });
+          db.ref(`groups/${currentActiveGroupId}`).remove();
+          db.ref(`group_messages/${currentActiveGroupId}`).remove();
+          showToast("Grup silindi!");
+          openChatsHub();
+        });
+      }
+    }
+  }
+
   function openPrivateChat(friendName, friendUid) {
     activeChatTarget = friendName;
+    currentActiveGroupId = null;
     document.getElementById('chat-header-title').innerText = `💬 ${friendName}`;
+    document.getElementById('group-manage-btn').style.display = 'none';
     showScreen('chat-screen');
 
     const chatRoomId = [currentUid, friendUid].sort().join('_');
@@ -1759,6 +1914,17 @@
   }
 
   function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  function shareDropsSummaryToChat() {
+    if (currentSessionDrops.length === 0) return;
+    let summaryText = `📦 [${GAME_MODES[selectedModeKey].name}] tamamladım! Toplam Skor: ${currentScore} P\nÇıkanlar:\n`;
+    currentSessionDrops.forEach(d => {
+      summaryText += `• ${d.tier}: ${d.item} (+${d.points}P)\n`;
+    });
+
+    openGlobalChat();
+    document.getElementById('chat-message-input').value = summaryText;
+  }
 
   // --- ONARILMIŞ ARKADAŞLIK SİSTEMİ ---
   function openFriendsScreen() {
@@ -1890,7 +2056,9 @@
     const container = document.getElementById('titles-container');
     container.innerHTML = '';
 
-    userTitles.forEach(t => {
+    const uniqueTitles = [...new Set(userTitles)];
+
+    uniqueTitles.forEach(t => {
       const isCurrent = t === currentTitle;
       const btn = document.createElement('button');
       btn.className = 'btn-action';
@@ -1908,10 +2076,11 @@
     if (firebaseReady && db && currentUid) {
       db.ref(`users/${currentUid}/title`).set(titleName);
     }
+    showToast(`Unvanın [${titleName}] olarak değiştirildi!`);
     openSettings();
   }
 
-  // --- AYRI GÖREVLER EKRANI ---
+  // --- GÖREVLER EKRANI ---
   function openQuestsScreen() {
     renderQuestsList();
     showScreen('quests-screen');
@@ -2253,7 +2422,7 @@
       document.getElementById('score-txt').innerText = currentScore;
       currentSessionDrops.push(winDrop);
 
-      if (winDrop.tier.includes('Godly') || winDrop.tier.includes('Kozmik')) {
+      if (winDrop.tier.includes('Godly') || winDrop.tier.includes('Kozmik') || winDrop.tier.includes('Uranus')) {
         AudioEngine.playGodly();
         triggerScreenShake();
         godlyFoundCount++;
@@ -2427,12 +2596,28 @@
     track.style.transform = 'translateX(0px)';
     track.innerHTML = '';
 
+    // Yakala Aç %1 bir üst kademe, %0.01 Uranus şansı
+    let chosenTierName = targetBox.tier;
+    const isUranusLuck = Math.random() < 0.0001; // %0.01
+    const isTierUpgrade = Math.random() < 0.01; // %1
+
+    if (isUranusLuck) {
+      chosenTierName = 'Uranus (Gizemli)';
+    } else if (isTierUpgrade) {
+      const tiersOrder = ['Classic Kasa', 'Super Kasa', 'Ultra Kasa', 'Omega Kasa', 'Godly Kasa'];
+      const cIdx = tiersOrder.indexOf(targetBox.tier);
+      if (cIdx !== -1 && cIdx < tiersOrder.length - 1) {
+        chosenTierName = tiersOrder[cIdx + 1];
+        showToast("⚡ ŞANS! Bir üst kademe kasa açılıyor!");
+      }
+    }
+
     const totalItems = 30;
     const winIdx = 24;
     let winDrop = null;
 
     for (let i = 0; i < totalItems; i++) {
-      const drop = getRandomDrop('catch_open', i === winIdx ? targetBox.tier : null);
+      const drop = getRandomDrop('catch_open', i === winIdx ? chosenTierName : null);
       if (i === winIdx) winDrop = drop;
 
       const card = document.createElement('div');
@@ -2463,7 +2648,7 @@
       currentSessionDrops.push(winDrop);
       isOpening = false;
 
-      if (winDrop.tier.includes('Godly')) {
+      if (winDrop.tier.includes('Godly') || winDrop.tier.includes('Uranus')) {
         AudioEngine.playGodly();
         triggerScreenShake();
         godlyFoundCount++;
@@ -2491,10 +2676,12 @@
 
     unOpened.forEach(b => {
       b.opened = true;
-      const drop = getRandomDrop('catch_open', b.tier);
+      let chosenTierName = b.tier;
+      if (Math.random() < 0.0001) chosenTierName = 'Uranus (Gizemli)';
+      const drop = getRandomDrop('catch_open', chosenTierName);
       currentScore += drop.points;
       currentSessionDrops.push(drop);
-      if (drop.tier.includes('Godly')) {
+      if (drop.tier.includes('Godly') || drop.tier.includes('Uranus')) {
         godlyFoundCount++;
         updateAchievementProgress('ultra_1', godlyFoundCount);
       }
@@ -2615,7 +2802,6 @@
     updateAchievementProgress('quantum_2', currentScore);
     updateQuestProgress('w_2', currentScore);
 
-    // Mod istatistikleri güncellemesi
     if (!userModeStats[selectedModeKey]) {
       userModeStats[selectedModeKey] = { played: 0, won: 0, best: 0 };
     }
