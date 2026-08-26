@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <title>Kutu Açma Pro - Cloud Master Pro</title>
+  <title>Kutu Açma Pro - Cloud & Social</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -54,7 +54,6 @@
       40%, 60% { transform: translate3d(4px, 0, 0); }
     }
 
-    /* TOAST BİLDİRİMİ */
     #toast-notification {
       position: absolute;
       top: 10px;
@@ -192,7 +191,7 @@
 
     /* EKRANLAR */
     #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, 
-    #mines-game-screen, #fire-game-screen, #wheel-game-screen, #catch-summary-screen, 
+    #mines-game-screen, #fire-game-screen, #catch-summary-screen, 
     #chats-hub-screen, #chat-screen, #friends-screen, #achievements-screen, #profile-screen, #settings-screen {
       display: none;
       flex-direction: column;
@@ -215,7 +214,7 @@
 
     .nav-extra-bar {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 4px;
       width: 100%;
       flex-shrink: 0;
@@ -657,7 +656,6 @@
 
 <div id="app-container">
 
-  <!-- TOAST BİLDİRİMİ -->
   <div id="toast-notification">Bildirim</div>
 
   <!-- 1. GİRİŞ EKRANI -->
@@ -701,7 +699,6 @@
       <div style="font-size:16px; font-weight:900; color:#d946ef; margin-top:2px;">KUTU AÇMA</div>
       <div style="font-size:11px; color:#34d399; font-weight:bold;" id="menu-user-greeting">👤 Oyuncu#00000</div>
       
-      <!-- GÜNLÜK GÖREV PANOSU -->
       <div class="rates-box" style="width:100%; border-color:#fbbf24; background:#190f05;" id="daily-quest-box">
         <div style="display:flex; justify-content:space-between; color:#fbbf24; font-weight:bold;">
           <span>🎯 Günlük Görev: 3 Kasa Aç</span>
@@ -716,7 +713,6 @@
           <div class="badge-dot" id="friend-badge"></div>
         </div>
         <div class="nav-extra-btn" onclick="openAchievements()">🏆 Görevler</div>
-        <div class="nav-extra-btn" style="color:#fbbf24;" onclick="openLuckyWheel()">🎰 Çark</div>
       </div>
 
       <div class="mode-grid">
@@ -757,7 +753,10 @@
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
       <div style="font-size:10px; font-weight:bold; color:#d946ef;" id="game-mode-name-txt">Kasa</div>
-      <button class="icon-btn" id="turbo-toggle-btn" onclick="toggleTurbo()">⚡ Turbo: KAPALI</button>
+      <div style="display:flex; gap:3px;">
+        <button class="icon-btn" id="double-chance-btn" onclick="toggleDoubleChance()">✨ Şans: x1</button>
+        <button class="icon-btn" id="turbo-toggle-btn" onclick="toggleTurbo()">⚡ Turbo: KAPALI</button>
+      </div>
     </div>
 
     <div class="game-stats-top">
@@ -901,29 +900,12 @@
     <button id="fire-cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutFire()">💰 Puanı Güvenle Al</button>
   </div>
 
-  <!-- 8. ŞANS ÇARKI MODU -->
-  <div id="wheel-game-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:10px; font-weight:bold; color:#fbbf24;">🎰 Günlük Şans Çarkı</div>
-      <div></div>
-    </div>
-
-    <div class="case-container" style="padding: 10px; text-align:center;">
-      <div style="font-size:40px; margin-bottom:10px;">🎡</div>
-      <div style="font-size:12px; font-weight:bold; color:#fbbf24;" id="wheel-result-txt">Günün Şansını Yakala!</div>
-      <div style="font-size:9px; color:#94a3b8; margin-top:4px;">50 ile 500 arasında anında puan kazan!</div>
-    </div>
-
-    <button id="spin-wheel-btn" class="btn-action" style="background:linear-gradient(135deg,#f59e0b,#d97706);" onclick="spinLuckyWheel()">🎡 Çarkı Çevir</button>
-  </div>
-
-  <!-- 9. SOHBETLER LİSTESİ (HUB) -->
+  <!-- 8. SOHBETLER LİSTESİ (HUB) -->
   <div id="chats-hub-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
       <div style="font-size:11px; font-weight:bold; color:#25D366;">💬 Sohbetler</div>
-      <div></div>
+      <button class="icon-btn" style="background:#10b981;" onclick="promptCreateGroup()">➕ Grup Kur</button>
     </div>
 
     <div class="scroll-list" style="padding:4px 0;">
@@ -938,12 +920,15 @@
         <span style="font-size:12px; color:#25D366;">›</span>
       </div>
 
+      <div style="font-size:9px; color:#8696a0; margin:6px 0 2px 2px; font-weight:bold;">GRUPLAR</div>
+      <div id="hub-groups-chats"></div>
+
       <div style="font-size:9px; color:#8696a0; margin:6px 0 2px 2px; font-weight:bold;">ÖZEL MESAJLAR</div>
       <div id="hub-friends-chats"></div>
     </div>
   </div>
 
-  <!-- 10. WHATSAPP MESAJLAŞMA EKRANI -->
+  <!-- 9. WHATSAPP MESAJLAŞMA EKRANI -->
   <div id="chat-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="openChatsHub()">‹ Sohbetler</button>
@@ -959,7 +944,7 @@
     </div>
   </div>
 
-  <!-- 11. ARKADAŞLAR VE İSTEKLER -->
+  <!-- 10. ARKADAŞLAR VE İSTEKLER -->
   <div id="friends-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -979,11 +964,11 @@
     <div class="scroll-list" id="friends-list-container"></div>
   </div>
 
-  <!-- 12. GÖREVLER -->
+  <!-- 11. GÖREVLER -->
   <div id="achievements-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">🏆 Görevler</div>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">🏆 Görevler (10 Adet)</div>
       <div></div>
     </div>
 
@@ -991,7 +976,7 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
   </div>
 
-  <!-- 13. PROFİL & İSTATİSTİK EKRANI -->
+  <!-- 12. PROFİL & İSTATİSTİK EKRANI -->
   <div id="profile-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -1019,7 +1004,7 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
   </div>
 
-  <!-- 14. AYARLAR & UNVAN SEÇİMİ -->
+  <!-- 13. AYARLAR & UNVAN SEÇİMİ -->
   <div id="settings-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -1033,6 +1018,16 @@
     </div>
 
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kaydet & Kapat</button>
+  </div>
+
+  <!-- 14. SIRALAMA VE OYUNCU DETAY MODALI -->
+  <div id="details-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="text-align:center; font-weight:bold; font-size:12px; color:#fbbf24;" id="detail-player-title">Oyuncu Detayı</div>
+      <div style="font-size:9px; color:#94a3b8; text-align:center; margin-bottom:4px;" id="detail-player-sub">Mod ve Puan Aldığı Eşyalar:</div>
+      <div class="scroll-list" id="detail-drops-list"></div>
+      <button class="btn-modal btn-close" style="margin-top:6px;" onclick="closeDetailsModal()">Kapat</button>
+    </div>
   </div>
 
   <!-- ÖZET VE MODALLAR -->
@@ -1065,7 +1060,7 @@
 
   <div id="leaderboard-modal" class="modal-overlay">
     <div class="modal-card">
-      <div style="text-align:center; font-weight:bold; font-size:12px; margin-bottom:4px;">🏆 SIRALAMA (İLK 10)</div>
+      <div style="text-align:center; font-weight:bold; font-size:12px; margin-bottom:4px;">🏆 SIRALAMA (EN YÜKSEK SKORLAR)</div>
       <div class="filter-tabs">
         <button class="tab-btn active" onclick="filterLeaderboard('all', this)">Tümü</button>
         <button class="tab-btn" onclick="filterLeaderboard('standard', this)">Normal</button>
@@ -1230,12 +1225,18 @@
     { id: 'godly_find', title: 'Tanrısal Dokunuş', desc: 'Bir kutudan Godly eşya çıkar', icon: '👑', titleReward: 'Tanrısal' },
     { id: 'score_100', title: 'Puan Avcısı', desc: 'Tek oyunda 100+ puan topla', icon: '🔥', titleReward: 'Avcı' },
     { id: 'mines_master', title: 'Mayın Uzmanı', desc: 'Mayınlı modda 5 güvenli kasa aç', icon: '💣', titleReward: 'Bomba İmha' },
-    { id: 'fire_master', title: 'Alev Terbiyecisi', desc: 'Ateş Çemberinde x3 çarpanına ulaş', icon: '🔥', titleReward: 'Alev Efendisi' }
+    { id: 'fire_master', title: 'Alev Terbiyecisi', desc: 'Ateş Çemberinde x3 çarpanına ulaş', icon: '🔥', titleReward: 'Alev Efendisi' },
+    { id: 'box_addict', title: 'Kasa Bağımlısı', desc: 'Toplam 25 kasa açılışı yap', icon: '📦', titleReward: 'Kasa Avcısı' },
+    { id: 'millionaire', title: 'Hazine Zengini', desc: 'Tek oyunda 500+ puana ulaş', icon: '💎', titleReward: 'Milyoner' },
+    { id: 'group_creator', title: 'Grup Lideri', desc: 'Yeni bir sohbet grubu kur', icon: '👥', titleReward: 'Lider' },
+    { id: 'lucky_hour', title: 'Şanslı An', desc: 'Çift Şans etkinliğini aktifleştir', icon: '✨', titleReward: 'Talihli' },
+    { id: 'social_star', title: 'Sosyal Kelebek', desc: 'Global sohbete 5 mesaj gönder', icon: '💬', titleReward: 'Konuşkan' }
   ];
 
   let leaderboardData = [];
   let userAchievements = [];
   let userFriends = [];
+  let userGroups = [];
   let userTitles = ['Çaylak'];
   let currentTitle = 'Çaylak';
   let currentUser = null;
@@ -1244,6 +1245,7 @@
   let authMode = "login";
   let activeChatTarget = "global";
   let isTurbo = false;
+  let isDoubleChance = false;
 
   let totalBoxesOpened = 0;
   let userHighScore = 0;
@@ -1379,7 +1381,7 @@
     const screens = [
       'auth-screen', 'menu-screen', 'game-screen',
       'catch-game-screen', 'inventory-screen', 'mines-game-screen', 
-      'fire-game-screen', 'wheel-game-screen', 'catch-summary-screen', 
+      'fire-game-screen', 'catch-summary-screen', 
       'chats-hub-screen', 'chat-screen', 'friends-screen', 'achievements-screen', 'profile-screen', 'settings-screen'
     ];
     screens.forEach(id => {
@@ -1402,6 +1404,14 @@
     const btn = document.getElementById('turbo-toggle-btn');
     btn.innerText = isTurbo ? "⚡ Turbo: AÇIK" : "⚡ Turbo: KAPALI";
     btn.style.color = isTurbo ? "#34d399" : "#fff";
+  }
+
+  function toggleDoubleChance() {
+    isDoubleChance = !isDoubleChance;
+    const btn = document.getElementById('double-chance-btn');
+    btn.innerText = isDoubleChance ? "✨ Şans: x2" : "✨ Şans: x1";
+    btn.style.color = isDoubleChance ? "#fbbf24" : "#fff";
+    if (isDoubleChance) unlockAchievement('lucky_hour');
   }
 
   function listenFirebaseData() {
@@ -1437,6 +1447,12 @@
       renderHubFriendsList();
     });
 
+    db.ref('groups').on('value', (snapshot) => {
+      const val = snapshot.val();
+      userGroups = val ? Object.keys(val).map(k => ({ id: k, ...val[k] })) : [];
+      renderHubGroupsList();
+    });
+
     db.ref(`friend_requests/${currentUid}`).on('value', (snapshot) => {
       const reqs = snapshot.val();
       const dot = document.getElementById('friend-badge');
@@ -1455,7 +1471,53 @@
 
   function openChatsHub() {
     renderHubFriendsList();
+    renderHubGroupsList();
     showScreen('chats-hub-screen');
+  }
+
+  function promptCreateGroup() {
+    const groupName = prompt("Oluşturmak istediğiniz grup adını girin:");
+    if (!groupName || !groupName.trim()) return;
+
+    if (firebaseReady && db) {
+      const newGroupRef = db.ref('groups').push();
+      newGroupRef.set({
+        name: groupName.trim(),
+        createdBy: currentUser,
+        createdAt: Date.now()
+      }).then(() => {
+        unlockAchievement('group_creator');
+        showToast(`'${groupName}' grubu başarıyla kuruldu!`);
+      });
+    }
+  }
+
+  function renderHubGroupsList() {
+    const container = document.getElementById('hub-groups-chats');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (userGroups.length === 0) {
+      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:6px;">Henüz aktif bir grup yok.</div>`;
+      return;
+    }
+
+    userGroups.forEach(g => {
+      const item = document.createElement('div');
+      item.className = 'chat-hub-item';
+      item.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">👥</span>
+          <div>
+            <div style="font-weight:bold; color:#d946ef; font-size:11px;">${g.name}</div>
+            <div style="font-size:8px; color:#8696a0;">Kurucu: ${g.createdBy}</div>
+          </div>
+        </div>
+        <span style="font-size:12px; color:#d946ef;">›</span>
+      `;
+      item.onclick = () => openGroupChat(g.id, g.name);
+      container.appendChild(item);
+    });
   }
 
   function renderHubFriendsList() {
@@ -1464,7 +1526,7 @@
     container.innerHTML = '';
 
     if (userFriends.length === 0) {
-      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:10px;">Henüz özel sohbet edecek arkadaşın yok.</div>`;
+      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:8px;">Henüz özel sohbet edecek arkadaşın yok.</div>`;
       return;
     }
 
@@ -1493,6 +1555,18 @@
 
     if (firebaseReady && db) {
       db.ref('global_chat').limitToLast(30).on('value', (snapshot) => {
+        renderWhatsAppChat(snapshot.val());
+      });
+    }
+  }
+
+  function openGroupChat(groupId, groupName) {
+    activeChatTarget = `group_${groupId}`;
+    document.getElementById('chat-header-title').innerText = `👥 Grup: ${groupName}`;
+    showScreen('chat-screen');
+
+    if (firebaseReady && db) {
+      db.ref(`group_messages/${groupId}`).limitToLast(30).on('value', (snapshot) => {
         renderWhatsAppChat(snapshot.val());
       });
     }
@@ -1531,6 +1605,10 @@
 
     if (activeChatTarget === "global") {
       if (firebaseReady && db) db.ref('global_chat').push(chatData);
+      unlockAchievement('social_star');
+    } else if (activeChatTarget.startsWith('group_')) {
+      const gId = activeChatTarget.replace('group_', '');
+      if (firebaseReady && db) db.ref(`group_messages/${gId}`).push(chatData);
     } else {
       const friendObj = userFriends.find(f => f.username === activeChatTarget);
       if (friendObj) {
@@ -1680,31 +1758,6 @@
       `;
       list.appendChild(row);
     });
-  }
-
-  function openLuckyWheel() {
-    showScreen('wheel-game-screen');
-  }
-
-  function spinLuckyWheel() {
-    const btn = document.getElementById('spin-wheel-btn');
-    btn.disabled = true;
-
-    AudioEngine.playGodly();
-    triggerScreenShake();
-
-    const bonusPoints = Math.floor(Math.random() * 450) + 50;
-    document.getElementById('wheel-result-txt').innerText = `🎉 Tebrikler! +${bonusPoints} Puan Kazandın!`;
-
-    currentScore = bonusPoints;
-    currentSessionDrops = [{ tier: "Bonus Çark", item: `${bonusPoints} Puanlık Şans`, points: bonusPoints, color: "#fbbf24" }];
-
-    setTimeout(() => {
-      saveScoreToLeaderboard();
-      showToast(`+${bonusPoints} Puan Eklendi!`);
-      btn.disabled = false;
-      exitToMenu();
-    }, 1500);
   }
 
   function openSettings() {
@@ -1955,6 +2008,10 @@
     const tiers = GAME_MODES[modeKey].tiers;
     let rand = Math.random() * 100;
 
+    if (isDoubleChance) {
+      rand = Math.max(0, rand - 15);
+    }
+
     if (modeKey === 'upgrade_mode') {
       const bonusChance = (upgradeStep - 1) * 6;
       rand = Math.max(0, rand - bonusChance);
@@ -1990,6 +2047,8 @@
     totalBoxesOpened++;
     dailyQuestCount = Math.min(3, dailyQuestCount + 1);
     document.getElementById('quest-progress-txt').innerText = `${dailyQuestCount}/3`;
+
+    if (totalBoxesOpened >= 25) unlockAchievement('box_addict');
 
     if (firebaseReady && db && currentUid) {
       db.ref(`users/${currentUid}/boxesOpened`).set(totalBoxesOpened);
@@ -2370,6 +2429,7 @@
   function saveScoreToLeaderboard() {
     unlockAchievement('first_game');
     if (currentScore >= 100) unlockAchievement('score_100');
+    if (currentScore >= 500) unlockAchievement('millionaire');
 
     if (currentScore > userHighScore) {
       userHighScore = currentScore;
@@ -2394,7 +2454,14 @@
     };
 
     if (firebaseReady && db) {
-      db.ref('leaderboard').push(record);
+      // Mod bazlı sadece en yüksek skoru tutma
+      const userModRecordKey = `${currentUid}_${selectedModeKey}`;
+      db.ref(`leaderboard/${userModRecordKey}`).once('value').then(snap => {
+        const existing = snap.val();
+        if (!existing || currentScore > existing.score) {
+          db.ref(`leaderboard/${userModRecordKey}`).set(record);
+        }
+      });
     }
   }
 
@@ -2442,18 +2509,50 @@
       const rank = index + 1;
       const row = document.createElement('div');
       row.className = 'item-row';
-      if (rank === 1) row.classList.add('rank-1');
-      else if (rank === 2) row.classList.add('rank-2');
-      else if (rank === 3) row.classList.add('rank-3');
+      row.style.cursor = 'pointer';
+
+      let rankBadge = `${rank}.`;
+      if (rank === 1) { row.classList.add('rank-1'); rankBadge = '🥇 1.'; }
+      else if (rank === 2) { row.classList.add('rank-2'); rankBadge = '🥈 2.'; }
+      else if (rank === 3) { row.classList.add('rank-3'); rankBadge = '🥉 3.'; }
       else if (rank === 4 || rank === 5) row.classList.add('rank-green');
       else row.classList.add('rank-rest');
 
       row.innerHTML = `
-        <div><span>${rank}. ${item.name}</span> <span style="font-size:7px; opacity:0.8;">[${item.title || 'Çaylak'}] (${item.modeName || 'Normal'})</span></div>
-        <b>${item.score} P</b>
+        <div><span>${rankBadge} ${item.name}</span> <span style="font-size:7px; opacity:0.8;">[${item.title || 'Çaylak'}] (${item.modeName || 'Normal'})</span></div>
+        <b>${item.score} P ›</b>
       `;
+      row.onclick = () => openPlayerDetails(item);
       list.appendChild(row);
     });
+  }
+
+  function openPlayerDetails(item) {
+    document.getElementById('detail-player-title').innerText = `👤 ${item.name} (${item.score} Puan)`;
+    document.getElementById('detail-player-sub').innerText = `Oynanan Mod: ${item.modeName || 'Normal Kasa'} | Tarih: ${item.date || 'Bilinmiyor'}`;
+
+    const list = document.getElementById('detail-drops-list');
+    list.innerHTML = '';
+
+    if (!item.drops || item.drops.length === 0) {
+      list.innerHTML = `<div style="text-align:center; color:#64748b; padding:10px;">Düşen eşya kaydı yok.</div>`;
+    } else {
+      item.drops.forEach(d => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <div><span style="color:${d.color}; font-weight:bold;">[${d.tier}]</span> <span>${d.item}</span></div>
+          <div style="color:#34d399; font-weight:bold;">+${d.points} P</div>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    document.getElementById('details-modal').style.display = 'flex';
+  }
+
+  function closeDetailsModal() {
+    document.getElementById('details-modal').style.display = 'none';
   }
 
   function confirmClearLeaderboard() {
