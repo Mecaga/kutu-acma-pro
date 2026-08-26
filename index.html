@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <title>Kutu Açma Pro - Cloud & Social Master</title>
+  <title>Kutu Açma Pro - Cloud & Online Duel</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -191,7 +191,7 @@
 
     /* EKRANLAR */
     #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, 
-    #mines-game-screen, #catch-summary-screen, 
+    #mines-game-screen, #duel-game-screen, #catch-summary-screen, 
     #chats-hub-screen, #chat-screen, #group-manage-screen, #friends-screen, #profile-screen, #user-inspect-screen, #settings-screen {
       display: none;
       flex-direction: column;
@@ -484,6 +484,28 @@
     .mine-card.safe { border-color: #10b981; background: #064e3b; }
     .mine-card.bomb { border-color: #ef4444; background: #7f1d1d; }
 
+    /* DUEL EKRANI */
+    .duel-arena {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      flex: 1;
+      align-items: center;
+    }
+
+    .duel-box {
+      background: #110521;
+      border: 1.5px solid #6b21a8;
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+    }
+
     /* WHATSAPP SOHBET */
     .whatsapp-chat-box {
       flex: 1;
@@ -692,11 +714,11 @@
         </button>
         <button class="mode-btn" onclick="selectMode('ten_cases', this)">
           📦 10 Kutu Modu (Süresiz)
-          <div style="font-size:7px; color:#94a3b8;">Tam 10 kutu açma hakkı (Kozmik Hüküm İçerir)</div>
+          <div style="font-size:7px; color:#94a3b8;">10 Kutu Hakkı (Kozmik Hüküm: %0.2)</div>
         </button>
         <button class="mode-btn" onclick="selectMode('catch_open', this)">
           🎯 Yakala & Aç Modu (15s)
-          <div style="font-size:7px; color:#94a3b8;">Sınırlı kutuları topla, aç (Uranus Şansı)</div>
+          <div style="font-size:7px; color:#94a3b8;">Kutuları topla, aç (Uranus: %0.01)</div>
         </button>
         <button class="mode-btn" onclick="selectMode('upgrade_mode', this)">
           📈 Şans Yükseltme Modu (7 Kutu)
@@ -705,6 +727,10 @@
         <button class="mode-btn" onclick="selectMode('mines_mode', this)">
           💣 Mayınlı Kasa Modu (Risk)
           <div style="font-size:7px; color:#94a3b8;">Mayına basarsan puanlar gider!</div>
+        </button>
+        <button class="mode-btn" onclick="startOnlineDuel()" style="border-color:#ef4444; background:rgba(239,68,68,0.1);">
+          ⚔️ Canlı 1v1 Kutu Düellosu (Online)
+          <div style="font-size:7px; color:#ef4444;">Rakiple canlı kapış, 5 kutuda yüksek alan kazanır!</div>
         </button>
       </div>
 
@@ -838,12 +864,44 @@
     <button id="cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
   </div>
 
-  <!-- 7. SOHBETLER LİSTESİ (HUB) -->
+  <!-- 7. CANLI 1v1 DÜELLO EKRANI -->
+  <div id="duel-game-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:10px; font-weight:bold; color:#ef4444;">⚔️ Canlı 1v1 Düello</div>
+      <div></div>
+    </div>
+
+    <div class="duel-arena">
+      <div class="duel-box" style="border-color:#38bdf8;">
+        <div style="font-size:10px; color:#38bdf8; font-weight:bold;" id="duel-p1-name">Sen</div>
+        <div style="font-size:20px; font-weight:bold; margin:6px 0;" id="duel-p1-score">0 P</div>
+        <div style="font-size:8px; color:#94a3b8;" id="duel-p1-last">-</div>
+      </div>
+      <div class="duel-box" style="border-color:#f43f5e;">
+        <div style="font-size:10px; color:#f43f5e; font-weight:bold;" id="duel-p2-name">Rakip</div>
+        <div style="font-size:20px; font-weight:bold; margin:6px 0;" id="duel-p2-score">0 P</div>
+        <div style="font-size:8px; color:#94a3b8;" id="duel-p2-last">-</div>
+      </div>
+    </div>
+
+    <div class="case-container" style="min-height: 80px; flex:none;">
+      <div style="font-size:11px; font-weight:bold; color:#fbbf24;" id="duel-round-txt">Tur: 1 / 5</div>
+      <div style="font-size:8px; color:#94a3b8; margin-top:2px;">Kutunu aç ve rakibini geç!</div>
+    </div>
+
+    <button id="duel-open-btn" class="btn-action" style="background:#ef4444;" onclick="openDuelBox()">📦 Düello Kutusunu Aç</button>
+  </div>
+
+  <!-- 8. SOHBETLER LİSTESİ (HUB) -->
   <div id="chats-hub-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#25D366;">💬 Sohbetler</div>
-      <button class="icon-btn" style="background:#10b981;" onclick="promptCreateGroup()">➕ Grup Kur</button>
+      <div style="font-size:11px; font-weight:bold; color:#25D366;">💬 Sohbetler & Kanallar</div>
+      <div style="display:flex; gap:3px;">
+        <button class="icon-btn" style="background:#0284c7;" onclick="promptJoinGroup()">🔗 Katıl</button>
+        <button class="icon-btn" style="background:#10b981;" onclick="promptCreateGroup()">➕ Kur</button>
+      </div>
     </div>
 
     <div class="scroll-list" style="padding:4px 0;">
@@ -858,7 +916,7 @@
         <span style="font-size:12px; color:#25D366;">›</span>
       </div>
 
-      <div style="font-size:9px; color:#8696a0; margin:6px 0 2px 2px; font-weight:bold;">ÖZEL GRUPLARIM</div>
+      <div style="font-size:9px; color:#8696a0; margin:6px 0 2px 2px; font-weight:bold;">KATILDIĞIN KANALLAR</div>
       <div id="hub-groups-chats"></div>
 
       <div style="font-size:9px; color:#8696a0; margin:6px 0 2px 2px; font-weight:bold;">ÖZEL MESAJLAR</div>
@@ -866,12 +924,12 @@
     </div>
   </div>
 
-  <!-- 8. WHATSAPP MESAJLAŞMA EKRANI -->
+  <!-- 9. WHATSAPP MESAJLAŞMA EKRANI -->
   <div id="chat-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="openChatsHub()">‹ Sohbetler</button>
       <div style="font-size:11px; font-weight:bold; color:#25D366;" id="chat-header-title">💬 Sohbet</div>
-      <button class="icon-btn" id="group-manage-btn" style="display:none; background:#9333ea;" onclick="openGroupManageScreen()">⚙️ Yönet</button>
+      <button class="icon-btn" id="group-manage-btn" style="display:none; background:#9333ea;" onclick="openGroupManageScreen()">⚙️ Kanalı Yönet</button>
     </div>
 
     <div class="whatsapp-chat-box" id="chat-messages-box"></div>
@@ -882,31 +940,30 @@
     </div>
   </div>
 
-  <!-- 8.1 GRUP YÖNETİM EKRANI -->
+  <!-- 9.1 KANAL YÖNETİM EKRANI -->
   <div id="group-manage-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="backToGroupChat()">‹ Geri</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">⚙️ Grup Yönetimi</div>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">⚙️ Kanal Yönetimi</div>
       <div></div>
     </div>
 
     <div class="case-container" style="padding: 10px; gap:8px; overflow-y:auto;">
-      <div style="font-size:12px; font-weight:bold; color:#fbbf24;" id="manage-group-name-txt">Grup Adı</div>
+      <div style="font-size:12px; font-weight:bold; color:#fbbf24;" id="manage-group-name-txt">Kanal Adı#00000</div>
       
       <div id="group-admin-tools" style="display:none; width:100%; flex-direction:column; gap:4px;">
-        <button class="icon-btn" style="background:#0284c7; width:100%; padding:8px;" onclick="renameCurrentGroup()">✏️ Grup Adını Değiştir</button>
-        <button class="icon-btn" style="background:#10b981; width:100%; padding:8px;" onclick="addMemberToCurrentGroup()">👤 Gruba Arkadaş Ekle</button>
-        <button class="icon-btn exit-btn" style="width:100%; padding:8px;" onclick="deleteCurrentGroup()">🗑️ Grubu Tamamen Sil</button>
+        <button class="icon-btn" style="background:#0284c7; width:100%; padding:8px;" onclick="renameCurrentGroup()">✏️ Kanal Adını Değiştir</button>
+        <button class="icon-btn exit-btn" style="width:100%; padding:8px;" onclick="deleteCurrentGroup()">🗑️ Kanalı Sil</button>
       </div>
 
-      <div style="font-size:9px; color:#a855f7; font-weight:bold; width:100%; margin-top:4px;">GRUPTAKİ ÜYELER:</div>
+      <div style="font-size:9px; color:#a855f7; font-weight:bold; width:100%; margin-top:4px;">KANALDAKİ ÜYELER:</div>
       <div class="scroll-list" id="group-members-list" style="width:100%; max-height:140px;"></div>
     </div>
 
     <button class="btn-modal btn-close" onclick="backToGroupChat()">Kapat</button>
   </div>
 
-  <!-- 9. ARKADAŞLAR VE ARKADAŞ SKOR SIRALAMASI -->
+  <!-- 10. ARKADAŞLAR VE ARKADAŞ SKOR SIRALAMASI -->
   <div id="friends-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -926,7 +983,7 @@
     <div class="scroll-list" id="friends-list-container"></div>
   </div>
 
-  <!-- 10. KENDİ PROFİL & MOD BAZLI KAZANMA İSTATİSTİKLERİ -->
+  <!-- 11. KENDİ PROFİL & MOD BAZLI KAZANMA İSTATİSTİKLERİ -->
   <div id="profile-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -957,7 +1014,7 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
   </div>
 
-  <!-- 11. OYUNCU İNCELEME KARTI -->
+  <!-- 12. OYUNCU İNCELEME KARTI -->
   <div id="user-inspect-screen" class="modal-overlay" style="z-index: 80;">
     <div class="modal-card" style="gap:6px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -987,7 +1044,7 @@
     </div>
   </div>
 
-  <!-- 12. AYARLAR & RASTGELE UNVAN SEÇİMİ -->
+  <!-- 13. AYARLAR & SERBEST UNVAN SEÇİMİ -->
   <div id="settings-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -1008,7 +1065,7 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kaydet & Kapat</button>
   </div>
 
-  <!-- 13. MESAJ İŞLEM MODALI (KOPYALA, SİL, DÜZENLE) -->
+  <!-- 14. MESAJ İŞLEMLERİ MODALI -->
   <div id="message-actions-modal" class="modal-overlay" style="z-index: 90;">
     <div class="modal-card" style="gap:6px;">
       <div style="font-size:12px; font-weight:bold; color:#fbbf24; text-align:center;">Mesaj İşlemleri</div>
@@ -1022,7 +1079,7 @@
     </div>
   </div>
 
-  <!-- 14. SIRALAMA VE OYUNCU DETAY MODALI (ÜSTTE AÇILIR) -->
+  <!-- 15. SIRALAMA VE OYUNCU DETAY MODALI -->
   <div id="details-modal" class="modal-overlay" style="z-index: 70;">
     <div class="modal-card">
       <div style="text-align:center; font-weight:bold; font-size:12px; color:#fbbf24; cursor:pointer;" id="detail-player-title" onclick="inspectPlayerFromDetail()">👤 Oyuncu Detayı (Profile Bak)</div>
@@ -1255,9 +1312,12 @@
   let totalMessagesSent = 0;
   let userModeStats = {};
   let currentlyInspectingUser = null;
-
-  // Mesaj aksiyonları için seçilen mesaj bilgileri
   let selectedActionMsg = null;
+
+  // Düello Değişkenleri
+  let duelRound = 1;
+  let duelP1Score = 0;
+  let duelP2Score = 0;
 
   let selectedModeKey = 'standard';
   let currentScore = 0;
@@ -1385,7 +1445,7 @@
   function showScreen(screenId) {
     const screens = [
       'auth-screen', 'menu-screen', 'game-screen',
-      'catch-game-screen', 'inventory-screen', 'mines-game-screen', 
+      'catch-game-screen', 'inventory-screen', 'mines-game-screen', 'duel-game-screen',
       'catch-summary-screen', 'chats-hub-screen', 'chat-screen', 'group-manage-screen', 
       'friends-screen', 'profile-screen', 'settings-screen'
     ];
@@ -1440,7 +1500,6 @@
       renderHubGroupsList();
     });
 
-    // Arkadaşlık isteklerini canlı dinleme
     db.ref(`friend_requests/${currentUid}`).on('value', (snapshot) => {
       const reqs = snapshot.val();
       const dot = document.getElementById('friend-badge');
@@ -1542,6 +1601,53 @@
     }
   }
 
+  // --- CANLI 1v1 DÜELLO SİSTEMİ ---
+  function startOnlineDuel() {
+    duelRound = 1;
+    duelP1Score = 0;
+    duelP2Score = 0;
+    document.getElementById('duel-p1-name').innerText = currentUser;
+    document.getElementById('duel-p1-score').innerText = "0 P";
+    document.getElementById('duel-p1-last').innerText = "Hazır";
+    document.getElementById('duel-p2-name').innerText = "Çevrim İçi Rakip";
+    document.getElementById('duel-p2-score').innerText = "0 P";
+    document.getElementById('duel-p2-last').innerText = "Bekleniyor...";
+    document.getElementById('duel-round-txt').innerText = "Tur: 1 / 5";
+    document.getElementById('duel-open-btn').disabled = false;
+    showScreen('duel-game-screen');
+  }
+
+  function openDuelBox() {
+    const btn = document.getElementById('duel-open-btn');
+    btn.disabled = true;
+
+    AudioEngine.playTick();
+    const dropP1 = getRandomDrop('standard');
+    const dropP2 = getRandomDrop('standard');
+
+    duelP1Score += dropP1.points;
+    duelP2Score += dropP2.points;
+
+    document.getElementById('duel-p1-score').innerText = `${duelP1Score} P`;
+    document.getElementById('duel-p1-last').innerText = `+${dropP1.points} (${dropP1.item})`;
+
+    document.getElementById('duel-p2-score').innerText = `${duelP2Score} P`;
+    document.getElementById('duel-p2-last').innerText = `+${dropP2.points} (${dropP2.item})`;
+
+    if (duelRound < 5) {
+      duelRound++;
+      document.getElementById('duel-round-txt').innerText = `Tur: ${duelRound} / 5`;
+      setTimeout(() => btn.disabled = false, 800);
+    } else {
+      AudioEngine.playGodly();
+      triggerScreenShake();
+      const isWin = duelP1Score >= duelP2Score;
+      alert(`DÜELLO BİTTİ!\n\nSen: ${duelP1Score} P | Rakip: ${duelP2Score} P\nSonuç: ${isWin ? '🏆 KAZANDIN!' : '💀 KAYBETTİN!'}`);
+      exitToMenu();
+    }
+  }
+
+  // --- KANAL (GRUP) KURMA VE KATILMA SİSTEMİ ---
   function openChatsHub() {
     renderHubFriendsList();
     renderHubGroupsList();
@@ -1549,13 +1655,17 @@
   }
 
   function promptCreateGroup() {
-    const groupName = prompt("Oluşturmak istediğiniz özel grup adını girin:");
+    const groupName = prompt("Oluşturmak istediğiniz kanal adını girin:");
     if (!groupName || !groupName.trim()) return;
 
     if (firebaseReady && db && currentUid) {
+      const channelId = Math.floor(10000 + Math.random() * 90000);
+      const fullChannelTag = `${groupName.trim()}#${channelId}`;
       const newGroupId = db.ref('groups').push().key;
+
       const groupData = {
         id: newGroupId,
+        tag: fullChannelTag,
         name: groupName.trim(),
         createdBy: currentUser,
         creatorUid: currentUid,
@@ -1566,8 +1676,43 @@
       };
 
       db.ref(`groups/${newGroupId}`).set(groupData);
+      db.ref(`channel_tags/${fullChannelTag.toLowerCase()}`).set(newGroupId);
       db.ref(`users/${currentUid}/my_groups/${newGroupId}`).set(groupData);
-      showToast(`'${groupName}' özel grubu kuruldu!`);
+      showToast(`'${fullChannelTag}' kanalı kuruldu!`);
+    }
+  }
+
+  function promptJoinGroup() {
+    const channelTag = prompt("Katılmak istediğiniz kanalın tam adını girin (Örn: Sohbet#12345):");
+    if (!channelTag || !channelTag.trim()) return;
+
+    if (!channelTag.includes('#')) {
+      alert("Lütfen kanal adını etiketiyle birlikte girin! Örn: Kanal#12345");
+      return;
+    }
+
+    if (firebaseReady && db && currentUid) {
+      db.ref(`channel_tags/${channelTag.trim().toLowerCase()}`).once('value').then(snap => {
+        const groupId = snap.val();
+        if (!groupId) {
+          alert("HATA: Bu isim ve ID'ye sahip bir kanal bulunamadı!");
+          return;
+        }
+
+        db.ref(`groups/${groupId}`).once('value').then(gSnap => {
+          const gData = gSnap.val();
+          if (gData) {
+            db.ref(`groups/${groupId}/members/${currentUid}`).set({
+              username: currentUser,
+              uid: currentUid,
+              role: 'member'
+            });
+            db.ref(`users/${currentUid}/my_groups/${groupId}`).set(gData);
+            showToast(`'${gData.tag || gData.name}' kanalına katıldınız!`);
+            openChatsHub();
+          }
+        });
+      });
     }
   }
 
@@ -1577,7 +1722,7 @@
     container.innerHTML = '';
 
     if (userGroups.length === 0) {
-      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:6px;">Henüz bir özel grubun yok.</div>`;
+      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:6px;">Henüz bir kanala katılmadın.</div>`;
       return;
     }
 
@@ -1588,13 +1733,13 @@
         <div style="display:flex; align-items:center; gap:8px;">
           <span style="font-size:18px;">👥</span>
           <div>
-            <div style="font-weight:bold; color:#d946ef; font-size:11px;">${g.name}</div>
+            <div style="font-weight:bold; color:#d946ef; font-size:11px;">${g.tag || g.name}</div>
             <div style="font-size:8px; color:#8696a0;">Kurucu: 👑 ${g.createdBy}</div>
           </div>
         </div>
         <span style="font-size:12px; color:#d946ef;">›</span>
       `;
-      item.onclick = () => openGroupChat(g.id, g.name, g.creatorUid === currentUid);
+      item.onclick = () => openGroupChat(g.id, g.tag || g.name, g.creatorUid === currentUid);
       container.appendChild(item);
     });
   }
@@ -1662,7 +1807,7 @@
       const gData = snap.val();
       if (!gData) return;
 
-      document.getElementById('manage-group-name-txt').innerText = gData.name;
+      document.getElementById('manage-group-name-txt').innerText = gData.tag || gData.name;
       const isOwner = (gData.creatorUid === currentUid);
       document.getElementById('group-admin-tools').style.display = isOwner ? 'flex' : 'none';
 
@@ -1692,53 +1837,33 @@
   }
 
   function renameCurrentGroup() {
-    const newName = prompt("Yeni grup adını girin:");
+    const newName = prompt("Yeni kanal adını girin:");
     if (!newName || !newName.trim()) return;
 
     if (db && currentActiveGroupId) {
-      db.ref(`groups/${currentActiveGroupId}/name`).set(newName.trim());
-      db.ref(`users/${currentUid}/my_groups/${currentActiveGroupId}/name`).set(newName.trim());
-      document.getElementById('manage-group-name-txt').innerText = newName.trim();
-      document.getElementById('chat-header-title').innerText = `👥 ${newName.trim()}`;
-      showToast("Grup adı güncellendi!");
-    }
-  }
-
-  function addMemberToCurrentGroup() {
-    if (userFriends.length === 0) {
-      alert("Gruba eklemek için önce arkadaş edinmelisiniz!");
-      return;
-    }
-
-    const friendNames = userFriends.map(f => f.username).join('\n');
-    const targetName = prompt(`Gruba eklemek istediğiniz arkadaşınızın tam adını girin:\n\n${friendNames}`);
-    if (!targetName) return;
-
-    const friendObj = userFriends.find(f => f.username.toLowerCase() === targetName.trim().toLowerCase());
-    if (!friendObj) {
-      alert("Bu isimde bir arkadaşınız bulunamadı!");
-      return;
-    }
-
-    if (db && currentActiveGroupId) {
-      db.ref(`groups/${currentActiveGroupId}/members/${friendObj.uid}`).set({
-        username: friendObj.username,
-        uid: friendObj.uid,
-        role: 'member'
-      });
-
       db.ref(`groups/${currentActiveGroupId}`).once('value').then(snap => {
-        const gData = snap.val();
-        db.ref(`users/${friendObj.uid}/my_groups/${currentActiveGroupId}`).set(gData);
-      });
+        const gData = snap.val() || {};
+        const oldTag = (gData.tag || "").toLowerCase();
+        const randId = Math.floor(10000 + Math.random() * 90000);
+        const newTag = `${newName.trim()}#${randId}`;
 
-      showToast(`${friendObj.username} gruba eklendi!`);
-      openGroupManageScreen();
+        if (oldTag) db.ref(`channel_tags/${oldTag}`).remove();
+        db.ref(`channel_tags/${newTag.toLowerCase()}`).set(currentActiveGroupId);
+
+        db.ref(`groups/${currentActiveGroupId}/name`).set(newName.trim());
+        db.ref(`groups/${currentActiveGroupId}/tag`).set(newTag);
+        db.ref(`users/${currentUid}/my_groups/${currentActiveGroupId}/name`).set(newName.trim());
+        db.ref(`users/${currentUid}/my_groups/${currentActiveGroupId}/tag`).set(newTag);
+
+        document.getElementById('manage-group-name-txt').innerText = newTag;
+        document.getElementById('chat-header-title').innerText = `👥 ${newTag}`;
+        showToast("Kanal adı ve ID'si güncellendi!");
+      });
     }
   }
 
   function removeMemberFromGroup(memberUid) {
-    if (confirm("Bu üyeyi gruptan çıkarmak istediğinize emin misiniz?")) {
+    if (confirm("Bu üyeyi kanaldan çıkarmak istediğinize emin misiniz?")) {
       if (db && currentActiveGroupId) {
         db.ref(`groups/${currentActiveGroupId}/members/${memberUid}`).remove();
         db.ref(`users/${memberUid}/my_groups/${currentActiveGroupId}`).remove();
@@ -1748,17 +1873,18 @@
   }
 
   function deleteCurrentGroup() {
-    if (confirm("DİKKAT: Bu grup ve tüm mesajları kalıcı olarak silinecek! Onaylıyor musunuz?")) {
+    if (confirm("DİKKAT: Bu kanal ve tüm mesajları kalıcı olarak silinecek! Onaylıyor musunuz?")) {
       if (db && currentActiveGroupId) {
         db.ref(`groups/${currentActiveGroupId}`).once('value').then(snap => {
           const gData = snap.val() || {};
           const members = gData.members || {};
+          if (gData.tag) db.ref(`channel_tags/${gData.tag.toLowerCase()}`).remove();
           Object.keys(members).forEach(mUid => {
             db.ref(`users/${mUid}/my_groups/${currentActiveGroupId}`).remove();
           });
           db.ref(`groups/${currentActiveGroupId}`).remove();
           db.ref(`group_messages/${currentActiveGroupId}`).remove();
-          showToast("Grup silindi!");
+          showToast("Kanal silindi!");
           openChatsHub();
         });
       }
@@ -1819,7 +1945,6 @@
     input.value = "";
   }
 
-  // Mesaja tıklanınca açılan işlem menüsü
   function openMessageActionsModal(dbPath, msgId, rawMsg, senderUid) {
     selectedActionMsg = { dbPath, msgId, rawMsg, senderUid };
     document.getElementById('action-msg-preview').innerText = `"${rawMsg}"`;
@@ -1909,7 +2034,7 @@
     document.getElementById('chat-message-input').value = summaryText;
   }
 
-  // --- KUSURSUZ ARKADAŞLIK SİSTEMİ ---
+  // --- ARKADAŞLIK SİSTEMİ ---
   function openFriendsScreen() {
     renderFriendsList();
     showScreen('friends-screen');
@@ -1935,14 +2060,12 @@
     }
 
     if (firebaseReady && db) {
-      // 1. Önce doğrudan usernames tablosunu kontrol et
       db.ref(`usernames/${targetUsername.toLowerCase()}`).once('value').then(snapshot => {
         let targetUid = snapshot.val();
 
         if (targetUid) {
           executeSendRequest(targetUid, targetUsername);
         } else {
-          // 2. Yedek olarak users tablosunda tam eşleşme ara
           db.ref('users').once('value').then(uSnap => {
             const allUsers = uSnap.val() || {};
             const foundEntry = Object.entries(allUsers).find(([uid, uData]) => 
