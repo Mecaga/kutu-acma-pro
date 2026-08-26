@@ -67,7 +67,7 @@
       cursor: pointer;
     }
 
-    /* --- MENÜ EKRANI --- */
+    /* MENÜ */
     #menu-screen {
       display: flex;
       flex-direction: column;
@@ -144,10 +144,6 @@
       outline: none;
     }
 
-    .input-field:focus {
-      border-color: #0284c7;
-    }
-
     .btn-start {
       width: 100%;
       padding: 11px;
@@ -168,7 +164,7 @@
       line-height: 1.3;
     }
 
-    /* --- STAT BAR --- */
+    /* STAT BAR */
     .game-stats-top {
       display: flex;
       justify-content: space-between;
@@ -190,7 +186,7 @@
     .score-val { color: #34d399; }
     .user-tag { font-size: 10px; color: #38bdf8; }
 
-    /* --- OYUN ALANLARI --- */
+    /* EKRANLAR */
     #game-screen, #catch-game-screen, #inventory-screen, #mines-game-screen, #catch-summary-screen {
       display: none;
       flex-direction: column;
@@ -404,7 +400,7 @@
     .mine-card.safe { border-color: #10b981; background: #064e3b; }
     .mine-card.bomb { border-color: #ef4444; background: #7f1d1d; }
 
-    /* --- MODALLAR --- */
+    /* MODAL */
     .modal-overlay {
       display: none;
       position: absolute;
@@ -574,7 +570,7 @@
     </div>
   </div>
 
-  <!-- KLASİK / 10 KUTU / ŞANS YÜKSELTME EKRANI -->
+  <!-- KLASİK EKRAN -->
   <div id="game-screen">
     <div class="game-stats-top">
       <div class="stat-card timer">
@@ -612,7 +608,7 @@
     <button id="open-case-btn" class="btn-action" onclick="openCase()">KASAYI AÇ (3s)</button>
   </div>
 
-  <!-- YAKALA & AÇ: ARENA -->
+  <!-- YAKALA & AÇ: 1. AŞAMA -->
   <div id="catch-game-screen">
     <div class="game-stats-top">
       <div class="stat-card timer">
@@ -634,7 +630,7 @@
     </div>
   </div>
 
-  <!-- YAKALA & AÇ: ENVANTER -->
+  <!-- YAKALA & AÇ: 2. AŞAMA -->
   <div id="inventory-screen">
     <div class="game-stats-top">
       <div class="stat-card score">
@@ -664,7 +660,7 @@
     <div class="inv-grid" id="inv-grid-container"></div>
   </div>
 
-  <!-- MAYINLI KASA EKRANI -->
+  <!-- MAYINLI KASA -->
   <div id="mines-game-screen">
     <div class="game-stats-top">
       <div class="stat-card timer">
@@ -760,14 +756,14 @@
     </div>
   </div>
 
-  <!-- KAYIT / GİRİŞ MODALI -->
+  <!-- GİRİŞ MODALI -->
   <div id="auth-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header" id="auth-modal-title">GİRİŞ YAP</div>
       
       <div class="auth-box">
-        <input type="text" id="auth-username" class="input-field" placeholder="Kullanıcı Adı (Örn: Oyuncu1)">
-        <input type="password" id="auth-password" class="input-field" placeholder="Şifre (En az 6 karakter)">
+        <input type="text" id="auth-username" class="input-field" placeholder="Kullanıcı Adı (Örn: Mecaga)">
+        <input type="password" id="auth-password" class="input-field" placeholder="Şifre (Min. 6 Karakter)">
         
         <button id="auth-action-btn" class="btn-modal btn-secondary" onclick="handleAuthAction()">Giriş Yap</button>
         
@@ -780,7 +776,7 @@
     </div>
   </div>
 
-  <!-- ADMIN GİRİŞ / PANEL MODALI -->
+  <!-- ADMIN MODALI -->
   <div id="admin-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">🔑 ADMIN PANELİ</div>
@@ -794,7 +790,7 @@
       <div id="admin-control-view" style="display:none; text-align:center; padding:10px 0;">
         <div style="color:#34d399; font-weight:bold; margin-bottom:10px;">Hoş Geldin, Admin!</div>
         <button class="btn-modal btn-danger" style="width:100%;" onclick="clearOnlineLeaderboard()">
-          🗑️ Skor Tablosunu Sıfırla (Online & Yerel)
+          🗑️ Skor Tablosunu Sıfırla
         </button>
       </div>
 
@@ -805,7 +801,7 @@
 </div>
 
 <script>
-  // --- FIREBASE CONFIGURATION ---
+  // --- BİREBİR FIREBASE CONFIG ---
   const firebaseConfig = {
     apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
     authDomain: "kutu-acma-pro.firebaseapp.com",
@@ -825,7 +821,7 @@
     db = firebase.database();
     firebaseReady = true;
   } catch (err) {
-    console.warn("Firebase başlatılamadı, yerel depolama aktif:", err);
+    console.warn("Firebase bağlantı uyarısı:", err);
   }
 
   // --- OYUN MODLARI & ORANLAR ---
@@ -902,7 +898,7 @@
   let mineField = [];
   let safePicksCount = 0;
 
-  // --- FIREBASE REALTIME LEADERBOARD SYNC ---
+  // --- FIREBASE DİNLEYİCİLERİ ---
   if (firebaseReady && db) {
     try {
       db.ref('leaderboard').on('value', (snapshot) => {
@@ -916,48 +912,45 @@
           validateLeaderboard();
           renderLeaderboard();
         }
-      }, (err) => {
-        console.warn("DB dinleme izin hatası:", err);
-      });
-    } catch (e) {
-      console.warn("DB Hatası:", e);
-    }
+      }, (e) => console.log("DB read notice:", e));
+    } catch (e) {}
   }
 
-  // --- FIREBASE AUTH DİNLEYİCİSİ ---
   if (firebaseReady && auth) {
-    auth.onAuthStateChanged((user) => {
-      const greetingEl = document.getElementById('menu-user-greeting');
-      const authBtn = document.getElementById('btn-auth-menu');
+    try {
+      auth.onAuthStateChanged((user) => {
+        const greetingEl = document.getElementById('menu-user-greeting');
+        const authBtn = document.getElementById('btn-auth-menu');
 
-      if (user) {
-        if (db) {
-          db.ref(`users/${user.uid}/username`).once('value').then(snap => {
-            currentUser = snap.val() || user.email.split('@')[0];
-            localStorage.setItem('kutu_current_user', currentUser);
-            greetingEl.innerText = `👤 ${currentUser}`;
-            authBtn.innerText = "🚪 Çıkış";
-            authBtn.onclick = handleSignOut;
-          }).catch(() => {
-            currentUser = user.email.split('@')[0];
-            localStorage.setItem('kutu_current_user', currentUser);
-            greetingEl.innerText = `👤 ${currentUser}`;
-            authBtn.innerText = "🚪 Çıkış";
-            authBtn.onclick = handleSignOut;
-          });
+        if (user) {
+          if (db) {
+            db.ref(`users/${user.uid}/username`).once('value').then(snap => {
+              currentUser = snap.val() || user.email.split('@')[0];
+              localStorage.setItem('kutu_current_user', currentUser);
+              greetingEl.innerText = `👤 ${currentUser}`;
+              authBtn.innerText = "🚪 Çıkış";
+              authBtn.onclick = handleSignOut;
+            }).catch(() => {
+              currentUser = user.email.split('@')[0];
+              localStorage.setItem('kutu_current_user', currentUser);
+              greetingEl.innerText = `👤 ${currentUser}`;
+              authBtn.innerText = "🚪 Çıkış";
+              authBtn.onclick = handleSignOut;
+            });
+          }
+        } else {
+          currentUser = localStorage.getItem('kutu_current_user') || "Misafir";
+          greetingEl.innerText = currentUser !== "Misafir" ? `👤 ${currentUser}` : "Giriş Yapılmadı";
+          authBtn.innerText = "👤 Giriş";
+          authBtn.onclick = openAuthModal;
         }
-      } else {
-        currentUser = localStorage.getItem('kutu_current_user') || "Misafir";
-        greetingEl.innerText = currentUser !== "Misafir" ? `👤 ${currentUser}` : "Giriş Yapılmadı";
-        authBtn.innerText = "👤 Giriş";
-        authBtn.onclick = openAuthModal;
-      }
-    });
+      });
+    } catch(e) {}
   } else {
     document.getElementById('menu-user-greeting').innerText = currentUser !== "Misafir" ? `👤 ${currentUser}` : "Giriş Yapılmadı";
   }
 
-  // --- AUTH FONKSİYONLARI ---
+  // --- AUTH İŞLEMLERİ ---
   function openAuthModal() { document.getElementById('auth-modal').style.display = 'flex'; }
   function closeAuthModal() { document.getElementById('auth-modal').style.display = 'none'; }
 
@@ -989,7 +982,7 @@
       currentUser = rawUser;
       localStorage.setItem('kutu_current_user', currentUser);
       document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}`;
-      alert(`Hoş geldin, ${currentUser}! (Giriş Başarılı)`);
+      alert(`Hoş geldin, ${currentUser}!`);
       closeAuthModal();
       return;
     }
@@ -1003,8 +996,7 @@
           alert("Kayıt başarılı, giriş yapıldı!");
           closeAuthModal();
         })
-        .catch(err => {
-          // Firebase kuralları kapalıysa yerel giriş yap
+        .catch(() => {
           currentUser = rawUser;
           localStorage.setItem('kutu_current_user', currentUser);
           document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}`;
@@ -1017,7 +1009,7 @@
           alert("Giriş başarılı!");
           closeAuthModal();
         })
-        .catch(err => {
+        .catch(() => {
           currentUser = rawUser;
           localStorage.setItem('kutu_current_user', currentUser);
           document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}`;
@@ -1028,7 +1020,7 @@
   }
 
   function handleSignOut() {
-    if (auth) auth.signOut();
+    if (auth) auth.signOut().catch(()=>{});
     currentUser = "Misafir";
     localStorage.removeItem('kutu_current_user');
     document.getElementById('menu-user-greeting').innerText = "Giriş Yapılmadı";
@@ -1060,18 +1052,17 @@
       leaderboardData = [];
       localStorage.removeItem('kutu_leaderboard');
       if (firebaseReady && db) {
-        db.ref('leaderboard').remove()
-          .then(() => alert("Skor tablosu başarıyla sıfırlandı!"))
-          .catch(() => alert("Skor tablosu yerel olarak sıfırlandı!"));
-      } else {
-        alert("Skor tablosu sıfırlandı!");
+        try {
+          db.ref('leaderboard').remove();
+        } catch(e) {}
       }
+      alert("Skor tablosu sıfırlandı!");
       renderLeaderboard();
       closeAdminModal();
     }
   }
 
-  // --- OYUN MEKANİKLERİ ---
+  // --- OYUN MOTORU & ORANLAR ---
   function updateMenuRatesPreview() {
     const preview = document.getElementById('menu-rates-preview');
     const currentTiers = GAME_MODES[selectedModeKey].tiers;
@@ -1603,9 +1594,7 @@
     if (firebaseReady && db) {
       try {
         db.ref('leaderboard').push(record);
-      } catch (e) {
-        console.warn("DB Kayıt Hatası:", e);
-      }
+      } catch (e) {}
     }
   }
 
@@ -1765,3 +1754,4 @@
 
 </body>
 </html>
+
