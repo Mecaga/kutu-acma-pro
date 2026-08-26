@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kutu Açma Pro - Ultimate</title>
+
+  <!-- Firebase SDK (v9 Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #05020a;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    #app-container {
+      width: 100%;
+      max-width: 420px;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 20%, #1e0b36 0%, #08020f 100%);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      border: 1px solid #2d1254;
+      overflow: hidden;
+    }
+
+    /* Sarsıntı Animasyonu */
+    .shake-effect {
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(3px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    /* --- GİRİŞ EKRANI --- */
+    #auth-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      padding: 10px 4px;
+      overflow-y: auto;
+    }
+
+    .auth-header-logo { text-align: center; margin-top: 5px; }
+    .chest-icon {
+      font-size: 45px;
+      filter: drop-shadow(0 0 15px #a855f7);
+      animation: floatChest 3s ease-in-out infinite;
+    }
+    @keyframes floatChest {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .brand-title {
+      font-size: 30px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 0 15px #c084fc, 0 0 25px #9333ea;
+      line-height: 1.1;
+      margin-top: 2px;
+    }
+    .brand-sub { font-size: 24px; font-weight: 900; color: #e879f9; text-shadow: 0 0 15px #db2777; }
+
+    .auth-card-panel {
+      width: 100%;
+      background: rgba(18, 7, 34, 0.85);
+      border: 2px solid #a855f7;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.35);
+      border-radius: 18px;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .auth-tab-switch {
+      display: flex;
+      background: rgba(10, 3, 20, 0.8);
+      border-radius: 10px;
+      padding: 3px;
+      border: 1px solid #3b1466;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 8px 0;
+      text-align: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #a855f7;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .auth-tab.active {
+      background: linear-gradient(135deg, #9333ea, #c026d3);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(192, 38, 211, 0.6);
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap-icon {
+      position: absolute;
+      left: 12px;
+      font-size: 14px;
+      color: #c084fc;
+    }
+
+    .neon-input {
+      width: 100%;
+      padding: 10px 12px 10px 38px;
+      background: #0d041a;
+      border: 1.5px solid #6b21a8;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .neon-input:focus {
+      border-color: #d946ef;
+      box-shadow: 0 0 8px rgba(217, 70, 239, 0.4);
+    }
+
+    .btn-neon-action {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(217, 70, 239, 0.5);
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #a855f7;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #4c1d95;
+    }
+    .auth-divider:not(:empty)::before { margin-right: .5em; }
+    .auth-divider:not(:empty)::after { margin-left: .5em; }
+
+    .btn-alt-action {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1.5px solid #a855f7;
+      background: rgba(46, 16, 84, 0.4);
+      color: #f0abfc;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .auth-footer-note {
+      font-size: 10px;
+      color: #c084fc;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    /* --- ÜST PANEL & GENEL BUTONLAR --- */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+    }
+
+    .app-title { font-size: 15px; font-weight: 800; color: #fff; }
+    .header-actions { display: flex; gap: 4px; }
+
+    .icon-btn {
+      background: #1b0e2f;
+      border: 1px solid #6b21a8;
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .exit-btn { background: #7f1d1d; border-color: #ef4444; color: #fff; }
+
+    /* --- MENÜ VE İÇ EKRANLAR --- */
+    #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, #mines-game-screen, #catch-summary-screen, #craft-screen, #collection-screen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .menu-center {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: center;
+      margin: auto 0;
+      width: 100%;
+      overflow-y: auto;
+    }
+
+    .user-greeting {
+      font-size: 12px;
+      color: #34d399;
+      font-weight: bold;
+    }
+
+    .nav-extra-bar {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      margin-bottom: 4px;
+    }
+
+    .nav-extra-btn {
+      flex: 1;
+      padding: 8px;
+      background: #190a30;
+      border: 1px solid #6b21a8;
+      border-radius: 8px;
+      color: #e879f9;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .mode-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 100%;
+    }
+
+    .mode-btn {
+      background: #0f071a;
+      border: 1px solid #3b1466;
+      color: #cbd5e1;
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(90deg, #7e22ce, #a855f7);
+      color: #fff;
+      border-color: #d946ef;
+      font-weight: bold;
+    }
+
+    .menu-preview-box {
+      width: 100%;
+      background: rgba(15, 6, 26, 0.9);
+      border: 1px solid #3b1466;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 9px;
+    }
+
+    .btn-start {
+      width: 100%;
+      padding: 11px;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+      flex-shrink: 0;
+    }
+
+    .footer-credits {
+      font-size: 9px;
+      color: #64748b;
+      text-align: left;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+
+    /* --- STAT BAR --- */
+    .game-stats-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+      flex-shrink: 0;
+    }
+
+    .stat-card {
+      background: #110521;
+      border: 1px solid #4c1d95;
+      padding: 3px 6px;
+      border-radius: 6px;
+    }
+
+    .stat-card.timer { border-color: #ef4444; }
+    .stat-card.score { border-color: #10b981; text-align: right; }
+    .stat-title { font-size: 8px; color: #94a3b8; }
+    .stat-val { font-size: 13px; font-weight: bold; }
+    .timer-val { color: #f87171; }
+    .score-val { color: #34d399; }
+    .user-tag { font-size: 8px; color: #c084fc; }
+
+    .rates-box {
+      background: rgba(17, 5, 33, 0.95);
+      border: 1px solid #4c1d95;
+      border-radius: 6px;
+      padding: 3px 6px;
+      font-size: 9px;
+      flex-shrink: 0;
+    }
+
+    .rate-row { display: flex; justify-content: space-between; padding: 1px 0; }
+
+    .case-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #080210;
+      border-radius: 10px;
+      border: 1px solid #3b1466;
+      position: relative;
+      overflow: hidden;
+      min-height: 110px;
+    }
+
+    .roulette-wrapper {
+      width: 100%;
+      height: 75px;
+      position: relative;
+      display: none;
+      overflow: hidden;
+      border-top: 2px solid #4c1d95;
+      border-bottom: 2px solid #4c1d95;
+      background: rgba(5, 1, 10, 0.8);
+    }
+
+    .roulette-needle {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: #ef4444;
+      transform: translateX(-50%);
+      z-index: 10;
+      box-shadow: 0 0 10px #ef4444;
+    }
+
+    .roulette-track {
+      display: flex;
+      position: absolute;
+      left: 0;
+      top: 2px;
+      height: 71px;
+    }
+
+    .roulette-item {
+      width: 72px;
+      height: 71px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      background: rgba(22, 9, 41, 0.9);
+      font-size: 8px;
+      text-align: center;
+      padding: 2px;
+    }
+
+    .ready-banner { font-size: 18px; font-weight: 900; color: #fff; text-align: center; }
+    .ready-sub { font-size: 10px; color: #fbbf24; margin-top: 2px; text-align: center; }
+
+    .drop-info-panel {
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
+    .drop-result-badge {
+      background: #110521;
+      border: 1px solid #4c1d95;
+      border-radius: 6px;
+      padding: 3px 6px;
+      font-size: 9px;
+      text-align: right;
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 11px;
+      font-size: 13px;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
+      color: white;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+    }
+
+    .btn-action:disabled {
+      background: #231038;
+      color: #64748b;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .catch-arena {
+      flex: 1;
+      background: #080210;
+      border: 2px dashed #4c1d95;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    .falling-box {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 8px;
+      cursor: pointer;
+      z-index: 20;
+      box-shadow: 0 0 8px rgba(0,0,0,0.8);
+      border: 2px solid;
+    }
+
+    .inv-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px;
+      background: #080210;
+      border-radius: 8px;
+      border: 1px solid #3b1466;
+      align-content: start;
+    }
+
+    .inv-card {
+      height: 60px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 2px solid;
+      background: #110521;
+      text-align: center;
+      padding: 2px;
+    }
+
+    .inv-card.opened {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border-color: #3b1466 !important;
+    }
+
+    .mines-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      flex: 1;
+      background: #080210;
+      border: 1px solid #3b1466;
+      border-radius: 8px;
+      padding: 6px;
+      align-content: center;
+    }
+
+    .mine-card {
+      aspect-ratio: 1;
+      background: #110521;
+      border: 2px solid #4c1d95;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .mine-card.safe { border-color: #10b981; background: #064e3b; }
+    .mine-card.bomb { border-color: #ef4444; background: #7f1d1d; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 50;
+      padding: 10px;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .modal-card {
+      background: #110521;
+      border: 1.5px solid #6b21a8;
+      border-radius: 12px;
+      padding: 10px;
+      max-height: 90%;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 20px rgba(107, 33, 168, 0.5);
+    }
+
+    .modal-header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #f8fafc;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    .tab-btn {
+      background: #1c0b33;
+      border: 1px solid #4c1d95;
+      color: #c084fc;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 8px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: #9333ea;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .scroll-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 6px;
+    }
+
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: #18082d;
+      font-size: 9px;
+    }
+
+    .lb-row { cursor: pointer; font-weight: bold; }
+    .rank-1 { background: #fbbf24; color: #000; }
+    .rank-2 { background: #cbd5e1; color: #000; }
+    .rank-3 { background: #f97316; color: #fff; }
+    .rank-green { background: #22c55e; color: #000; }
+    .rank-rest { background: #200c3b; color: #c084fc; }
+
+    .btn-modal {
+      padding: 8px;
+      border-radius: 6px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-close { background: #ef4444; color: #fff; }
+    .btn-secondary { background: #9333ea; color: #fff; margin-bottom: 4px; }
+    .btn-danger { background: #b91c1c; color: #fff; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<div id="app-container">
+
+  <!-- 1. GİRİŞ / KAYIT EKRANI -->
+  <div id="auth-screen">
+    <div class="auth-header-logo">
+      <div class="chest-icon">👑📦</div>
+      <div class="brand-title">Kutu Açma</div>
+      <div class="brand-sub">Pro</div>
+    </div>
+
+    <div class="auth-card-panel">
+      <div class="auth-tab-switch">
+        <div class="auth-tab active" id="tab-login" onclick="setAuthTab('login')">🎮 Giriş</div>
+        <div class="auth-tab" id="tab-register" onclick="setAuthTab('register')">👤+ Kayıt</div>
+      </div>
+
+      <div class="input-wrap">
+        <span class="input-wrap-icon">👤</span>
+        <input type="text" id="auth-username" class="neon-input" placeholder="Kullanıcı Adı">
+      </div>
+
+      <div class="input-wrap">
+        <span class="input-wrap-icon">🔒</span>
+        <input type="password" id="auth-password" class="neon-input" placeholder="Şifre">
+      </div>
+
+      <button class="btn-neon-action" id="auth-submit-btn" onclick="executeAuth()">🎮 Giriş Yap</button>
+
+      <div class="auth-divider">veya</div>
+
+      <button class="btn-alt-action" id="auth-switch-btn" onclick="toggleAuthTab()">👤+ Yeni Hesap Oluştur</button>
+    </div>
+
+    <div class="auth-footer-note">
+      <span>🛡️</span> Güvenli ve hızlı oyun deneyimi için kutu açma dünyasına katıl!
+    </div>
+  </div>
+
+  <!-- 2. OYUN ANA MENÜSÜ -->
+  <div id="menu-screen">
+    <div class="top-header">
+      <div class="app-title">Kutu Açma Pro</div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="openLeaderboard()">🏆 Sıralama</button>
+        <button class="icon-btn exit-btn" onclick="handleSignOut()">🚪 Çıkış</button>
+      </div>
+    </div>
+
+    <div class="menu-center">
+      <div style="font-size:20px; font-weight:900; color:#d946ef; text-shadow:0 0 15px #d946ef;">KUTU AÇMA</div>
+      <div class="user-greeting" id="menu-user-greeting">👤 Oyuncu</div>
+      
+      <div class="nav-extra-bar">
+        <div class="nav-extra-btn" onclick="openCollection()">📜 Koleksiyon</div>
+        <div class="nav-extra-btn" onclick="openCrafting()">⚒️ Demirci (Craft)</div>
+      </div>
+
+      <div class="mode-grid">
+        <button class="mode-btn active" onclick="selectMode('standard', this)">
+          ⚔️ Normal Kasa (30s)
+          <div style="font-size:8px; color:#94a3b8;">Dengeli klasik oranlar</div>
+        </button>
+        <button class="mode-btn" onclick="selectMode('ten_cases', this)">
+          📦 10 Kutu Modu (Süresiz)
+          <div style="font-size:8px; color:#94a3b8;">Tam 10 kutu açma hakkı</div>
+        </button>
+        <button class="mode-btn" onclick="selectMode('catch_open', this)">
+          🎯 Yakala & Aç Modu (15s)
+          <div style="font-size:8px; color:#94a3b8;">Sınırlı kutuları topla, tek tek aç</div>
+        </button>
+        <button class="mode-btn" onclick="selectMode('upgrade_mode', this)">
+          📈 Şans Yükseltme Modu (7 Kutu)
+          <div style="font-size:8px; color:#94a3b8;">Her kutuda Godly şansı katlanarak artar</div>
+        </button>
+        <button class="mode-btn" onclick="selectMode('mines_mode', this)">
+          💣 Mayınlı Kasa Modu (Risk / Çıkış)
+          <div style="font-size:8px; color:#94a3b8;">Kutuları seç; bombaya basarsan puanlar gider!</div>
+        </button>
+      </div>
+
+      <div class="menu-preview-box" id="menu-rates-preview"></div>
+
+      <button class="btn-start" onclick="startGame()">OYUNA BAŞLA</button>
+    </div>
+
+    <div class="footer-credits">
+      Yapımcı: MecagaTR<br>
+      26 Ağustos Çşb 2026
+    </div>
+  </div>
+
+  <!-- 3. KLASİK / 10 KUTU / ŞANS YÜKSELTME EKRANI -->
+  <div id="game-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;" id="game-mode-name-txt">Kasa</div>
+      <div></div>
+    </div>
+
+    <div class="game-stats-top">
+      <div class="stat-card timer">
+        <div class="stat-title" id="stat-timer-title">SÜRE</div>
+        <div class="stat-val timer-val" id="timer-txt">30s</div>
+        <div class="user-tag" id="user-tag-txt">@User</div>
+      </div>
+      <div class="stat-card score">
+        <div class="stat-title">PUAN</div>
+        <div class="stat-val score-val" id="score-txt">0</div>
+      </div>
+    </div>
+
+    <div class="rates-box" id="rates-box-container"></div>
+
+    <div class="case-container" id="case-box-visual">
+      <div id="ready-view">
+        <div class="ready-banner" id="ready-banner-txt">HAZIR!</div>
+        <div class="ready-sub" id="mode-badge-txt">Kasayı Aç!</div>
+      </div>
+      <div id="roulette-view" class="roulette-wrapper">
+        <div class="roulette-needle"></div>
+        <div id="roulette-track" class="roulette-track"></div>
+      </div>
+    </div>
+
+    <div class="drop-info-panel">
+      <div class="drop-result-badge" id="drop-result-txt">Son Düşen: <span style="color:#64748b;">-</span></div>
+    </div>
+
+    <button id="open-case-btn" class="btn-action" onclick="openCase()">KASAYI AÇ (3s)</button>
+  </div>
+
+  <!-- YAKALA & AÇ: 1. AŞAMA -->
+  <div id="catch-game-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">Yakala & Aç</div>
+      <div></div>
+    </div>
+
+    <div class="game-stats-top">
+      <div class="stat-card timer">
+        <div class="stat-title">TOPLAMA SÜRESİ</div>
+        <div class="stat-val timer-val" id="catch-timer-txt">15s</div>
+        <div class="user-tag" id="catch-user-tag">@User</div>
+      </div>
+      <div class="stat-card score">
+        <div class="stat-title">YAKALANAN</div>
+        <div class="stat-val score-val" id="caught-count-txt">0</div>
+      </div>
+    </div>
+
+    <div class="catch-arena" id="catch-arena"></div>
+    <div style="font-size:10px; color:#fbbf24; text-align:center; padding:2px;">⚡ Düşen kutulara dokunarak topla!</div>
+  </div>
+
+  <!-- YAKALA & AÇ: 2. AŞAMA -->
+  <div id="inventory-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">Kutuları Aç</div>
+      <div></div>
+    </div>
+
+    <div class="game-stats-top">
+      <div class="stat-card score">
+        <div class="stat-title">KALAN KUTU</div>
+        <div class="stat-val score-val" id="inv-remaining-txt">0</div>
+      </div>
+      <div class="stat-card score">
+        <div class="stat-title">TOPLAM PUAN</div>
+        <div class="stat-val score-val" id="inv-score-txt">0</div>
+      </div>
+    </div>
+
+    <div class="case-container" style="min-height: 90px; flex:none;">
+      <div id="inv-ready-view" style="text-align:center;">
+        <div style="font-size:11px; color:#94a3b8;">Açmak istediğin kutuya dokun!</div>
+      </div>
+      <div id="inv-roulette-view" class="roulette-wrapper">
+        <div class="roulette-needle"></div>
+        <div id="inv-roulette-track" class="roulette-track"></div>
+      </div>
+    </div>
+
+    <div style="font-size:10px; color:#d946ef; font-weight:bold;">📦 Yakaladığın Kutular:</div>
+    <div class="inv-grid" id="inv-grid-container"></div>
+  </div>
+
+  <!-- MAYINLI KASA -->
+  <div id="mines-game-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">Mayınlı Kasa</div>
+      <div></div>
+    </div>
+
+    <div class="game-stats-top">
+      <div class="stat-card timer">
+        <div class="stat-title">DURUM</div>
+        <div class="stat-val timer-val" id="mine-status-txt">1 Mayın Var!</div>
+        <div class="user-tag" id="mine-user-tag">@User</div>
+      </div>
+      <div class="stat-card score">
+        <div class="stat-title">BİRİKEN PUAN</div>
+        <div class="stat-val score-val" id="mine-score-txt">0</div>
+      </div>
+    </div>
+
+    <div class="mines-grid" id="mines-grid"></div>
+    <button id="cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
+  </div>
+
+  <!-- DEMİRCİ / CRAFT EKRANI -->
+  <div id="craft-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">Demirci (Eşya Yükselt)</div>
+      <div></div>
+    </div>
+
+    <div style="font-size:10px; color:#c084fc; text-align:center; padding:4px;">
+      3 adet aynı nadirlikteki eşyayı feda edip 1 üst kademe eşya üret!
+    </div>
+
+    <div class="scroll-list" id="craft-items-list"></div>
+
+    <button class="btn-action" style="background:#9333ea;" onclick="executeCrafting()">⚒️ Yükseltmeyi Başlat</button>
+  </div>
+
+  <!-- KOLEKSİYON EKRANI -->
+  <div id="collection-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">Koleksiyon Albümü</div>
+      <div></div>
+    </div>
+
+    <div style="font-size:10px; color:#34d399; font-weight:bold; text-align:center; margin-bottom:4px;" id="collection-progress-txt">
+      Koleksiyon: 0 / 0 Tamamlandı
+    </div>
+
+    <div class="scroll-list" id="collection-items-list"></div>
+
+    <button class="btn-modal btn-close" onclick="exitToMenu()">Menüye Dön</button>
+  </div>
+
+  <!-- ÖZET EKRANI -->
+  <div id="catch-summary-screen">
+    <div class="modal-header" id="summary-title-txt">OYUN ÖZETİ</div>
+    
+    <div style="display:flex; justify-content:space-around; margin-bottom:6px;">
+      <div class="stat-card score" style="flex:1; margin-right:4px; text-align:center;">
+        <div class="stat-title">TOPLAM PUAN</div>
+        <div class="stat-val score-val" id="summary-final-score">0</div>
+      </div>
+      <div class="stat-card timer" style="flex:1; margin-left:4px; text-align:center;">
+        <div class="stat-title">AÇILAN KUTU</div>
+        <div class="stat-val timer-val" id="summary-final-count">0</div>
+      </div>
+    </div>
+
+    <div style="font-size:9px; color:#fbbf24; font-weight:bold;">📋 Çıkan Eşyalar:</div>
+    <div class="scroll-list" id="summary-drops-list"></div>
+
+    <button class="btn-modal btn-close" onclick="exitToMenu()">🚪 Ana Menüye Dön</button>
+  </div>
+
+  <!-- OYUN BİTTİ MODALI -->
+  <div id="game-over-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">OYUN BİTTİ</div>
+      <div style="text-align:center; margin-bottom:10px;">
+        <div style="font-size:11px; color:#94a3b8;" id="modal-mod-info">Normal Kasa</div>
+        <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Toplam Skorun</div>
+        <div style="font-size:24px; font-weight:bold; color:#10b981;" id="final-score-txt">0</div>
+      </div>
+
+      <button class="btn-modal btn-secondary" onclick="openHistoryDetails('current')">📦 Çıkan Eşyaları Gör</button>
+      <button class="btn-modal btn-close" onclick="exitToMenu()">Ana Menüye Dön</button>
+    </div>
+  </div>
+
+  <!-- SIRALAMA MODALI (İLK 10 & ADMİN SIFIRLAMA) -->
+  <div id="leaderboard-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">🏆 SIRALAMA TABLOSU (İLK 10)</div>
+      
+      <div class="filter-tabs">
+        <button class="tab-btn active" onclick="filterLeaderboard('all', this)">Tümü</button>
+        <button class="tab-btn" onclick="filterLeaderboard('standard', this)">Normal</button>
+        <button class="tab-btn" onclick="filterLeaderboard('ten_cases', this)">10 Kutu</button>
+        <button class="tab-btn" onclick="filterLeaderboard('catch_open', this)">Yakala & Aç</button>
+        <button class="tab-btn" onclick="filterLeaderboard('upgrade_mode', this)">Şans Yükseltme</button>
+        <button class="tab-btn" onclick="filterLeaderboard('mines_mode', this)">Mayınlı</button>
+      </div>
+
+      <div class="scroll-list" id="lb-list-container"></div>
+      
+      <div id="admin-lb-controls" style="display:none; margin-top:4px;">
+        <button class="btn-modal btn-danger" style="width:100%;" onclick="confirmClearLeaderboard()">
+          🗑️ Tabloyu Sıfırla (Admin)
+        </button>
+      </div>
+
+      <button class="btn-modal btn-close" style="margin-top:6px;" onclick="closeLeaderboard()">Kapat</button>
+    </div>
+  </div>
+
+  <!-- KASA DETAY MODALI -->
+  <div id="details-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header" id="details-header-txt">Kasa Geçmişi</div>
+      <div style="font-size:11px; color:#d946ef; text-align:center;" id="details-mode-txt"></div>
+      <div style="font-size:9px; color:#94a3b8; text-align:center; margin-bottom:6px;" id="details-date-txt"></div>
+      <div class="scroll-list" id="details-list-container"></div>
+      <button class="btn-modal btn-close" onclick="closeDetailsModal()">Geri</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- JAVASCRIPT & AUDIO SİSTEMİ -->
+<script>
+  // Web Audio API Ses Sentezleyicisi (Harici ses dosyası gerektirmez)
+  const AudioEngine = {
+    ctx: null,
+    init() {
+      if (!this.ctx) {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    },
+    playTick() {
+      try {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.04);
+      } catch(e){}
+    },
+    playGodly() {
+      try {
+        this.init();
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + i * 0.1);
+          gain.gain.setValueAtTime(0.15, now + i * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.4);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.1);
+          osc.stop(now + i * 0.1 + 0.4);
+        });
+      } catch(e){}
+    },
+    playExplosion() {
+      try {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(120, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.4);
+      } catch(e){}
+    }
+  };
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
+    authDomain: "kutu-acma-pro.firebaseapp.com",
+    projectId: "kutu-acma-pro",
+    storageBucket: "kutu-acma-pro.firebasestorage.app",
+    messagingSenderId: "483395048462",
+    appId: "1:483395048462:web:450f18178e682a4a2f985f"
+  };
+
+  let auth = null;
+  let db = null;
+  let firebaseReady = false;
+
+  try {
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.database();
+    firebaseReady = true;
+  } catch (err) {
+    console.warn("Firebase durumu:", err);
+  }
+
+  const GAME_MODES = {
+    standard: {
+      name: "Normal Kasa",
+      tiers: [
+        { name: 'Classic', rate: 58.0, minP: 1, maxP: 3, color: '#ffffff', items: ['Tahta Kılıç', 'Deri Kask', 'Taş Parçası'] },
+        { name: 'Super',   rate: 29.0, minP: 4, maxP: 10, color: '#38bdf8', items: ['Demir Balta', 'Gümüş Yüzük', 'Çelik Kalkan'] },
+        { name: 'Ultra',   rate: 10.0, minP: 12, maxP: 30, color: '#c084fc', items: ['Büyülü Asa', 'Ateş Pelerini', 'Rünik Yay'] },
+        { name: 'Omega',   rate: 2.8,  minP: 35, maxP: 120, color: '#fb923c', items: ['Ejder Baltası', 'Lich Tacı'] },
+        { name: 'Godly',   rate: 0.2,  minP: 500, maxP: 1000, color: '#f43f5e', items: ['Ebedi Kristal Kılıç'] }
+      ]
+    },
+    ten_cases: {
+      name: "10 Kutu Modu",
+      tiers: [
+        { name: 'Classic', rate: 35.0, minP: 2, maxP: 5, color: '#ffffff', items: ['Gelişmiş Kalkan', 'Bronz Zırh'] },
+        { name: 'Super',   rate: 35.0, minP: 6, maxP: 15, color: '#38bdf8', items: ['Safir Kılıç', 'Titan Başlığı'] },
+        { name: 'Ultra',   rate: 20.0, minP: 20, maxP: 50, color: '#c084fc', items: ['Karanlık Asa', 'Yıldırım Yayı'] },
+        { name: 'Omega',   rate: 8.5,  minP: 60, maxP: 200, color: '#fb923c', items: ['Kıyamet Baltası', 'Zaman Tacı'] },
+        { name: 'Godly',   rate: 1.5,  minP: 600, maxP: 1200, color: '#f43f5e', items: ['Tanrısal Hüküm Kılıcı'] }
+      ]
+    },
+    catch_open: {
+      name: "Yakala & Aç Modu",
+      tiers: [
+        { name: 'Classic Kasa', rate: 45.0, minP: 2, maxP: 5, color: '#ffffff', items: ['Deri Çanta', 'Taş Kolye', 'Bakır Hançer'] },
+        { name: 'Super Kasa',   rate: 30.0, minP: 6, maxP: 18, color: '#38bdf8', items: ['Buz Asası', 'Rüzgar Pelerini', 'Platin Kalkan'] },
+        { name: 'Ultra Kasa',   rate: 15.0, minP: 25, maxP: 60, color: '#c084fc', items: ['Gök Gürültüsü Baltası', 'Anka Tüyü'] },
+        { name: 'Omega Kasa',   rate: 8.0,  minP: 80, maxP: 250, color: '#fb923c', items: ['Ejderha Kalbi', 'Gölge Tacı'] },
+        { name: 'Godly Kasa',   rate: 2.0,  minP: 750, maxP: 1500, color: '#f43f5e', items: ['Kainatın Asası', 'Ebedi Yıldız Taşı'] }
+      ]
+    },
+    upgrade_mode: {
+      name: "Şans Yükseltme Modu",
+      tiers: [
+        { name: 'Kademe 1', rate: 60.0, minP: 5, maxP: 15, color: '#ffffff', items: ['Gelişen Kılıç', 'Dinamik Zırh'] },
+        { name: 'Kademe 2', rate: 25.0, minP: 20, maxP: 60, color: '#38bdf8', items: ['Aura Yayı', 'Işık Kristali'] },
+        { name: 'Kademe 3', rate: 10.0, minP: 70, maxP: 180, color: '#c084fc', items: ['Yükseltilmiş Asa', 'Hiçlik Kalkanı'] },
+        { name: 'Kozmik Güç', rate: 5.0, minP: 250, maxP: 800, color: '#f43f5e', items: ['Sonsuzluk Matrisi', 'Tanrı Katili'] }
+      ]
+    },
+    mines_mode: {
+      name: "Mayınlı Kasa Modu",
+      tiers: [
+        { name: 'Güvenli Kasa', rate: 70.0, minP: 15, maxP: 45, color: '#10b981', items: ['Elmas Külçesi', 'Zümrüt Heykel'] },
+        { name: 'Büyük Hazine', rate: 30.0, minP: 60, maxP: 160, color: '#fbbf24', items: ['Kraliyet Tacı', 'Kutsal Kupa'] }
+      ]
+    }
+  };
+
+  let leaderboardData = JSON.parse(localStorage.getItem('kutu_leaderboard') || '[]');
+  let userInventory = JSON.parse(localStorage.getItem('kutu_inventory') || '[]');
+  let currentUser = null;
+  let isAdmin = false;
+  let authMode = "login";
+
+  let selectedModeKey = 'standard';
+  let currentScore = 0;
+  let timeLeft = 30;
+  let timerInterval = null;
+  let isOpening = false;
+  let currentSessionDrops = [];
+  let selectedFilterMode = 'all';
+
+  let remainingBoxes = 10;
+  let upgradeStep = 1;
+  let caughtBoxes = [];
+  let catchAnimationFrames = [];
+  let spawnInterval = null;
+  let catchTimeLeft = 15;
+  let mineField = [];
+  let safePicksCount = 0;
+
+  window.onload = function() {
+    if (auth) {
+      try { auth.signOut(); } catch(e){}
+    }
+    currentUser = null;
+    isAdmin = false;
+    showScreen('auth-screen');
+    updateAdminUI();
+  };
+
+  if (firebaseReady && db) {
+    try {
+      db.ref('leaderboard').on('value', (snapshot) => {
+        const val = snapshot.val();
+        if (val) {
+          leaderboardData = [];
+          Object.keys(val).forEach(key => {
+            leaderboardData.push({ id: key, ...val[key] });
+          });
+          localStorage.setItem('kutu_leaderboard', JSON.stringify(leaderboardData));
+          validateLeaderboard();
+          renderLeaderboard();
+        } else {
+          leaderboardData = [];
+          localStorage.setItem('kutu_leaderboard', '[]');
+          renderLeaderboard();
+        }
+      });
+    } catch (e) {}
+  }
+
+  function setAuthTab(tab) {
+    authMode = tab;
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    document.getElementById('auth-submit-btn').innerText = tab === 'login' ? "🎮 Giriş Yap" : "👤+ Kayıt Ol";
+    document.getElementById('auth-switch-btn').innerText = tab === 'login' ? "👤+ Yeni Hesap Oluştur" : "🎮 Zaten Hesabım Var";
+  }
+
+  function toggleAuthTab() {
+    setAuthTab(authMode === 'login' ? 'register' : 'login');
+  }
+
+  function executeAuth() {
+    const rawUser = document.getElementById('auth-username').value.trim();
+    const pass = document.getElementById('auth-password').value.trim();
+
+    if (!rawUser || !pass) {
+      alert("Lütfen kullanıcı adı ve şifre giriniz!");
+      return;
+    }
+
+    if (rawUser === "admin" && pass === "54321") {
+      currentUser = "Admin";
+      isAdmin = true;
+      alert("👑 Admin olarak giriş yapıldı!");
+      loginSuccess();
+      return;
+    }
+
+    if (pass.length < 6) {
+      alert("Şifre en az 6 karakter olmalıdır!");
+      return;
+    }
+
+    const cleanUser = rawUser.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const email = `${cleanUser}@kutupro.com`;
+
+    if (!firebaseReady || !auth) {
+      alert("Firebase bağlantısı hazır değil.");
+      return;
+    }
+
+    if (authMode === 'register') {
+      auth.createUserWithEmailAndPassword(email, pass)
+        .then((cred) => {
+          if (db) db.ref(`users/${cred.user.uid}`).set({ username: rawUser, createdAt: Date.now() });
+          currentUser = rawUser;
+          isAdmin = false;
+          alert("Kayıt başarılı, hoş geldin!");
+          loginSuccess();
+        })
+        .catch(err => {
+          if (err.code === 'auth/email-already-in-use') {
+            alert("Bu kullanıcı adı zaten kayıtlı! Lütfen giriş yapın.");
+          } else {
+            alert("Kayıt Hatası: " + err.message);
+          }
+        });
+    } else {
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(() => {
+          currentUser = rawUser;
+          isAdmin = false;
+          loginSuccess();
+        })
+        .catch(() => {
+          alert("Giriş Başarısız! Hesap bulunamadı veya şifre hatalı.");
+        });
+    }
+  }
+
+  function loginSuccess() {
+    document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}` + (isAdmin ? " (👑 Admin)" : "");
+    updateAdminUI();
+    showScreen('menu-screen');
+  }
+
+  function handleSignOut() {
+    if (auth) {
+      try { auth.signOut(); } catch(e){}
+    }
+    currentUser = null;
+    isAdmin = false;
+    document.getElementById('auth-username').value = "";
+    document.getElementById('auth-password').value = "";
+    setAuthTab('login');
+    updateAdminUI();
+    showScreen('auth-screen');
+  }
+
+  function updateAdminUI() {
+    const adminControls = document.getElementById('admin-lb-controls');
+    if (adminControls) {
+      adminControls.style.display = isAdmin ? 'block' : 'none';
+    }
+  }
+
+  function confirmClearLeaderboard() {
+    if (!isAdmin) return;
+    const isConfirmed = confirm("DİKKAT: Sıralama tablosundaki tüm veriler kalıcı olarak silinecektir!\n\nOnaylıyor musunuz?");
+    if (isConfirmed) {
+      leaderboardData = [];
+      localStorage.removeItem('kutu_leaderboard');
+      if (firebaseReady && db) {
+        db.ref('leaderboard').remove()
+          .then(() => alert("Sıralama tablosu başarıyla sıfırlandı!"))
+          .catch(e => alert("Sıfırlama hatası: " + e.message));
+      } else {
+        alert("Sıralama tablosu sıfırlandı!");
+      }
+      renderLeaderboard();
+    }
+  }
+
+  function showScreen(screenId) {
+    const screens = [
+      'auth-screen', 'menu-screen', 'game-screen',
+      'catch-game-screen', 'inventory-screen', 'mines-game-screen', 
+      'catch-summary-screen', 'craft-screen', 'collection-screen'
+    ];
+    screens.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = (id === screenId) ? 'flex' : 'none';
+    });
+  }
+
+  function exitToMenu() {
+    clearInterval(timerInterval);
+    clearInterval(spawnInterval);
+    catchAnimationFrames.forEach(cancelAnimationFrame);
+    catchAnimationFrames = [];
+
+    document.getElementById('game-over-modal').style.display = 'none';
+    showScreen('menu-screen');
+  }
+
+  function updateMenuRatesPreview() {
+    const preview = document.getElementById('menu-rates-preview');
+    const currentTiers = GAME_MODES[selectedModeKey].tiers;
+    let html = `<div style="color:#fbbf24; font-weight:bold; margin-bottom:2px;">📊 ${GAME_MODES[selectedModeKey].name.toUpperCase()}</div>`;
+    currentTiers.forEach(t => {
+      html += `<div style="display:flex; justify-content:space-between; color:${t.color}; padding:1px 0;">
+        <span>${t.name} (%${t.rate})</span><span>${t.minP}-${t.maxP} P</span>
+      </div>`;
+    });
+    preview.innerHTML = html;
+  }
+
+  function selectMode(key, btn) {
+    selectedModeKey = key;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updateMenuRatesPreview();
+  }
+
+  function renderGameRatesTable() {
+    const container = document.getElementById('rates-box-container');
+    const currentTiers = GAME_MODES[selectedModeKey].tiers;
+    let html = `<div style="color:#fbbf24; font-weight:bold; margin-bottom:2px;">${GAME_MODES[selectedModeKey].name.toUpperCase()}</div>`;
+    currentTiers.forEach(t => {
+      html += `<div class="rate-row" style="color:${t.color};">
+        <span>${t.name} (%${t.rate})</span><span>${t.minP}-${t.maxP} P</span>
+      </div>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function startGame() {
+    if (!currentUser) {
+      alert("Oyunu oynamak için lütfen giriş yapınız!");
+      showScreen('auth-screen');
+      return;
+    }
+
+    currentScore = 0;
+    currentSessionDrops = [];
+    isOpening = false;
+
+    if (selectedModeKey === 'standard') startStandardMode();
+    else if (selectedModeKey === 'ten_cases') startTenCasesMode();
+    else if (selectedModeKey === 'catch_open') startCatchModePhase1();
+    else if (selectedModeKey === 'upgrade_mode') startUpgradeMode();
+    else if (selectedModeKey === 'mines_mode') startMinesMode();
+  }
+
+  function startStandardMode() {
+    timeLeft = 30;
+    document.getElementById('game-mode-name-txt').innerText = "Normal Kasa";
+    document.getElementById('stat-timer-title').innerText = "SÜRE";
+    document.getElementById('timer-txt').innerText = timeLeft + "s";
+    document.getElementById('user-tag-txt').innerText = "@" + currentUser;
+    document.getElementById('score-txt').innerText = "0";
+    document.getElementById('mode-badge-txt').innerText = "Normal Kasa (30s)";
+    document.getElementById('drop-result-txt').innerHTML = 'Son Düşen: <span style="color:#64748b;">-</span>';
+
+    renderGameRatesTable();
+    resetStandardCaseUI();
+    showScreen('game-screen');
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById('timer-txt').innerText = timeLeft + "s";
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('open-case-btn').disabled = true;
+        document.getElementById('open-case-btn').innerText = "SÜRE DOLDU!";
+        if (!isOpening) triggerDelayedGameOver();
+      }
+    }, 1000);
+  }
+
+  function startTenCasesMode() {
+    remainingBoxes = 10;
+    document.getElementById('game-mode-name-txt').innerText = "10 Kutu Modu";
+    document.getElementById('stat-timer-title').innerText = "KALAN HAK";
+    document.getElementById('timer-txt').innerText = remainingBoxes + " Kutu";
+    document.getElementById('user-tag-txt').innerText = "@" + currentUser;
+    document.getElementById('score-txt').innerText = "0";
+    document.getElementById('mode-badge-txt').innerText = "10 Kutu Modu";
+    document.getElementById('drop-result-txt').innerHTML = 'Son Düşen: <span style="color:#64748b;">-</span>';
+
+    renderGameRatesTable();
+    resetStandardCaseUI();
+    showScreen('game-screen');
+  }
+
+  function startUpgradeMode() {
+    remainingBoxes = 7;
+    upgradeStep = 1;
+    document.getElementById('game-mode-name-txt').innerText = "Şans Yükseltme";
+    document.getElementById('stat-timer-title').innerText = "KALAN HAK";
+    document.getElementById('timer-txt').innerText = `${remainingBoxes} (x${upgradeStep})`;
+    document.getElementById('user-tag-txt').innerText = "@" + currentUser;
+    document.getElementById('score-txt').innerText = "0";
+    document.getElementById('mode-badge-txt').innerText = "Şans Yükseltme Modu";
+    document.getElementById('drop-result-txt').innerHTML = 'Son Düşen: <span style="color:#64748b;">-</span>';
+
+    renderGameRatesTable();
+    resetStandardCaseUI();
+    showScreen('game-screen');
+  }
+
+  function resetStandardCaseUI() {
+    isOpening = false;
+    document.getElementById('open-case-btn').disabled = false;
+    document.getElementById('open-case-btn').innerText = "KASAYI AÇ (3s)";
+    document.getElementById('ready-view').style.display = 'block';
+    document.getElementById('ready-banner-txt').innerText = "HAZIR!";
+    document.getElementById('roulette-view').style.display = 'none';
+  }
+
+  function getRandomDrop(modeKey = selectedModeKey, forcedTierName = null) {
+    const tiers = GAME_MODES[modeKey].tiers;
+    let rand = Math.random() * 100;
+
+    if (modeKey === 'upgrade_mode') {
+      const bonusChance = (upgradeStep - 1) * 6;
+      rand = Math.max(0, rand - bonusChance);
+    }
+
+    let cumulative = 0;
+    if (forcedTierName) {
+      const tier = tiers.find(t => t.name === forcedTierName) || tiers[0];
+      const item = tier.items[Math.floor(Math.random() * tier.items.length)];
+      const pts = Math.floor(Math.random() * (tier.maxP - tier.minP + 1)) + tier.minP;
+      return { tier: tier.name, item: item, points: pts, color: tier.color };
+    }
+
+    for (let t of tiers) {
+      cumulative += t.rate;
+      if (rand <= cumulative) {
+        const item = t.items[Math.floor(Math.random() * t.items.length)];
+        const pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
+        return { tier: t.name, item: item, points: pts, color: t.color };
+      }
+    }
+    return { tier: tiers[0].name, item: tiers[0].items[0], points: tiers[0].minP, color: tiers[0].color };
+  }
+
+  function openCase() {
+    if (isOpening) return;
+    if (selectedModeKey === 'standard' && timeLeft <= 0) return;
+    if ((selectedModeKey === 'ten_cases' || selectedModeKey === 'upgrade_mode') && remainingBoxes <= 0) return;
+
+    isOpening = true;
+    document.getElementById('open-case-btn').disabled = true;
+
+    if (selectedModeKey === 'ten_cases') {
+      remainingBoxes--;
+      document.getElementById('timer-txt').innerText = remainingBoxes + " Kutu";
+    } else if (selectedModeKey === 'upgrade_mode') {
+      remainingBoxes--;
+      upgradeStep++;
+      document.getElementById('timer-txt').innerText = `${remainingBoxes} (x${upgradeStep})`;
+    }
+
+    document.getElementById('ready-view').style.display = 'none';
+    const rouletteView = document.getElementById('roulette-view');
+    const track = document.getElementById('roulette-track');
+    rouletteView.style.display = 'block';
+
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0px)';
+    track.innerHTML = '';
+
+    const totalItems = 30;
+    const winIdx = 24;
+    let winDrop = null;
+
+    for (let i = 0; i < totalItems; i++) {
+      const drop = getRandomDrop(selectedModeKey);
+      if (i === winIdx) winDrop = drop;
+
+      const card = document.createElement('div');
+      card.className = 'roulette-item';
+      card.style.borderBottom = `3px solid ${drop.color}`;
+      card.innerHTML = `
+        <span style="color:${drop.color};font-weight:bold;">${drop.tier}</span>
+        <span style="color:#cbd5e1;margin:1px 0;font-size:7px;">${drop.item}</span>
+        <span style="color:#94a3b8;">+${drop.points}P</span>
+      `;
+      track.appendChild(card);
+    }
+
+    // Tık sesi ritmi
+    let tickInterval = setInterval(() => AudioEngine.playTick(), 100);
+    setTimeout(() => clearInterval(tickInterval), 2800);
+
+    setTimeout(() => {
+      track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
+      const itemWidth = 72;
+      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 14 - 7);
+      track.style.transform = `translateX(${target}px)`;
+    }, 20);
+
+    setTimeout(() => {
+      currentScore += winDrop.points;
+      document.getElementById('score-txt').innerText = currentScore;
+      currentSessionDrops.push(winDrop);
+      saveItemToInventory(winDrop);
+
+      if (winDrop.tier.includes('Godly') || winDrop.tier.includes('Kozmik')) {
+        AudioEngine.playGodly();
+        triggerScreenShake();
+      }
+
+      document.getElementById('drop-result-txt').innerHTML = `
+        <span style="color:${winDrop.color}; font-weight:bold;">${winDrop.tier}</span> - 
+        <span>${winDrop.item}</span> - 
+        <span style="color:#34d399; font-weight:bold;">+${winDrop.points} P</span>
+      `;
+
+      isOpening = false;
+
+      if (selectedModeKey === 'standard' && timeLeft <= 0) {
+        document.getElementById('ready-view').style.display = 'block';
+        document.getElementById('ready-banner-txt').innerText = "SON KUTU AÇILDI!";
+        document.getElementById('mode-badge-txt').innerText = "Sonuç geliyor...";
+        triggerDelayedGameOver();
+      } else if ((selectedModeKey === 'ten_cases' || selectedModeKey === 'upgrade_mode') && remainingBoxes <= 0) {
+        document.getElementById('ready-view').style.display = 'block';
+        document.getElementById('ready-banner-txt').innerText = "TÜM KUTULAR AÇILDI!";
+        document.getElementById('mode-badge-txt').innerText = "Sonuç geliyor...";
+        triggerDelayedGameOver();
+      } else {
+        document.getElementById('open-case-btn').disabled = false;
+      }
+    }, 3100);
+  }
+
+  function triggerScreenShake() {
+    const app = document.getElementById('app-container');
+    app.classList.add('shake-effect');
+    setTimeout(() => app.classList.remove('shake-effect'), 600);
+  }
+
+  function triggerDelayedGameOver() {
+    setTimeout(() => endGame(), 1500);
+  }
+
+  function startCatchModePhase1() {
+    caughtBoxes = [];
+    catchTimeLeft = 15;
+    document.getElementById('catch-user-tag').innerText = "@" + currentUser;
+    document.getElementById('catch-timer-txt').innerText = catchTimeLeft + "s";
+    document.getElementById('caught-count-txt').innerText = "0";
+    const arena = document.getElementById('catch-arena');
+    arena.innerHTML = '';
+
+    showScreen('catch-game-screen');
+
+    clearInterval(spawnInterval);
+    spawnInterval = setInterval(() => spawnFallingBox(), 1000);
+
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      catchTimeLeft--;
+      document.getElementById('catch-timer-txt').innerText = catchTimeLeft + "s";
+
+      if (catchTimeLeft <= 0) {
+        clearInterval(timerInterval);
+        clearInterval(spawnInterval);
+        catchAnimationFrames.forEach(cancelAnimationFrame);
+        catchAnimationFrames = [];
+
+        arena.innerHTML = `
+          <div style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fbbf24; font-weight:bold; font-size:15px;">
+            SÜRE DOLDU! ⏳<br>
+            <span style="font-size:10px; color:#94a3b8; margin-top:4px;">Kutular açılıyor...</span>
+          </div>
+        `;
+        setTimeout(() => startCatchModePhase2(), 1200);
+      }
+    }, 1000);
+  }
+
+  function spawnFallingBox() {
+    const arena = document.getElementById('catch-arena');
+    if (!arena || catchTimeLeft <= 0) return;
+
+    const dropTier = getRandomDrop('catch_open');
+    const box = document.createElement('div');
+    box.className = 'falling-box';
+    
+    const arenaWidth = arena.offsetWidth || 340;
+    const arenaHeight = arena.offsetHeight || 380;
+    const startX = Math.random() * (arenaWidth - 50);
+    let posY = -50;
+    const speed = 2.0;
+
+    box.style.left = `${startX}px`;
+    box.style.top = `${posY}px`;
+    box.style.borderColor = dropTier.color;
+    box.style.background = `radial-gradient(circle, ${dropTier.color}44 0%, #110521 90%)`;
+    box.innerHTML = `
+      <span style="font-size:13px;">📦</span>
+      <span style="color:${dropTier.color}; font-size:7px;">${dropTier.tier}</span>
+    `;
+
+    const handleBoxCatch = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      AudioEngine.playTick();
+      caughtBoxes.push({
+        id: Date.now() + Math.random(),
+        tier: dropTier.tier,
+        color: dropTier.color
+      });
+      document.getElementById('caught-count-txt').innerText = caughtBoxes.length;
+      box.remove();
+    };
+
+    box.addEventListener('pointerdown', handleBoxCatch, { passive: false });
+    arena.appendChild(box);
+
+    function step() {
+      if (!box.parentNode) return;
+      posY += speed;
+      box.style.top = `${posY}px`;
+
+      if (posY > arenaHeight + 10) {
+        if (box.parentNode) box.remove();
+      } else {
+        const animId = requestAnimationFrame(step);
+        catchAnimationFrames.push(animId);
+      }
+    }
+    const animId = requestAnimationFrame(step);
+    catchAnimationFrames.push(animId);
+  }
+
+  function startCatchModePhase2() {
+    showScreen('inventory-screen');
+    currentScore = 0;
+    currentSessionDrops = [];
+    renderInventoryGrid();
+  }
+
+  function renderInventoryGrid() {
+    const grid = document.getElementById('inv-grid-container');
+    grid.innerHTML = '';
+
+    const remaining = caughtBoxes.filter(b => !b.opened).length;
+    document.getElementById('inv-remaining-txt').innerText = remaining;
+    document.getElementById('inv-score-txt').innerText = currentScore;
+
+    if (caughtBoxes.length === 0) {
+      grid.innerHTML = `<div style="grid-column: span 3; text-align:center; color:#64748b; padding:20px;">Hiç kutu yakalayamadın!</div>`;
+      setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ ÖZETİ"), 1000);
+      return;
+    }
+
+    caughtBoxes.forEach((box, index) => {
+      const card = document.createElement('div');
+      card.className = 'inv-card' + (box.opened ? ' opened' : '');
+      card.style.borderColor = box.color;
+      card.innerHTML = `
+        <span style="font-size:13px;">📦</span>
+        <span style="color:${box.color};">${box.tier}</span>
+        <span style="font-size:7px; color:#94a3b8;">${box.opened ? 'AÇILDI' : 'DOKUN VE AÇ'}</span>
+      `;
+
+      if (!box.opened) card.onclick = () => openSpecificCaughtBox(index);
+      grid.appendChild(card);
+    });
+  }
+
+  function openSpecificCaughtBox(index) {
+    if (isOpening) return;
+    isOpening = true;
+
+    const targetBox = caughtBoxes[index];
+    document.getElementById('inv-ready-view').style.display = 'none';
+    const rouletteView = document.getElementById('inv-roulette-view');
+    const track = document.getElementById('inv-roulette-track');
+    rouletteView.style.display = 'block';
+
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0px)';
+    track.innerHTML = '';
+
+    const totalItems = 30;
+    const winIdx = 24;
+    let winDrop = null;
+
+    for (let i = 0; i < totalItems; i++) {
+      const drop = getRandomDrop('catch_open', i === winIdx ? targetBox.tier : null);
+      if (i === winIdx) winDrop = drop;
+
+      const card = document.createElement('div');
+      card.className = 'roulette-item';
+      card.style.borderBottom = `3px solid ${drop.color}`;
+      card.innerHTML = `
+        <span style="color:${drop.color};font-weight:bold;">${drop.tier}</span>
+        <span style="color:#cbd5e1;margin:1px 0;font-size:7px;">${drop.item}</span>
+        <span style="color:#94a3b8;">+${drop.points}P</span>
+      `;
+      track.appendChild(card);
+    }
+
+    let tickInterval = setInterval(() => AudioEngine.playTick(), 100);
+    setTimeout(() => clearInterval(tickInterval), 2800);
+
+    setTimeout(() => {
+      track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
+      const itemWidth = 72;
+      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 14 - 7);
+      track.style.transform = `translateX(${target}px)`;
+    }, 20);
+
+    setTimeout(() => {
+      targetBox.opened = true;
+      currentScore += winDrop.points;
+      currentSessionDrops.push(winDrop);
+      saveItemToInventory(winDrop);
+      isOpening = false;
+
+      if (winDrop.tier.includes('Godly')) {
+        AudioEngine.playGodly();
+        triggerScreenShake();
+      }
+
+      renderInventoryGrid();
+
+      const remaining = caughtBoxes.filter(b => !b.opened).length;
+      if (remaining === 0) {
+        setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ ÖZETİ"), 1000);
+      }
+    }, 3100);
+  }
+
+  function startMinesMode() {
+    currentScore = 0;
+    safePicksCount = 0;
+    currentSessionDrops = [];
+    document.getElementById('mine-user-tag').innerText = "@" + currentUser;
+    document.getElementById('mine-score-txt').innerText = "0";
+    document.getElementById('mine-status-txt').innerText = "9 Kutuda 1 Mayın!";
+    document.getElementById('cashout-btn').disabled = false;
+
+    const bombIndex = Math.floor(Math.random() * 9);
+    mineField = [];
+    for (let i = 0; i < 9; i++) {
+      mineField.push({ isBomb: i === bombIndex, opened: false });
+    }
+
+    renderMinesGrid();
+    showScreen('mines-game-screen');
+  }
+
+  function renderMinesGrid() {
+    const grid = document.getElementById('mines-grid');
+    grid.innerHTML = '';
+
+    mineField.forEach((tile, index) => {
+      const card = document.createElement('div');
+      card.className = 'mine-card';
+      card.innerHTML = `<span style="font-size:18px;">📦</span>`;
+      card.onclick = () => pickMineCard(index, card);
+      grid.appendChild(card);
+    });
+  }
+
+  function pickMineCard(index, cardEl) {
+    const tile = mineField[index];
+    if (tile.opened) return;
+    tile.opened = true;
+
+    if (tile.isBomb) {
+      AudioEngine.playExplosion();
+      triggerScreenShake();
+      cardEl.classList.add('bomb');
+      cardEl.innerHTML = `<span style="font-size:20px;">💣</span><span style="font-size:8px;color:#fca5a5;">PATLADIN!</span>`;
+      document.getElementById('cashout-btn').disabled = true;
+      document.getElementById('mine-status-txt').innerText = "BOMBA PATLADI!";
+      currentScore = 0;
+      currentSessionDrops = [{ tier: "Mayın", item: "Patlama (Puan Sıfırlandı)", points: 0, color: "#ef4444" }];
+      setTimeout(() => startSummaryScreen("💣 MAYIN PATLADI - 0 PUAN"), 1200);
+    } else {
+      AudioEngine.playTick();
+      safePicksCount++;
+      const drop = getRandomDrop('mines_mode');
+      currentScore += drop.points;
+      currentSessionDrops.push(drop);
+      saveItemToInventory(drop);
+
+      cardEl.classList.add('safe');
+      cardEl.innerHTML = `
+        <span style="color:#a7f3d0; font-size:8px; font-weight:bold;">${drop.item}</span>
+        <span style="color:#34d399; font-weight:bold;">+${drop.points}P</span>
+      `;
+
+      document.getElementById('mine-score-txt').innerText = currentScore;
+      document.getElementById('mine-status-txt').innerText = `Güvenli: ${safePicksCount}/8`;
+
+      if (safePicksCount === 8) cashoutMines();
+    }
+  }
+
+  function cashoutMines() {
+    document.getElementById('cashout-btn').disabled = true;
+    startSummaryScreen("💰 KASADAN BAŞARIYLA ÇEKİLDİN!");
+  }
+
+  function startSummaryScreen(title) {
+    showScreen('catch-summary-screen');
+
+    document.getElementById('summary-title-txt').innerText = title;
+    document.getElementById('summary-final-score').innerText = currentScore;
+    document.getElementById('summary-final-count').innerText = currentSessionDrops.length;
+
+    const list = document.getElementById('summary-drops-list');
+    list.innerHTML = '';
+
+    currentSessionDrops.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <div>
+          <span style="color:${d.color}; font-weight:bold;">[${d.tier}]</span> 
+          <span>${d.item}</span>
+        </div>
+        <div style="color:#34d399; font-weight:bold;">+${d.points} P</div>
+      `;
+      list.appendChild(row);
+    });
+
+    saveScoreToLeaderboard();
+  }
+
+  function endGame() {
+    document.getElementById('final-score-txt').innerText = currentScore;
+    document.getElementById('modal-mod-info').innerText = `Oynanan Mod: ${GAME_MODES[selectedModeKey].name}`;
+    document.getElementById('game-over-modal').style.display = 'flex';
+    saveScoreToLeaderboard();
+  }
+
+  function saveScoreToLeaderboard() {
+    const now = new Date();
+    const dateStr = `${now.getDate()} Ağu 2026 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const record = {
+      name: currentUser,
+      modeKey: selectedModeKey,
+      modeName: GAME_MODES[selectedModeKey].name,
+      score: currentScore,
+      date: dateStr,
+      drops: currentSessionDrops,
+      timestamp: Date.now()
+    };
+
+    leaderboardData.push(record);
+    validateLeaderboard();
+    localStorage.setItem('kutu_leaderboard', JSON.stringify(leaderboardData));
+
+    if (firebaseReady && db) {
+      try { db.ref('leaderboard').push(record); } catch (e) {}
+    }
+  }
+
+  function validateLeaderboard() {
+    leaderboardData = leaderboardData.filter(player => {
+      if (!player.drops || player.drops.length === 0) return false;
+      const calculatedSum = player.drops.reduce((sum, item) => sum + item.points, 0);
+      return calculatedSum === player.score;
+    });
+    leaderboardData.sort((a, b) => b.score - a.score);
+  }
+
+  // --- KALICI ENVANTER & DEMİRCİ SİSTEMİ ---
+  function saveItemToInventory(drop) {
+    if (!drop || drop.tier === "Mayın") return;
+    userInventory.push({ ...drop, date: Date.now() });
+    localStorage.setItem('kutu_inventory', JSON.stringify(userInventory));
+  }
+
+  function openCollection() {
+    const list = document.getElementById('collection-items-list');
+    list.innerHTML = '';
+
+    const allItems = [];
+    Object.values(GAME_MODES).forEach(m => {
+      m.tiers.forEach(t => {
+        t.items.forEach(it => {
+          allItems.push({ name: it, tier: t.name, color: t.color });
+        });
+      });
+    });
+
+    const uniqueOwned = [...new Set(userInventory.map(i => i.item))];
+    document.getElementById('collection-progress-txt').innerText = `Koleksiyon: ${uniqueOwned.length} / ${allItems.length} Tamamlandı`;
+
+    allItems.forEach(it => {
+      const owned = uniqueOwned.includes(it.name);
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.style.opacity = owned ? '1' : '0.4';
+      row.innerHTML = `
+        <div>
+          <span style="color:${it.color}; font-weight:bold;">[${it.tier}]</span> 
+          <span>${it.name}</span>
+        </div>
+        <div style="font-size:9px; color:${owned ? '#34d399' : '#64748b'};">${owned ? '✓ Bulundu' : 'Kilitli'}</div>
+      `;
+      list.appendChild(row);
+    });
+
+    showScreen('collection-screen');
+  }
+
+  function openCrafting() {
+    const list = document.getElementById('craft-items-list');
+    list.innerHTML = '';
+
+    const tierCounts = {};
+    userInventory.forEach(it => {
+      tierCounts[it.tier] = (tierCounts[it.tier] || 0) + 1;
+    });
+
+    const tiers = ['Classic', 'Super', 'Ultra', 'Omega'];
+    tiers.forEach((tName, idx) => {
+      const count = tierCounts[tName] || 0;
+      const nextTier = tiers[idx + 1] || 'Godly';
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <div>
+          <span style="font-weight:bold;">3x ${tName}</span> ➔ <span style="color:#d946ef; font-weight:bold;">1x ${nextTier}</span>
+        </div>
+        <div style="color:${count >= 3 ? '#34d399' : '#f87171'}; font-weight:bold;">${count}/3 Adet</div>
+      `;
+      list.appendChild(row);
+    });
+
+    showScreen('craft-screen');
+  }
+
+  function executeCrafting() {
+    const tierCounts = {};
+    userInventory.forEach(it => {
+      tierCounts[it.tier] = (tierCounts[it.tier] || 0) + 1;
+    });
+
+    const upgradeTier = ['Classic', 'Super', 'Ultra', 'Omega'].find(t => (tierCounts[t] || 0) >= 3);
+    if (!upgradeTier) {
+      alert("Yükseltme yapmak için en az 3 adet aynı nadirlikte eşyaya sahip olmalısınız!");
+      return;
+    }
+
+    let removed = 0;
+    userInventory = userInventory.filter(it => {
+      if (it.tier === upgradeTier && removed < 3) {
+        removed++;
+        return false;
+      }
+      return true;
+    });
+
+    const nextTiersMap = { Classic: 'Super', Super: 'Ultra', Ultra: 'Omega', Omega: 'Godly' };
+    const targetTierName = nextTiersMap[upgradeTier];
+    const newDrop = getRandomDrop('standard', targetTierName);
+
+    userInventory.push(newDrop);
+    localStorage.setItem('kutu_inventory', JSON.stringify(userInventory));
+
+    AudioEngine.playGodly();
+    triggerScreenShake();
+    alert(`Tebrikler! 3x ${upgradeTier} birleştirildi ve 1x [${newDrop.tier}] ${newDrop.item} kazanıldı!`);
+    openCrafting();
+  }
+
+  // --- SIRALAMA TABLOSU ---
+  function filterLeaderboard(modeKey, btn) {
+    selectedFilterMode = modeKey;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderLeaderboard();
+  }
+
+  function openLeaderboard() {
+    renderLeaderboard();
+    updateAdminUI();
+    document.getElementById('leaderboard-modal').style.display = 'flex';
+  }
+
+  function closeLeaderboard() {
+    document.getElementById('leaderboard-modal').style.display = 'none';
+  }
+
+  function renderLeaderboard() {
+    const list = document.getElementById('lb-list-container');
+    list.innerHTML = '';
+
+    validateLeaderboard();
+
+    let filtered = selectedFilterMode === 'all' 
+      ? [...leaderboardData] 
+      : leaderboardData.filter(d => d.modeKey === selectedFilterMode);
+
+    filtered.sort((a, b) => b.score - a.score);
+    const top10 = filtered.slice(0, 10);
+
+    if (top10.length === 0) {
+      list.innerHTML = `<div style="text-align:center; color:#64748b; padding:15px;">Kayıtlı skor bulunamadı.</div>`;
+      return;
+    }
+
+    top10.forEach((item, index) => {
+      const rank = index + 1;
+      const row = document.createElement('div');
+      row.className = 'item-row lb-row';
+
+      if (rank === 1) row.classList.add('rank-1');
+      else if (rank === 2) row.classList.add('rank-2');
+      else if (rank === 3) row.classList.add('rank-3');
+      else if (rank === 4 || rank === 5) row.classList.add('rank-green');
+      else row.classList.add('rank-rest');
+
+      row.innerHTML = `
+        <div>
+          <span>${rank}. ${item.name}</span>
+          <span style="font-size:8px; opacity:0.8; margin-left:4px;">(${item.modeName || 'Normal'})</span>
+        </div>
+        <span>${item.score} P</span>
+      `;
+      row.onclick = () => openHistoryDetails(item);
+      list.appendChild(row);
+    });
+  }
+
+  function openHistoryDetails(target) {
+    const listContainer = document.getElementById('details-list-container');
+    listContainer.innerHTML = '';
+
+    let itemsToShow = [];
+    let title = "";
+    let modeInfo = "";
+    let dateInfo = "";
+
+    if (target === 'current') {
+      title = `${currentUser} - Oyun Sonu`;
+      modeInfo = `Mod: ${GAME_MODES[selectedModeKey].name}`;
+      dateInfo = "Bu Oyun";
+      itemsToShow = currentSessionDrops;
+    } else {
+      title = `${target.name} - Profil Detayı`;
+      modeInfo = `Oynanan Mod: ${target.modeName || 'Normal Kasa'}`;
+      dateInfo = `Tarih: ${target.date || 'Bilinmiyor'}`;
+      itemsToShow = target.drops || [];
+    }
+
+    document.getElementById('details-header-txt').innerText = title;
+    document.getElementById('details-mode-txt').innerText = modeInfo;
+    document.getElementById('details-date-txt').innerText = dateInfo;
+
+    if (itemsToShow.length === 0) {
+      listContainer.innerHTML = `<div style="text-align:center; color:#64748b; padding:20px;">Kayıtlı kasa detayı bulunamadı.</div>`;
+    } else {
+      itemsToShow.forEach(d => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <div>
+            <span style="color:${d.color}; font-weight:bold;">[${d.tier}]</span> 
+            <span>${d.item}</span>
+          </div>
+          <div style="color:#34d399; font-weight:bold;">+${d.points} P</div>
+        `;
+        listContainer.appendChild(row);
+      });
+    }
+
+    document.getElementById('details-modal').style.display = 'flex';
+  }
+
+  function closeDetailsModal() {
+    document.getElementById('details-modal').style.display = 'none';
+  }
+
+  updateMenuRatesPreview();
+</script>
+
+</body>
+</html>
+
