@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kutu Açma Pro - Cloud Master</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+  <title>Kutu Açma Pro - Cloud Master Pro</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -20,27 +20,28 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    body {
+    html, body {
       background-color: #05020a;
       color: #ffffff;
-      min-height: 100vh;
-      min-height: 100dvh;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow-x: hidden;
     }
 
     #app-container {
       width: 100%;
       max-width: 420px;
-      height: 100vh;
+      height: 100%;
       height: 100dvh;
       background: radial-gradient(circle at 50% 20%, #1e0b36 0%, #08020f 100%);
       position: relative;
       display: flex;
       flex-direction: column;
-      padding: 10px 8px;
+      padding: 8px;
       border: 1px solid #2d1254;
       overflow: hidden;
     }
@@ -53,6 +54,25 @@
       40%, 60% { transform: translate3d(4px, 0, 0); }
     }
 
+    /* TOAST BİLDİRİMİ */
+    #toast-notification {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: linear-gradient(135deg, #9333ea, #d946ef);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      z-index: 999;
+      box-shadow: 0 4px 15px rgba(217, 70, 239, 0.5);
+      transition: transform 0.3s ease;
+      white-space: nowrap;
+    }
+    #toast-notification.show { transform: translateX(-50%) translateY(0); }
+
     /* GİRİŞ EKRANI */
     #auth-screen {
       display: flex;
@@ -60,7 +80,7 @@
       align-items: center;
       justify-content: space-between;
       height: 100%;
-      padding: 10px 4px;
+      padding: 12px 4px;
       overflow-y: auto;
     }
 
@@ -150,6 +170,7 @@
       align-items: center;
       margin-bottom: 4px;
       flex-shrink: 0;
+      height: 32px;
     }
 
     .app-title { font-size: 13px; font-weight: 800; color: #fff; }
@@ -172,7 +193,7 @@
     /* EKRANLAR */
     #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, 
     #mines-game-screen, #fire-game-screen, #wheel-game-screen, #catch-summary-screen, 
-    #chats-hub-screen, #chat-screen, #friends-screen, #achievements-screen, #settings-screen {
+    #chats-hub-screen, #chat-screen, #friends-screen, #achievements-screen, #profile-screen, #settings-screen {
       display: none;
       flex-direction: column;
       height: 100%;
@@ -251,7 +272,7 @@
 
     .btn-start {
       width: 100%;
-      min-height: 42px;
+      min-height: 44px;
       padding: 10px;
       border-radius: 8px;
       border: none;
@@ -275,7 +296,7 @@
     .stat-card {
       background: #110521;
       border: 1px solid #4c1d95;
-      padding: 3px 6px;
+      padding: 4px 6px;
       border-radius: 6px;
     }
 
@@ -291,7 +312,7 @@
       background: rgba(17, 5, 33, 0.95);
       border: 1px solid #4c1d95;
       border-radius: 6px;
-      padding: 3px 5px;
+      padding: 4px 6px;
       font-size: 8px;
       flex-shrink: 0;
     }
@@ -359,7 +380,7 @@
 
     .btn-action {
       width: 100%;
-      min-height: 42px;
+      min-height: 44px;
       font-size: 13px;
       font-weight: 900;
       border-radius: 8px;
@@ -531,12 +552,13 @@
 
     .whatsapp-input-bar {
       display: flex;
-      gap: 5px;
+      gap: 6px;
       align-items: center;
       flex-shrink: 0;
       background: #202c33;
-      padding: 4px;
-      border-radius: 20px;
+      padding: 6px 8px;
+      border-radius: 24px;
+      height: 44px;
     }
 
     .whatsapp-input {
@@ -545,22 +567,22 @@
       border: none;
       outline: none;
       color: #fff;
-      font-size: 11px;
-      padding-left: 10px;
+      font-size: 12px;
+      padding-left: 6px;
     }
 
     .whatsapp-send-btn {
       background: #00a884;
       border: none;
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       color: #fff;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 13px;
       flex-shrink: 0;
     }
 
@@ -635,6 +657,9 @@
 
 <div id="app-container">
 
+  <!-- TOAST BİLDİRİMİ -->
+  <div id="toast-notification">Bildirim</div>
+
   <!-- 1. GİRİŞ EKRANI -->
   <div id="auth-screen">
     <div style="text-align:center; margin-top:5px;">
@@ -664,7 +689,7 @@
   <!-- 2. ANA MENÜ -->
   <div id="menu-screen">
     <div class="top-header">
-      <div class="app-title">Kutu Açma Pro</div>
+      <div class="app-title" onclick="openProfileScreen()" style="cursor:pointer;">👤 Profilim</div>
       <div class="header-actions">
         <button class="icon-btn" onclick="openLeaderboard()">🏆 Sıralama</button>
         <button class="icon-btn" onclick="openSettings()">⚙️ Ayarlar</button>
@@ -676,6 +701,14 @@
       <div style="font-size:16px; font-weight:900; color:#d946ef; margin-top:2px;">KUTU AÇMA</div>
       <div style="font-size:11px; color:#34d399; font-weight:bold;" id="menu-user-greeting">👤 Oyuncu#00000</div>
       
+      <!-- GÜNLÜK GÖREV PANOSU -->
+      <div class="rates-box" style="width:100%; border-color:#fbbf24; background:#190f05;" id="daily-quest-box">
+        <div style="display:flex; justify-content:space-between; color:#fbbf24; font-weight:bold;">
+          <span>🎯 Günlük Görev: 3 Kasa Aç</span>
+          <span id="quest-progress-txt">0/3</span>
+        </div>
+      </div>
+
       <div class="nav-extra-bar">
         <div class="nav-extra-btn" onclick="openChatsHub()">💬 Sohbetler</div>
         <div class="nav-extra-btn" onclick="openFriendsScreen()">
@@ -958,7 +991,35 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
   </div>
 
-  <!-- 13. AYARLAR & UNVAN SEÇİMİ -->
+  <!-- 13. PROFİL & İSTATİSTİK EKRANI -->
+  <div id="profile-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">👤 Oyuncu Profili</div>
+      <div></div>
+    </div>
+
+    <div class="case-container" style="padding: 12px; gap:8px;">
+      <div style="font-size:32px;">👑</div>
+      <div style="font-size:14px; font-weight:bold; color:#38bdf8;" id="prof-name-txt">Oyuncu#00000</div>
+      <div style="font-size:10px; color:#fbbf24;" id="prof-title-txt">Unvan: Çaylak</div>
+      
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; width:100%; margin-top:4px;">
+        <div class="stat-card" style="text-align:center;">
+          <div class="stat-title">AÇILAN KASA</div>
+          <div class="stat-val score-val" id="prof-boxes-txt">0</div>
+        </div>
+        <div class="stat-card" style="text-align:center;">
+          <div class="stat-title">EN YÜKSEK SKOR</div>
+          <div class="stat-val timer-val" id="prof-highscore-txt">0</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
+  </div>
+
+  <!-- 14. AYARLAR & UNVAN SEÇİMİ -->
   <div id="settings-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -1080,6 +1141,13 @@
     }
   };
 
+  function showToast(msg) {
+    const el = document.getElementById('toast-notification');
+    el.innerText = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
   const firebaseConfig = {
     apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
     authDomain: "kutu-acma-pro.firebaseapp.com",
@@ -1177,6 +1245,10 @@
   let activeChatTarget = "global";
   let isTurbo = false;
 
+  let totalBoxesOpened = 0;
+  let userHighScore = 0;
+  let dailyQuestCount = 0;
+
   let selectedModeKey = 'standard';
   let currentScore = 0;
   let timeLeft = 30;
@@ -1197,7 +1269,6 @@
   let fireScore = 20;
   let fireMultiplier = 1.5;
 
-  // Oturum Durumu Takibi
   if (firebaseReady && auth) {
     auth.onAuthStateChanged((user) => {
       if (user) {
@@ -1262,7 +1333,9 @@
               username: fullUsername,
               createdAt: Date.now(),
               title: 'Çaylak',
-              titles: ['Çaylak']
+              titles: ['Çaylak'],
+              boxesOpened: 0,
+              highScore: 0
             });
             db.ref(`usernames/${fullUsername.toLowerCase()}`).set(cred.user.uid);
           }
@@ -1307,7 +1380,7 @@
       'auth-screen', 'menu-screen', 'game-screen',
       'catch-game-screen', 'inventory-screen', 'mines-game-screen', 
       'fire-game-screen', 'wheel-game-screen', 'catch-summary-screen', 
-      'chats-hub-screen', 'chat-screen', 'friends-screen', 'achievements-screen', 'settings-screen'
+      'chats-hub-screen', 'chat-screen', 'friends-screen', 'achievements-screen', 'profile-screen', 'settings-screen'
     ];
     screens.forEach(id => {
       const el = document.getElementById(id);
@@ -1331,7 +1404,6 @@
     btn.style.color = isTurbo ? "#34d399" : "#fff";
   }
 
-  // FIREBASE BULUT SENKRONİZASYONU
   function listenFirebaseData() {
     if (!firebaseReady || !db || !currentUid) return;
 
@@ -1349,6 +1421,8 @@
       if (data) {
         currentTitle = data.title || 'Çaylak';
         userTitles = data.titles || ['Çaylak'];
+        totalBoxesOpened = data.boxesOpened || 0;
+        userHighScore = data.highScore || 0;
         document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser} [${currentTitle}]` + (isAdmin ? " (👑 Admin)" : "");
       }
     });
@@ -1371,7 +1445,14 @@
     });
   }
 
-  // --- SOHBETLER LİSTESİ VE WHATSAPP CHAT ---
+  function openProfileScreen() {
+    document.getElementById('prof-name-txt').innerText = currentUser || "Oyuncu";
+    document.getElementById('prof-title-txt').innerText = `Unvan: ${currentTitle}`;
+    document.getElementById('prof-boxes-txt').innerText = totalBoxesOpened;
+    document.getElementById('prof-highscore-txt').innerText = userHighScore;
+    showScreen('profile-screen');
+  }
+
   function openChatsHub() {
     renderHubFriendsList();
     showScreen('chats-hub-screen');
@@ -1487,7 +1568,6 @@
 
   function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
-  // --- ARKADAŞLIK SİSTEMİ (#5 HANELİ KONTROL) ---
   function openFriendsScreen() {
     renderFriendsList();
     showScreen('friends-screen');
@@ -1521,7 +1601,7 @@
           senderUid: currentUid,
           timestamp: Date.now()
         }).then(() => {
-          alert(`${target} oyuncusuna arkadaşlık isteği gönderildi!`);
+          showToast(`İstek ${target} kullanıcısına gönderildi!`);
           input.value = "";
         });
       });
@@ -1559,7 +1639,7 @@
       db.ref(`users/${friendUid}/friends/${currentUid}`).set({ username: currentUser, uid: currentUid });
       db.ref(`friend_requests/${currentUid}/${friendUid}`).remove();
     }
-    alert(`${friendName} ile artık arkadaşsınız!`);
+    showToast(`${friendName} ile artık arkadaşsınız!`);
   }
 
   function rejectFriend(senderUid) {
@@ -1602,7 +1682,6 @@
     });
   }
 
-  // --- ŞANS ÇARKI MODU ---
   function openLuckyWheel() {
     showScreen('wheel-game-screen');
   }
@@ -1622,13 +1701,12 @@
 
     setTimeout(() => {
       saveScoreToLeaderboard();
-      alert(`Çark Sonucu: +${bonusPoints} Puan Sıralama Tablosuna Eklendi!`);
+      showToast(`+${bonusPoints} Puan Eklendi!`);
       btn.disabled = false;
       exitToMenu();
     }, 1500);
   }
 
-  // --- AYARLAR & UNVAN DEĞİŞTİRME ---
   function openSettings() {
     const container = document.getElementById('titles-container');
     container.innerHTML = '';
@@ -1654,7 +1732,6 @@
     openSettings();
   }
 
-  // --- ATEŞ ÇEMBERİ ---
   function startFireMode() {
     fireScore = 20;
     fireMultiplier = 1.5;
@@ -1721,7 +1798,6 @@
     startSummaryScreen("💰 ALEVLERDEN ZAFERLE ÇIKTIN!");
   }
 
-  // --- BAŞARIMLAR (BULUT TABANLI) ---
   function openAchievements() {
     const list = document.getElementById('achievements-list-container');
     list.innerHTML = '';
@@ -1759,10 +1835,10 @@
         db.ref(`users/${currentUid}/titles`).set(userTitles);
       }
       AudioEngine.playGodly();
+      showToast(`🏆 Başarım Açıldı: ${ach ? ach.title : ''}`);
     }
   }
 
-  // --- OYUN AKIŞI & ORANLAR ---
   function updateMenuRatesPreview() {
     const preview = document.getElementById('menu-rates-preview');
     const currentTiers = GAME_MODES[selectedModeKey].tiers;
@@ -1910,6 +1986,14 @@
 
     isOpening = true;
     document.getElementById('open-case-btn').disabled = true;
+
+    totalBoxesOpened++;
+    dailyQuestCount = Math.min(3, dailyQuestCount + 1);
+    document.getElementById('quest-progress-txt').innerText = `${dailyQuestCount}/3`;
+
+    if (firebaseReady && db && currentUid) {
+      db.ref(`users/${currentUid}/boxesOpened`).set(totalBoxesOpened);
+    }
 
     if (selectedModeKey === 'ten_cases') {
       remainingBoxes--;
@@ -2287,12 +2371,20 @@
     unlockAchievement('first_game');
     if (currentScore >= 100) unlockAchievement('score_100');
 
+    if (currentScore > userHighScore) {
+      userHighScore = currentScore;
+      if (firebaseReady && db && currentUid) {
+        db.ref(`users/${currentUid}/highScore`).set(userHighScore);
+      }
+    }
+
     const now = new Date();
     const dateStr = `${now.getDate()} Ağu 2026 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
     const record = {
       name: currentUser,
       uid: currentUid,
+      title: currentTitle,
       modeKey: selectedModeKey,
       modeName: GAME_MODES[selectedModeKey].name,
       score: currentScore,
