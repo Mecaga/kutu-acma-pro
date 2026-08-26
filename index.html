@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kutu Açma Pro - Cloud & Social</title>
+  <title>Kutu Açma Pro - Cloud Master</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -23,22 +23,24 @@
     body {
       background-color: #05020a;
       color: #ffffff;
-      height: 100vh;
+      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
     #app-container {
       width: 100%;
       max-width: 420px;
       height: 100vh;
+      height: 100dvh;
       background: radial-gradient(circle at 50% 20%, #1e0b36 0%, #08020f 100%);
       position: relative;
       display: flex;
       flex-direction: column;
-      padding: 8px;
+      padding: 10px 8px;
       border: 1px solid #2d1254;
       overflow: hidden;
     }
@@ -63,7 +65,7 @@
     }
 
     .chest-icon {
-      font-size: 40px;
+      font-size: 38px;
       filter: drop-shadow(0 0 15px #a855f7);
       animation: floatChest 3s ease-in-out infinite;
     }
@@ -73,7 +75,7 @@
     }
 
     .brand-title {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 900;
       color: #ffffff;
       text-shadow: 0 0 15px #c084fc;
@@ -81,7 +83,7 @@
       margin-top: 2px;
       text-align: center;
     }
-    .brand-sub { font-size: 20px; font-weight: 900; color: #e879f9; text-align: center; }
+    .brand-sub { font-size: 18px; font-weight: 900; color: #e879f9; text-align: center; }
 
     .auth-card-panel {
       width: 100%;
@@ -130,7 +132,7 @@
 
     .btn-neon-action {
       width: 100%;
-      padding: 10px;
+      padding: 11px;
       border-radius: 8px;
       border: none;
       background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%);
@@ -138,6 +140,7 @@
       font-size: 13px;
       font-weight: 900;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     /* ÜST PANEL */
@@ -174,35 +177,36 @@
       flex-direction: column;
       height: 100%;
       justify-content: space-between;
-      gap: 4px;
+      gap: 6px;
       overflow: hidden;
     }
 
-    .menu-center {
+    .menu-scroll-content {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
       align-items: center;
-      margin: auto 0;
       width: 100%;
+      flex: 1;
       overflow-y: auto;
+      padding-bottom: 4px;
     }
 
     .nav-extra-bar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 3px;
+      gap: 4px;
       width: 100%;
       flex-shrink: 0;
     }
 
     .nav-extra-btn {
-      padding: 6px 1px;
+      padding: 7px 1px;
       background: #190a30;
       border: 1px solid #6b21a8;
       border-radius: 6px;
       color: #e879f9;
-      font-size: 8px;
+      font-size: 9px;
       font-weight: bold;
       cursor: pointer;
       text-align: center;
@@ -223,7 +227,7 @@
     .mode-grid {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
       width: 100%;
     }
 
@@ -231,7 +235,7 @@
       background: #0f071a;
       border: 1px solid #3b1466;
       color: #cbd5e1;
-      padding: 5px 7px;
+      padding: 6px 8px;
       border-radius: 6px;
       font-size: 9px;
       cursor: pointer;
@@ -247,15 +251,17 @@
 
     .btn-start {
       width: 100%;
+      min-height: 42px;
       padding: 10px;
       border-radius: 8px;
       border: none;
       background: linear-gradient(135deg, #10b981, #059669);
       color: white;
-      font-size: 13px;
-      font-weight: bold;
+      font-size: 14px;
+      font-weight: 900;
       cursor: pointer;
       flex-shrink: 0;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
     }
 
     /* STAT BAR */
@@ -269,14 +275,14 @@
     .stat-card {
       background: #110521;
       border: 1px solid #4c1d95;
-      padding: 3px 5px;
+      padding: 3px 6px;
       border-radius: 6px;
     }
 
     .stat-card.timer { border-color: #ef4444; }
     .stat-card.score { border-color: #10b981; text-align: right; }
     .stat-title { font-size: 8px; color: #94a3b8; }
-    .stat-val { font-size: 12px; font-weight: bold; }
+    .stat-val { font-size: 13px; font-weight: bold; }
     .timer-val { color: #f87171; }
     .score-val { color: #34d399; }
     .user-tag { font-size: 8px; color: #c084fc; }
@@ -303,7 +309,7 @@
       border: 1px solid #3b1466;
       position: relative;
       overflow: hidden;
-      min-height: 85px;
+      min-height: 80px;
     }
 
     .roulette-wrapper {
@@ -353,9 +359,9 @@
 
     .btn-action {
       width: 100%;
-      height: 38px;
-      font-size: 12px;
-      font-weight: bold;
+      min-height: 42px;
+      font-size: 13px;
+      font-weight: 900;
       border-radius: 8px;
       border: none;
       background: linear-gradient(135deg, #7e22ce, #a855f7);
@@ -365,12 +371,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
     }
 
     .btn-action:disabled {
       background: #231038;
       color: #64748b;
       cursor: not-allowed;
+      box-shadow: none;
     }
 
     .catch-arena {
@@ -384,8 +392,8 @@
 
     .falling-box {
       position: absolute;
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 6px;
       display: flex;
       flex-direction: column;
@@ -411,7 +419,7 @@
     }
 
     .inv-card {
-      height: 50px;
+      height: 52px;
       border-radius: 6px;
       display: flex;
       flex-direction: column;
@@ -430,11 +438,11 @@
     .mines-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
+      gap: 5px;
       flex: 1;
       background: #080210;
       border-radius: 6px;
-      padding: 4px;
+      padding: 6px;
       align-content: center;
     }
 
@@ -467,7 +475,7 @@
     }
 
     .fire-card {
-      aspect-ratio: 0.8;
+      aspect-ratio: 0.85;
       background: #1a0505;
       border: 2px solid #ef4444;
       border-radius: 8px;
@@ -480,7 +488,7 @@
       cursor: pointer;
     }
 
-    /* WHATSAPP SOHBET VE LİSTE */
+    /* WHATSAPP SOHBET */
     .whatsapp-chat-box {
       flex: 1;
       background: #0b141a;
@@ -553,6 +561,7 @@
       align-items: center;
       justify-content: center;
       font-size: 12px;
+      flex-shrink: 0;
     }
 
     .chat-hub-item {
@@ -579,8 +588,8 @@
       font-size: 9px;
     }
 
-    .btn-accept { background: #10b981; border: none; padding: 3px 6px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 8px; }
-    .btn-reject { background: #ef4444; border: none; padding: 3px 6px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 8px; margin-left: 2px; }
+    .btn-accept { background: #10b981; border: none; padding: 4px 8px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 9px; }
+    .btn-reject { background: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 9px; margin-left: 2px; }
 
     /* MODAL */
     .modal-overlay {
@@ -605,11 +614,11 @@
     }
 
     .filter-tabs { display: flex; gap: 3px; overflow-x: auto; padding-bottom: 3px; }
-    .tab-btn { background: #1c0b33; border: 1px solid #4c1d95; color: #c084fc; padding: 3px 5px; border-radius: 4px; font-size: 8px; cursor: pointer; }
+    .tab-btn { background: #1c0b33; border: 1px solid #4c1d95; color: #c084fc; padding: 4px 6px; border-radius: 4px; font-size: 8px; cursor: pointer; }
     .tab-btn.active { background: #9333ea; color: #fff; font-weight: bold; }
 
     .scroll-list { display: flex; flex-direction: column; gap: 3px; flex: 1; overflow-y: auto; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; border-radius: 4px; background: #18082d; font-size: 9px; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 6px; border-radius: 4px; background: #18082d; font-size: 9px; }
 
     .rank-1 { background: #fbbf24; color: #000; }
     .rank-2 { background: #cbd5e1; color: #000; }
@@ -617,7 +626,7 @@
     .rank-green { background: #22c55e; color: #000; }
     .rank-rest { background: #200c3b; color: #c084fc; }
 
-    .btn-modal { padding: 8px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; flex-shrink: 0; }
+    .btn-modal { padding: 9px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; flex-shrink: 0; }
     .btn-close { background: #ef4444; color: #fff; }
     .btn-danger { background: #b91c1c; color: #fff; margin-top: 4px; }
   </style>
@@ -663,8 +672,8 @@
       </div>
     </div>
 
-    <div class="menu-center">
-      <div style="font-size:16px; font-weight:900; color:#d946ef;">KUTU AÇMA</div>
+    <div class="menu-scroll-content">
+      <div style="font-size:16px; font-weight:900; color:#d946ef; margin-top:2px;">KUTU AÇMA</div>
       <div style="font-size:11px; color:#34d399; font-weight:bold;" id="menu-user-greeting">👤 Oyuncu#00000</div>
       
       <div class="nav-extra-bar">
@@ -704,14 +713,10 @@
         </button>
       </div>
 
-      <div class="menu-preview-box" id="menu-rates-preview"></div>
-
-      <button class="btn-start" onclick="startGame()">OYUNA BAŞLA</button>
+      <div class="rates-box" style="width:100%; margin-top:2px;" id="menu-rates-preview"></div>
     </div>
 
-    <div class="footer-credits">
-      Yapımcı: MecagaTR | 26 Ağustos Çşb 2026
-    </div>
+    <button class="btn-start" onclick="startGame()">OYUNA BAŞLA</button>
   </div>
 
   <!-- 3. KASA AÇMA EKRANI -->
@@ -747,8 +752,8 @@
       </div>
     </div>
 
-    <div class="drop-info-panel">
-      <div class="drop-result-badge" id="drop-result-txt">Son Düşen: <span style="color:#64748b;">-</span></div>
+    <div style="display:flex; justify-content:flex-end; flex-shrink:0;">
+      <div class="stat-card" style="font-size:9px;" id="drop-result-txt">Son Düşen: <span style="color:#64748b;">-</span></div>
     </div>
 
     <button id="open-case-btn" class="btn-action" onclick="openCase()">KASAYI AÇ</button>
@@ -775,7 +780,7 @@
     </div>
 
     <div class="catch-arena" id="catch-arena"></div>
-    <div style="font-size:9px; color:#fbbf24; text-align:center;">⚡ Düşen kutulara dokunarak topla!</div>
+    <div style="font-size:9px; color:#fbbf24; text-align:center; flex-shrink:0;">⚡ Düşen kutulara dokunarak topla!</div>
   </div>
 
   <!-- 5. YAKALA & AÇ: 2. AŞAMA -->
@@ -797,7 +802,7 @@
       </div>
     </div>
 
-    <div class="case-container" style="min-height: 75px; flex:none;">
+    <div class="case-container" style="min-height: 70px; flex:none;">
       <div id="inv-ready-view" style="text-align:center;">
         <div style="font-size:10px; color:#94a3b8;">Açmak istediğin kutuya dokun!</div>
       </div>
@@ -807,7 +812,7 @@
       </div>
     </div>
 
-    <div style="font-size:9px; color:#d946ef; font-weight:bold;">📦 Yakaladığın Kutular:</div>
+    <div style="font-size:9px; color:#d946ef; font-weight:bold; flex-shrink:0;">📦 Yakaladığın Kutular:</div>
     <div class="inv-grid" id="inv-grid-container"></div>
   </div>
 
@@ -854,7 +859,7 @@
       </div>
     </div>
 
-    <div style="font-size:9px; color:#f87171; text-align:center;">
+    <div style="font-size:9px; color:#f87171; text-align:center; flex-shrink:0;">
       3 alevden biri tuzak! Doğru alevi seç, puanı katla.
     </div>
 
@@ -2148,11 +2153,12 @@
       track.appendChild(card);
     }
 
-    let tickInterval = setInterval(() => AudioEngine.playTick(), 100);
-    setTimeout(() => clearInterval(tickInterval), 2800);
+    const spinDuration = isTurbo ? 1000 : 3000;
+    let tickInterval = setInterval(() => AudioEngine.playTick(), isTurbo ? 50 : 100);
+    setTimeout(() => clearInterval(tickInterval), spinDuration - 200);
 
     setTimeout(() => {
-      track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
+      track.style.transition = `transform ${spinDuration/1000}s cubic-bezier(0.12, 0.8, 0.2, 1)`;
       const itemWidth = 65;
       const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 10 - 5);
       track.style.transform = `translateX(${target}px)`;
@@ -2176,7 +2182,7 @@
       if (remaining === 0) {
         setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ ÖZETİ"), 1000);
       }
-    }, 3100);
+    }, spinDuration + 100);
   }
 
   function startMinesMode() {
@@ -2351,7 +2357,7 @@
       else row.classList.add('rank-rest');
 
       row.innerHTML = `
-        <div><span>${rank}. ${item.name}</span> <span style="font-size:7px; opacity:0.8;">(${item.modeName || 'Normal'})</span></div>
+        <div><span>${rank}. ${item.name}</span> <span style="font-size:7px; opacity:0.8;">[${item.title || 'Çaylak'}] (${item.modeName || 'Normal'})</span></div>
         <b>${item.score} P</b>
       `;
       list.appendChild(row);
