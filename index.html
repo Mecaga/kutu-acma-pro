@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <title>Kutu Açma Pro - Cloud & Online Duel</title>
+  <title>Kutu Açma Pro - 1v1 PvP & Social Hub</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -245,26 +245,31 @@
       display: none;
     }
 
-    .mode-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    /* 2x3 GRID OYUN MODU DÜZENİ */
+    .mode-grid-2x3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
       width: 100%;
     }
 
-    .mode-btn {
+    .mode-btn-box {
       background: #0f071a;
-      border: 1px solid #3b1466;
+      border: 1.5px solid #3b1466;
       color: #cbd5e1;
-      padding: 6px 8px;
-      border-radius: 6px;
+      padding: 8px 6px;
+      border-radius: 8px;
       font-size: 9px;
       cursor: pointer;
       text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 48px;
     }
 
-    .mode-btn.active {
-      background: linear-gradient(90deg, #7e22ce, #a855f7);
+    .mode-btn-box.active {
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
       color: #fff;
       border-color: #d946ef;
       font-weight: bold;
@@ -684,7 +689,7 @@
     </div>
   </div>
 
-  <!-- 2. ANA MENÜ -->
+  <!-- 2. ANA MENÜ (2x3 GRID DÜZENİ) -->
   <div id="menu-screen">
     <div class="top-header">
       <div class="app-title" onclick="openProfileScreen()" style="cursor:pointer;">👤 Profilim</div>
@@ -696,42 +701,43 @@
     </div>
 
     <div class="menu-scroll-content">
-      <div style="font-size:16px; font-weight:900; color:#d946ef; margin-top:2px;">KUTU AÇMA</div>
+      <div style="font-size:15px; font-weight:900; color:#d946ef; margin-top:2px;">KUTU AÇMA</div>
       <div style="font-size:11px; color:#34d399; font-weight:bold;" id="menu-user-greeting">👤 Oyuncu#00000 [Çaylak]</div>
       
       <div class="nav-extra-bar">
-        <div class="nav-extra-btn" onclick="openChatsHub()">💬 Sohbetler</div>
+        <div class="nav-extra-btn" onclick="openChatsHub()">💬 Sohbetler & Kanallar</div>
         <div class="nav-extra-btn" onclick="openFriendsScreen()">
-          👥 Arkadaşlar
+          👥 Kullanıcılar & Arkadaşlar
           <div class="badge-dot" id="friend-badge"></div>
         </div>
       </div>
 
-      <div class="mode-grid">
-        <button class="mode-btn active" onclick="selectMode('standard', this)">
-          ⚔️ Normal Kasa (30s)
-          <div style="font-size:7px; color:#94a3b8;">Dengeli klasik oranlar</div>
-        </button>
-        <button class="mode-btn" onclick="selectMode('ten_cases', this)">
-          📦 10 Kutu Modu (Süresiz)
-          <div style="font-size:7px; color:#94a3b8;">10 Kutu Hakkı (Kozmik Hüküm: %0.2)</div>
-        </button>
-        <button class="mode-btn" onclick="selectMode('catch_open', this)">
-          🎯 Yakala & Aç Modu (15s)
-          <div style="font-size:7px; color:#94a3b8;">Kutuları topla, aç (Uranus: %0.01)</div>
-        </button>
-        <button class="mode-btn" onclick="selectMode('upgrade_mode', this)">
-          📈 Şans Yükseltme Modu (7 Kutu)
-          <div style="font-size:7px; color:#94a3b8;">Her kutuda kademe & puan artar</div>
-        </button>
-        <button class="mode-btn" onclick="selectMode('mines_mode', this)">
-          💣 Mayınlı Kasa Modu (Risk)
-          <div style="font-size:7px; color:#94a3b8;">Mayına basarsan puanlar gider!</div>
-        </button>
-        <button class="mode-btn" onclick="startOnlineDuel()" style="border-color:#ef4444; background:rgba(239,68,68,0.1);">
-          ⚔️ Canlı 1v1 Kutu Düellosu (Online)
-          <div style="font-size:7px; color:#ef4444;">Rakiple canlı kapış, 5 kutuda yüksek alan kazanır!</div>
-        </button>
+      <!-- 2 Sütun x 3 Satır Mod Kutuları -->
+      <div class="mode-grid-2x3">
+        <div class="mode-btn-box active" onclick="selectMode('standard', this)">
+          <b>⚔️ Normal Kasa</b>
+          <div style="font-size:7px; color:#94a3b8;">Dengeli klasik kasa</div>
+        </div>
+        <div class="mode-btn-box" onclick="selectMode('ten_cases', this)">
+          <b>📦 10 Kutu Modu</b>
+          <div style="font-size:7px; color:#94a3b8;">Kozmik Hüküm (%0.2)</div>
+        </div>
+        <div class="mode-btn-box" onclick="selectMode('catch_open', this)">
+          <b>🎯 Yakala & Aç</b>
+          <div style="font-size:7px; color:#94a3b8;">Uranus Gizemli (%0.01)</div>
+        </div>
+        <div class="mode-btn-box" onclick="selectMode('upgrade_mode', this)">
+          <b>📈 Şans Yükseltme</b>
+          <div style="font-size:7px; color:#94a3b8;">7 Kutu katlanan puan</div>
+        </div>
+        <div class="mode-btn-box" onclick="selectMode('mines_mode', this)">
+          <b>💣 Mayınlı Kasa</b>
+          <div style="font-size:7px; color:#94a3b8;">Risk & Çekilme modu</div>
+        </div>
+        <div class="mode-btn-box" onclick="openDuelRoomModal()" style="border-color:#ef4444; background:rgba(239,68,68,0.15);">
+          <b style="color:#f87171;">⚔️ 1v1 PvP Savaş</b>
+          <div style="font-size:7px; color:#fca5a5;">Canlı oda kur & kapış</div>
+        </div>
       </div>
 
       <div class="rates-box" style="width:100%; margin-top:2px;" id="menu-rates-preview"></div>
@@ -867,8 +873,8 @@
   <!-- 7. CANLI 1v1 DÜELLO EKRANI -->
   <div id="duel-game-screen">
     <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:10px; font-weight:bold; color:#ef4444;">⚔️ Canlı 1v1 Düello</div>
+      <button class="icon-btn exit-btn" onclick="exitDuelRoom()">‹ Çıkış</button>
+      <div style="font-size:10px; font-weight:bold; color:#ef4444;" id="duel-room-title">Oda: #00000</div>
       <div></div>
     </div>
 
@@ -879,7 +885,7 @@
         <div style="font-size:8px; color:#94a3b8;" id="duel-p1-last">-</div>
       </div>
       <div class="duel-box" style="border-color:#f43f5e;">
-        <div style="font-size:10px; color:#f43f5e; font-weight:bold;" id="duel-p2-name">Rakip</div>
+        <div style="font-size:10px; color:#f43f5e; font-weight:bold;" id="duel-p2-name">Rakip Bekleniyor...</div>
         <div style="font-size:20px; font-weight:bold; margin:6px 0;" id="duel-p2-score">0 P</div>
         <div style="font-size:8px; color:#94a3b8;" id="duel-p2-last">-</div>
       </div>
@@ -887,7 +893,7 @@
 
     <div class="case-container" style="min-height: 80px; flex:none;">
       <div style="font-size:11px; font-weight:bold; color:#fbbf24;" id="duel-round-txt">Tur: 1 / 5</div>
-      <div style="font-size:8px; color:#94a3b8; margin-top:2px;">Kutunu aç ve rakibini geç!</div>
+      <div style="font-size:8px; color:#94a3b8; margin-top:2px;">Kutunu aç ve rakibini geç! (Eğlence Modu)</div>
     </div>
 
     <button id="duel-open-btn" class="btn-action" style="background:#ef4444;" onclick="openDuelBox()">📦 Düello Kutusunu Aç</button>
@@ -963,27 +969,22 @@
     <button class="btn-modal btn-close" onclick="backToGroupChat()">Kapat</button>
   </div>
 
-  <!-- 10. ARKADAŞLAR VE ARKADAŞ SKOR SIRALAMASI -->
+  <!-- 10. TÜM KULLANICILAR & ARKADAŞLAR SEKMESİ -->
   <div id="friends-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">👥 Arkadaşlar & Skorları</div>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">👥 Kullanıcılar & Arkadaşlar</div>
       <div></div>
-    </div>
-
-    <div style="display:flex; gap:4px;">
-      <input type="text" id="add-friend-input" class="neon-input" placeholder="Örn: Oyuncu#12345">
-      <button class="icon-btn" style="background:#10b981;" onclick="sendFriendRequest()">İstek At</button>
     </div>
 
     <div style="font-size:9px; color:#fbbf24; font-weight:bold; margin-top:2px;">Gelen İstekler:</div>
     <div id="friend-requests-container"></div>
 
-    <div style="font-size:9px; color:#38bdf8; font-weight:bold; margin-top:2px;">Arkadaş Skor Sıralaması:</div>
-    <div class="scroll-list" id="friends-list-container"></div>
+    <div style="font-size:9px; color:#38bdf8; font-weight:bold; margin-top:2px;">Oyuna Kayıtlı Kullanıcılar:</div>
+    <div class="scroll-list" id="all-registered-users-list"></div>
   </div>
 
-  <!-- 11. KENDİ PROFİL & MOD BAZLI KAZANMA İSTATİSTİKLERİ -->
+  <!-- 11. KENDİ PROFİL & İSTATİSTİKLER -->
   <div id="profile-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -1018,7 +1019,7 @@
   <div id="user-inspect-screen" class="modal-overlay" style="z-index: 80;">
     <div class="modal-card" style="gap:6px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <button class="icon-btn" style="background:#10b981;" id="inspect-add-friend-btn">➕ Arkadaş Ekle</button>
+        <button class="icon-btn" style="background:#10b981;" id="inspect-add-friend-btn">➕ İstek At</button>
         <button class="icon-btn exit-btn" onclick="closeInspectModal()">✕ Kapat</button>
       </div>
 
@@ -1065,7 +1066,24 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kaydet & Kapat</button>
   </div>
 
-  <!-- 14. MESAJ İŞLEMLERİ MODALI -->
+  <!-- 14. 1v1 ODA KURMA & KATILMA MODALI -->
+  <div id="duel-room-modal" class="modal-overlay" style="z-index: 85;">
+    <div class="modal-card" style="gap:8px;">
+      <div style="font-size:12px; font-weight:bold; color:#ef4444; text-align:center;">⚔️ 1v1 PvP Savaş Lobisi</div>
+      <div style="font-size:8px; color:#94a3b8; text-align:center;">(Bu mod sıralama puanına etki etmez)</div>
+
+      <button class="btn-action" style="background:#10b981;" onclick="createDuelRoom()">🎲 Yeni Savaş Odası Kur</button>
+      
+      <div style="display:flex; gap:4px; margin-top:4px;">
+        <input type="text" id="join-duel-room-input" class="neon-input" placeholder="Oda Kodu Gir (Örn: #12345)">
+        <button class="icon-btn" style="background:#0284c7;" onclick="joinDuelRoom()">Katıl</button>
+      </div>
+
+      <button class="btn-modal btn-close" onclick="closeDuelRoomModal()">Vazgeç</button>
+    </div>
+  </div>
+
+  <!-- 15. MESAJ İŞLEMLERİ MODALI -->
   <div id="message-actions-modal" class="modal-overlay" style="z-index: 90;">
     <div class="modal-card" style="gap:6px;">
       <div style="font-size:12px; font-weight:bold; color:#fbbf24; text-align:center;">Mesaj İşlemleri</div>
@@ -1079,7 +1097,7 @@
     </div>
   </div>
 
-  <!-- 15. SIRALAMA VE OYUNCU DETAY MODALI -->
+  <!-- 16. SIRALAMA VE OYUNCU DETAY MODALI -->
   <div id="details-modal" class="modal-overlay" style="z-index: 70;">
     <div class="modal-card">
       <div style="text-align:center; font-weight:bold; font-size:12px; color:#fbbf24; cursor:pointer;" id="detail-player-title" onclick="inspectPlayerFromDetail()">👤 Oyuncu Detayı (Profile Bak)</div>
@@ -1299,6 +1317,7 @@
   let leaderboardData = [];
   let userFriends = [];
   let userGroups = [];
+  let allRegisteredUsers = [];
   let currentTitle = 'Çaylak';
   let currentUser = null;
   let currentUid = null;
@@ -1314,10 +1333,11 @@
   let currentlyInspectingUser = null;
   let selectedActionMsg = null;
 
-  // Düello Değişkenleri
+  // 1v1 Online PvP Değişkenleri
+  let currentDuelRoomCode = null;
+  let duelListenerRef = null;
+  let duelMyRole = 'p1';
   let duelRound = 1;
-  let duelP1Score = 0;
-  let duelP2Score = 0;
 
   let selectedModeKey = 'standard';
   let currentScore = 0;
@@ -1432,6 +1452,7 @@
     }
     showScreen('menu-screen');
     listenFirebaseData();
+    listenAllRegisteredUsers();
   }
 
   function handleSignOut() {
@@ -1490,8 +1511,8 @@
 
     db.ref(`users/${currentUid}/friends`).on('value', (snapshot) => {
       userFriends = snapshot.val() ? Object.values(snapshot.val()) : [];
-      renderFriendsList();
       renderHubFriendsList();
+      renderAllRegisteredUsersList();
     });
 
     db.ref(`users/${currentUid}/my_groups`).on('value', (snapshot) => {
@@ -1505,6 +1526,53 @@
       const dot = document.getElementById('friend-badge');
       if (dot) dot.style.display = (reqs && Object.keys(reqs).length > 0) ? 'block' : 'none';
       renderFriendRequests(reqs);
+    });
+  }
+
+  // TÜM KAYITLI KULLANICILARI DİNLEME
+  function listenAllRegisteredUsers() {
+    if (!firebaseReady || !db) return;
+    db.ref('users').on('value', (snapshot) => {
+      const val = snapshot.val() || {};
+      allRegisteredUsers = Object.keys(val).map(uid => ({
+        uid: uid,
+        username: val[uid].username || "Oyuncu#00000",
+        title: val[uid].title || "Çaylak",
+        boxesOpened: val[uid].boxesOpened || 0,
+        highScore: val[uid].highScore || 0
+      })).filter(u => u.uid !== currentUid);
+
+      renderAllRegisteredUsersList();
+    });
+  }
+
+  function renderAllRegisteredUsersList() {
+    const list = document.getElementById('all-registered-users-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    if (allRegisteredUsers.length === 0) {
+      list.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:10px;">Henüz başka kayıtlı kullanıcı yok.</div>`;
+      return;
+    }
+
+    allRegisteredUsers.forEach(u => {
+      const isFriend = userFriends.some(f => f.uid === u.uid);
+      const row = document.createElement('div');
+      row.className = 'item-row';
+
+      row.innerHTML = `
+        <div style="cursor:pointer; display:flex; align-items:center; gap:4px;" onclick='inspectPlayer(${JSON.stringify({name: u.username, title: u.title, uid: u.uid})})'>
+          <span style="color:#25D366;">●</span>
+          <b>${u.username}</b>
+          <span style="font-size:7px; color:#c084fc;">[${u.title}]</span>
+        </div>
+        <div style="display:flex; gap:3px;">
+          ${!isFriend ? `<button class="icon-btn" style="background:#10b981;" onclick="sendDirectFriendRequest('${u.username}')">➕ İstek At</button>` : `<span style="font-size:8px; color:#34d399; margin-top:4px;">✓ Arkadaşsınız</span>`}
+          <button class="icon-btn" style="background:#0284c7;" onclick="openPrivateChat('${u.username}', '${u.uid}')">💬 Mesaj</button>
+        </div>
+      `;
+      list.appendChild(row);
     });
   }
 
@@ -1601,50 +1669,156 @@
     }
   }
 
-  // --- CANLI 1v1 DÜELLO SİSTEMİ ---
-  function startOnlineDuel() {
-    duelRound = 1;
-    duelP1Score = 0;
-    duelP2Score = 0;
-    document.getElementById('duel-p1-name').innerText = currentUser;
-    document.getElementById('duel-p1-score').innerText = "0 P";
-    document.getElementById('duel-p1-last').innerText = "Hazır";
-    document.getElementById('duel-p2-name').innerText = "Çevrim İçi Rakip";
-    document.getElementById('duel-p2-score').innerText = "0 P";
-    document.getElementById('duel-p2-last').innerText = "Bekleniyor...";
-    document.getElementById('duel-round-txt').innerText = "Tur: 1 / 5";
-    document.getElementById('duel-open-btn').disabled = false;
+  // --- CANLI 1v1 PvP SAVAŞ ODASI (ODA KODU İLE GERÇEK ZAMANLI) ---
+  function openDuelRoomModal() {
+    document.getElementById('duel-room-modal').style.display = 'flex';
+  }
+
+  function closeDuelRoomModal() {
+    document.getElementById('duel-room-modal').style.display = 'none';
+  }
+
+  function createDuelRoom() {
+    if (!firebaseReady || !db || !currentUid) return;
+    const roomCode = Math.floor(10000 + Math.random() * 90000).toString();
+    currentDuelRoomCode = roomCode;
+    duelMyRole = 'p1';
+
+    const roomData = {
+      code: roomCode,
+      p1: { uid: currentUid, name: currentUser, score: 0, last: '-' },
+      p2: null,
+      round: 1,
+      status: 'waiting',
+      createdAt: Date.now()
+    };
+
+    db.ref(`duel_rooms/${roomCode}`).set(roomData).then(() => {
+      closeDuelRoomModal();
+      listenDuelRoom(roomCode);
+    });
+  }
+
+  function joinDuelRoom() {
+    const input = document.getElementById('join-duel-room-input');
+    let code = input.value.trim().replace('#', '');
+    if (!code) { alert("Lütfen 5 haneli oda kodunu girin!"); return; }
+
+    if (firebaseReady && db && currentUid) {
+      db.ref(`duel_rooms/${code}`).once('value').then(snap => {
+        const rData = snap.val();
+        if (!rData) {
+          alert("Bu kodda bir savaş odası bulunamadı!");
+          return;
+        }
+        if (rData.p2 && rData.p2.uid !== currentUid) {
+          alert("Bu oda şu anda dolu!");
+          return;
+        }
+
+        currentDuelRoomCode = code;
+        duelMyRole = 'p2';
+
+        db.ref(`duel_rooms/${code}/p2`).set({
+          uid: currentUid,
+          name: currentUser,
+          score: 0,
+          last: '-'
+        });
+        db.ref(`duel_rooms/${code}/status`).set('playing');
+
+        closeDuelRoomModal();
+        listenDuelRoom(code);
+      });
+    }
+  }
+
+  function listenDuelRoom(code) {
+    document.getElementById('duel-room-title').innerText = `Oda: #${code}`;
     showScreen('duel-game-screen');
+
+    duelListenerRef = db.ref(`duel_rooms/${code}`);
+    duelListenerRef.on('value', (snapshot) => {
+      const room = snapshot.val();
+      if (!room) return;
+
+      duelRound = room.round || 1;
+      document.getElementById('duel-round-txt').innerText = `Tur: ${duelRound} / 5`;
+
+      const p1 = room.p1 || { name: 'Oyuncu 1', score: 0, last: '-' };
+      const p2 = room.p2 || { name: 'Rakip Bekleniyor...', score: 0, last: '-' };
+
+      if (duelMyRole === 'p1') {
+        document.getElementById('duel-p1-name').innerText = p1.name + " (Sen)";
+        document.getElementById('duel-p1-score').innerText = `${p1.score} P`;
+        document.getElementById('duel-p1-last').innerText = p1.last;
+
+        document.getElementById('duel-p2-name').innerText = p2.name;
+        document.getElementById('duel-p2-score').innerText = `${p2.score} P`;
+        document.getElementById('duel-p2-last').innerText = p2.last;
+      } else {
+        document.getElementById('duel-p1-name').innerText = p2.name + " (Sen)";
+        document.getElementById('duel-p1-score').innerText = `${p2.score} P`;
+        document.getElementById('duel-p1-last').innerText = p2.last;
+
+        document.getElementById('duel-p2-name').innerText = p1.name;
+        document.getElementById('duel-p2-score').innerText = `${p1.score} P`;
+        document.getElementById('duel-p2-last').innerText = p1.last;
+      }
+
+      if (room.status === 'finished') {
+        AudioEngine.playGodly();
+        triggerScreenShake();
+        const myScore = duelMyRole === 'p1' ? p1.score : p2.score;
+        const oppScore = duelMyRole === 'p1' ? p2.score : p1.score;
+        const isWin = myScore >= oppScore;
+        alert(`DÜELLO BİTTİ!\n\nSen: ${myScore} P | Rakip: ${oppScore} P\nSonuç: ${isWin ? '🏆 KAZANDIN!' : '💀 KAYBETTİN!'}`);
+        exitDuelRoom();
+      }
+    });
   }
 
   function openDuelBox() {
+    if (!currentDuelRoomCode || !db) return;
     const btn = document.getElementById('duel-open-btn');
     btn.disabled = true;
 
     AudioEngine.playTick();
-    const dropP1 = getRandomDrop('standard');
-    const dropP2 = getRandomDrop('standard');
+    const drop = getRandomDrop('standard');
 
-    duelP1Score += dropP1.points;
-    duelP2Score += dropP2.points;
+    db.ref(`duel_rooms/${currentDuelRoomCode}`).once('value').then(snap => {
+      const room = snap.val();
+      if (!room) return;
 
-    document.getElementById('duel-p1-score').innerText = `${duelP1Score} P`;
-    document.getElementById('duel-p1-last').innerText = `+${dropP1.points} (${dropP1.item})`;
+      const myObj = duelMyRole === 'p1' ? room.p1 : room.p2;
+      const newScore = (myObj.score || 0) + drop.points;
+      const newLast = `+${drop.points} (${drop.item})`;
 
-    document.getElementById('duel-p2-score').innerText = `${duelP2Score} P`;
-    document.getElementById('duel-p2-last').innerText = `+${dropP2.points} (${dropP2.item})`;
+      db.ref(`duel_rooms/${currentDuelRoomCode}/${duelMyRole}`).update({
+        score: newScore,
+        last: newLast
+      });
 
-    if (duelRound < 5) {
-      duelRound++;
-      document.getElementById('duel-round-txt').innerText = `Tur: ${duelRound} / 5`;
-      setTimeout(() => btn.disabled = false, 800);
-    } else {
-      AudioEngine.playGodly();
-      triggerScreenShake();
-      const isWin = duelP1Score >= duelP2Score;
-      alert(`DÜELLO BİTTİ!\n\nSen: ${duelP1Score} P | Rakip: ${duelP2Score} P\nSonuç: ${isWin ? '🏆 KAZANDIN!' : '💀 KAYBETTİN!'}`);
-      exitToMenu();
+      const nextRound = (room.round || 1) + 1;
+      if (nextRound <= 5) {
+        db.ref(`duel_rooms/${currentDuelRoomCode}/round`).set(nextRound);
+        setTimeout(() => btn.disabled = false, 800);
+      } else {
+        db.ref(`duel_rooms/${currentDuelRoomCode}/status`).set('finished');
+      }
+    });
+  }
+
+  function exitDuelRoom() {
+    if (duelListenerRef) {
+      duelListenerRef.off();
+      duelListenerRef = null;
     }
+    if (currentDuelRoomCode && db && duelMyRole === 'p1') {
+      db.ref(`duel_rooms/${currentDuelRoomCode}`).remove();
+    }
+    currentDuelRoomCode = null;
+    exitToMenu();
   }
 
   // --- KANAL (GRUP) KURMA VE KATILMA SİSTEMİ ---
@@ -1750,7 +1924,7 @@
     container.innerHTML = '';
 
     if (userFriends.length === 0) {
-      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:8px;">Henüz özel sohbet edecek arkadaşın yok.</div>`;
+      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:8px;">Henüz arkadaşın yok.</div>`;
       return;
     }
 
@@ -2034,9 +2208,10 @@
     document.getElementById('chat-message-input').value = summaryText;
   }
 
-  // --- ARKADAŞLIK SİSTEMİ ---
+  // --- KUSURSUZ ARKADAŞLIK SİSTEMİ ---
   function openFriendsScreen() {
     renderFriendsList();
+    renderAllRegisteredUsersList();
     showScreen('friends-screen');
   }
 
@@ -2145,36 +2320,7 @@
   }
 
   function renderFriendsList() {
-    const list = document.getElementById('friends-list-container');
-    if (!list) return;
-    list.innerHTML = '';
-
-    if (userFriends.length === 0) {
-      list.innerHTML = `<div style="text-align:center; color:#64748b; font-size:9px; padding:10px;">Henüz arkadaşınız yok.</div>`;
-      return;
-    }
-
-    const friendsWithScores = userFriends.map(f => {
-      const bestRecord = leaderboardData.find(lb => lb.uid === f.uid);
-      return { ...f, score: bestRecord ? bestRecord.score : 0 };
-    });
-
-    friendsWithScores.sort((a, b) => b.score - a.score);
-
-    friendsWithScores.forEach((f, idx) => {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <div style="cursor:pointer; display:flex; align-items:center; gap:4px;" onclick="openPrivateChat('${f.username}', '${f.uid}')">
-          <span style="font-weight:bold; color:#fbbf24;">#${idx+1}</span>
-          <span style="color:#25D366;">●</span>
-          <b>${f.username}</b>
-          <span style="font-size:8px; color:#34d399;">(${f.score} P)</span>
-        </div>
-        <button class="icon-btn exit-btn" onclick="removeFriend('${f.uid}', '${f.username}')">Sil</button>
-      `;
-      list.appendChild(row);
-    });
+    renderAllRegisteredUsersList();
   }
 
   // --- AYARLAR & SERBEST UNVAN SEÇİMİ ---
@@ -2218,7 +2364,7 @@
 
   function selectMode(key, btn) {
     selectedModeKey = key;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.mode-btn-box').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     updateMenuRatesPreview();
   }
