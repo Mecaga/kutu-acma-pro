@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <title>Kutu Açma Pro - Ultimate Social</title>
+  <title>Kutu Açma Pro - Cloud & Social</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -192,7 +192,7 @@
     /* EKRANLAR */
     #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, 
     #mines-game-screen, #catch-summary-screen, 
-    #chats-hub-screen, #chat-screen, #group-manage-screen, #friends-screen, #achievements-screen, #quests-screen, #profile-screen, #user-inspect-screen, #settings-screen {
+    #chats-hub-screen, #chat-screen, #group-manage-screen, #friends-screen, #profile-screen, #user-inspect-screen, #settings-screen {
       display: none;
       flex-direction: column;
       height: 100%;
@@ -214,19 +214,20 @@
 
     .nav-extra-bar {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 4px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
       width: 100%;
       flex-shrink: 0;
+      margin-bottom: 2px;
     }
 
     .nav-extra-btn {
-      padding: 7px 1px;
+      padding: 8px 2px;
       background: #190a30;
       border: 1px solid #6b21a8;
       border-radius: 6px;
       color: #e879f9;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: bold;
       cursor: pointer;
       text-align: center;
@@ -588,31 +589,6 @@
     .btn-accept { background: #10b981; border: none; padding: 4px 8px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 9px; }
     .btn-reject { background: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 9px; margin-left: 2px; }
 
-    /* İLERLEME ÇUBUĞU */
-    .progress-bar-bg {
-      width: 100%;
-      height: 6px;
-      background: #200c3b;
-      border-radius: 3px;
-      overflow: hidden;
-      margin-top: 3px;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #9333ea, #34d399);
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-
-    .tier-header {
-      font-size: 10px;
-      font-weight: 900;
-      color: #fbbf24;
-      margin: 6px 0 2px 0;
-      padding-left: 2px;
-      text-transform: uppercase;
-    }
-
     /* MODAL */
     .modal-overlay {
       display: none;
@@ -706,8 +682,6 @@
           👥 Arkadaşlar
           <div class="badge-dot" id="friend-badge"></div>
         </div>
-        <div class="nav-extra-btn" onclick="openQuestsScreen()">🎯 Görevler</div>
-        <div class="nav-extra-btn" onclick="openAchievements()">🏆 Başarımlar</div>
       </div>
 
       <div class="mode-grid">
@@ -717,11 +691,11 @@
         </button>
         <button class="mode-btn" onclick="selectMode('ten_cases', this)">
           📦 10 Kutu Modu (Süresiz)
-          <div style="font-size:7px; color:#94a3b8;">Tam 10 kutu açma hakkı</div>
+          <div style="font-size:7px; color:#94a3b8;">Tam 10 kutu açma hakkı (Kozmik Hüküm İçerir)</div>
         </button>
         <button class="mode-btn" onclick="selectMode('catch_open', this)">
           🎯 Yakala & Aç Modu (15s)
-          <div style="font-size:7px; color:#94a3b8;">Sınırlı kutuları topla, aç</div>
+          <div style="font-size:7px; color:#94a3b8;">Sınırlı kutuları topla, aç (Uranus Şansı)</div>
         </button>
         <button class="mode-btn" onclick="selectMode('upgrade_mode', this)">
           📈 Şans Yükseltme Modu (7 Kutu)
@@ -951,31 +925,7 @@
     <div class="scroll-list" id="friends-list-container"></div>
   </div>
 
-  <!-- 10. GÖREVLER (GÜNLÜK & HAFTALIK) -->
-  <div id="quests-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">🎯 Günlük & Haftalık Görevler</div>
-      <div></div>
-    </div>
-
-    <div class="scroll-list" id="quests-list-container"></div>
-    <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
-  </div>
-
-  <!-- 11. BAŞARIMLAR (7 KADEMELİ ZORLUK BLOĞU) -->
-  <div id="achievements-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">🏆 Kademeli Başarımlar</div>
-      <div></div>
-    </div>
-
-    <div class="scroll-list" id="achievements-list-container"></div>
-    <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
-  </div>
-
-  <!-- 12. KENDİ PROFİL & MOD BAZLI KAZANMA İSTATİSTİKLERİ -->
+  <!-- 10. KENDİ PROFİL & MOD BAZLI KAZANMA İSTATİSTİKLERİ -->
   <div id="profile-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -990,7 +940,7 @@
       
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; width:100%;">
         <div class="stat-card" style="text-align:center;">
-          <div class="stat-title">TOPLAM OYUN</div>
+          <div class="stat-title">AÇILAN KASA</div>
           <div class="stat-val score-val" id="prof-boxes-txt">0</div>
         </div>
         <div class="stat-card" style="text-align:center;">
@@ -1006,7 +956,7 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
   </div>
 
-  <!-- 13. OYUNCU İNCELEME KARTI (ARKADAŞ EKLE / ÇIKIŞ BUTONLU) -->
+  <!-- 11. OYUNCU İNCELEME KARTI -->
   <div id="user-inspect-screen" class="modal-overlay" style="z-index: 80;">
     <div class="modal-card" style="gap:6px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1036,7 +986,7 @@
     </div>
   </div>
 
-  <!-- 14. AYARLAR & UNVAN SEÇİMİ -->
+  <!-- 12. AYARLAR & RASTGELE UNVAN SEÇİMİ -->
   <div id="settings-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -1050,14 +1000,14 @@
         <button class="icon-btn" id="audio-toggle-btn" onclick="toggleAudioSetting()">Açık</button>
       </div>
 
-      <div style="font-size:11px; font-weight:bold; color:#38bdf8; width:100%; margin-top:6px;">Kazanılan Unvanlar:</div>
-      <div class="scroll-list" style="width:100%; gap:4px;" id="titles-container"></div>
+      <div style="font-size:11px; font-weight:bold; color:#38bdf8; width:100%; margin-top:6px;">Unvanını Seç (Serbest Havuz):</div>
+      <div class="scroll-list" style="width:100%; gap:4px; max-height:160px;" id="titles-container"></div>
     </div>
 
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kaydet & Kapat</button>
   </div>
 
-  <!-- 15. SIRALAMA VE OYUNCU DETAY MODALI (ÜSTTE AÇILIR) -->
+  <!-- 13. SIRALAMA VE OYUNCU DETAY MODALI (ÜSTTE AÇILIR) -->
   <div id="details-modal" class="modal-overlay" style="z-index: 70;">
     <div class="modal-card">
       <div style="text-align:center; font-weight:bold; font-size:12px; color:#fbbf24; cursor:pointer;" id="detail-player-title" onclick="inspectPlayerFromDetail()">👤 Oyuncu Detayı (Profile Bak)</div>
@@ -1123,6 +1073,12 @@
 <!-- JAVASCRIPT & CLOUD SYNC -->
 <script>
   let isAudioEnabled = true;
+
+  const ALL_TITLES_POOL = [
+    'Çaylak', 'Kutucu', 'Avcı', 'Bomba İmha', 'Üstat', 
+    'Tanrısal', 'Milyoner', 'Astronot', 'Galaktik', 'Kozmik Efendi', 
+    'Evrenin Hakimi', 'Kuantum Varlığı', 'Ölümsüz', 'Ejderha Süvarisi'
+  ];
 
   const AudioEngine = {
     ctx: null,
@@ -1232,10 +1188,11 @@
       name: "10 Kutu Modu",
       tiers: [
         { name: 'Classic', rate: 35.0, minP: 2, maxP: 5, color: '#ffffff', items: ['Gelişmiş Kalkan', 'Bronz Zırh'] },
-        { name: 'Super',   rate: 35.0, minP: 6, maxP: 15, color: '#38bdf8', items: ['Safir Kılıç', 'Titan Başlığı'] },
+        { name: 'Super',   rate: 34.8, minP: 6, maxP: 15, color: '#38bdf8', items: ['Safir Kılıç', 'Titan Başlığı'] },
         { name: 'Ultra',   rate: 20.0, minP: 20, maxP: 50, color: '#c084fc', items: ['Karanlık Asa', 'Yıldırım Yayı'] },
         { name: 'Omega',   rate: 8.5,  minP: 60, maxP: 200, color: '#fb923c', items: ['Kıyamet Baltası', 'Zaman Tacı'] },
-        { name: 'Godly',   rate: 1.5,  minP: 600, maxP: 1200, color: '#f43f5e', items: ['Tanrısal Hüküm Kılıcı'] }
+        { name: 'Godly',   rate: 1.5,  minP: 600, maxP: 1200, color: '#f43f5e', items: ['Tanrısal Hüküm Kılıcı'] },
+        { name: 'Kozmik Hüküm (Cosmic)', rate: 0.2, minP: 3500, maxP: 3500, color: '#e879f9', items: ['Kozmik Hükümdar Asası'] }
       ]
     },
     catch_open: {
@@ -1267,37 +1224,9 @@
     }
   };
 
-  const ACHIEVEMENTS_DEF = [
-    { id: 'ez_1', tier: 'Kolay', title: 'İlk Adım', desc: 'Toplam 10 kasa aç', icon: '🌱', target: 10, titleReward: 'Çırak' },
-    { id: 'ez_2', tier: 'Kolay', title: 'Sohbetçi', desc: 'Sohbette 5 mesaj gönder', icon: '💬', target: 5, titleReward: 'Konuşkan' },
-    { id: 'med_1', tier: 'Orta', title: 'Kasa Bağımlısı', desc: 'Toplam 25 kasa aç', icon: '📦', target: 25, titleReward: 'Kutucu' },
-    { id: 'med_2', tier: 'Orta', title: 'Puan Avcısı', desc: 'Tek oyunda 100+ puan topla', icon: '🔥', target: 100, titleReward: 'Avcı' },
-    { id: 'hard_1', tier: 'Zor', title: 'Mayın Uzmanı', desc: 'Mayın modunda 5 güvenli kasa aç', icon: '💣', target: 5, titleReward: 'Bomba İmha' },
-    { id: 'hard_2', tier: 'Zor', title: 'Kasa Ustası', desc: 'Toplam 50 kasa açılışı yap', icon: '💎', target: 50, titleReward: 'Üstat' },
-    { id: 'ultra_1', tier: 'Ultra Zor', title: 'Tanrısal Dokunuş', desc: '1 adet Godly eşya düşür', icon: '👑', target: 1, titleReward: 'Tanrısal' },
-    { id: 'ultra_2', tier: 'Ultra Zor', title: 'Hazine Zengini', desc: 'Tek oyunda 300+ puan topla', icon: '💰', target: 300, titleReward: 'Milyoner' },
-    { id: 'space_1', tier: 'Uzay Zor', title: 'Yıldız Gezgini', desc: 'Toplam 100 kasa açılışı yap', icon: '🚀', target: 100, titleReward: 'Astronot' },
-    { id: 'space_2', tier: 'Uzay Zor', title: 'Galaksi Lideri', desc: 'Tek oyunda 500+ puana ulaş', icon: '🌌', target: 500, titleReward: 'Galaktik' },
-    { id: 'cosmic_1', tier: 'Kozmik Zor', title: 'Kozmik Hükümdar', desc: 'Toplam 200 kasa açılışı yap', icon: '🪐', target: 200, titleReward: 'Kozmik Efendi' },
-    { id: 'cosmic_2', tier: 'Kozmik Zor', title: 'Evrenin Zirvesi', desc: 'Tek oyunda 750+ puan topla', icon: '✨', target: 750, titleReward: 'Evrenin Hakimi' },
-    { id: 'quantum_1', tier: 'Kuantum Zor', title: 'Kuantum Tanrısı', desc: 'Toplam 500 kasa açılışı yap', icon: '⚛️', target: 500, titleReward: 'Kuantum Varlığı' },
-    { id: 'quantum_2', tier: 'Kuantum Zor', title: 'Sonsuzluk Matrisi', desc: 'Tek oyunda 1000+ puan topla', icon: '♾️', target: 1000, titleReward: 'Ölümsüz' }
-  ];
-
-  const QUESTS_DEF = [
-    { id: 'd_1', type: 'Günlük', title: 'Günün Kutu Avı', desc: 'Bugün 5 kasa aç', target: 5, rewardP: 50 },
-    { id: 'd_2', type: 'Günlük', title: 'Sohbet Vakti', desc: 'Bugün sohbete 3 mesaj yaz', target: 3, rewardP: 30 },
-    { id: 'd_3', type: 'Günlük', title: 'Mayın Riskçisi', desc: 'Mayın modunda 1 kez puan çek', target: 1, rewardP: 40 },
-    { id: 'w_1', type: 'Haftalık', title: 'Haftanın Şampiyonu', desc: 'Bu hafta 30 kasa aç', target: 30, rewardP: 200 },
-    { id: 'w_2', type: 'Haftalık', title: 'Büyük Hazine Avı', desc: 'Hafta boyunca tek oyunda 250+ puan yap', target: 250, rewardP: 250 }
-  ];
-
   let leaderboardData = [];
-  let userAchievementsProgress = {};
-  let userQuestsProgress = {};
   let userFriends = [];
   let userGroups = [];
-  let userTitles = ['Çaylak'];
   let currentTitle = 'Çaylak';
   let currentUser = null;
   let currentUid = null;
@@ -1309,7 +1238,6 @@
   let totalBoxesOpened = 0;
   let userHighScore = 0;
   let totalMessagesSent = 0;
-  let godlyFoundCount = 0;
   let userModeStats = {};
   let currentlyInspectingUser = null;
 
@@ -1394,7 +1322,6 @@
               username: fullUsername,
               createdAt: Date.now(),
               title: 'Çaylak',
-              titles: ['Çaylak'],
               boxesOpened: 0,
               highScore: 0,
               modeStats: {}
@@ -1442,7 +1369,7 @@
       'auth-screen', 'menu-screen', 'game-screen',
       'catch-game-screen', 'inventory-screen', 'mines-game-screen', 
       'catch-summary-screen', 'chats-hub-screen', 'chat-screen', 'group-manage-screen', 
-      'friends-screen', 'achievements-screen', 'quests-screen', 'profile-screen', 'settings-screen'
+      'friends-screen', 'profile-screen', 'settings-screen'
     ];
     screens.forEach(id => {
       const el = document.getElementById(id);
@@ -1475,24 +1402,12 @@
       const data = snapshot.val();
       if (data) {
         currentTitle = data.title || 'Çaylak';
-        userTitles = data.titles || ['Çaylak'];
         totalBoxesOpened = data.boxesOpened || 0;
         userHighScore = data.highScore || 0;
         totalMessagesSent = data.messagesSent || 0;
-        godlyFoundCount = data.godlyCount || 0;
         userModeStats = data.modeStats || {};
         document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser} [${currentTitle}]` + (isAdmin ? " (👑 Admin)" : "");
       }
-    });
-
-    db.ref(`users/${currentUid}/achievementsProgress`).on('value', (snapshot) => {
-      userAchievementsProgress = snapshot.val() || {};
-      renderAchievementsList();
-    });
-
-    db.ref(`users/${currentUid}/questsProgress`).on('value', (snapshot) => {
-      userQuestsProgress = snapshot.val() || {};
-      renderQuestsList();
     });
 
     db.ref(`users/${currentUid}/friends`).on('value', (snapshot) => {
@@ -1868,8 +1783,6 @@
     if (firebaseReady && db && currentUid) {
       db.ref(`users/${currentUid}/messagesSent`).set(totalMessagesSent);
     }
-    updateAchievementProgress('ez_2', totalMessagesSent);
-    updateQuestProgress('d_2', 1);
 
     if (activeChatTarget === "global") {
       if (firebaseReady && db) db.ref('global_chat').push(chatData);
@@ -2052,13 +1965,12 @@
     });
   }
 
+  // --- AYARLAR & SERBEST UNVAN SEÇİMİ ---
   function openSettings() {
     const container = document.getElementById('titles-container');
     container.innerHTML = '';
 
-    const uniqueTitles = [...new Set(userTitles)];
-
-    uniqueTitles.forEach(t => {
+    ALL_TITLES_POOL.forEach(t => {
       const isCurrent = t === currentTitle;
       const btn = document.createElement('button');
       btn.className = 'btn-action';
@@ -2076,135 +1988,8 @@
     if (firebaseReady && db && currentUid) {
       db.ref(`users/${currentUid}/title`).set(titleName);
     }
-    showToast(`Unvanın [${titleName}] olarak değiştirildi!`);
+    showToast(`Unvanın [${titleName}] olarak seçildi!`);
     openSettings();
-  }
-
-  // --- GÖREVLER EKRANI ---
-  function openQuestsScreen() {
-    renderQuestsList();
-    showScreen('quests-screen');
-  }
-
-  function renderQuestsList() {
-    const list = document.getElementById('quests-list-container');
-    if (!list) return;
-    list.innerHTML = '';
-
-    QUESTS_DEF.forEach(q => {
-      const currentVal = userQuestsProgress[q.id] || 0;
-      const target = q.target;
-      const isCompleted = currentVal >= target;
-      const displayVal = Math.min(currentVal, target);
-      const percentage = Math.min(100, (displayVal / target) * 100);
-
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.style.flexDirection = 'column';
-      row.style.alignItems = 'stretch';
-      row.style.border = isCompleted ? '1px solid #10b981' : '1px solid #fbbf24';
-
-      row.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <span style="font-size:8px; background:#4c1d95; padding:1px 4px; border-radius:3px;">${q.type}</span>
-            <b style="color:${isCompleted ? '#34d399' : '#fff'}; margin-left:2px;">${q.title}</b>
-            <div style="font-size:7px; color:#94a3b8;">${q.desc} (+${q.rewardP} Puan Ödülü)</div>
-          </div>
-          <b style="color:${isCompleted ? '#34d399' : '#fbbf24'}; font-size:9px;">${displayVal} / ${target}</b>
-        </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
-        </div>
-      `;
-      list.appendChild(row);
-    });
-  }
-
-  function updateQuestProgress(id, addVal) {
-    const current = userQuestsProgress[id] || 0;
-    const q = QUESTS_DEF.find(item => item.id === id);
-    if (q && current < q.target) {
-      userQuestsProgress[id] = current + addVal;
-      if (userQuestsProgress[id] >= q.target) {
-        AudioEngine.playGodly();
-        showToast(`🎯 Görev Tamamlandı: ${q.title}!`);
-      }
-      if (firebaseReady && db && currentUid) {
-        db.ref(`users/${currentUid}/questsProgress`).set(userQuestsProgress);
-      }
-    }
-  }
-
-  // --- KADEMELİ BAŞARIMLAR EKRANI ---
-  function openAchievements() {
-    renderAchievementsList();
-    showScreen('achievements-screen');
-  }
-
-  function renderAchievementsList() {
-    const list = document.getElementById('achievements-list-container');
-    if (!list) return;
-    list.innerHTML = '';
-
-    const tiers = ['Kolay', 'Orta', 'Zor', 'Ultra Zor', 'Uzay Zor', 'Kozmik Zor', 'Kuantum Zor'];
-
-    tiers.forEach(tName => {
-      const header = document.createElement('div');
-      header.className = 'tier-header';
-      header.innerText = `⭐ ${tName} Başarımlar`;
-      list.appendChild(header);
-
-      const tierAch = ACHIEVEMENTS_DEF.filter(a => a.tier === tName);
-      tierAch.forEach(ach => {
-        const currentVal = userAchievementsProgress[ach.id] || 0;
-        const target = ach.target;
-        const isCompleted = currentVal >= target;
-        const displayVal = Math.min(currentVal, target);
-        const percentage = Math.min(100, (displayVal / target) * 100);
-
-        const row = document.createElement('div');
-        row.className = 'item-row';
-        row.style.flexDirection = 'column';
-        row.style.alignItems = 'stretch';
-        row.style.border = isCompleted ? '1px solid #10b981' : '1px solid #3b1466';
-
-        row.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:6px;">
-              <span>${ach.icon}</span>
-              <div>
-                <b style="color:${isCompleted ? '#34d399' : '#fff'};">${ach.title}</b>
-                <div style="font-size:7px; color:#94a3b8;">${ach.desc} (Unvan: ${ach.titleReward})</div>
-              </div>
-            </div>
-            <b style="color:${isCompleted ? '#34d399' : '#fbbf24'}; font-size:9px;">${displayVal} / ${target}</b>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
-          </div>
-        `;
-        list.appendChild(row);
-      });
-    });
-  }
-
-  function updateAchievementProgress(id, value) {
-    const current = userAchievementsProgress[id] || 0;
-    if (value > current) {
-      userAchievementsProgress[id] = value;
-      const ach = ACHIEVEMENTS_DEF.find(a => a.id === id);
-      if (ach && value >= ach.target && !userTitles.includes(ach.titleReward)) {
-        userTitles.push(ach.titleReward);
-        AudioEngine.playGodly();
-        showToast(`🏆 Başarım Tamamlandı: ${ach.title}!`);
-      }
-
-      if (firebaseReady && db && currentUid) {
-        db.ref(`users/${currentUid}/achievementsProgress`).set(userAchievementsProgress);
-        db.ref(`users/${currentUid}/titles`).set(userTitles);
-      }
-    }
   }
 
   function updateMenuRatesPreview() {
@@ -2355,15 +2140,6 @@
     document.getElementById('open-case-btn').disabled = true;
 
     totalBoxesOpened++;
-    updateAchievementProgress('ez_1', totalBoxesOpened);
-    updateAchievementProgress('med_1', totalBoxesOpened);
-    updateAchievementProgress('hard_2', totalBoxesOpened);
-    updateAchievementProgress('space_1', totalBoxesOpened);
-    updateAchievementProgress('cosmic_1', totalBoxesOpened);
-    updateAchievementProgress('quantum_1', totalBoxesOpened);
-    updateQuestProgress('d_1', 1);
-    updateQuestProgress('w_1', 1);
-
     if (firebaseReady && db && currentUid) {
       db.ref(`users/${currentUid}/boxesOpened`).set(totalBoxesOpened);
     }
@@ -2425,11 +2201,6 @@
       if (winDrop.tier.includes('Godly') || winDrop.tier.includes('Kozmik') || winDrop.tier.includes('Uranus')) {
         AudioEngine.playGodly();
         triggerScreenShake();
-        godlyFoundCount++;
-        updateAchievementProgress('ultra_1', godlyFoundCount);
-        if (firebaseReady && db && currentUid) {
-          db.ref(`users/${currentUid}/godlyCount`).set(godlyFoundCount);
-        }
       }
 
       document.getElementById('drop-result-txt').innerHTML = `
@@ -2596,7 +2367,6 @@
     track.style.transform = 'translateX(0px)';
     track.innerHTML = '';
 
-    // Yakala Aç %1 bir üst kademe, %0.01 Uranus şansı
     let chosenTierName = targetBox.tier;
     const isUranusLuck = Math.random() < 0.0001; // %0.01
     const isTierUpgrade = Math.random() < 0.01; // %1
@@ -2651,11 +2421,6 @@
       if (winDrop.tier.includes('Godly') || winDrop.tier.includes('Uranus')) {
         AudioEngine.playGodly();
         triggerScreenShake();
-        godlyFoundCount++;
-        updateAchievementProgress('ultra_1', godlyFoundCount);
-        if (firebaseReady && db && currentUid) {
-          db.ref(`users/${currentUid}/godlyCount`).set(godlyFoundCount);
-        }
       }
 
       renderInventoryGrid();
@@ -2681,15 +2446,7 @@
       const drop = getRandomDrop('catch_open', chosenTierName);
       currentScore += drop.points;
       currentSessionDrops.push(drop);
-      if (drop.tier.includes('Godly') || drop.tier.includes('Uranus')) {
-        godlyFoundCount++;
-        updateAchievementProgress('ultra_1', godlyFoundCount);
-      }
     });
-
-    if (firebaseReady && db && currentUid && godlyFoundCount > 0) {
-      db.ref(`users/${currentUid}/godlyCount`).set(godlyFoundCount);
-    }
 
     renderInventoryGrid();
     setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ: TOPLU AÇILIŞ"), 800);
@@ -2755,14 +2512,12 @@
       document.getElementById('mine-score-txt').innerText = currentScore;
       document.getElementById('mine-status-txt').innerText = `Güvenli: ${safePicksCount}/8`;
 
-      if (safePicksCount >= 5) updateAchievementProgress('hard_1', safePicksCount);
       if (safePicksCount === 8) cashoutMines();
     }
   }
 
   function cashoutMines() {
     document.getElementById('cashout-btn').disabled = true;
-    updateQuestProgress('d_3', 1);
     startSummaryScreen("💰 KASADAN BAŞARIYLA ÇEKİLDİN!");
   }
 
@@ -2795,13 +2550,6 @@
   }
 
   function saveScoreToLeaderboard() {
-    updateAchievementProgress('med_2', currentScore);
-    updateAchievementProgress('ultra_2', currentScore);
-    updateAchievementProgress('space_2', currentScore);
-    updateAchievementProgress('cosmic_2', currentScore);
-    updateAchievementProgress('quantum_2', currentScore);
-    updateQuestProgress('w_2', currentScore);
-
     if (!userModeStats[selectedModeKey]) {
       userModeStats[selectedModeKey] = { played: 0, won: 0, best: 0 };
     }
