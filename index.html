@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kutu Açma Pro - WhatsApp & Sosyal</title>
+  <title>Kutu Açma Pro - Cloud Sync</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -34,7 +34,6 @@
       width: 100%;
       max-width: 420px;
       height: 100vh;
-      max-height: 100vh;
       background: radial-gradient(circle at 50% 20%, #1e0b36 0%, #08020f 100%);
       position: relative;
       display: flex;
@@ -205,6 +204,18 @@
       font-weight: bold;
       cursor: pointer;
       text-align: center;
+      position: relative;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      background: #ef4444;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      display: none;
     }
 
     .mode-grid {
@@ -439,7 +450,6 @@
     .mine-card.safe { border-color: #10b981; background: #064e3b; }
     .mine-card.bomb { border-color: #ef4444; background: #7f1d1d; }
 
-    /* ATEŞ ÇEMBERİ MODU */
     .fire-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -465,7 +475,7 @@
       cursor: pointer;
     }
 
-    /* WHATSAPP TARZI SOHBET */
+    /* WHATSAPP SOHBET */
     .whatsapp-chat-box {
       flex: 1;
       background: #0b141a;
@@ -539,7 +549,6 @@
       font-size: 12px;
     }
 
-    /* ARKADAŞLIK & İSTEK KUTULARI */
     .request-box {
       background: #2d1045;
       border: 1px solid #d946ef;
@@ -621,7 +630,7 @@
     </div>
 
     <div style="font-size:8px; color:#c084fc; text-align:center;">
-      🛡️ Güvenli ve hızlı oyun deneyimi için aramıza katıl!
+      🛡️ Verileriniz bulutta güvenle saklanır!
     </div>
   </div>
 
@@ -638,10 +647,14 @@
     <div class="menu-center">
       <div style="font-size:16px; font-weight:900; color:#d946ef;">KUTU AÇMA</div>
       <div style="font-size:11px; color:#34d399; font-weight:bold;" id="menu-user-greeting">👤 Oyuncu</div>
+      <div style="font-size:8px; color:#94a3b8;" id="menu-uid-tag">ID: -</div>
       
       <div class="nav-extra-bar">
         <div class="nav-extra-btn" onclick="openGlobalChat()">💬 Sohbet</div>
-        <div class="nav-extra-btn" onclick="openFriendsScreen()">👥 Arkadaşlar</div>
+        <div class="nav-extra-btn" onclick="openFriendsScreen()">
+          👥 Arkadaşlar
+          <div class="badge-dot" id="friend-badge"></div>
+        </div>
         <div class="nav-extra-btn" onclick="openAchievements()">🏆 Görevler</div>
       </div>
 
@@ -803,7 +816,7 @@
     <button id="cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
   </div>
 
-  <!-- 7. YENİ MOD: ATEŞ ÇEMBERİ -->
+  <!-- 7. ATEŞ ÇEMBERİ -->
   <div id="fire-game-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -831,7 +844,7 @@
     <button id="fire-cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutFire()">💰 Puanı Güvenle Al</button>
   </div>
 
-  <!-- 8. WHATSAPP TARZI SOHBET EKRANI -->
+  <!-- 8. WHATSAPP SOHBET -->
   <div id="chat-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -867,7 +880,7 @@
     <div class="scroll-list" id="friends-list-container"></div>
   </div>
 
-  <!-- 10. GÖREVLER / BAŞARIMLAR -->
+  <!-- 10. GÖREVLER -->
   <div id="achievements-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -879,7 +892,7 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
   </div>
 
-  <!-- ÖZET VE SIRALAMA MODALLARI -->
+  <!-- ÖZET VE MODALLAR -->
   <div id="catch-summary-screen">
     <div style="text-align:center; font-weight:bold; font-size:13px;" id="summary-title-txt">OYUN ÖZETİ</div>
     <div style="display:flex; justify-content:space-around; margin:4px 0;">
@@ -929,7 +942,7 @@
 
 </div>
 
-<!-- JAVASCRIPT & OYUN MOTORU -->
+<!-- JAVASCRIPT & CLOUD SYNC -->
 <script>
   const AudioEngine = {
     ctx: null,
@@ -1070,10 +1083,11 @@
     { id: 'fire_master', title: 'Alev Terbiyecisi', desc: 'Ateş Çemberinde x3 çarpanına ulaş', icon: '🔥' }
   ];
 
-  let leaderboardData = JSON.parse(localStorage.getItem('kutu_leaderboard') || '[]');
-  let userAchievements = JSON.parse(localStorage.getItem('kutu_achievements') || '[]');
-  let userFriends = JSON.parse(localStorage.getItem('kutu_friends') || '[]');
+  let leaderboardData = [];
+  let userAchievements = [];
+  let userFriends = [];
   let currentUser = null;
+  let currentUid = null;
   let isAdmin = false;
   let authMode = "login";
   let activeChatTarget = "global";
@@ -1098,12 +1112,27 @@
   let fireScore = 20;
   let fireMultiplier = 1.5;
 
-  window.onload = function() {
-    if (auth) { try { auth.signOut(); } catch(e){} }
-    currentUser = null;
-    isAdmin = false;
-    showScreen('auth-screen');
-  };
+  // Sayfa yenilendiğinde Firebase Auth oturumu otomatik algılanır
+  if (firebaseReady && auth) {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUid = user.uid;
+        if (db) {
+          db.ref(`users/${user.uid}/username`).once('value').then(snap => {
+            currentUser = snap.val() || user.email.split('@')[0];
+            isAdmin = (currentUser === "Admin");
+            loginSuccess();
+          });
+        }
+      } else {
+        if (!isAdmin) {
+          currentUser = null;
+          currentUid = null;
+          showScreen('auth-screen');
+        }
+      }
+    });
+  }
 
   function setAuthTab(tab) {
     authMode = tab;
@@ -1122,6 +1151,7 @@
 
     if (rawUser === "admin" && pass === "54321") {
       currentUser = "Admin";
+      currentUid = "admin_root";
       isAdmin = true;
       loginSuccess();
       return;
@@ -1137,18 +1167,28 @@
     if (authMode === 'register') {
       auth.createUserWithEmailAndPassword(email, pass)
         .then((cred) => {
-          if (db) db.ref(`users/${cleanUser}`).set({ username: rawUser, uid: cred.user.uid });
+          currentUid = cred.user.uid;
           currentUser = rawUser;
           isAdmin = false;
+          // Kullanıcı kaydı ve username indeksi
+          if (db) {
+            db.ref(`users/${cred.user.uid}`).set({ username: rawUser, createdAt: Date.now() });
+            db.ref(`usernames/${cleanUser}`).set(cred.user.uid);
+          }
           loginSuccess();
         })
         .catch(err => alert("Kayıt Hatası: " + err.message));
     } else {
       auth.signInWithEmailAndPassword(email, pass)
-        .then(() => {
-          currentUser = rawUser;
-          isAdmin = false;
-          loginSuccess();
+        .then((cred) => {
+          currentUid = cred.user.uid;
+          if (db) {
+            db.ref(`users/${cred.user.uid}/username`).once('value').then(snap => {
+              currentUser = snap.val() || rawUser;
+              isAdmin = false;
+              loginSuccess();
+            });
+          }
         })
         .catch(() => alert("Giriş Başarısız! Hesap yok veya şifre hatalı."));
     }
@@ -1156,6 +1196,7 @@
 
   function loginSuccess() {
     document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}` + (isAdmin ? " (👑 Admin)" : "");
+    document.getElementById('menu-uid-tag').innerText = `ID: ${currentUid ? currentUid.slice(0, 10) + '...' : 'Admin'}`;
     if (document.getElementById('admin-lb-controls')) {
       document.getElementById('admin-lb-controls').style.display = isAdmin ? 'block' : 'none';
     }
@@ -1166,6 +1207,7 @@
   function handleSignOut() {
     if (auth) { try { auth.signOut(); } catch(e){} }
     currentUser = null;
+    currentUid = null;
     isAdmin = false;
     showScreen('auth-screen');
   }
@@ -1191,29 +1233,41 @@
     showScreen('menu-screen');
   }
 
-  // FIREBASE DİNLEYİCİLERİ
+  // FIREBASE BULUT SENKRONİZASYONU
   function listenFirebaseData() {
-    if (!firebaseReady || !db || !currentUser) return;
+    if (!firebaseReady || !db || !currentUid) return;
 
     // Leaderboard
     db.ref('leaderboard').on('value', (snapshot) => {
       const val = snapshot.val();
       if (val) {
         leaderboardData = Object.keys(val).map(key => ({ id: key, ...val[key] }));
-        localStorage.setItem('kutu_leaderboard', JSON.stringify(leaderboardData));
         validateLeaderboard();
         renderLeaderboard();
       }
     });
 
+    // Kullanıcı Başarımları (Buluttan Çekilir)
+    db.ref(`users/${currentUid}/achievements`).on('value', (snapshot) => {
+      userAchievements = snapshot.val() || [];
+    });
+
+    // Arkadaş Listesi (Buluttan Çekilir)
+    db.ref(`users/${currentUid}/friends`).on('value', (snapshot) => {
+      userFriends = snapshot.val() ? Object.values(snapshot.val()) : [];
+      renderFriendsList();
+    });
+
     // Arkadaşlık İstekleri
-    const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
-    db.ref(`friend_requests/${cleanUser}`).on('value', (snapshot) => {
-      renderFriendRequests(snapshot.val());
+    db.ref(`friend_requests/${currentUid}`).on('value', (snapshot) => {
+      const reqs = snapshot.val();
+      const dot = document.getElementById('friend-badge');
+      if (dot) dot.style.display = (reqs && Object.keys(reqs).length > 0) ? 'block' : 'none';
+      renderFriendRequests(reqs);
     });
   }
 
-  // --- WHATSAPP TARZI SOHBET ---
+  // --- WHATSAPP SOHBET ---
   function openGlobalChat() {
     activeChatTarget = "global";
     document.getElementById('chat-header-title').innerText = "💬 Canlı Global Sohbet";
@@ -1226,15 +1280,12 @@
     }
   }
 
-  function openPrivateChat(friendName) {
+  function openPrivateChat(friendName, friendUid) {
     activeChatTarget = friendName;
     document.getElementById('chat-header-title').innerText = `💬 ${friendName}`;
     showScreen('chat-screen');
 
-    const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const cleanFriend = friendName.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const chatRoomId = [cleanUser, cleanFriend].sort().join('_');
-
+    const chatRoomId = [currentUid, friendUid].sort().join('_');
     if (firebaseReady && db) {
       db.ref(`private_chats/${chatRoomId}`).limitToLast(30).on('value', (snapshot) => {
         renderWhatsAppChat(snapshot.val());
@@ -1252,6 +1303,7 @@
 
     const chatData = {
       sender: currentUser,
+      senderUid: currentUid,
       isAdmin: isAdmin,
       message: msg,
       time: timeStr,
@@ -1261,10 +1313,11 @@
     if (activeChatTarget === "global") {
       if (firebaseReady && db) db.ref('global_chat').push(chatData);
     } else {
-      const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const cleanFriend = activeChatTarget.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const chatRoomId = [cleanUser, cleanFriend].sort().join('_');
-      if (firebaseReady && db) db.ref(`private_chats/${chatRoomId}`).push(chatData);
+      const friendObj = userFriends.find(f => f.username === activeChatTarget);
+      if (friendObj) {
+        const chatRoomId = [currentUid, friendObj.uid].sort().join('_');
+        if (firebaseReady && db) db.ref(`private_chats/${chatRoomId}`).push(chatData);
+      }
     }
 
     input.value = "";
@@ -1281,7 +1334,7 @@
     }
 
     Object.values(data).forEach(m => {
-      const isMe = m.sender === currentUser;
+      const isMe = (m.senderUid === currentUid || m.sender === currentUser);
       const bubble = document.createElement('div');
       bubble.className = `msg-bubble ${isMe ? 'msg-outgoing' : 'msg-incoming'}`;
       bubble.innerHTML = `
@@ -1296,7 +1349,7 @@
 
   function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
-  // --- ARKADAŞLIK İSTEĞİ (KABUL / REDDET) ---
+  // --- KAYITLI KULLANICI KONTROLLÜ ARKADAŞLIK SİSTEMİ ---
   function openFriendsScreen() {
     renderFriendsList();
     showScreen('friends-screen');
@@ -1308,20 +1361,30 @@
     if (!target) return;
 
     if (target.toLowerCase() === currentUser.toLowerCase()) {
-      alert("Kendine istek atamazsın!");
+      alert("Kendinize istek atamazsınız!");
       return;
     }
 
     const cleanTarget = target.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
 
     if (firebaseReady && db) {
-      db.ref(`friend_requests/${cleanTarget}/${cleanUser}`).set({
-        sender: currentUser,
-        timestamp: Date.now()
-      }).then(() => {
-        alert(`${target} kullanıcısına arkadaşlık isteği gönderildi!`);
-        input.value = "";
+      // Hedef kullanıcının veritabanında kayıtlı olup olmadığını kontrol et
+      db.ref(`usernames/${cleanTarget}`).once('value').then(snapshot => {
+        const targetUid = snapshot.val();
+        if (!targetUid) {
+          alert("HATA: Bu kullanıcı adına sahip kayıtlı bir oyuncu bulunamadı!");
+          return;
+        }
+
+        // İstek gönderme
+        db.ref(`friend_requests/${targetUid}/${currentUid}`).set({
+          sender: currentUser,
+          senderUid: currentUid,
+          timestamp: Date.now()
+        }).then(() => {
+          alert(`${target} oyuncusuna arkadaşlık isteği gönderildi!`);
+          input.value = "";
+        });
       });
     }
   }
@@ -1336,46 +1399,43 @@
       return;
     }
 
-    Object.keys(requests).forEach(reqKey => {
-      const req = requests[reqKey];
+    Object.keys(requests).forEach(senderUid => {
+      const req = requests[senderUid];
       const box = document.createElement('div');
       box.className = 'request-box';
       box.innerHTML = `
         <span>👤 <b>${req.sender}</b></span>
         <div>
-          <button class="btn-accept" onclick="acceptFriend('${req.sender}', '${reqKey}')">Kabul Et</button>
-          <button class="btn-reject" onclick="rejectFriend('${reqKey}')">Reddet</button>
+          <button class="btn-accept" onclick="acceptFriend('${req.sender}', '${req.senderUid}')">Kabul Et</button>
+          <button class="btn-reject" onclick="rejectFriend('${req.senderUid}')">Reddet</button>
         </div>
       `;
       container.appendChild(box);
     });
   }
 
-  function acceptFriend(friendName, reqKey) {
-    if (!userFriends.includes(friendName)) {
-      userFriends.push(friendName);
-      localStorage.setItem('kutu_friends', JSON.stringify(userFriends));
+  function acceptFriend(friendName, friendUid) {
+    if (firebaseReady && db && currentUid) {
+      // Karşılıklı bulut arkadaş listesine ekleme
+      db.ref(`users/${currentUid}/friends/${friendUid}`).set({ username: friendName, uid: friendUid });
+      db.ref(`users/${friendUid}/friends/${currentUid}`).set({ username: currentUser, uid: currentUid });
+      db.ref(`friend_requests/${currentUid}/${friendUid}`).remove();
     }
-    const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (firebaseReady && db) {
-      db.ref(`friend_requests/${cleanUser}/${reqKey}`).remove();
-    }
-    renderFriendsList();
     alert(`${friendName} ile artık arkadaşsınız!`);
   }
 
-  function rejectFriend(reqKey) {
-    const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (firebaseReady && db) {
-      db.ref(`friend_requests/${cleanUser}/${reqKey}`).remove();
+  function rejectFriend(senderUid) {
+    if (firebaseReady && db && currentUid) {
+      db.ref(`friend_requests/${currentUid}/${senderUid}`).remove();
     }
   }
 
-  function removeFriend(target) {
-    if (confirm(`${target} arkadaş listenden silinsin mi?`)) {
-      userFriends = userFriends.filter(f => f !== target);
-      localStorage.setItem('kutu_friends', JSON.stringify(userFriends));
-      renderFriendsList();
+  function removeFriend(friendUid, friendName) {
+    if (confirm(`${friendName} arkadaş listenden silinsin mi?`)) {
+      if (firebaseReady && db && currentUid) {
+        db.ref(`users/${currentUid}/friends/${friendUid}`).remove();
+        db.ref(`users/${friendUid}/friends/${currentUid}`).remove();
+      }
     }
   }
 
@@ -1385,7 +1445,7 @@
     list.innerHTML = '';
 
     if (userFriends.length === 0) {
-      list.innerHTML = `<div style="text-align:center; color:#64748b; font-size:9px; padding:10px;">Henüz arkadaşın yok.</div>`;
+      list.innerHTML = `<div style="text-align:center; color:#64748b; font-size:9px; padding:10px;">Henüz arkadaşınız yok.</div>`;
       return;
     }
 
@@ -1393,18 +1453,18 @@
       const row = document.createElement('div');
       row.className = 'item-row';
       row.innerHTML = `
-        <div style="cursor:pointer; display:flex; align-items:center; gap:4px;" onclick="openPrivateChat('${f}')">
+        <div style="cursor:pointer; display:flex; align-items:center; gap:4px;" onclick="openPrivateChat('${f.username}', '${f.uid}')">
           <span style="color:#25D366;">●</span>
-          <b>${f}</b>
+          <b>${f.username}</b>
           <span style="font-size:7px; color:#a855f7;">(Mesaj At)</span>
         </div>
-        <button class="icon-btn exit-btn" onclick="removeFriend('${f}')">Sil</button>
+        <button class="icon-btn exit-btn" onclick="removeFriend('${f.uid}', '${f.username}')">Sil</button>
       `;
       list.appendChild(row);
     });
   }
 
-  // --- 6. MOD: ATEŞ ÇEMBERİ ---
+  // --- ATEŞ ÇEMBERİ ---
   function startFireMode() {
     fireScore = 20;
     fireMultiplier = 1.5;
@@ -1471,7 +1531,7 @@
     startSummaryScreen("💰 ALEVLERDEN ZAFERLE ÇIKTIN!");
   }
 
-  // --- BAŞARIMLAR ---
+  // --- BAŞARIMLAR (BULUT TABANLI) ---
   function openAchievements() {
     const list = document.getElementById('achievements-list-container');
     list.innerHTML = '';
@@ -1499,12 +1559,14 @@
   function unlockAchievement(id) {
     if (!userAchievements.includes(id)) {
       userAchievements.push(id);
-      localStorage.setItem('kutu_achievements', JSON.stringify(userAchievements));
+      if (firebaseReady && db && currentUid) {
+        db.ref(`users/${currentUid}/achievements`).set(userAchievements);
+      }
       AudioEngine.playGodly();
     }
   }
 
-  // --- OYUN AKIŞI ---
+  // --- OYUN AKIŞI & ORANLAR ---
   function updateMenuRatesPreview() {
     const preview = document.getElementById('menu-rates-preview');
     const currentTiers = GAME_MODES[selectedModeKey].tiers;
@@ -2032,6 +2094,7 @@
 
     const record = {
       name: currentUser,
+      uid: currentUid,
       modeKey: selectedModeKey,
       modeName: GAME_MODES[selectedModeKey].name,
       score: currentScore,
@@ -2040,12 +2103,8 @@
       timestamp: Date.now()
     };
 
-    leaderboardData.push(record);
-    validateLeaderboard();
-    localStorage.setItem('kutu_leaderboard', JSON.stringify(leaderboardData));
-
     if (firebaseReady && db) {
-      try { db.ref('leaderboard').push(record); } catch (e) {}
+      db.ref('leaderboard').push(record);
     }
   }
 
@@ -2110,10 +2169,7 @@
   function confirmClearLeaderboard() {
     if (!isAdmin) return;
     if (confirm("Skor tablosundaki tüm veriler silinsin mi?")) {
-      leaderboardData = [];
-      localStorage.removeItem('kutu_leaderboard');
       if (firebaseReady && db) db.ref('leaderboard').remove();
-      renderLeaderboard();
     }
   }
 
