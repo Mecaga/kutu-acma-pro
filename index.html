@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kutu Açma Pro - Ultimate</title>
+  <title>Kutu Açma Pro - Online & Sosyal</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -34,6 +34,7 @@
       width: 100%;
       max-width: 420px;
       height: 100vh;
+      max-height: 100vh;
       background: radial-gradient(circle at 50% 20%, #1e0b36 0%, #08020f 100%);
       position: relative;
       display: flex;
@@ -43,7 +44,6 @@
       overflow: hidden;
     }
 
-    /* Sarsıntı Animasyonu */
     .shake-effect {
       animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
     }
@@ -61,7 +61,7 @@
       align-items: center;
       justify-content: space-between;
       height: 100%;
-      padding: 10px 4px;
+      padding: 8px 4px;
       overflow-y: auto;
     }
 
@@ -77,31 +77,31 @@
     }
 
     .brand-title {
-      font-size: 30px;
+      font-size: 28px;
       font-weight: 900;
       color: #ffffff;
       text-shadow: 0 0 15px #c084fc, 0 0 25px #9333ea;
       line-height: 1.1;
       margin-top: 2px;
     }
-    .brand-sub { font-size: 24px; font-weight: 900; color: #e879f9; text-shadow: 0 0 15px #db2777; }
+    .brand-sub { font-size: 22px; font-weight: 900; color: #e879f9; text-shadow: 0 0 15px #db2777; }
 
     .auth-card-panel {
       width: 100%;
       background: rgba(18, 7, 34, 0.85);
       border: 2px solid #a855f7;
       box-shadow: 0 0 20px rgba(168, 85, 247, 0.35);
-      border-radius: 18px;
-      padding: 14px 12px;
+      border-radius: 16px;
+      padding: 12px 10px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .auth-tab-switch {
       display: flex;
       background: rgba(10, 3, 20, 0.8);
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 3px;
       border: 1px solid #3b1466;
     }
@@ -113,7 +113,7 @@
       font-size: 12px;
       font-weight: bold;
       color: #a855f7;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
     }
 
@@ -131,19 +131,19 @@
 
     .input-wrap-icon {
       position: absolute;
-      left: 12px;
-      font-size: 14px;
+      left: 10px;
+      font-size: 13px;
       color: #c084fc;
     }
 
     .neon-input {
       width: 100%;
-      padding: 10px 12px 10px 38px;
+      padding: 9px 10px 9px 34px;
       background: #0d041a;
       border: 1.5px solid #6b21a8;
-      border-radius: 10px;
+      border-radius: 8px;
       color: #fff;
-      font-size: 13px;
+      font-size: 12px;
       outline: none;
     }
 
@@ -154,15 +154,15 @@
 
     .btn-neon-action {
       width: 100%;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 11px;
+      border-radius: 8px;
       border: none;
       background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%);
       color: #fff;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       cursor: pointer;
-      box-shadow: 0 0 15px rgba(217, 70, 239, 0.5);
+      box-shadow: 0 0 12px rgba(217, 70, 239, 0.5);
     }
 
     .auth-divider {
@@ -170,7 +170,7 @@
       align-items: center;
       text-align: center;
       color: #a855f7;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: bold;
     }
     .auth-divider::before, .auth-divider::after {
@@ -183,18 +183,18 @@
 
     .btn-alt-action {
       width: 100%;
-      padding: 10px;
-      border-radius: 10px;
+      padding: 9px;
+      border-radius: 8px;
       border: 1.5px solid #a855f7;
       background: rgba(46, 16, 84, 0.4);
       color: #f0abfc;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
       cursor: pointer;
     }
 
     .auth-footer-note {
-      font-size: 10px;
+      font-size: 9px;
       color: #c084fc;
       text-align: center;
       display: flex;
@@ -208,39 +208,41 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       flex-shrink: 0;
     }
 
-    .app-title { font-size: 15px; font-weight: 800; color: #fff; }
+    .app-title { font-size: 14px; font-weight: 800; color: #fff; }
     .header-actions { display: flex; gap: 4px; }
 
     .icon-btn {
       background: #1b0e2f;
       border: 1px solid #6b21a8;
       color: #fff;
-      padding: 5px 8px;
+      padding: 4px 7px;
       border-radius: 6px;
       font-size: 10px;
       font-weight: bold;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     .exit-btn { background: #7f1d1d; border-color: #ef4444; color: #fff; }
 
     /* --- MENÜ VE İÇ EKRANLAR --- */
-    #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, #mines-game-screen, #catch-summary-screen, #craft-screen, #collection-screen {
+    #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, 
+    #mines-game-screen, #catch-summary-screen, #chat-screen, #friends-screen, #achievements-screen {
       display: none;
       flex-direction: column;
       height: 100%;
       justify-content: space-between;
-      gap: 6px;
+      gap: 5px;
     }
 
     .menu-center {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
       align-items: center;
       margin: auto 0;
       width: 100%;
@@ -248,29 +250,31 @@
     }
 
     .user-greeting {
-      font-size: 12px;
+      font-size: 11px;
       color: #34d399;
       font-weight: bold;
     }
 
     .nav-extra-bar {
-      display: flex;
-      gap: 6px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
       width: 100%;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
+      flex-shrink: 0;
     }
 
     .nav-extra-btn {
-      flex: 1;
-      padding: 8px;
+      padding: 7px 2px;
       background: #190a30;
       border: 1px solid #6b21a8;
-      border-radius: 8px;
+      border-radius: 6px;
       color: #e879f9;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: bold;
       cursor: pointer;
       text-align: center;
+      white-space: nowrap;
     }
 
     .mode-grid {
@@ -285,7 +289,7 @@
       border: 1px solid #3b1466;
       color: #cbd5e1;
       padding: 6px 8px;
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 10px;
       cursor: pointer;
       text-align: left;
@@ -309,7 +313,7 @@
 
     .btn-start {
       width: 100%;
-      padding: 11px;
+      padding: 10px;
       border-radius: 8px;
       border: none;
       background: linear-gradient(135deg, #10b981, #059669);
@@ -317,12 +321,12 @@
       font-size: 13px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
       flex-shrink: 0;
     }
 
     .footer-credits {
-      font-size: 9px;
+      font-size: 8px;
       color: #64748b;
       text-align: left;
       line-height: 1.2;
@@ -348,7 +352,7 @@
     .stat-card.timer { border-color: #ef4444; }
     .stat-card.score { border-color: #10b981; text-align: right; }
     .stat-title { font-size: 8px; color: #94a3b8; }
-    .stat-val { font-size: 13px; font-weight: bold; }
+    .stat-val { font-size: 12px; font-weight: bold; }
     .timer-val { color: #f87171; }
     .score-val { color: #34d399; }
     .user-tag { font-size: 8px; color: #c084fc; }
@@ -358,7 +362,7 @@
       border: 1px solid #4c1d95;
       border-radius: 6px;
       padding: 3px 6px;
-      font-size: 9px;
+      font-size: 8px;
       flex-shrink: 0;
     }
 
@@ -371,16 +375,16 @@
       justify-content: center;
       align-items: center;
       background: #080210;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid #3b1466;
       position: relative;
       overflow: hidden;
-      min-height: 110px;
+      min-height: 100px;
     }
 
     .roulette-wrapper {
       width: 100%;
-      height: 75px;
+      height: 70px;
       position: relative;
       display: none;
       overflow: hidden;
@@ -398,7 +402,7 @@
       background: #ef4444;
       transform: translateX(-50%);
       z-index: 10;
-      box-shadow: 0 0 10px #ef4444;
+      box-shadow: 0 0 8px #ef4444;
     }
 
     .roulette-track {
@@ -406,12 +410,12 @@
       position: absolute;
       left: 0;
       top: 2px;
-      height: 71px;
+      height: 66px;
     }
 
     .roulette-item {
-      width: 72px;
-      height: 71px;
+      width: 68px;
+      height: 66px;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
@@ -424,7 +428,7 @@
       padding: 2px;
     }
 
-    .ready-banner { font-size: 18px; font-weight: 900; color: #fff; text-align: center; }
+    .ready-banner { font-size: 17px; font-weight: 900; color: #fff; text-align: center; }
     .ready-sub { font-size: 10px; color: #fbbf24; margin-top: 2px; text-align: center; }
 
     .drop-info-panel {
@@ -444,8 +448,8 @@
 
     .btn-action {
       width: 100%;
-      padding: 11px;
-      font-size: 13px;
+      padding: 10px;
+      font-size: 12px;
       font-weight: bold;
       border-radius: 8px;
       border: none;
@@ -475,8 +479,8 @@
 
     .falling-box {
       position: absolute;
-      width: 48px;
-      height: 48px;
+      width: 45px;
+      height: 45px;
       border-radius: 8px;
       display: flex;
       flex-direction: column;
@@ -493,7 +497,7 @@
     .inv-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
+      gap: 4px;
       flex: 1;
       overflow-y: auto;
       padding: 4px;
@@ -504,7 +508,7 @@
     }
 
     .inv-card {
-      height: 60px;
+      height: 55px;
       border-radius: 6px;
       display: flex;
       flex-direction: column;
@@ -533,7 +537,7 @@
       background: #080210;
       border: 1px solid #3b1466;
       border-radius: 8px;
-      padding: 6px;
+      padding: 4px;
       align-content: center;
     }
 
@@ -554,6 +558,42 @@
     .mine-card.safe { border-color: #10b981; background: #064e3b; }
     .mine-card.bomb { border-color: #ef4444; background: #7f1d1d; }
 
+    /* --- CHAT EKRANI --- */
+    .chat-box {
+      flex: 1;
+      background: #090312;
+      border: 1px solid #3b1466;
+      border-radius: 8px;
+      padding: 6px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .chat-msg {
+      padding: 4px 6px;
+      border-radius: 6px;
+      background: #160829;
+      font-size: 10px;
+      word-break: break-word;
+    }
+
+    .chat-sender {
+      font-weight: bold;
+      color: #c084fc;
+      margin-right: 4px;
+    }
+
+    .chat-admin { color: #f43f5e !important; }
+    .chat-time { font-size: 8px; color: #64748b; margin-left: 4px; }
+
+    .chat-input-bar {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
     /* MODAL */
     .modal-overlay {
       display: none;
@@ -569,12 +609,11 @@
     .modal-card {
       background: #110521;
       border: 1.5px solid #6b21a8;
-      border-radius: 12px;
+      border-radius: 10px;
       padding: 10px;
       max-height: 90%;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 0 20px rgba(107, 33, 168, 0.5);
     }
 
     .modal-header {
@@ -587,17 +626,17 @@
 
     .filter-tabs {
       display: flex;
-      gap: 4px;
+      gap: 3px;
       overflow-x: auto;
-      padding-bottom: 4px;
-      margin-bottom: 6px;
+      padding-bottom: 3px;
+      margin-bottom: 4px;
     }
 
     .tab-btn {
       background: #1c0b33;
       border: 1px solid #4c1d95;
       color: #c084fc;
-      padding: 3px 6px;
+      padding: 3px 5px;
       border-radius: 4px;
       font-size: 8px;
       white-space: nowrap;
@@ -616,14 +655,14 @@
       gap: 3px;
       flex: 1;
       overflow-y: auto;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .item-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 5px 8px;
+      padding: 4px 6px;
       border-radius: 6px;
       background: #18082d;
       font-size: 9px;
@@ -642,18 +681,19 @@
       font-weight: bold;
       border: none;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     .btn-close { background: #ef4444; color: #fff; }
     .btn-secondary { background: #9333ea; color: #fff; margin-bottom: 4px; }
-    .btn-danger { background: #b91c1c; color: #fff; margin-top: 6px; }
+    .btn-danger { background: #b91c1c; color: #fff; margin-top: 4px; }
   </style>
 </head>
 <body>
 
 <div id="app-container">
 
-  <!-- 1. GİRİŞ / KAYIT EKRANI -->
+  <!-- ==================== 1. GİRİŞ / KAYIT EKRANI ==================== -->
   <div id="auth-screen">
     <div class="auth-header-logo">
       <div class="chest-icon">👑📦</div>
@@ -685,11 +725,11 @@
     </div>
 
     <div class="auth-footer-note">
-      <span>🛡️</span> Güvenli ve hızlı oyun deneyimi için kutu açma dünyasına katıl!
+      <span>🛡️</span> Güvenli ve hızlı oyun deneyimi için aramıza katıl!
     </div>
   </div>
 
-  <!-- 2. OYUN ANA MENÜSÜ -->
+  <!-- ==================== 2. OYUN ANA MENÜSÜ ==================== -->
   <div id="menu-screen">
     <div class="top-header">
       <div class="app-title">Kutu Açma Pro</div>
@@ -700,12 +740,14 @@
     </div>
 
     <div class="menu-center">
-      <div style="font-size:20px; font-weight:900; color:#d946ef; text-shadow:0 0 15px #d946ef;">KUTU AÇMA</div>
+      <div style="font-size:18px; font-weight:900; color:#d946ef; text-shadow:0 0 15px #d946ef;">KUTU AÇMA</div>
       <div class="user-greeting" id="menu-user-greeting">👤 Oyuncu</div>
       
+      <!-- Sosyal ve Başarım Barı -->
       <div class="nav-extra-bar">
-        <div class="nav-extra-btn" onclick="openCollection()">📜 Koleksiyon</div>
-        <div class="nav-extra-btn" onclick="openCrafting()">⚒️ Demirci (Craft)</div>
+        <div class="nav-extra-btn" onclick="openGlobalChat()">💬 Canlı Sohbet</div>
+        <div class="nav-extra-btn" onclick="openFriendsScreen()">👥 Arkadaşlar</div>
+        <div class="nav-extra-btn" onclick="openAchievements()">🏆 Başarımlar</div>
       </div>
 
       <div class="mode-grid">
@@ -742,7 +784,7 @@
     </div>
   </div>
 
-  <!-- 3. KLASİK / 10 KUTU / ŞANS YÜKSELTME EKRANI -->
+  <!-- ==================== 3. OYUN EKRANLARI ==================== -->
   <div id="game-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
@@ -825,7 +867,7 @@
       </div>
     </div>
 
-    <div class="case-container" style="min-height: 90px; flex:none;">
+    <div class="case-container" style="min-height: 80px; flex:none;">
       <div id="inv-ready-view" style="text-align:center;">
         <div style="font-size:11px; color:#94a3b8;">Açmak istediğin kutuya dokun!</div>
       </div>
@@ -863,36 +905,51 @@
     <button id="cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
   </div>
 
-  <!-- DEMİRCİ / CRAFT EKRANI -->
-  <div id="craft-screen">
+  <!-- ==================== 4. CANLI GLOBAL CHAT EKRANI ==================== -->
+  <div id="chat-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">Demirci (Eşya Yükselt)</div>
+      <div style="font-size:12px; font-weight:bold; color:#d946ef;" id="chat-header-title">💬 Canlı Global Sohbet</div>
       <div></div>
     </div>
 
-    <div style="font-size:10px; color:#c084fc; text-align:center; padding:4px;">
-      3 adet aynı nadirlikteki eşyayı feda edip 1 üst kademe eşya üret!
+    <div class="chat-box" id="global-chat-box"></div>
+
+    <div class="chat-input-bar">
+      <input type="text" id="chat-message-input" class="neon-input" placeholder="Bir mesaj yaz..." style="padding-left:10px;">
+      <button class="icon-btn" style="background:#9333ea;" onclick="sendChatMessage()">Gönder</button>
     </div>
-
-    <div class="scroll-list" id="craft-items-list"></div>
-
-    <button class="btn-action" style="background:#9333ea;" onclick="executeCrafting()">⚒️ Yükseltmeyi Başlat</button>
   </div>
 
-  <!-- KOLEKSİYON EKRANI -->
-  <div id="collection-screen">
+  <!-- ==================== 5. ARKADAŞLAR & ÖZEL MESAJ ==================== -->
+  <div id="friends-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">Koleksiyon Albümü</div>
+      <div style="font-size:12px; font-weight:bold; color:#d946ef;">👥 Arkadaşlarım</div>
       <div></div>
     </div>
 
-    <div style="font-size:10px; color:#34d399; font-weight:bold; text-align:center; margin-bottom:4px;" id="collection-progress-txt">
-      Koleksiyon: 0 / 0 Tamamlandı
+    <div style="display:flex; gap:4px; margin-bottom:4px;">
+      <input type="text" id="add-friend-input" class="neon-input" placeholder="Arkadaşının Kullanıcı Adı" style="padding-left:10px;">
+      <button class="icon-btn" style="background:#10b981;" onclick="addFriend()">Ekle</button>
     </div>
 
-    <div class="scroll-list" id="collection-items-list"></div>
+    <div class="scroll-list" id="friends-list-container"></div>
+
+    <div style="font-size:9px; color:#94a3b8; text-align:center;">
+      Mesajlaşmak için arkadaşının üzerine dokun!
+    </div>
+  </div>
+
+  <!-- ==================== 6. BAŞARIMLAR EKRANI ==================== -->
+  <div id="achievements-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:12px; font-weight:bold; color:#d946ef;">🏆 Başarımlar</div>
+      <div></div>
+    </div>
+
+    <div class="scroll-list" id="achievements-list-container"></div>
 
     <button class="btn-modal btn-close" onclick="exitToMenu()">Menüye Dön</button>
   </div>
@@ -933,7 +990,7 @@
     </div>
   </div>
 
-  <!-- SIRALAMA MODALI (İLK 10 & ADMİN SIFIRLAMA) -->
+  <!-- SIRALAMA MODALI (İLK 10) -->
   <div id="leaderboard-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">🏆 SIRALAMA TABLOSU (İLK 10)</div>
@@ -972,9 +1029,9 @@
 
 </div>
 
-<!-- JAVASCRIPT & AUDIO SİSTEMİ -->
+<!-- JAVASCRIPT MOTORU & FIREBASE ENTEGRASYONU -->
 <script>
-  // Web Audio API Ses Sentezleyicisi (Harici ses dosyası gerektirmez)
+  // Web Audio API Ses Sentezleyicisi
   const AudioEngine = {
     ctx: null,
     init() {
@@ -1052,7 +1109,7 @@
     db = firebase.database();
     firebaseReady = true;
   } catch (err) {
-    console.warn("Firebase durumu:", err);
+    console.warn("Firebase hazır değil:", err);
   }
 
   const GAME_MODES = {
@@ -1104,11 +1161,22 @@
     }
   };
 
+  const ACHIEVEMENTS_DEF = [
+    { id: 'first_game', title: 'İlk Adım', desc: 'Herhangi bir modu tamamla', icon: '🎮' },
+    { id: 'godly_find', title: 'Tanrısal Dokunuş', desc: 'Bir kutudan Godly eşya çıkar', icon: '👑' },
+    { id: 'score_100', title: 'Puan Avcısı', desc: 'Tek oyunda 100+ puan topla', icon: '🔥' },
+    { id: 'mines_master', title: 'Mayın Uzmanı', desc: 'Mayınlı modda 5 güvenli kasa aç ve çekil', icon: '💣' },
+    { id: 'catch_pro', title: 'Hızlı Parmaklar', desc: 'Yakala & Aç modunda en az 8 kutu topla', icon: '🎯' },
+    { id: 'chat_active', title: 'Sosyalleşme', desc: 'Global sohbete mesaj gönder', icon: '💬' }
+  ];
+
   let leaderboardData = JSON.parse(localStorage.getItem('kutu_leaderboard') || '[]');
-  let userInventory = JSON.parse(localStorage.getItem('kutu_inventory') || '[]');
+  let userAchievements = JSON.parse(localStorage.getItem('kutu_achievements') || '[]');
+  let userFriends = JSON.parse(localStorage.getItem('kutu_friends') || '[]');
   let currentUser = null;
   let isAdmin = false;
   let authMode = "login";
+  let activeChatTarget = "global"; // "global" veya arkadaş kullanıcı adı
 
   let selectedModeKey = 'standard';
   let currentScore = 0;
@@ -1137,6 +1205,7 @@
     updateAdminUI();
   };
 
+  // Realtime Database Dinleyicileri
   if (firebaseReady && db) {
     try {
       db.ref('leaderboard').on('value', (snapshot) => {
@@ -1155,9 +1224,16 @@
           renderLeaderboard();
         }
       });
+
+      // Global Chat Dinleyicisi
+      db.ref('global_chat').limitToLast(40).on('value', (snapshot) => {
+        const val = snapshot.val();
+        renderChatMessages(val);
+      });
     } catch (e) {}
   }
 
+  // --- AUTH SİSTEMİ ---
   function setAuthTab(tab) {
     authMode = tab;
     document.getElementById('tab-login').classList.toggle('active', tab === 'login');
@@ -1276,7 +1352,7 @@
     const screens = [
       'auth-screen', 'menu-screen', 'game-screen',
       'catch-game-screen', 'inventory-screen', 'mines-game-screen', 
-      'catch-summary-screen', 'craft-screen', 'collection-screen'
+      'catch-summary-screen', 'chat-screen', 'friends-screen', 'achievements-screen'
     ];
     screens.forEach(id => {
       const el = document.getElementById(id);
@@ -1294,6 +1370,187 @@
     showScreen('menu-screen');
   }
 
+  // --- ONLINE CHAT SİSTEMİ ---
+  function openGlobalChat() {
+    activeChatTarget = "global";
+    document.getElementById('chat-header-title').innerText = "💬 Canlı Global Sohbet";
+    showScreen('chat-screen');
+  }
+
+  function sendChatMessage() {
+    const input = document.getElementById('chat-message-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const chatData = {
+      sender: currentUser,
+      isAdmin: isAdmin,
+      message: msg,
+      time: timeStr,
+      timestamp: Date.now()
+    };
+
+    if (activeChatTarget === "global") {
+      if (firebaseReady && db) {
+        db.ref('global_chat').push(chatData);
+      }
+      unlockAchievement('chat_active');
+    } else {
+      // Özel Arkadaş Sohbeti
+      const chatRoomId = [currentUser, activeChatTarget].sort().join('_');
+      if (firebaseReady && db) {
+        db.ref(`private_chats/${chatRoomId}`).push(chatData);
+      }
+    }
+
+    input.value = "";
+  }
+
+  function renderChatMessages(data) {
+    const box = document.getElementById('global-chat-box');
+    if (!box) return;
+    box.innerHTML = '';
+
+    if (!data) {
+      box.innerHTML = `<div style="text-align:center; color:#64748b; font-size:10px; margin-top:20px;">Henüz mesaj yok. İlk mesajı sen yaz!</div>`;
+      return;
+    }
+
+    Object.values(data).forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'chat-msg';
+      row.innerHTML = `
+        <span class="chat-sender ${m.isAdmin ? 'chat-admin' : ''}">${m.isAdmin ? '👑 ' : ''}${m.sender}:</span>
+        <span>${escapeHtml(m.message)}</span>
+        <span class="chat-time">${m.time || ''}</span>
+      `;
+      box.appendChild(row);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  // --- ARKADAŞLAR SİSTEMİ ---
+  function openFriendsScreen() {
+    renderFriendsList();
+    showScreen('friends-screen');
+  }
+
+  function addFriend() {
+    const input = document.getElementById('add-friend-input');
+    const target = input.value.trim();
+    if (!target) return;
+
+    if (target.toLowerCase() === currentUser.toLowerCase()) {
+      alert("Kendini arkadaş olarak ekleyemezsin!");
+      return;
+    }
+
+    if (userFriends.includes(target)) {
+      alert("Bu kullanıcı zaten arkadaş listende var!");
+      return;
+    }
+
+    userFriends.push(target);
+    localStorage.setItem('kutu_friends', JSON.stringify(userFriends));
+    input.value = "";
+    renderFriendsList();
+    alert(`${target} arkadaş listene eklendi!`);
+  }
+
+  function removeFriend(target) {
+    if (confirm(`${target} arkadaş listenden çıkarılsın mı?`)) {
+      userFriends = userFriends.filter(f => f !== target);
+      localStorage.setItem('kutu_friends', JSON.stringify(userFriends));
+      renderFriendsList();
+    }
+  }
+
+  function openPrivateChatWith(friendName) {
+    activeChatTarget = friendName;
+    document.getElementById('chat-header-title').innerText = `💬 Özel: ${friendName}`;
+    showScreen('chat-screen');
+
+    const chatRoomId = [currentUser, friendName].sort().join('_');
+    if (firebaseReady && db) {
+      db.ref(`private_chats/${chatRoomId}`).limitToLast(40).on('value', (snapshot) => {
+        renderChatMessages(snapshot.val());
+      });
+    }
+  }
+
+  function renderFriendsList() {
+    const list = document.getElementById('friends-list-container');
+    list.innerHTML = '';
+
+    if (userFriends.length === 0) {
+      list.innerHTML = `<div style="text-align:center; color:#64748b; padding:15px;">Henüz arkadaş eklemedin.</div>`;
+      return;
+    }
+
+    userFriends.forEach(f => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <div style="cursor:pointer; display:flex; align-items:center; gap:6px;" onclick="openPrivateChatWith('${f}')">
+          <span style="color:#34d399;">●</span>
+          <span style="font-weight:bold; color:#fff;">${f}</span>
+          <span style="font-size:8px; color:#c084fc;">(Mesaj Gönder)</span>
+        </div>
+        <button class="icon-btn exit-btn" onclick="removeFriend('${f}')">Sil</button>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  // --- BAŞARIMLAR SİSTEMİ ---
+  function openAchievements() {
+    const list = document.getElementById('achievements-list-container');
+    list.innerHTML = '';
+
+    ACHIEVEMENTS_DEF.forEach(ach => {
+      const unlocked = userAchievements.includes(ach.id);
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.style.border = unlocked ? '1px solid #10b981' : '1px solid #3b1466';
+      row.style.background = unlocked ? '#06281e' : '#140624';
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:16px;">${ach.icon}</span>
+          <div>
+            <div style="font-weight:bold; color:${unlocked ? '#34d399' : '#fff'};">${ach.title}</div>
+            <div style="font-size:8px; color:#94a3b8;">${ach.desc}</div>
+          </div>
+        </div>
+        <div style="font-weight:bold; color:${unlocked ? '#34d399' : '#64748b'};">
+          ${unlocked ? '✓ Tamamlandı' : 'Kilitli'}
+        </div>
+      `;
+      list.appendChild(row);
+    });
+
+    showScreen('achievements-screen');
+  }
+
+  function unlockAchievement(id) {
+    if (!userAchievements.includes(id)) {
+      userAchievements.push(id);
+      localStorage.setItem('kutu_achievements', JSON.stringify(userAchievements));
+      AudioEngine.playGodly();
+      const ach = ACHIEVEMENTS_DEF.find(a => a.id === id);
+      if (ach) {
+        alert(`🏆 BAŞARIM AÇILDI!\n${ach.title}: ${ach.desc}`);
+      }
+    }
+  }
+
+  // --- OYUN MEKANİKLERİ ---
   function updateMenuRatesPreview() {
     const preview = document.getElementById('menu-rates-preview');
     const currentTiers = GAME_MODES[selectedModeKey].tiers;
@@ -1483,14 +1740,13 @@
       track.appendChild(card);
     }
 
-    // Tık sesi ritmi
     let tickInterval = setInterval(() => AudioEngine.playTick(), 100);
     setTimeout(() => clearInterval(tickInterval), 2800);
 
     setTimeout(() => {
       track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
-      const itemWidth = 72;
-      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 14 - 7);
+      const itemWidth = 68;
+      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 12 - 6);
       track.style.transform = `translateX(${target}px)`;
     }, 20);
 
@@ -1498,11 +1754,11 @@
       currentScore += winDrop.points;
       document.getElementById('score-txt').innerText = currentScore;
       currentSessionDrops.push(winDrop);
-      saveItemToInventory(winDrop);
 
       if (winDrop.tier.includes('Godly') || winDrop.tier.includes('Kozmik')) {
         AudioEngine.playGodly();
         triggerScreenShake();
+        unlockAchievement('godly_find');
       }
 
       document.getElementById('drop-result-txt').innerHTML = `
@@ -1563,6 +1819,8 @@
         clearInterval(spawnInterval);
         catchAnimationFrames.forEach(cancelAnimationFrame);
         catchAnimationFrames = [];
+
+        if (caughtBoxes.length >= 8) unlockAchievement('catch_pro');
 
         arena.innerHTML = `
           <div style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fbbf24; font-weight:bold; font-size:15px;">
@@ -1704,8 +1962,8 @@
 
     setTimeout(() => {
       track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
-      const itemWidth = 72;
-      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 14 - 7);
+      const itemWidth = 68;
+      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 12 - 6);
       track.style.transform = `translateX(${target}px)`;
     }, 20);
 
@@ -1713,12 +1971,12 @@
       targetBox.opened = true;
       currentScore += winDrop.points;
       currentSessionDrops.push(winDrop);
-      saveItemToInventory(winDrop);
       isOpening = false;
 
       if (winDrop.tier.includes('Godly')) {
         AudioEngine.playGodly();
         triggerScreenShake();
+        unlockAchievement('godly_find');
       }
 
       renderInventoryGrid();
@@ -1783,7 +2041,6 @@
       const drop = getRandomDrop('mines_mode');
       currentScore += drop.points;
       currentSessionDrops.push(drop);
-      saveItemToInventory(drop);
 
       cardEl.classList.add('safe');
       cardEl.innerHTML = `
@@ -1794,6 +2051,7 @@
       document.getElementById('mine-score-txt').innerText = currentScore;
       document.getElementById('mine-status-txt').innerText = `Güvenli: ${safePicksCount}/8`;
 
+      if (safePicksCount >= 5) unlockAchievement('mines_master');
       if (safePicksCount === 8) cashoutMines();
     }
   }
@@ -1837,6 +2095,9 @@
   }
 
   function saveScoreToLeaderboard() {
+    unlockAchievement('first_game');
+    if (currentScore >= 100) unlockAchievement('score_100');
+
     const now = new Date();
     const dateStr = `${now.getDate()} Ağu 2026 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
@@ -1866,108 +2127,6 @@
       return calculatedSum === player.score;
     });
     leaderboardData.sort((a, b) => b.score - a.score);
-  }
-
-  // --- KALICI ENVANTER & DEMİRCİ SİSTEMİ ---
-  function saveItemToInventory(drop) {
-    if (!drop || drop.tier === "Mayın") return;
-    userInventory.push({ ...drop, date: Date.now() });
-    localStorage.setItem('kutu_inventory', JSON.stringify(userInventory));
-  }
-
-  function openCollection() {
-    const list = document.getElementById('collection-items-list');
-    list.innerHTML = '';
-
-    const allItems = [];
-    Object.values(GAME_MODES).forEach(m => {
-      m.tiers.forEach(t => {
-        t.items.forEach(it => {
-          allItems.push({ name: it, tier: t.name, color: t.color });
-        });
-      });
-    });
-
-    const uniqueOwned = [...new Set(userInventory.map(i => i.item))];
-    document.getElementById('collection-progress-txt').innerText = `Koleksiyon: ${uniqueOwned.length} / ${allItems.length} Tamamlandı`;
-
-    allItems.forEach(it => {
-      const owned = uniqueOwned.includes(it.name);
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.style.opacity = owned ? '1' : '0.4';
-      row.innerHTML = `
-        <div>
-          <span style="color:${it.color}; font-weight:bold;">[${it.tier}]</span> 
-          <span>${it.name}</span>
-        </div>
-        <div style="font-size:9px; color:${owned ? '#34d399' : '#64748b'};">${owned ? '✓ Bulundu' : 'Kilitli'}</div>
-      `;
-      list.appendChild(row);
-    });
-
-    showScreen('collection-screen');
-  }
-
-  function openCrafting() {
-    const list = document.getElementById('craft-items-list');
-    list.innerHTML = '';
-
-    const tierCounts = {};
-    userInventory.forEach(it => {
-      tierCounts[it.tier] = (tierCounts[it.tier] || 0) + 1;
-    });
-
-    const tiers = ['Classic', 'Super', 'Ultra', 'Omega'];
-    tiers.forEach((tName, idx) => {
-      const count = tierCounts[tName] || 0;
-      const nextTier = tiers[idx + 1] || 'Godly';
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <div>
-          <span style="font-weight:bold;">3x ${tName}</span> ➔ <span style="color:#d946ef; font-weight:bold;">1x ${nextTier}</span>
-        </div>
-        <div style="color:${count >= 3 ? '#34d399' : '#f87171'}; font-weight:bold;">${count}/3 Adet</div>
-      `;
-      list.appendChild(row);
-    });
-
-    showScreen('craft-screen');
-  }
-
-  function executeCrafting() {
-    const tierCounts = {};
-    userInventory.forEach(it => {
-      tierCounts[it.tier] = (tierCounts[it.tier] || 0) + 1;
-    });
-
-    const upgradeTier = ['Classic', 'Super', 'Ultra', 'Omega'].find(t => (tierCounts[t] || 0) >= 3);
-    if (!upgradeTier) {
-      alert("Yükseltme yapmak için en az 3 adet aynı nadirlikte eşyaya sahip olmalısınız!");
-      return;
-    }
-
-    let removed = 0;
-    userInventory = userInventory.filter(it => {
-      if (it.tier === upgradeTier && removed < 3) {
-        removed++;
-        return false;
-      }
-      return true;
-    });
-
-    const nextTiersMap = { Classic: 'Super', Super: 'Ultra', Ultra: 'Omega', Omega: 'Godly' };
-    const targetTierName = nextTiersMap[upgradeTier];
-    const newDrop = getRandomDrop('standard', targetTierName);
-
-    userInventory.push(newDrop);
-    localStorage.setItem('kutu_inventory', JSON.stringify(userInventory));
-
-    AudioEngine.playGodly();
-    triggerScreenShake();
-    alert(`Tebrikler! 3x ${upgradeTier} birleştirildi ve 1x [${newDrop.tier}] ${newDrop.item} kazanıldı!`);
-    openCrafting();
   }
 
   // --- SIRALAMA TABLOSU ---
@@ -2083,4 +2242,3 @@
 
 </body>
 </html>
-
