@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <title>Kutu Açma Pro - Cloud & Social</title>
+  <title>Kutu Açma Pro - Cloud & Social Master</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -506,6 +506,7 @@
       display: flex;
       flex-direction: column;
       position: relative;
+      cursor: pointer;
     }
 
     .msg-incoming {
@@ -940,7 +941,7 @@
       
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; width:100%;">
         <div class="stat-card" style="text-align:center;">
-          <div class="stat-title">AÇILAN KASA</div>
+          <div class="stat-title">TOPLAM OYUN</div>
           <div class="stat-val score-val" id="prof-boxes-txt">0</div>
         </div>
         <div class="stat-card" style="text-align:center;">
@@ -1007,7 +1008,21 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kaydet & Kapat</button>
   </div>
 
-  <!-- 13. SIRALAMA VE OYUNCU DETAY MODALI (ÜSTTE AÇILIR) -->
+  <!-- 13. MESAJ İŞLEM MODALI (KOPYALA, SİL, DÜZENLE) -->
+  <div id="message-actions-modal" class="modal-overlay" style="z-index: 90;">
+    <div class="modal-card" style="gap:6px;">
+      <div style="font-size:12px; font-weight:bold; color:#fbbf24; text-align:center;">Mesaj İşlemleri</div>
+      <div style="font-size:9px; color:#94a3b8; text-align:center; padding:4px;" id="action-msg-preview">Mesaj...</div>
+
+      <button class="btn-action" style="background:#0284c7;" onclick="executeCopyMessage()">📋 Mesajı Kopyala</button>
+      <button class="btn-action" style="background:#eab308;" id="action-edit-btn" onclick="executeEditMessage()">✏️ Mesajı Düzenle</button>
+      <button class="btn-action" style="background:#ef4444;" id="action-delete-btn" onclick="executeDeleteMessage()">🗑️ Mesajı Sil</button>
+
+      <button class="btn-modal btn-close" onclick="closeMessageActionsModal()">Vazgeç</button>
+    </div>
+  </div>
+
+  <!-- 14. SIRALAMA VE OYUNCU DETAY MODALI (ÜSTTE AÇILIR) -->
   <div id="details-modal" class="modal-overlay" style="z-index: 70;">
     <div class="modal-card">
       <div style="text-align:center; font-weight:bold; font-size:12px; color:#fbbf24; cursor:pointer;" id="detail-player-title" onclick="inspectPlayerFromDetail()">👤 Oyuncu Detayı (Profile Bak)</div>
@@ -1241,6 +1256,9 @@
   let userModeStats = {};
   let currentlyInspectingUser = null;
 
+  // Mesaj aksiyonları için seçilen mesaj bilgileri
+  let selectedActionMsg = null;
+
   let selectedModeKey = 'standard';
   let currentScore = 0;
   let timeLeft = 30;
@@ -1422,6 +1440,7 @@
       renderHubGroupsList();
     });
 
+    // Arkadaşlık isteklerini canlı dinleme
     db.ref(`friend_requests/${currentUid}`).on('value', (snapshot) => {
       const reqs = snapshot.val();
       const dot = document.getElementById('friend-badge');
@@ -1800,6 +1819,55 @@
     input.value = "";
   }
 
+  // Mesaja tıklanınca açılan işlem menüsü
+  function openMessageActionsModal(dbPath, msgId, rawMsg, senderUid) {
+    selectedActionMsg = { dbPath, msgId, rawMsg, senderUid };
+    document.getElementById('action-msg-preview').innerText = `"${rawMsg}"`;
+
+    const isMine = (senderUid === currentUid || currentUser.toLowerCase().includes('admin'));
+    document.getElementById('action-edit-btn').style.display = isMine ? 'block' : 'none';
+    document.getElementById('action-delete-btn').style.display = isMine ? 'block' : 'none';
+
+    document.getElementById('message-actions-modal').style.display = 'flex';
+  }
+
+  function closeMessageActionsModal() {
+    document.getElementById('message-actions-modal').style.display = 'none';
+    selectedActionMsg = null;
+  }
+
+  function executeCopyMessage() {
+    if (!selectedActionMsg) return;
+    navigator.clipboard.writeText(selectedActionMsg.rawMsg);
+    showToast("Mesaj kopyalandı!");
+    closeMessageActionsModal();
+  }
+
+  function executeEditMessage() {
+    if (!selectedActionMsg) return;
+    const oldText = selectedActionMsg.rawMsg.replace(' (düzenlendi)', '');
+    const newText = prompt("Mesajınızı düzenleyin:", oldText);
+
+    if (newText !== null && newText.trim() !== "" && newText !== oldText) {
+      if (firebaseReady && db) {
+        db.ref(`${selectedActionMsg.dbPath}/${selectedActionMsg.msgId}/message`).set(newText.trim() + " (düzenlendi)");
+        showToast("Mesaj güncellendi!");
+      }
+    }
+    closeMessageActionsModal();
+  }
+
+  function executeDeleteMessage() {
+    if (!selectedActionMsg) return;
+    if (confirm("Bu mesajı silmek istediğinize emin misiniz?")) {
+      if (firebaseReady && db) {
+        db.ref(`${selectedActionMsg.dbPath}/${selectedActionMsg.msgId}`).remove();
+        showToast("Mesaj silindi!");
+      }
+    }
+    closeMessageActionsModal();
+  }
+
   function renderWhatsAppChat(data, dbPath) {
     const box = document.getElementById('chat-messages-box');
     if (!box) return;
@@ -1821,6 +1889,8 @@
         <div>${escapeHtml(m.message)}</div>
         <div class="msg-time">${m.time || ''}</div>
       `;
+
+      bubble.onclick = () => openMessageActionsModal(dbPath, msgKey, m.message, m.senderUid);
       box.appendChild(bubble);
     });
     box.scrollTop = box.scrollHeight;
@@ -1839,7 +1909,7 @@
     document.getElementById('chat-message-input').value = summaryText;
   }
 
-  // --- ONARILMIŞ ARKADAŞLIK SİSTEMİ ---
+  // --- KUSURSUZ ARKADAŞLIK SİSTEMİ ---
   function openFriendsScreen() {
     renderFriendsList();
     showScreen('friends-screen');
@@ -1865,22 +1935,41 @@
     }
 
     if (firebaseReady && db) {
+      // 1. Önce doğrudan usernames tablosunu kontrol et
       db.ref(`usernames/${targetUsername.toLowerCase()}`).once('value').then(snapshot => {
-        const targetUid = snapshot.val();
-        if (!targetUid) {
-          alert("HATA: Bu kullanıcı adına ve etiketine sahip kayıtlı bir oyuncu bulunamadı!");
-          return;
-        }
+        let targetUid = snapshot.val();
 
-        db.ref(`friend_requests/${targetUid}/${currentUid}`).set({
-          sender: currentUser,
-          senderUid: currentUid,
-          timestamp: Date.now()
-        }).then(() => {
-          showToast(`İstek ${targetUsername} kullanıcısına gönderildi!`);
-        });
+        if (targetUid) {
+          executeSendRequest(targetUid, targetUsername);
+        } else {
+          // 2. Yedek olarak users tablosunda tam eşleşme ara
+          db.ref('users').once('value').then(uSnap => {
+            const allUsers = uSnap.val() || {};
+            const foundEntry = Object.entries(allUsers).find(([uid, uData]) => 
+              (uData.username && uData.username.toLowerCase() === targetUsername.toLowerCase())
+            );
+
+            if (foundEntry) {
+              executeSendRequest(foundEntry[0], targetUsername);
+            } else {
+              alert("HATA: Bu kullanıcı adına ve etiketine sahip kayıtlı bir oyuncu bulunamadı!");
+            }
+          });
+        }
       });
     }
+  }
+
+  function executeSendRequest(targetUid, targetUsername) {
+    db.ref(`friend_requests/${targetUid}/${currentUid}`).set({
+      sender: currentUser,
+      senderUid: currentUid,
+      timestamp: Date.now()
+    }).then(() => {
+      showToast(`İstek ${targetUsername} kullanıcısına gönderildi!`);
+    }).catch(err => {
+      alert("İstek gönderme hatası: " + err.message);
+    });
   }
 
   function renderFriendRequests(requests) {
@@ -2368,8 +2457,8 @@
     track.innerHTML = '';
 
     let chosenTierName = targetBox.tier;
-    const isUranusLuck = Math.random() < 0.0001; // %0.01
-    const isTierUpgrade = Math.random() < 0.01; // %1
+    const isUranusLuck = Math.random() < 0.0001;
+    const isTierUpgrade = Math.random() < 0.01;
 
     if (isUranusLuck) {
       chosenTierName = 'Uranus (Gizemli)';
