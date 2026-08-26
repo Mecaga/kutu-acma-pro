@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kutu Açma Pro - Online & Sosyal</title>
+  <title>Kutu Açma Pro - WhatsApp & Sosyal</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -39,14 +39,12 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      padding: 10px;
+      padding: 8px;
       border: 1px solid #2d1254;
       overflow: hidden;
     }
 
-    .shake-effect {
-      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-    }
+    .shake-effect { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
     @keyframes shake {
       10%, 90% { transform: translate3d(-2px, 0, 0); }
       20%, 80% { transform: translate3d(3px, 0, 0); }
@@ -54,20 +52,19 @@
       40%, 60% { transform: translate3d(4px, 0, 0); }
     }
 
-    /* --- GİRİŞ EKRANI --- */
+    /* GİRİŞ EKRANI */
     #auth-screen {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
       height: 100%;
-      padding: 8px 4px;
+      padding: 10px 4px;
       overflow-y: auto;
     }
 
-    .auth-header-logo { text-align: center; margin-top: 5px; }
     .chest-icon {
-      font-size: 45px;
+      font-size: 40px;
       filter: drop-shadow(0 0 15px #a855f7);
       animation: floatChest 3s ease-in-out infinite;
     }
@@ -77,21 +74,21 @@
     }
 
     .brand-title {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 900;
       color: #ffffff;
-      text-shadow: 0 0 15px #c084fc, 0 0 25px #9333ea;
+      text-shadow: 0 0 15px #c084fc;
       line-height: 1.1;
       margin-top: 2px;
+      text-align: center;
     }
-    .brand-sub { font-size: 22px; font-weight: 900; color: #e879f9; text-shadow: 0 0 15px #db2777; }
+    .brand-sub { font-size: 20px; font-weight: 900; color: #e879f9; text-align: center; }
 
     .auth-card-panel {
       width: 100%;
       background: rgba(18, 7, 34, 0.85);
       border: 2px solid #a855f7;
-      box-shadow: 0 0 20px rgba(168, 85, 247, 0.35);
-      border-radius: 16px;
+      border-radius: 14px;
       padding: 12px 10px;
       display: flex;
       flex-direction: column;
@@ -102,15 +99,14 @@
       display: flex;
       background: rgba(10, 3, 20, 0.8);
       border-radius: 8px;
-      padding: 3px;
-      border: 1px solid #3b1466;
+      padding: 2px;
     }
 
     .auth-tab {
       flex: 1;
-      padding: 8px 0;
+      padding: 7px 0;
       text-align: center;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
       color: #a855f7;
       border-radius: 6px;
@@ -120,41 +116,22 @@
     .auth-tab.active {
       background: linear-gradient(135deg, #9333ea, #c026d3);
       color: #ffffff;
-      box-shadow: 0 0 10px rgba(192, 38, 211, 0.6);
-    }
-
-    .input-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .input-wrap-icon {
-      position: absolute;
-      left: 10px;
-      font-size: 13px;
-      color: #c084fc;
     }
 
     .neon-input {
       width: 100%;
-      padding: 9px 10px 9px 34px;
+      padding: 9px 10px;
       background: #0d041a;
       border: 1.5px solid #6b21a8;
       border-radius: 8px;
       color: #fff;
-      font-size: 12px;
+      font-size: 11px;
       outline: none;
-    }
-
-    .neon-input:focus {
-      border-color: #d946ef;
-      box-shadow: 0 0 8px rgba(217, 70, 239, 0.4);
     }
 
     .btn-neon-action {
       width: 100%;
-      padding: 11px;
+      padding: 10px;
       border-radius: 8px;
       border: none;
       background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%);
@@ -162,48 +139,9 @@
       font-size: 13px;
       font-weight: 900;
       cursor: pointer;
-      box-shadow: 0 0 12px rgba(217, 70, 239, 0.5);
     }
 
-    .auth-divider {
-      display: flex;
-      align-items: center;
-      text-align: center;
-      color: #a855f7;
-      font-size: 9px;
-      font-weight: bold;
-    }
-    .auth-divider::before, .auth-divider::after {
-      content: '';
-      flex: 1;
-      border-bottom: 1px solid #4c1d95;
-    }
-    .auth-divider:not(:empty)::before { margin-right: .5em; }
-    .auth-divider:not(:empty)::after { margin-left: .5em; }
-
-    .btn-alt-action {
-      width: 100%;
-      padding: 9px;
-      border-radius: 8px;
-      border: 1.5px solid #a855f7;
-      background: rgba(46, 16, 84, 0.4);
-      color: #f0abfc;
-      font-size: 11px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .auth-footer-note {
-      font-size: 9px;
-      color: #c084fc;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
-
-    /* --- ÜST PANEL & GENEL BUTONLAR --- */
+    /* ÜST PANEL */
     .top-header {
       display: flex;
       justify-content: space-between;
@@ -212,31 +150,31 @@
       flex-shrink: 0;
     }
 
-    .app-title { font-size: 14px; font-weight: 800; color: #fff; }
+    .app-title { font-size: 13px; font-weight: 800; color: #fff; }
     .header-actions { display: flex; gap: 4px; }
 
     .icon-btn {
       background: #1b0e2f;
       border: 1px solid #6b21a8;
       color: #fff;
-      padding: 4px 7px;
+      padding: 4px 6px;
       border-radius: 6px;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: bold;
       cursor: pointer;
       flex-shrink: 0;
     }
 
-    .exit-btn { background: #7f1d1d; border-color: #ef4444; color: #fff; }
+    .exit-btn { background: #7f1d1d; border-color: #ef4444; }
 
-    /* --- MENÜ VE İÇ EKRANLAR --- */
+    /* EKRANLAR */
     #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, 
-    #mines-game-screen, #catch-summary-screen, #chat-screen, #friends-screen, #achievements-screen {
+    #mines-game-screen, #fire-game-screen, #catch-summary-screen, #chat-screen, #friends-screen, #achievements-screen {
       display: none;
       flex-direction: column;
       height: 100%;
       justify-content: space-between;
-      gap: 5px;
+      gap: 4px;
     }
 
     .menu-center {
@@ -249,38 +187,30 @@
       overflow-y: auto;
     }
 
-    .user-greeting {
-      font-size: 11px;
-      color: #34d399;
-      font-weight: bold;
-    }
-
     .nav-extra-bar {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 4px;
       width: 100%;
-      margin-bottom: 2px;
       flex-shrink: 0;
     }
 
     .nav-extra-btn {
-      padding: 7px 2px;
+      padding: 6px 2px;
       background: #190a30;
       border: 1px solid #6b21a8;
       border-radius: 6px;
       color: #e879f9;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: bold;
       cursor: pointer;
       text-align: center;
-      white-space: nowrap;
     }
 
     .mode-grid {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
       width: 100%;
     }
 
@@ -288,9 +218,9 @@
       background: #0f071a;
       border: 1px solid #3b1466;
       color: #cbd5e1;
-      padding: 6px 8px;
+      padding: 5px 7px;
       border-radius: 6px;
-      font-size: 10px;
+      font-size: 9px;
       cursor: pointer;
       text-align: left;
     }
@@ -300,15 +230,6 @@
       color: #fff;
       border-color: #d946ef;
       font-weight: bold;
-    }
-
-    .menu-preview-box {
-      width: 100%;
-      background: rgba(15, 6, 26, 0.9);
-      border: 1px solid #3b1466;
-      border-radius: 6px;
-      padding: 4px 6px;
-      font-size: 9px;
     }
 
     .btn-start {
@@ -321,31 +242,21 @@
       font-size: 13px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
       flex-shrink: 0;
     }
 
-    .footer-credits {
-      font-size: 8px;
-      color: #64748b;
-      text-align: left;
-      line-height: 1.2;
-      flex-shrink: 0;
-    }
-
-    /* --- STAT BAR --- */
+    /* STAT BAR */
     .game-stats-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 2px;
       flex-shrink: 0;
     }
 
     .stat-card {
       background: #110521;
       border: 1px solid #4c1d95;
-      padding: 3px 6px;
+      padding: 3px 5px;
       border-radius: 6px;
     }
 
@@ -361,7 +272,7 @@
       background: rgba(17, 5, 33, 0.95);
       border: 1px solid #4c1d95;
       border-radius: 6px;
-      padding: 3px 6px;
+      padding: 3px 5px;
       font-size: 8px;
       flex-shrink: 0;
     }
@@ -379,12 +290,12 @@
       border: 1px solid #3b1466;
       position: relative;
       overflow: hidden;
-      min-height: 100px;
+      min-height: 90px;
     }
 
     .roulette-wrapper {
       width: 100%;
-      height: 70px;
+      height: 65px;
       position: relative;
       display: none;
       overflow: hidden;
@@ -402,7 +313,6 @@
       background: #ef4444;
       transform: translateX(-50%);
       z-index: 10;
-      box-shadow: 0 0 8px #ef4444;
     }
 
     .roulette-track {
@@ -410,12 +320,12 @@
       position: absolute;
       left: 0;
       top: 2px;
-      height: 66px;
+      height: 61px;
     }
 
     .roulette-item {
-      width: 68px;
-      height: 66px;
+      width: 65px;
+      height: 61px;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
@@ -425,25 +335,7 @@
       background: rgba(22, 9, 41, 0.9);
       font-size: 8px;
       text-align: center;
-      padding: 2px;
-    }
-
-    .ready-banner { font-size: 17px; font-weight: 900; color: #fff; text-align: center; }
-    .ready-sub { font-size: 10px; color: #fbbf24; margin-top: 2px; text-align: center; }
-
-    .drop-info-panel {
-      display: flex;
-      justify-content: flex-end;
-      flex-shrink: 0;
-    }
-
-    .drop-result-badge {
-      background: #110521;
-      border: 1px solid #4c1d95;
-      border-radius: 6px;
-      padding: 3px 6px;
-      font-size: 9px;
-      text-align: right;
+      padding: 1px;
     }
 
     .btn-action {
@@ -457,14 +349,12 @@
       color: white;
       cursor: pointer;
       flex-shrink: 0;
-      box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
     }
 
     .btn-action:disabled {
       background: #231038;
       color: #64748b;
       cursor: not-allowed;
-      box-shadow: none;
     }
 
     .catch-arena {
@@ -474,14 +364,13 @@
       border-radius: 8px;
       position: relative;
       overflow: hidden;
-      touch-action: manipulation;
     }
 
     .falling-box {
       position: absolute;
-      width: 45px;
-      height: 45px;
-      border-radius: 8px;
+      width: 42px;
+      height: 42px;
+      border-radius: 6px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -490,7 +379,6 @@
       font-size: 8px;
       cursor: pointer;
       z-index: 20;
-      box-shadow: 0 0 8px rgba(0,0,0,0.8);
       border: 2px solid;
     }
 
@@ -500,43 +388,36 @@
       gap: 4px;
       flex: 1;
       overflow-y: auto;
-      padding: 4px;
+      padding: 3px;
       background: #080210;
-      border-radius: 8px;
-      border: 1px solid #3b1466;
+      border-radius: 6px;
       align-content: start;
     }
 
     .inv-card {
-      height: 55px;
+      height: 50px;
       border-radius: 6px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 8px;
+      font-size: 7px;
       font-weight: bold;
       cursor: pointer;
       border: 2px solid;
       background: #110521;
       text-align: center;
-      padding: 2px;
     }
 
-    .inv-card.opened {
-      opacity: 0.3;
-      cursor: not-allowed;
-      border-color: #3b1466 !important;
-    }
+    .inv-card.opened { opacity: 0.3; cursor: not-allowed; }
 
     .mines-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
+      gap: 4px;
       flex: 1;
       background: #080210;
-      border: 1px solid #3b1466;
-      border-radius: 8px;
+      border-radius: 6px;
       padding: 4px;
       align-content: center;
     }
@@ -558,41 +439,121 @@
     .mine-card.safe { border-color: #10b981; background: #064e3b; }
     .mine-card.bomb { border-color: #ef4444; background: #7f1d1d; }
 
-    /* --- CHAT EKRANI --- */
-    .chat-box {
+    /* ATEŞ ÇEMBERİ MODU */
+    .fire-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
       flex: 1;
-      background: #090312;
-      border: 1px solid #3b1466;
+      background: #080210;
       border-radius: 8px;
-      padding: 6px;
+      padding: 8px;
+      align-content: center;
+    }
+
+    .fire-card {
+      aspect-ratio: 0.8;
+      background: #1a0505;
+      border: 2px solid #ef4444;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* WHATSAPP TARZI SOHBET */
+    .whatsapp-chat-box {
+      flex: 1;
+      background: #0b141a;
+      border: 1px solid #1f2c34;
+      border-radius: 8px;
+      padding: 8px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
     }
 
-    .chat-msg {
-      padding: 4px 6px;
-      border-radius: 6px;
-      background: #160829;
-      font-size: 10px;
+    .msg-bubble {
+      max-width: 75%;
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: 11px;
       word-break: break-word;
-    }
-
-    .chat-sender {
-      font-weight: bold;
-      color: #c084fc;
-      margin-right: 4px;
-    }
-
-    .chat-admin { color: #f43f5e !important; }
-    .chat-time { font-size: 8px; color: #64748b; margin-left: 4px; }
-
-    .chat-input-bar {
       display: flex;
-      gap: 4px;
-      flex-shrink: 0;
+      flex-direction: column;
     }
+
+    .msg-incoming {
+      align-self: flex-start;
+      background: #202c33;
+      color: #e9edef;
+      border-top-left-radius: 0;
+    }
+
+    .msg-outgoing {
+      align-self: flex-end;
+      background: #005c4b;
+      color: #e9edef;
+      border-top-right-radius: 0;
+    }
+
+    .msg-sender { font-size: 9px; font-weight: bold; color: #53bdeb; margin-bottom: 2px; }
+    .msg-time { font-size: 7px; color: #8696a0; align-self: flex-end; margin-top: 2px; }
+
+    .whatsapp-input-bar {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      flex-shrink: 0;
+      background: #202c33;
+      padding: 4px;
+      border-radius: 20px;
+    }
+
+    .whatsapp-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 11px;
+      padding-left: 10px;
+    }
+
+    .whatsapp-send-btn {
+      background: #00a884;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    /* ARKADAŞLIK & İSTEK KUTULARI */
+    .request-box {
+      background: #2d1045;
+      border: 1px solid #d946ef;
+      border-radius: 6px;
+      padding: 4px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      font-size: 9px;
+    }
+
+    .btn-accept { background: #10b981; border: none; padding: 3px 6px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 8px; }
+    .btn-reject { background: #ef4444; border: none; padding: 3px 6px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 8px; margin-left: 2px; }
 
     /* MODAL */
     .modal-overlay {
@@ -601,7 +562,7 @@
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.92);
       z-index: 50;
-      padding: 10px;
+      padding: 8px;
       flex-direction: column;
       justify-content: center;
     }
@@ -610,82 +571,27 @@
       background: #110521;
       border: 1.5px solid #6b21a8;
       border-radius: 10px;
-      padding: 10px;
+      padding: 8px;
       max-height: 90%;
       display: flex;
       flex-direction: column;
     }
 
-    .modal-header {
-      text-align: center;
-      font-weight: bold;
-      font-size: 13px;
-      margin-bottom: 6px;
-      color: #f8fafc;
-    }
+    .filter-tabs { display: flex; gap: 3px; overflow-x: auto; padding-bottom: 3px; }
+    .tab-btn { background: #1c0b33; border: 1px solid #4c1d95; color: #c084fc; padding: 3px 5px; border-radius: 4px; font-size: 8px; cursor: pointer; }
+    .tab-btn.active { background: #9333ea; color: #fff; font-weight: bold; }
 
-    .filter-tabs {
-      display: flex;
-      gap: 3px;
-      overflow-x: auto;
-      padding-bottom: 3px;
-      margin-bottom: 4px;
-    }
+    .scroll-list { display: flex; flex-direction: column; gap: 3px; flex: 1; overflow-y: auto; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; border-radius: 4px; background: #18082d; font-size: 9px; }
 
-    .tab-btn {
-      background: #1c0b33;
-      border: 1px solid #4c1d95;
-      color: #c084fc;
-      padding: 3px 5px;
-      border-radius: 4px;
-      font-size: 8px;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .tab-btn.active {
-      background: #9333ea;
-      color: #fff;
-      font-weight: bold;
-    }
-
-    .scroll-list {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      flex: 1;
-      overflow-y: auto;
-      margin-bottom: 4px;
-    }
-
-    .item-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 6px;
-      border-radius: 6px;
-      background: #18082d;
-      font-size: 9px;
-    }
-
-    .lb-row { cursor: pointer; font-weight: bold; }
     .rank-1 { background: #fbbf24; color: #000; }
     .rank-2 { background: #cbd5e1; color: #000; }
     .rank-3 { background: #f97316; color: #fff; }
     .rank-green { background: #22c55e; color: #000; }
     .rank-rest { background: #200c3b; color: #c084fc; }
 
-    .btn-modal {
-      padding: 8px;
-      border-radius: 6px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
+    .btn-modal { padding: 8px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; flex-shrink: 0; }
     .btn-close { background: #ef4444; color: #fff; }
-    .btn-secondary { background: #9333ea; color: #fff; margin-bottom: 4px; }
     .btn-danger { background: #b91c1c; color: #fff; margin-top: 4px; }
   </style>
 </head>
@@ -693,9 +599,9 @@
 
 <div id="app-container">
 
-  <!-- ==================== 1. GİRİŞ / KAYIT EKRANI ==================== -->
+  <!-- 1. GİRİŞ EKRANI -->
   <div id="auth-screen">
-    <div class="auth-header-logo">
+    <div style="text-align:center; margin-top:5px;">
       <div class="chest-icon">👑📦</div>
       <div class="brand-title">Kutu Açma</div>
       <div class="brand-sub">Pro</div>
@@ -707,29 +613,19 @@
         <div class="auth-tab" id="tab-register" onclick="setAuthTab('register')">👤+ Kayıt</div>
       </div>
 
-      <div class="input-wrap">
-        <span class="input-wrap-icon">👤</span>
-        <input type="text" id="auth-username" class="neon-input" placeholder="Kullanıcı Adı">
-      </div>
-
-      <div class="input-wrap">
-        <span class="input-wrap-icon">🔒</span>
-        <input type="password" id="auth-password" class="neon-input" placeholder="Şifre">
-      </div>
+      <input type="text" id="auth-username" class="neon-input" placeholder="Kullanıcı Adı">
+      <input type="password" id="auth-password" class="neon-input" placeholder="Şifre">
 
       <button class="btn-neon-action" id="auth-submit-btn" onclick="executeAuth()">🎮 Giriş Yap</button>
-
-      <div class="auth-divider">veya</div>
-
-      <button class="btn-alt-action" id="auth-switch-btn" onclick="toggleAuthTab()">👤+ Yeni Hesap Oluştur</button>
+      <button class="btn-neon-action" id="auth-switch-btn" style="background:#2e1054; border:1px solid #a855f7;" onclick="toggleAuthTab()">👤+ Yeni Hesap Oluştur</button>
     </div>
 
-    <div class="auth-footer-note">
-      <span>🛡️</span> Güvenli ve hızlı oyun deneyimi için aramıza katıl!
+    <div style="font-size:8px; color:#c084fc; text-align:center;">
+      🛡️ Güvenli ve hızlı oyun deneyimi için aramıza katıl!
     </div>
   </div>
 
-  <!-- ==================== 2. OYUN ANA MENÜSÜ ==================== -->
+  <!-- 2. ANA MENÜ -->
   <div id="menu-screen">
     <div class="top-header">
       <div class="app-title">Kutu Açma Pro</div>
@@ -740,36 +636,39 @@
     </div>
 
     <div class="menu-center">
-      <div style="font-size:18px; font-weight:900; color:#d946ef; text-shadow:0 0 15px #d946ef;">KUTU AÇMA</div>
-      <div class="user-greeting" id="menu-user-greeting">👤 Oyuncu</div>
+      <div style="font-size:16px; font-weight:900; color:#d946ef;">KUTU AÇMA</div>
+      <div style="font-size:11px; color:#34d399; font-weight:bold;" id="menu-user-greeting">👤 Oyuncu</div>
       
-      <!-- Sosyal ve Başarım Barı -->
       <div class="nav-extra-bar">
-        <div class="nav-extra-btn" onclick="openGlobalChat()">💬 Canlı Sohbet</div>
+        <div class="nav-extra-btn" onclick="openGlobalChat()">💬 Sohbet</div>
         <div class="nav-extra-btn" onclick="openFriendsScreen()">👥 Arkadaşlar</div>
-        <div class="nav-extra-btn" onclick="openAchievements()">🏆 Başarımlar</div>
+        <div class="nav-extra-btn" onclick="openAchievements()">🏆 Görevler</div>
       </div>
 
       <div class="mode-grid">
         <button class="mode-btn active" onclick="selectMode('standard', this)">
           ⚔️ Normal Kasa (30s)
-          <div style="font-size:8px; color:#94a3b8;">Dengeli klasik oranlar</div>
+          <div style="font-size:7px; color:#94a3b8;">Dengeli klasik oranlar</div>
         </button>
         <button class="mode-btn" onclick="selectMode('ten_cases', this)">
           📦 10 Kutu Modu (Süresiz)
-          <div style="font-size:8px; color:#94a3b8;">Tam 10 kutu açma hakkı</div>
+          <div style="font-size:7px; color:#94a3b8;">Tam 10 kutu açma hakkı</div>
         </button>
         <button class="mode-btn" onclick="selectMode('catch_open', this)">
           🎯 Yakala & Aç Modu (15s)
-          <div style="font-size:8px; color:#94a3b8;">Sınırlı kutuları topla, tek tek aç</div>
+          <div style="font-size:7px; color:#94a3b8;">Sınırlı kutuları topla, aç</div>
         </button>
         <button class="mode-btn" onclick="selectMode('upgrade_mode', this)">
           📈 Şans Yükseltme Modu (7 Kutu)
-          <div style="font-size:8px; color:#94a3b8;">Her kutuda Godly şansı katlanarak artar</div>
+          <div style="font-size:7px; color:#94a3b8;">Her kutuda Godly katlanır</div>
         </button>
         <button class="mode-btn" onclick="selectMode('mines_mode', this)">
-          💣 Mayınlı Kasa Modu (Risk / Çıkış)
-          <div style="font-size:8px; color:#94a3b8;">Kutuları seç; bombaya basarsan puanlar gider!</div>
+          💣 Mayınlı Kasa Modu (Risk)
+          <div style="font-size:7px; color:#94a3b8;">Mayına basarsan puanlar gider!</div>
+        </button>
+        <button class="mode-btn" onclick="selectMode('fire_mode', this)">
+          🔥 Ateş Çemberi (Risk / Çarpan)
+          <div style="font-size:7px; color:#ef4444;">Doğru alevi seç, puanı katla!</div>
         </button>
       </div>
 
@@ -779,16 +678,15 @@
     </div>
 
     <div class="footer-credits">
-      Yapımcı: MecagaTR<br>
-      26 Ağustos Çşb 2026
+      Yapımcı: MecagaTR | 26 Ağustos Çşb 2026
     </div>
   </div>
 
-  <!-- ==================== 3. OYUN EKRANLARI ==================== -->
+  <!-- 3. KASA AÇMA EKRANI -->
   <div id="game-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;" id="game-mode-name-txt">Kasa</div>
+      <div style="font-size:10px; font-weight:bold; color:#d946ef;" id="game-mode-name-txt">Kasa</div>
       <div></div>
     </div>
 
@@ -806,10 +704,10 @@
 
     <div class="rates-box" id="rates-box-container"></div>
 
-    <div class="case-container" id="case-box-visual">
+    <div class="case-container">
       <div id="ready-view">
-        <div class="ready-banner" id="ready-banner-txt">HAZIR!</div>
-        <div class="ready-sub" id="mode-badge-txt">Kasayı Aç!</div>
+        <div style="font-size:16px; font-weight:900;" id="ready-banner-txt">HAZIR!</div>
+        <div style="font-size:9px; color:#fbbf24;" id="mode-badge-txt">Kasayı Aç!</div>
       </div>
       <div id="roulette-view" class="roulette-wrapper">
         <div class="roulette-needle"></div>
@@ -824,11 +722,11 @@
     <button id="open-case-btn" class="btn-action" onclick="openCase()">KASAYI AÇ (3s)</button>
   </div>
 
-  <!-- YAKALA & AÇ: 1. AŞAMA -->
+  <!-- 4. YAKALA & AÇ: 1. AŞAMA -->
   <div id="catch-game-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">Yakala & Aç</div>
+      <div style="font-size:10px; font-weight:bold; color:#d946ef;">Yakala & Aç</div>
       <div></div>
     </div>
 
@@ -845,14 +743,14 @@
     </div>
 
     <div class="catch-arena" id="catch-arena"></div>
-    <div style="font-size:10px; color:#fbbf24; text-align:center; padding:2px;">⚡ Düşen kutulara dokunarak topla!</div>
+    <div style="font-size:9px; color:#fbbf24; text-align:center;">⚡ Düşen kutulara dokunarak topla!</div>
   </div>
 
-  <!-- YAKALA & AÇ: 2. AŞAMA -->
+  <!-- 5. YAKALA & AÇ: 2. AŞAMA -->
   <div id="inventory-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">Kutuları Aç</div>
+      <div style="font-size:10px; font-weight:bold; color:#d946ef;">Kutuları Aç</div>
       <div></div>
     </div>
 
@@ -867,9 +765,9 @@
       </div>
     </div>
 
-    <div class="case-container" style="min-height: 80px; flex:none;">
+    <div class="case-container" style="min-height: 75px; flex:none;">
       <div id="inv-ready-view" style="text-align:center;">
-        <div style="font-size:11px; color:#94a3b8;">Açmak istediğin kutuya dokun!</div>
+        <div style="font-size:10px; color:#94a3b8;">Açmak istediğin kutuya dokun!</div>
       </div>
       <div id="inv-roulette-view" class="roulette-wrapper">
         <div class="roulette-needle"></div>
@@ -877,15 +775,15 @@
       </div>
     </div>
 
-    <div style="font-size:10px; color:#d946ef; font-weight:bold;">📦 Yakaladığın Kutular:</div>
+    <div style="font-size:9px; color:#d946ef; font-weight:bold;">📦 Yakaladığın Kutular:</div>
     <div class="inv-grid" id="inv-grid-container"></div>
   </div>
 
-  <!-- MAYINLI KASA -->
+  <!-- 6. MAYINLI KASA -->
   <div id="mines-game-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">Mayınlı Kasa</div>
+      <div style="font-size:10px; font-weight:bold; color:#d946ef;">Mayınlı Kasa</div>
       <div></div>
     </div>
 
@@ -905,140 +803,137 @@
     <button id="cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
   </div>
 
-  <!-- ==================== 4. CANLI GLOBAL CHAT EKRANI ==================== -->
+  <!-- 7. YENİ MOD: ATEŞ ÇEMBERİ -->
+  <div id="fire-game-screen">
+    <div class="top-header">
+      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
+      <div style="font-size:10px; font-weight:bold; color:#ef4444;">🔥 Ateş Çemberi</div>
+      <div></div>
+    </div>
+
+    <div class="game-stats-top">
+      <div class="stat-card timer">
+        <div class="stat-title">ÇARPAN</div>
+        <div class="stat-val timer-val" id="fire-multiplier-txt">x1.5</div>
+      </div>
+      <div class="stat-card score">
+        <div class="stat-title">BİRİKEN PUAN</div>
+        <div class="stat-val score-val" id="fire-score-txt">20</div>
+      </div>
+    </div>
+
+    <div style="font-size:9px; color:#f87171; text-align:center;">
+      3 alevden biri tuzak! Doğru alevi seç, puanı katla.
+    </div>
+
+    <div class="fire-grid" id="fire-grid"></div>
+
+    <button id="fire-cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutFire()">💰 Puanı Güvenle Al</button>
+  </div>
+
+  <!-- 8. WHATSAPP TARZI SOHBET EKRANI -->
   <div id="chat-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:12px; font-weight:bold; color:#d946ef;" id="chat-header-title">💬 Canlı Global Sohbet</div>
+      <div style="font-size:11px; font-weight:bold; color:#25D366;" id="chat-header-title">💬 Canlı Sohbet</div>
       <div></div>
     </div>
 
-    <div class="chat-box" id="global-chat-box"></div>
+    <div class="whatsapp-chat-box" id="chat-messages-box"></div>
 
-    <div class="chat-input-bar">
-      <input type="text" id="chat-message-input" class="neon-input" placeholder="Bir mesaj yaz..." style="padding-left:10px;">
-      <button class="icon-btn" style="background:#9333ea;" onclick="sendChatMessage()">Gönder</button>
+    <div class="whatsapp-input-bar">
+      <input type="text" id="chat-message-input" class="whatsapp-input" placeholder="Bir mesaj yazın...">
+      <button class="whatsapp-send-btn" onclick="sendChatMessage()">➤</button>
     </div>
   </div>
 
-  <!-- ==================== 5. ARKADAŞLAR & ÖZEL MESAJ ==================== -->
+  <!-- 9. ARKADAŞLAR VE İSTEKLER -->
   <div id="friends-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:12px; font-weight:bold; color:#d946ef;">👥 Arkadaşlarım</div>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">👥 Arkadaşlar</div>
       <div></div>
     </div>
 
-    <div style="display:flex; gap:4px; margin-bottom:4px;">
-      <input type="text" id="add-friend-input" class="neon-input" placeholder="Arkadaşının Kullanıcı Adı" style="padding-left:10px;">
-      <button class="icon-btn" style="background:#10b981;" onclick="addFriend()">Ekle</button>
+    <div style="display:flex; gap:4px;">
+      <input type="text" id="add-friend-input" class="neon-input" placeholder="Kullanıcı Adı Girin">
+      <button class="icon-btn" style="background:#10b981;" onclick="sendFriendRequest()">İstek At</button>
     </div>
 
+    <div style="font-size:9px; color:#fbbf24; font-weight:bold; margin-top:2px;">Gelen İstekler:</div>
+    <div id="friend-requests-container"></div>
+
+    <div style="font-size:9px; color:#38bdf8; font-weight:bold; margin-top:2px;">Arkadaş Listem:</div>
     <div class="scroll-list" id="friends-list-container"></div>
-
-    <div style="font-size:9px; color:#94a3b8; text-align:center;">
-      Mesajlaşmak için arkadaşının üzerine dokun!
-    </div>
   </div>
 
-  <!-- ==================== 6. BAŞARIMLAR EKRANI ==================== -->
+  <!-- 10. GÖREVLER / BAŞARIMLAR -->
   <div id="achievements-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:12px; font-weight:bold; color:#d946ef;">🏆 Başarımlar</div>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">🏆 Görevler</div>
       <div></div>
     </div>
 
     <div class="scroll-list" id="achievements-list-container"></div>
-
-    <button class="btn-modal btn-close" onclick="exitToMenu()">Menüye Dön</button>
+    <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
   </div>
 
-  <!-- ÖZET EKRANI -->
+  <!-- ÖZET VE SIRALAMA MODALLARI -->
   <div id="catch-summary-screen">
-    <div class="modal-header" id="summary-title-txt">OYUN ÖZETİ</div>
-    
-    <div style="display:flex; justify-content:space-around; margin-bottom:6px;">
-      <div class="stat-card score" style="flex:1; margin-right:4px; text-align:center;">
+    <div style="text-align:center; font-weight:bold; font-size:13px;" id="summary-title-txt">OYUN ÖZETİ</div>
+    <div style="display:flex; justify-content:space-around; margin:4px 0;">
+      <div class="stat-card score" style="flex:1; margin-right:2px; text-align:center;">
         <div class="stat-title">TOPLAM PUAN</div>
         <div class="stat-val score-val" id="summary-final-score">0</div>
       </div>
-      <div class="stat-card timer" style="flex:1; margin-left:4px; text-align:center;">
+      <div class="stat-card timer" style="flex:1; margin-left:2px; text-align:center;">
         <div class="stat-title">AÇILAN KUTU</div>
         <div class="stat-val timer-val" id="summary-final-count">0</div>
       </div>
     </div>
-
-    <div style="font-size:9px; color:#fbbf24; font-weight:bold;">📋 Çıkan Eşyalar:</div>
     <div class="scroll-list" id="summary-drops-list"></div>
-
     <button class="btn-modal btn-close" onclick="exitToMenu()">🚪 Ana Menüye Dön</button>
   </div>
 
-  <!-- OYUN BİTTİ MODALI -->
   <div id="game-over-modal" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-header">OYUN BİTTİ</div>
-      <div style="text-align:center; margin-bottom:10px;">
-        <div style="font-size:11px; color:#94a3b8;" id="modal-mod-info">Normal Kasa</div>
-        <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Toplam Skorun</div>
-        <div style="font-size:24px; font-weight:bold; color:#10b981;" id="final-score-txt">0</div>
+      <div style="text-align:center; font-weight:bold; font-size:13px;">OYUN BİTTİ</div>
+      <div style="text-align:center; margin:8px 0;">
+        <div style="font-size:10px; color:#94a3b8;" id="modal-mod-info">Normal Kasa</div>
+        <div style="font-size:22px; font-weight:bold; color:#10b981;" id="final-score-txt">0</div>
       </div>
-
-      <button class="btn-modal btn-secondary" onclick="openHistoryDetails('current')">📦 Çıkan Eşyaları Gör</button>
       <button class="btn-modal btn-close" onclick="exitToMenu()">Ana Menüye Dön</button>
     </div>
   </div>
 
-  <!-- SIRALAMA MODALI (İLK 10) -->
   <div id="leaderboard-modal" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-header">🏆 SIRALAMA TABLOSU (İLK 10)</div>
-      
+      <div style="text-align:center; font-weight:bold; font-size:12px; margin-bottom:4px;">🏆 SIRALAMA (İLK 10)</div>
       <div class="filter-tabs">
         <button class="tab-btn active" onclick="filterLeaderboard('all', this)">Tümü</button>
         <button class="tab-btn" onclick="filterLeaderboard('standard', this)">Normal</button>
         <button class="tab-btn" onclick="filterLeaderboard('ten_cases', this)">10 Kutu</button>
         <button class="tab-btn" onclick="filterLeaderboard('catch_open', this)">Yakala & Aç</button>
-        <button class="tab-btn" onclick="filterLeaderboard('upgrade_mode', this)">Şans Yükseltme</button>
-        <button class="tab-btn" onclick="filterLeaderboard('mines_mode', this)">Mayınlı</button>
+        <button class="tab-btn" onclick="filterLeaderboard('upgrade_mode', this)">Şans</button>
+        <button class="tab-btn" onclick="filterLeaderboard('mines_mode', this)">Mayın</button>
+        <button class="tab-btn" onclick="filterLeaderboard('fire_mode', this)">Ateş</button>
       </div>
-
       <div class="scroll-list" id="lb-list-container"></div>
-      
       <div id="admin-lb-controls" style="display:none; margin-top:4px;">
-        <button class="btn-modal btn-danger" style="width:100%;" onclick="confirmClearLeaderboard()">
-          🗑️ Tabloyu Sıfırla (Admin)
-        </button>
+        <button class="btn-modal btn-danger" style="width:100%;" onclick="confirmClearLeaderboard()">🗑️ Tabloyu Sıfırla (Admin)</button>
       </div>
-
-      <button class="btn-modal btn-close" style="margin-top:6px;" onclick="closeLeaderboard()">Kapat</button>
-    </div>
-  </div>
-
-  <!-- KASA DETAY MODALI -->
-  <div id="details-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header" id="details-header-txt">Kasa Geçmişi</div>
-      <div style="font-size:11px; color:#d946ef; text-align:center;" id="details-mode-txt"></div>
-      <div style="font-size:9px; color:#94a3b8; text-align:center; margin-bottom:6px;" id="details-date-txt"></div>
-      <div class="scroll-list" id="details-list-container"></div>
-      <button class="btn-modal btn-close" onclick="closeDetailsModal()">Geri</button>
+      <button class="btn-modal btn-close" style="margin-top:4px;" onclick="closeLeaderboard()">Kapat</button>
     </div>
   </div>
 
 </div>
 
-<!-- JAVASCRIPT MOTORU & FIREBASE ENTEGRASYONU -->
+<!-- JAVASCRIPT & OYUN MOTORU -->
 <script>
-  // Web Audio API Ses Sentezleyicisi
   const AudioEngine = {
     ctx: null,
-    init() {
-      if (!this.ctx) {
-        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-    },
+    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
     playTick() {
       try {
         this.init();
@@ -1158,6 +1053,12 @@
         { name: 'Güvenli Kasa', rate: 70.0, minP: 15, maxP: 45, color: '#10b981', items: ['Elmas Külçesi', 'Zümrüt Heykel'] },
         { name: 'Büyük Hazine', rate: 30.0, minP: 60, maxP: 160, color: '#fbbf24', items: ['Kraliyet Tacı', 'Kutsal Kupa'] }
       ]
+    },
+    fire_mode: {
+      name: "Ateş Çemberi",
+      tiers: [
+        { name: 'Kıvılcım', rate: 100, minP: 20, maxP: 50, color: '#f97316', items: ['Ateş Yakutu', 'Lav Taşı', 'Anka Alevi'] }
+      ]
     }
   };
 
@@ -1165,9 +1066,8 @@
     { id: 'first_game', title: 'İlk Adım', desc: 'Herhangi bir modu tamamla', icon: '🎮' },
     { id: 'godly_find', title: 'Tanrısal Dokunuş', desc: 'Bir kutudan Godly eşya çıkar', icon: '👑' },
     { id: 'score_100', title: 'Puan Avcısı', desc: 'Tek oyunda 100+ puan topla', icon: '🔥' },
-    { id: 'mines_master', title: 'Mayın Uzmanı', desc: 'Mayınlı modda 5 güvenli kasa aç ve çekil', icon: '💣' },
-    { id: 'catch_pro', title: 'Hızlı Parmaklar', desc: 'Yakala & Aç modunda en az 8 kutu topla', icon: '🎯' },
-    { id: 'chat_active', title: 'Sosyalleşme', desc: 'Global sohbete mesaj gönder', icon: '💬' }
+    { id: 'mines_master', title: 'Mayın Uzmanı', desc: 'Mayınlı modda 5 güvenli kasa aç', icon: '💣' },
+    { id: 'fire_master', title: 'Alev Terbiyecisi', desc: 'Ateş Çemberinde x3 çarpanına ulaş', icon: '🔥' }
   ];
 
   let leaderboardData = JSON.parse(localStorage.getItem('kutu_leaderboard') || '[]');
@@ -1176,7 +1076,7 @@
   let currentUser = null;
   let isAdmin = false;
   let authMode = "login";
-  let activeChatTarget = "global"; // "global" veya arkadaş kullanıcı adı
+  let activeChatTarget = "global";
 
   let selectedModeKey = 'standard';
   let currentScore = 0;
@@ -1195,103 +1095,54 @@
   let mineField = [];
   let safePicksCount = 0;
 
+  let fireScore = 20;
+  let fireMultiplier = 1.5;
+
   window.onload = function() {
-    if (auth) {
-      try { auth.signOut(); } catch(e){}
-    }
+    if (auth) { try { auth.signOut(); } catch(e){} }
     currentUser = null;
     isAdmin = false;
     showScreen('auth-screen');
-    updateAdminUI();
   };
 
-  // Realtime Database Dinleyicileri
-  if (firebaseReady && db) {
-    try {
-      db.ref('leaderboard').on('value', (snapshot) => {
-        const val = snapshot.val();
-        if (val) {
-          leaderboardData = [];
-          Object.keys(val).forEach(key => {
-            leaderboardData.push({ id: key, ...val[key] });
-          });
-          localStorage.setItem('kutu_leaderboard', JSON.stringify(leaderboardData));
-          validateLeaderboard();
-          renderLeaderboard();
-        } else {
-          leaderboardData = [];
-          localStorage.setItem('kutu_leaderboard', '[]');
-          renderLeaderboard();
-        }
-      });
-
-      // Global Chat Dinleyicisi
-      db.ref('global_chat').limitToLast(40).on('value', (snapshot) => {
-        const val = snapshot.val();
-        renderChatMessages(val);
-      });
-    } catch (e) {}
-  }
-
-  // --- AUTH SİSTEMİ ---
   function setAuthTab(tab) {
     authMode = tab;
     document.getElementById('tab-login').classList.toggle('active', tab === 'login');
     document.getElementById('tab-register').classList.toggle('active', tab === 'register');
     document.getElementById('auth-submit-btn').innerText = tab === 'login' ? "🎮 Giriş Yap" : "👤+ Kayıt Ol";
-    document.getElementById('auth-switch-btn').innerText = tab === 'login' ? "👤+ Yeni Hesap Oluştur" : "🎮 Zaten Hesabım Var";
   }
 
-  function toggleAuthTab() {
-    setAuthTab(authMode === 'login' ? 'register' : 'login');
-  }
+  function toggleAuthTab() { setAuthTab(authMode === 'login' ? 'register' : 'login'); }
 
   function executeAuth() {
     const rawUser = document.getElementById('auth-username').value.trim();
     const pass = document.getElementById('auth-password').value.trim();
 
-    if (!rawUser || !pass) {
-      alert("Lütfen kullanıcı adı ve şifre giriniz!");
-      return;
-    }
+    if (!rawUser || !pass) { alert("Kullanıcı adı ve şifre girin!"); return; }
 
     if (rawUser === "admin" && pass === "54321") {
       currentUser = "Admin";
       isAdmin = true;
-      alert("👑 Admin olarak giriş yapıldı!");
       loginSuccess();
       return;
     }
 
-    if (pass.length < 6) {
-      alert("Şifre en az 6 karakter olmalıdır!");
-      return;
-    }
+    if (pass.length < 6) { alert("Şifre en az 6 karakter olmalıdır!"); return; }
 
     const cleanUser = rawUser.toLowerCase().replace(/[^a-z0-9]/g, '');
     const email = `${cleanUser}@kutupro.com`;
 
-    if (!firebaseReady || !auth) {
-      alert("Firebase bağlantısı hazır değil.");
-      return;
-    }
+    if (!firebaseReady || !auth) { alert("Firebase hazır değil."); return; }
 
     if (authMode === 'register') {
       auth.createUserWithEmailAndPassword(email, pass)
         .then((cred) => {
-          if (db) db.ref(`users/${cred.user.uid}`).set({ username: rawUser, createdAt: Date.now() });
+          if (db) db.ref(`users/${cleanUser}`).set({ username: rawUser, uid: cred.user.uid });
           currentUser = rawUser;
           isAdmin = false;
-          alert("Kayıt başarılı, hoş geldin!");
           loginSuccess();
         })
-        .catch(err => {
-          if (err.code === 'auth/email-already-in-use') {
-            alert("Bu kullanıcı adı zaten kayıtlı! Lütfen giriş yapın.");
-          } else {
-            alert("Kayıt Hatası: " + err.message);
-          }
-        });
+        .catch(err => alert("Kayıt Hatası: " + err.message));
     } else {
       auth.signInWithEmailAndPassword(email, pass)
         .then(() => {
@@ -1299,60 +1150,31 @@
           isAdmin = false;
           loginSuccess();
         })
-        .catch(() => {
-          alert("Giriş Başarısız! Hesap bulunamadı veya şifre hatalı.");
-        });
+        .catch(() => alert("Giriş Başarısız! Hesap yok veya şifre hatalı."));
     }
   }
 
   function loginSuccess() {
     document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser}` + (isAdmin ? " (👑 Admin)" : "");
-    updateAdminUI();
+    if (document.getElementById('admin-lb-controls')) {
+      document.getElementById('admin-lb-controls').style.display = isAdmin ? 'block' : 'none';
+    }
     showScreen('menu-screen');
+    listenFirebaseData();
   }
 
   function handleSignOut() {
-    if (auth) {
-      try { auth.signOut(); } catch(e){}
-    }
+    if (auth) { try { auth.signOut(); } catch(e){} }
     currentUser = null;
     isAdmin = false;
-    document.getElementById('auth-username').value = "";
-    document.getElementById('auth-password').value = "";
-    setAuthTab('login');
-    updateAdminUI();
     showScreen('auth-screen');
-  }
-
-  function updateAdminUI() {
-    const adminControls = document.getElementById('admin-lb-controls');
-    if (adminControls) {
-      adminControls.style.display = isAdmin ? 'block' : 'none';
-    }
-  }
-
-  function confirmClearLeaderboard() {
-    if (!isAdmin) return;
-    const isConfirmed = confirm("DİKKAT: Sıralama tablosundaki tüm veriler kalıcı olarak silinecektir!\n\nOnaylıyor musunuz?");
-    if (isConfirmed) {
-      leaderboardData = [];
-      localStorage.removeItem('kutu_leaderboard');
-      if (firebaseReady && db) {
-        db.ref('leaderboard').remove()
-          .then(() => alert("Sıralama tablosu başarıyla sıfırlandı!"))
-          .catch(e => alert("Sıfırlama hatası: " + e.message));
-      } else {
-        alert("Sıralama tablosu sıfırlandı!");
-      }
-      renderLeaderboard();
-    }
   }
 
   function showScreen(screenId) {
     const screens = [
       'auth-screen', 'menu-screen', 'game-screen',
       'catch-game-screen', 'inventory-screen', 'mines-game-screen', 
-      'catch-summary-screen', 'chat-screen', 'friends-screen', 'achievements-screen'
+      'fire-game-screen', 'catch-summary-screen', 'chat-screen', 'friends-screen', 'achievements-screen'
     ];
     screens.forEach(id => {
       const el = document.getElementById(id);
@@ -1365,16 +1187,59 @@
     clearInterval(spawnInterval);
     catchAnimationFrames.forEach(cancelAnimationFrame);
     catchAnimationFrames = [];
-
     document.getElementById('game-over-modal').style.display = 'none';
     showScreen('menu-screen');
   }
 
-  // --- ONLINE CHAT SİSTEMİ ---
+  // FIREBASE DİNLEYİCİLERİ
+  function listenFirebaseData() {
+    if (!firebaseReady || !db || !currentUser) return;
+
+    // Leaderboard
+    db.ref('leaderboard').on('value', (snapshot) => {
+      const val = snapshot.val();
+      if (val) {
+        leaderboardData = Object.keys(val).map(key => ({ id: key, ...val[key] }));
+        localStorage.setItem('kutu_leaderboard', JSON.stringify(leaderboardData));
+        validateLeaderboard();
+        renderLeaderboard();
+      }
+    });
+
+    // Arkadaşlık İstekleri
+    const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
+    db.ref(`friend_requests/${cleanUser}`).on('value', (snapshot) => {
+      renderFriendRequests(snapshot.val());
+    });
+  }
+
+  // --- WHATSAPP TARZI SOHBET ---
   function openGlobalChat() {
     activeChatTarget = "global";
     document.getElementById('chat-header-title').innerText = "💬 Canlı Global Sohbet";
     showScreen('chat-screen');
+
+    if (firebaseReady && db) {
+      db.ref('global_chat').limitToLast(30).on('value', (snapshot) => {
+        renderWhatsAppChat(snapshot.val());
+      });
+    }
+  }
+
+  function openPrivateChat(friendName) {
+    activeChatTarget = friendName;
+    document.getElementById('chat-header-title').innerText = `💬 ${friendName}`;
+    showScreen('chat-screen');
+
+    const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanFriend = friendName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const chatRoomId = [cleanUser, cleanFriend].sort().join('_');
+
+    if (firebaseReady && db) {
+      db.ref(`private_chats/${chatRoomId}`).limitToLast(30).on('value', (snapshot) => {
+        renderWhatsAppChat(snapshot.val());
+      });
+    }
   }
 
   function sendChatMessage() {
@@ -1394,103 +1259,133 @@
     };
 
     if (activeChatTarget === "global") {
-      if (firebaseReady && db) {
-        db.ref('global_chat').push(chatData);
-      }
-      unlockAchievement('chat_active');
+      if (firebaseReady && db) db.ref('global_chat').push(chatData);
     } else {
-      // Özel Arkadaş Sohbeti
-      const chatRoomId = [currentUser, activeChatTarget].sort().join('_');
-      if (firebaseReady && db) {
-        db.ref(`private_chats/${chatRoomId}`).push(chatData);
-      }
+      const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const cleanFriend = activeChatTarget.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const chatRoomId = [cleanUser, cleanFriend].sort().join('_');
+      if (firebaseReady && db) db.ref(`private_chats/${chatRoomId}`).push(chatData);
     }
 
     input.value = "";
   }
 
-  function renderChatMessages(data) {
-    const box = document.getElementById('global-chat-box');
+  function renderWhatsAppChat(data) {
+    const box = document.getElementById('chat-messages-box');
     if (!box) return;
     box.innerHTML = '';
 
     if (!data) {
-      box.innerHTML = `<div style="text-align:center; color:#64748b; font-size:10px; margin-top:20px;">Henüz mesaj yok. İlk mesajı sen yaz!</div>`;
+      box.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:10px; margin-top:20px;">Mesajlaşmaya başlayın...</div>`;
       return;
     }
 
     Object.values(data).forEach(m => {
-      const row = document.createElement('div');
-      row.className = 'chat-msg';
-      row.innerHTML = `
-        <span class="chat-sender ${m.isAdmin ? 'chat-admin' : ''}">${m.isAdmin ? '👑 ' : ''}${m.sender}:</span>
-        <span>${escapeHtml(m.message)}</span>
-        <span class="chat-time">${m.time || ''}</span>
+      const isMe = m.sender === currentUser;
+      const bubble = document.createElement('div');
+      bubble.className = `msg-bubble ${isMe ? 'msg-outgoing' : 'msg-incoming'}`;
+      bubble.innerHTML = `
+        ${!isMe ? `<div class="msg-sender">${m.isAdmin ? '👑 ' : ''}${m.sender}</div>` : ''}
+        <div>${escapeHtml(m.message)}</div>
+        <div class="msg-time">${m.time || ''}</div>
       `;
-      box.appendChild(row);
+      box.appendChild(bubble);
     });
     box.scrollTop = box.scrollHeight;
   }
 
-  function escapeHtml(text) {
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
+  function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
-  // --- ARKADAŞLAR SİSTEMİ ---
+  // --- ARKADAŞLIK İSTEĞİ (KABUL / REDDET) ---
   function openFriendsScreen() {
     renderFriendsList();
     showScreen('friends-screen');
   }
 
-  function addFriend() {
+  function sendFriendRequest() {
     const input = document.getElementById('add-friend-input');
     const target = input.value.trim();
     if (!target) return;
 
     if (target.toLowerCase() === currentUser.toLowerCase()) {
-      alert("Kendini arkadaş olarak ekleyemezsin!");
+      alert("Kendine istek atamazsın!");
       return;
     }
 
-    if (userFriends.includes(target)) {
-      alert("Bu kullanıcı zaten arkadaş listende var!");
+    const cleanTarget = target.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    if (firebaseReady && db) {
+      db.ref(`friend_requests/${cleanTarget}/${cleanUser}`).set({
+        sender: currentUser,
+        timestamp: Date.now()
+      }).then(() => {
+        alert(`${target} kullanıcısına arkadaşlık isteği gönderildi!`);
+        input.value = "";
+      });
+    }
+  }
+
+  function renderFriendRequests(requests) {
+    const container = document.getElementById('friend-requests-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!requests) {
+      container.innerHTML = `<div style="font-size:8px; color:#64748b;">Bekleyen istek yok.</div>`;
       return;
     }
 
-    userFriends.push(target);
-    localStorage.setItem('kutu_friends', JSON.stringify(userFriends));
-    input.value = "";
+    Object.keys(requests).forEach(reqKey => {
+      const req = requests[reqKey];
+      const box = document.createElement('div');
+      box.className = 'request-box';
+      box.innerHTML = `
+        <span>👤 <b>${req.sender}</b></span>
+        <div>
+          <button class="btn-accept" onclick="acceptFriend('${req.sender}', '${reqKey}')">Kabul Et</button>
+          <button class="btn-reject" onclick="rejectFriend('${reqKey}')">Reddet</button>
+        </div>
+      `;
+      container.appendChild(box);
+    });
+  }
+
+  function acceptFriend(friendName, reqKey) {
+    if (!userFriends.includes(friendName)) {
+      userFriends.push(friendName);
+      localStorage.setItem('kutu_friends', JSON.stringify(userFriends));
+    }
+    const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (firebaseReady && db) {
+      db.ref(`friend_requests/${cleanUser}/${reqKey}`).remove();
+    }
     renderFriendsList();
-    alert(`${target} arkadaş listene eklendi!`);
+    alert(`${friendName} ile artık arkadaşsınız!`);
+  }
+
+  function rejectFriend(reqKey) {
+    const cleanUser = currentUser.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (firebaseReady && db) {
+      db.ref(`friend_requests/${cleanUser}/${reqKey}`).remove();
+    }
   }
 
   function removeFriend(target) {
-    if (confirm(`${target} arkadaş listenden çıkarılsın mı?`)) {
+    if (confirm(`${target} arkadaş listenden silinsin mi?`)) {
       userFriends = userFriends.filter(f => f !== target);
       localStorage.setItem('kutu_friends', JSON.stringify(userFriends));
       renderFriendsList();
     }
   }
 
-  function openPrivateChatWith(friendName) {
-    activeChatTarget = friendName;
-    document.getElementById('chat-header-title').innerText = `💬 Özel: ${friendName}`;
-    showScreen('chat-screen');
-
-    const chatRoomId = [currentUser, friendName].sort().join('_');
-    if (firebaseReady && db) {
-      db.ref(`private_chats/${chatRoomId}`).limitToLast(40).on('value', (snapshot) => {
-        renderChatMessages(snapshot.val());
-      });
-    }
-  }
-
   function renderFriendsList() {
     const list = document.getElementById('friends-list-container');
+    if (!list) return;
     list.innerHTML = '';
 
     if (userFriends.length === 0) {
-      list.innerHTML = `<div style="text-align:center; color:#64748b; padding:15px;">Henüz arkadaş eklemedin.</div>`;
+      list.innerHTML = `<div style="text-align:center; color:#64748b; font-size:9px; padding:10px;">Henüz arkadaşın yok.</div>`;
       return;
     }
 
@@ -1498,10 +1393,10 @@
       const row = document.createElement('div');
       row.className = 'item-row';
       row.innerHTML = `
-        <div style="cursor:pointer; display:flex; align-items:center; gap:6px;" onclick="openPrivateChatWith('${f}')">
-          <span style="color:#34d399;">●</span>
-          <span style="font-weight:bold; color:#fff;">${f}</span>
-          <span style="font-size:8px; color:#c084fc;">(Mesaj Gönder)</span>
+        <div style="cursor:pointer; display:flex; align-items:center; gap:4px;" onclick="openPrivateChat('${f}')">
+          <span style="color:#25D366;">●</span>
+          <b>${f}</b>
+          <span style="font-size:7px; color:#a855f7;">(Mesaj At)</span>
         </div>
         <button class="icon-btn exit-btn" onclick="removeFriend('${f}')">Sil</button>
       `;
@@ -1509,7 +1404,74 @@
     });
   }
 
-  // --- BAŞARIMLAR SİSTEMİ ---
+  // --- 6. MOD: ATEŞ ÇEMBERİ ---
+  function startFireMode() {
+    fireScore = 20;
+    fireMultiplier = 1.5;
+    document.getElementById('fire-score-txt').innerText = fireScore;
+    document.getElementById('fire-multiplier-txt').innerText = `x${fireMultiplier}`;
+    document.getElementById('fire-cashout-btn').disabled = false;
+    currentSessionDrops = [];
+
+    renderFireGrid();
+    showScreen('fire-game-screen');
+  }
+
+  function renderFireGrid() {
+    const grid = document.getElementById('fire-grid');
+    grid.innerHTML = '';
+
+    const trapIndex = Math.floor(Math.random() * 3);
+
+    for (let i = 0; i < 3; i++) {
+      const card = document.createElement('div');
+      card.className = 'fire-card';
+      card.innerHTML = `<span style="font-size:24px;">🔥</span><span style="font-size:8px;margin-top:2px;">Alev ${i+1}</span>`;
+      card.onclick = () => pickFireCard(i === trapIndex, card);
+      grid.appendChild(card);
+    }
+  }
+
+  function pickFireCard(isTrap, cardEl) {
+    if (isTrap) {
+      AudioEngine.playExplosion();
+      triggerScreenShake();
+      cardEl.style.borderColor = '#000';
+      cardEl.style.background = '#000';
+      cardEl.innerHTML = `<span style="font-size:24px;">💀</span><span style="font-size:8px;color:#ef4444;">YANDIN!</span>`;
+      document.getElementById('fire-cashout-btn').disabled = true;
+      fireScore = 0;
+      currentScore = 0;
+      currentSessionDrops = [{ tier: "Ateş", item: "Kül Oldu (Puan Sıfırlandı)", points: 0, color: "#ef4444" }];
+      setTimeout(() => startSummaryScreen("🔥 ATEŞTE YANDIN - 0 PUAN"), 1200);
+    } else {
+      AudioEngine.playTick();
+      fireScore = Math.floor(fireScore * fireMultiplier);
+      fireMultiplier = +(fireMultiplier + 0.5).toFixed(1);
+
+      const drop = getRandomDrop('fire_mode');
+      drop.points = fireScore;
+      currentSessionDrops.push(drop);
+
+      cardEl.style.borderColor = '#10b981';
+      cardEl.innerHTML = `<span style="font-size:24px;">✨</span><span style="color:#34d399;font-size:8px;">GÜVENLİ!</span>`;
+
+      document.getElementById('fire-score-txt').innerText = fireScore;
+      document.getElementById('fire-multiplier-txt').innerText = `x${fireMultiplier}`;
+
+      if (fireMultiplier >= 3) unlockAchievement('fire_master');
+
+      setTimeout(() => renderFireGrid(), 600);
+    }
+  }
+
+  function cashoutFire() {
+    currentScore = fireScore;
+    document.getElementById('fire-cashout-btn').disabled = true;
+    startSummaryScreen("💰 ALEVLERDEN ZAFERLE ÇIKTIN!");
+  }
+
+  // --- BAŞARIMLAR ---
   function openAchievements() {
     const list = document.getElementById('achievements-list-container');
     list.innerHTML = '';
@@ -1519,22 +1481,18 @@
       const row = document.createElement('div');
       row.className = 'item-row';
       row.style.border = unlocked ? '1px solid #10b981' : '1px solid #3b1466';
-      row.style.background = unlocked ? '#06281e' : '#140624';
       row.innerHTML = `
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:16px;">${ach.icon}</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span>${ach.icon}</span>
           <div>
-            <div style="font-weight:bold; color:${unlocked ? '#34d399' : '#fff'};">${ach.title}</div>
-            <div style="font-size:8px; color:#94a3b8;">${ach.desc}</div>
+            <b style="color:${unlocked ? '#34d399' : '#fff'};">${ach.title}</b>
+            <div style="font-size:7px; color:#94a3b8;">${ach.desc}</div>
           </div>
         </div>
-        <div style="font-weight:bold; color:${unlocked ? '#34d399' : '#64748b'};">
-          ${unlocked ? '✓ Tamamlandı' : 'Kilitli'}
-        </div>
+        <b style="color:${unlocked ? '#34d399' : '#64748b'};">${unlocked ? '✓ Tamam' : 'Kilitli'}</b>
       `;
       list.appendChild(row);
     });
-
     showScreen('achievements-screen');
   }
 
@@ -1543,14 +1501,10 @@
       userAchievements.push(id);
       localStorage.setItem('kutu_achievements', JSON.stringify(userAchievements));
       AudioEngine.playGodly();
-      const ach = ACHIEVEMENTS_DEF.find(a => a.id === id);
-      if (ach) {
-        alert(`🏆 BAŞARIM AÇILDI!\n${ach.title}: ${ach.desc}`);
-      }
     }
   }
 
-  // --- OYUN MEKANİKLERİ ---
+  // --- OYUN AKIŞI ---
   function updateMenuRatesPreview() {
     const preview = document.getElementById('menu-rates-preview');
     const currentTiers = GAME_MODES[selectedModeKey].tiers;
@@ -1583,12 +1537,7 @@
   }
 
   function startGame() {
-    if (!currentUser) {
-      alert("Oyunu oynamak için lütfen giriş yapınız!");
-      showScreen('auth-screen');
-      return;
-    }
-
+    if (!currentUser) { showScreen('auth-screen'); return; }
     currentScore = 0;
     currentSessionDrops = [];
     isOpening = false;
@@ -1598,6 +1547,7 @@
     else if (selectedModeKey === 'catch_open') startCatchModePhase1();
     else if (selectedModeKey === 'upgrade_mode') startUpgradeMode();
     else if (selectedModeKey === 'mines_mode') startMinesMode();
+    else if (selectedModeKey === 'fire_mode') startFireMode();
   }
 
   function startStandardMode() {
@@ -1745,8 +1695,8 @@
 
     setTimeout(() => {
       track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
-      const itemWidth = 68;
-      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 12 - 6);
+      const itemWidth = 65;
+      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 10 - 5);
       track.style.transform = `translateX(${target}px)`;
     }, 20);
 
@@ -1772,12 +1722,10 @@
       if (selectedModeKey === 'standard' && timeLeft <= 0) {
         document.getElementById('ready-view').style.display = 'block';
         document.getElementById('ready-banner-txt').innerText = "SON KUTU AÇILDI!";
-        document.getElementById('mode-badge-txt').innerText = "Sonuç geliyor...";
         triggerDelayedGameOver();
       } else if ((selectedModeKey === 'ten_cases' || selectedModeKey === 'upgrade_mode') && remainingBoxes <= 0) {
         document.getElementById('ready-view').style.display = 'block';
         document.getElementById('ready-banner-txt').innerText = "TÜM KUTULAR AÇILDI!";
-        document.getElementById('mode-badge-txt').innerText = "Sonuç geliyor...";
         triggerDelayedGameOver();
       } else {
         document.getElementById('open-case-btn').disabled = false;
@@ -1791,9 +1739,7 @@
     setTimeout(() => app.classList.remove('shake-effect'), 600);
   }
 
-  function triggerDelayedGameOver() {
-    setTimeout(() => endGame(), 1500);
-  }
+  function triggerDelayedGameOver() { setTimeout(() => endGame(), 1500); }
 
   function startCatchModePhase1() {
     caughtBoxes = [];
@@ -1820,12 +1766,10 @@
         catchAnimationFrames.forEach(cancelAnimationFrame);
         catchAnimationFrames = [];
 
-        if (caughtBoxes.length >= 8) unlockAchievement('catch_pro');
-
         arena.innerHTML = `
-          <div style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fbbf24; font-weight:bold; font-size:15px;">
+          <div style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fbbf24; font-weight:bold; font-size:14px;">
             SÜRE DOLDU! ⏳<br>
-            <span style="font-size:10px; color:#94a3b8; margin-top:4px;">Kutular açılıyor...</span>
+            <span style="font-size:9px; color:#94a3b8; margin-top:4px;">Kutular açılıyor...</span>
           </div>
         `;
         setTimeout(() => startCatchModePhase2(), 1200);
@@ -1841,10 +1785,10 @@
     const box = document.createElement('div');
     box.className = 'falling-box';
     
-    const arenaWidth = arena.offsetWidth || 340;
-    const arenaHeight = arena.offsetHeight || 380;
-    const startX = Math.random() * (arenaWidth - 50);
-    let posY = -50;
+    const arenaWidth = arena.offsetWidth || 320;
+    const arenaHeight = arena.offsetHeight || 360;
+    const startX = Math.random() * (arenaWidth - 45);
+    let posY = -45;
     const speed = 2.0;
 
     box.style.left = `${startX}px`;
@@ -1852,7 +1796,7 @@
     box.style.borderColor = dropTier.color;
     box.style.background = `radial-gradient(circle, ${dropTier.color}44 0%, #110521 90%)`;
     box.innerHTML = `
-      <span style="font-size:13px;">📦</span>
+      <span style="font-size:12px;">📦</span>
       <span style="color:${dropTier.color}; font-size:7px;">${dropTier.tier}</span>
     `;
 
@@ -1860,11 +1804,7 @@
       e.preventDefault();
       e.stopPropagation();
       AudioEngine.playTick();
-      caughtBoxes.push({
-        id: Date.now() + Math.random(),
-        tier: dropTier.tier,
-        color: dropTier.color
-      });
+      caughtBoxes.push({ id: Date.now() + Math.random(), tier: dropTier.tier, color: dropTier.color });
       document.getElementById('caught-count-txt').innerText = caughtBoxes.length;
       box.remove();
     };
@@ -1876,7 +1816,6 @@
       if (!box.parentNode) return;
       posY += speed;
       box.style.top = `${posY}px`;
-
       if (posY > arenaHeight + 10) {
         if (box.parentNode) box.remove();
       } else {
@@ -1914,11 +1853,9 @@
       card.className = 'inv-card' + (box.opened ? ' opened' : '');
       card.style.borderColor = box.color;
       card.innerHTML = `
-        <span style="font-size:13px;">📦</span>
+        <span style="font-size:12px;">📦</span>
         <span style="color:${box.color};">${box.tier}</span>
-        <span style="font-size:7px; color:#94a3b8;">${box.opened ? 'AÇILDI' : 'DOKUN VE AÇ'}</span>
       `;
-
       if (!box.opened) card.onclick = () => openSpecificCaughtBox(index);
       grid.appendChild(card);
     });
@@ -1962,8 +1899,8 @@
 
     setTimeout(() => {
       track.style.transition = 'transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)';
-      const itemWidth = 68;
-      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 12 - 6);
+      const itemWidth = 65;
+      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 10 - 5);
       track.style.transform = `translateX(${target}px)`;
     }, 20);
 
@@ -1999,9 +1936,7 @@
 
     const bombIndex = Math.floor(Math.random() * 9);
     mineField = [];
-    for (let i = 0; i < 9; i++) {
-      mineField.push({ isBomb: i === bombIndex, opened: false });
-    }
+    for (let i = 0; i < 9; i++) mineField.push({ isBomb: i === bombIndex, opened: false });
 
     renderMinesGrid();
     showScreen('mines-game-screen');
@@ -2010,11 +1945,10 @@
   function renderMinesGrid() {
     const grid = document.getElementById('mines-grid');
     grid.innerHTML = '';
-
     mineField.forEach((tile, index) => {
       const card = document.createElement('div');
       card.className = 'mine-card';
-      card.innerHTML = `<span style="font-size:18px;">📦</span>`;
+      card.innerHTML = `<span style="font-size:16px;">📦</span>`;
       card.onclick = () => pickMineCard(index, card);
       grid.appendChild(card);
     });
@@ -2029,7 +1963,7 @@
       AudioEngine.playExplosion();
       triggerScreenShake();
       cardEl.classList.add('bomb');
-      cardEl.innerHTML = `<span style="font-size:20px;">💣</span><span style="font-size:8px;color:#fca5a5;">PATLADIN!</span>`;
+      cardEl.innerHTML = `<span style="font-size:18px;">💣</span><span style="font-size:7px;color:#fca5a5;">PATLADIN!</span>`;
       document.getElementById('cashout-btn').disabled = true;
       document.getElementById('mine-status-txt').innerText = "BOMBA PATLADI!";
       currentScore = 0;
@@ -2044,7 +1978,7 @@
 
       cardEl.classList.add('safe');
       cardEl.innerHTML = `
-        <span style="color:#a7f3d0; font-size:8px; font-weight:bold;">${drop.item}</span>
+        <span style="color:#a7f3d0; font-size:7px; font-weight:bold;">${drop.item}</span>
         <span style="color:#34d399; font-weight:bold;">+${drop.points}P</span>
       `;
 
@@ -2063,22 +1997,17 @@
 
   function startSummaryScreen(title) {
     showScreen('catch-summary-screen');
-
     document.getElementById('summary-title-txt').innerText = title;
     document.getElementById('summary-final-score').innerText = currentScore;
     document.getElementById('summary-final-count').innerText = currentSessionDrops.length;
 
     const list = document.getElementById('summary-drops-list');
     list.innerHTML = '';
-
     currentSessionDrops.forEach(d => {
       const row = document.createElement('div');
       row.className = 'item-row';
       row.innerHTML = `
-        <div>
-          <span style="color:${d.color}; font-weight:bold;">[${d.tier}]</span> 
-          <span>${d.item}</span>
-        </div>
+        <div><span style="color:${d.color}; font-weight:bold;">[${d.tier}]</span> <span>${d.item}</span></div>
         <div style="color:#34d399; font-weight:bold;">+${d.points} P</div>
       `;
       list.appendChild(row);
@@ -2129,7 +2058,6 @@
     leaderboardData.sort((a, b) => b.score - a.score);
   }
 
-  // --- SIRALAMA TABLOSU ---
   function filterLeaderboard(modeKey, btn) {
     selectedFilterMode = modeKey;
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -2139,18 +2067,14 @@
 
   function openLeaderboard() {
     renderLeaderboard();
-    updateAdminUI();
     document.getElementById('leaderboard-modal').style.display = 'flex';
   }
 
-  function closeLeaderboard() {
-    document.getElementById('leaderboard-modal').style.display = 'none';
-  }
+  function closeLeaderboard() { document.getElementById('leaderboard-modal').style.display = 'none'; }
 
   function renderLeaderboard() {
     const list = document.getElementById('lb-list-container');
     list.innerHTML = '';
-
     validateLeaderboard();
 
     let filtered = selectedFilterMode === 'all' 
@@ -2161,15 +2085,14 @@
     const top10 = filtered.slice(0, 10);
 
     if (top10.length === 0) {
-      list.innerHTML = `<div style="text-align:center; color:#64748b; padding:15px;">Kayıtlı skor bulunamadı.</div>`;
+      list.innerHTML = `<div style="text-align:center; color:#64748b; padding:15px;">Kayıt bulunamadı.</div>`;
       return;
     }
 
     top10.forEach((item, index) => {
       const rank = index + 1;
       const row = document.createElement('div');
-      row.className = 'item-row lb-row';
-
+      row.className = 'item-row';
       if (rank === 1) row.classList.add('rank-1');
       else if (rank === 2) row.classList.add('rank-2');
       else if (rank === 3) row.classList.add('rank-3');
@@ -2177,64 +2100,21 @@
       else row.classList.add('rank-rest');
 
       row.innerHTML = `
-        <div>
-          <span>${rank}. ${item.name}</span>
-          <span style="font-size:8px; opacity:0.8; margin-left:4px;">(${item.modeName || 'Normal'})</span>
-        </div>
-        <span>${item.score} P</span>
+        <div><span>${rank}. ${item.name}</span> <span style="font-size:7px; opacity:0.8;">(${item.modeName || 'Normal'})</span></div>
+        <b>${item.score} P</b>
       `;
-      row.onclick = () => openHistoryDetails(item);
       list.appendChild(row);
     });
   }
 
-  function openHistoryDetails(target) {
-    const listContainer = document.getElementById('details-list-container');
-    listContainer.innerHTML = '';
-
-    let itemsToShow = [];
-    let title = "";
-    let modeInfo = "";
-    let dateInfo = "";
-
-    if (target === 'current') {
-      title = `${currentUser} - Oyun Sonu`;
-      modeInfo = `Mod: ${GAME_MODES[selectedModeKey].name}`;
-      dateInfo = "Bu Oyun";
-      itemsToShow = currentSessionDrops;
-    } else {
-      title = `${target.name} - Profil Detayı`;
-      modeInfo = `Oynanan Mod: ${target.modeName || 'Normal Kasa'}`;
-      dateInfo = `Tarih: ${target.date || 'Bilinmiyor'}`;
-      itemsToShow = target.drops || [];
+  function confirmClearLeaderboard() {
+    if (!isAdmin) return;
+    if (confirm("Skor tablosundaki tüm veriler silinsin mi?")) {
+      leaderboardData = [];
+      localStorage.removeItem('kutu_leaderboard');
+      if (firebaseReady && db) db.ref('leaderboard').remove();
+      renderLeaderboard();
     }
-
-    document.getElementById('details-header-txt').innerText = title;
-    document.getElementById('details-mode-txt').innerText = modeInfo;
-    document.getElementById('details-date-txt').innerText = dateInfo;
-
-    if (itemsToShow.length === 0) {
-      listContainer.innerHTML = `<div style="text-align:center; color:#64748b; padding:20px;">Kayıtlı kasa detayı bulunamadı.</div>`;
-    } else {
-      itemsToShow.forEach(d => {
-        const row = document.createElement('div');
-        row.className = 'item-row';
-        row.innerHTML = `
-          <div>
-            <span style="color:${d.color}; font-weight:bold;">[${d.tier}]</span> 
-            <span>${d.item}</span>
-          </div>
-          <div style="color:#34d399; font-weight:bold;">+${d.points} P</div>
-        `;
-        listContainer.appendChild(row);
-      });
-    }
-
-    document.getElementById('details-modal').style.display = 'flex';
-  }
-
-  function closeDetailsModal() {
-    document.getElementById('details-modal').style.display = 'none';
   }
 
   updateMenuRatesPreview();
