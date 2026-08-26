@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <title>Kutu Açma Pro - Cloud & Social</title>
+  <title>Kutu Açma Pro - Cloud & Social Master</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -504,6 +504,7 @@
       word-break: break-word;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .msg-incoming {
@@ -523,6 +524,7 @@
     .msg-sender { font-size: 9px; font-weight: bold; color: #53bdeb; margin-bottom: 2px; }
     .msg-title-tag { font-size: 7px; background: #3b1466; padding: 1px 4px; border-radius: 4px; margin-left: 2px; }
     .msg-time { font-size: 7px; color: #8696a0; align-self: flex-end; margin-top: 2px; }
+    .msg-edit-btn { position: absolute; top: 4px; right: 4px; font-size: 9px; cursor: pointer; opacity: 0.6; }
 
     .whatsapp-input-bar {
       display: flex;
@@ -903,11 +905,11 @@
     </div>
   </div>
 
-  <!-- 9. ARKADAŞLAR VE İSTEKLER -->
+  <!-- 9. ARKADAŞLAR VE ARKADAŞ SKOR SIRALAMASI -->
   <div id="friends-screen">
     <div class="top-header">
       <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">👥 Arkadaşlar</div>
+      <div style="font-size:11px; font-weight:bold; color:#d946ef;">👥 Arkadaşlar & Skorları</div>
       <div></div>
     </div>
 
@@ -919,7 +921,7 @@
     <div style="font-size:9px; color:#fbbf24; font-weight:bold; margin-top:2px;">Gelen İstekler:</div>
     <div id="friend-requests-container"></div>
 
-    <div style="font-size:9px; color:#38bdf8; font-weight:bold; margin-top:2px;">Arkadaş Listem:</div>
+    <div style="font-size:9px; color:#38bdf8; font-weight:bold; margin-top:2px;">Arkadaş Skor Sıralaması:</div>
     <div class="scroll-list" id="friends-list-container"></div>
   </div>
 
@@ -979,8 +981,8 @@
     <button class="btn-modal btn-close" onclick="exitToMenu()">Kaydet & Kapat</button>
   </div>
 
-  <!-- 13. SIRALAMA VE OYUNCU DETAY MODALI -->
-  <div id="details-modal" class="modal-overlay">
+  <!-- 13. SIRALAMA VE OYUNCU DETAY MODALI (ÜSTTE AÇILIR) -->
+  <div id="details-modal" class="modal-overlay" style="z-index: 70;">
     <div class="modal-card">
       <div style="text-align:center; font-weight:bold; font-size:12px; color:#fbbf24;" id="detail-player-title">Oyuncu Detayı</div>
       <div style="font-size:9px; color:#94a3b8; text-align:center; margin-bottom:4px;" id="detail-player-sub">Mod ve Puan Aldığı Eşyalar:</div>
@@ -1173,11 +1175,11 @@
   };
 
   const ACHIEVEMENTS_DEF = [
-    { id: 'first_game', title: 'İlk Adım', desc: 'Herhangi bir modu tamamla', icon: '🎮', target: 1, titleReward: 'Çaylak' },
     { id: 'box_10', title: 'Kasa Çırağı', desc: 'Toplam 10 kasa aç', icon: '📦', target: 10, titleReward: 'Kutucu' },
-    { id: 'box_25', title: 'Kasa Bağımlısı', desc: 'Toplam 25 kasa aç', icon: '📦', target: 25, titleReward: 'Kasa Avcısı' },
-    { id: 'box_50', title: 'Kasa Ustası', desc: 'Toplam 50 kasa aç', icon: '💎', target: 50, titleReward: 'Üstat' },
-    { id: 'godly_find', title: 'Tanrısal Dokunuş', desc: 'Kutulardan Godly eşya bul', icon: '👑', target: 1, titleReward: 'Tanrısal' },
+    { id: 'box_20', title: 'Kasa Bağımlısı', desc: 'Toplam 20 kasa aç', icon: '📦', target: 20, titleReward: 'Kasa Avcısı' },
+    { id: 'box_30', title: 'Kasa Ustası', desc: 'Toplam 30 kasa aç', icon: '💎', target: 30, titleReward: 'Üstat' },
+    { id: 'box_40', title: 'Kasa Şampiyonu', desc: 'Toplam 40 kasa aç', icon: '👑', target: 40, titleReward: 'Efsane' },
+    { id: 'box_50', title: 'Kozmik Hükümdar', desc: 'Toplam 50 kasa aç', icon: '🌌', target: 50, titleReward: 'Kozmik Lider' },
     { id: 'score_100', title: 'Puan Avcısı', desc: 'Tek oyunda 100+ puan topla', icon: '🔥', target: 100, titleReward: 'Avcı' },
     { id: 'score_500', title: 'Hazine Zengini', desc: 'Tek oyunda 500+ puana ulaş', icon: '💎', target: 500, titleReward: 'Milyoner' },
     { id: 'mines_master', title: 'Mayın Uzmanı', desc: 'Mayınlı modda 5 güvenli kasa aç', icon: '💣', target: 5, titleReward: 'Bomba İmha' },
@@ -1202,7 +1204,6 @@
   let dailyQuestCount = 0;
   let totalMessagesSent = 0;
   let godlyFoundCount = 0;
-  let gamesCompletedCount = 0;
 
   let selectedModeKey = 'standard';
   let currentScore = 0;
@@ -1370,7 +1371,6 @@
         userHighScore = data.highScore || 0;
         totalMessagesSent = data.messagesSent || 0;
         godlyFoundCount = data.godlyCount || 0;
-        gamesCompletedCount = data.gamesCompleted || 0;
         document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser} [${currentTitle}]` + (isAdmin ? " (👑 Admin)" : "");
       }
     });
@@ -1498,7 +1498,7 @@
 
     if (firebaseReady && db) {
       db.ref('global_chat').limitToLast(30).on('value', (snapshot) => {
-        renderWhatsAppChat(snapshot.val());
+        renderWhatsAppChat(snapshot.val(), 'global_chat');
       });
     }
   }
@@ -1510,7 +1510,7 @@
 
     if (firebaseReady && db) {
       db.ref(`group_messages/${groupId}`).limitToLast(30).on('value', (snapshot) => {
-        renderWhatsAppChat(snapshot.val());
+        renderWhatsAppChat(snapshot.val(), `group_messages/${groupId}`);
       });
     }
   }
@@ -1523,7 +1523,7 @@
     const chatRoomId = [currentUid, friendUid].sort().join('_');
     if (firebaseReady && db) {
       db.ref(`private_chats/${chatRoomId}`).limitToLast(30).on('value', (snapshot) => {
-        renderWhatsAppChat(snapshot.val());
+        renderWhatsAppChat(snapshot.val(), `private_chats/${chatRoomId}`);
       });
     }
   }
@@ -1568,7 +1568,16 @@
     input.value = "";
   }
 
-  function renderWhatsAppChat(data) {
+  function editChatMessage(dbPath, msgId, oldMsg) {
+    const newMsg = prompt("Mesajınızı düzenleyin:", oldMsg);
+    if (newMsg !== null && newMsg.trim() !== "" && newMsg !== oldMsg) {
+      if (firebaseReady && db) {
+        db.ref(`${dbPath}/${msgId}/message`).set(newMsg.trim() + " (düzenlendi)");
+      }
+    }
+  }
+
+  function renderWhatsAppChat(data, dbPath) {
     const box = document.getElementById('chat-messages-box');
     if (!box) return;
     box.innerHTML = '';
@@ -1578,12 +1587,17 @@
       return;
     }
 
-    Object.values(data).forEach(m => {
+    Object.keys(data).forEach(msgKey => {
+      const m = data[msgKey];
       const isMe = (m.senderUid === currentUid || m.sender === currentUser);
       const bubble = document.createElement('div');
       bubble.className = `msg-bubble ${isMe ? 'msg-outgoing' : 'msg-incoming'}`;
+      
+      let editBtnHtml = isMe ? `<span class="msg-edit-btn" onclick="editChatMessage('${dbPath}', '${msgKey}', '${escapeHtml(m.message)}')">✏️</span>` : '';
+
       bubble.innerHTML = `
         ${!isMe ? `<div class="msg-sender">${m.isAdmin ? '👑 ' : ''}${m.sender} <span class="msg-title-tag">[${m.title || 'Çaylak'}]</span></div>` : ''}
+        ${editBtnHtml}
         <div>${escapeHtml(m.message)}</div>
         <div class="msg-time">${m.time || ''}</div>
       `;
@@ -1693,14 +1707,26 @@
       return;
     }
 
-    userFriends.forEach(f => {
+    // Arkadaşların skorlarını eşleştirmek için leaderboard'u tara
+    const friendsWithScores = userFriends.map(f => {
+      const bestRecord = leaderboardData.find(lb => lb.uid === f.uid);
+      return {
+        ...f,
+        score: bestRecord ? bestRecord.score : 0
+      };
+    });
+
+    friendsWithScores.sort((a, b) => b.score - a.score);
+
+    friendsWithScores.forEach((f, idx) => {
       const row = document.createElement('div');
       row.className = 'item-row';
       row.innerHTML = `
         <div style="cursor:pointer; display:flex; align-items:center; gap:4px;" onclick="openPrivateChat('${f.username}', '${f.uid}')">
+          <span style="font-weight:bold; color:#fbbf24;">#${idx+1}</span>
           <span style="color:#25D366;">●</span>
           <b>${f.username}</b>
-          <span style="font-size:7px; color:#a855f7;">(Mesaj At)</span>
+          <span style="font-size:8px; color:#34d399;">(${f.score} P)</span>
         </div>
         <button class="icon-btn exit-btn" onclick="removeFriend('${f.uid}', '${f.username}')">Sil</button>
       `;
@@ -1733,7 +1759,7 @@
     openSettings();
   }
 
-  // --- İLERLEMELİ BAŞARIMLAR SİSTEMİ ---
+  // --- İLERLEMELİ BAŞARIMLAR (0/10, 0/20, 0/30, 0/40, 0/50...) ---
   function openAchievements() {
     renderAchievementsList();
     showScreen('achievements-screen');
@@ -1946,7 +1972,9 @@
     document.getElementById('quest-progress-txt').innerText = `${dailyQuestCount}/3`;
 
     updateAchievementProgress('box_10', totalBoxesOpened);
-    updateAchievementProgress('box_25', totalBoxesOpened);
+    updateAchievementProgress('box_20', totalBoxesOpened);
+    updateAchievementProgress('box_30', totalBoxesOpened);
+    updateAchievementProgress('box_40', totalBoxesOpened);
     updateAchievementProgress('box_50', totalBoxesOpened);
 
     if (firebaseReady && db && currentUid) {
@@ -2011,7 +2039,9 @@
         AudioEngine.playGodly();
         triggerScreenShake();
         godlyFoundCount++;
-        updateAchievementProgress('godly_find', godlyFoundCount);
+        if (firebaseReady && db && currentUid) {
+          db.ref(`users/${currentUid}/godlyCount`).set(godlyFoundCount);
+        }
       }
 
       document.getElementById('drop-result-txt').innerHTML = `
@@ -2218,7 +2248,9 @@
         AudioEngine.playGodly();
         triggerScreenShake();
         godlyFoundCount++;
-        updateAchievementProgress('godly_find', godlyFoundCount);
+        if (firebaseReady && db && currentUid) {
+          db.ref(`users/${currentUid}/godlyCount`).set(godlyFoundCount);
+        }
       }
 
       renderInventoryGrid();
@@ -2244,9 +2276,12 @@
       currentSessionDrops.push(drop);
       if (drop.tier.includes('Godly')) {
         godlyFoundCount++;
-        updateAchievementProgress('godly_find', godlyFoundCount);
       }
     });
+
+    if (firebaseReady && db && currentUid && godlyFoundCount > 0) {
+      db.ref(`users/${currentUid}/godlyCount`).set(godlyFoundCount);
+    }
 
     renderInventoryGrid();
     setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ: TOPLU AÇILIŞ"), 800);
@@ -2351,8 +2386,6 @@
   }
 
   function saveScoreToLeaderboard() {
-    gamesCompletedCount++;
-    updateAchievementProgress('first_game', gamesCompletedCount);
     updateAchievementProgress('score_100', currentScore);
     updateAchievementProgress('score_500', currentScore);
 
@@ -2491,4 +2524,3 @@
 
 </body>
 </html>
-
