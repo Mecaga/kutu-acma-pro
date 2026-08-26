@@ -67,7 +67,6 @@
       cursor: pointer;
     }
 
-    /* MENÜ */
     #menu-screen {
       display: flex;
       flex-direction: column;
@@ -164,7 +163,6 @@
       line-height: 1.3;
     }
 
-    /* STAT BAR */
     .game-stats-top {
       display: flex;
       justify-content: space-between;
@@ -186,7 +184,6 @@
     .score-val { color: #34d399; }
     .user-tag { font-size: 10px; color: #38bdf8; }
 
-    /* EKRANLAR */
     #game-screen, #catch-game-screen, #inventory-screen, #mines-game-screen, #catch-summary-screen {
       display: none;
       flex-direction: column;
@@ -400,7 +397,6 @@
     .mine-card.safe { border-color: #10b981; background: #064e3b; }
     .mine-card.bomb { border-color: #ef4444; background: #7f1d1d; }
 
-    /* MODAL */
     .modal-overlay {
       display: none;
       position: absolute;
@@ -800,8 +796,11 @@
 
 </div>
 
+<!-- ========================================== -->
+<!-- JAVASCRIPT & FIREBASE BAŞLANGICI           -->
+<!-- ========================================== -->
 <script>
-  // --- BİREBİR FIREBASE CONFIG ---
+  // FIREBASE CONFIG BURADA TANIMLI:
   const firebaseConfig = {
     apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
     authDomain: "kutu-acma-pro.firebaseapp.com",
@@ -824,7 +823,7 @@
     console.warn("Firebase bağlantı uyarısı:", err);
   }
 
-  // --- OYUN MODLARI & ORANLAR ---
+  // OYUN MODLARI & ORANLAR
   const GAME_MODES = {
     standard: {
       name: "Normal Kasa",
@@ -898,7 +897,7 @@
   let mineField = [];
   let safePicksCount = 0;
 
-  // --- FIREBASE DİNLEYİCİLERİ ---
+  // FIREBASE DİNLEYİCİLERİ
   if (firebaseReady && db) {
     try {
       db.ref('leaderboard').on('value', (snapshot) => {
@@ -950,7 +949,7 @@
     document.getElementById('menu-user-greeting').innerText = currentUser !== "Misafir" ? `👤 ${currentUser}` : "Giriş Yapılmadı";
   }
 
-  // --- AUTH İŞLEMLERİ ---
+  // AUTH İŞLEMLERİ
   function openAuthModal() { document.getElementById('auth-modal').style.display = 'flex'; }
   function closeAuthModal() { document.getElementById('auth-modal').style.display = 'none'; }
 
@@ -1029,7 +1028,7 @@
     alert("Çıkış yapıldı.");
   }
 
-  // --- ADMIN PANELİ ---
+  // ADMIN PANELİ
   function openAdminModal() { document.getElementById('admin-modal').style.display = 'flex'; }
   function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
 
@@ -1062,7 +1061,7 @@
     }
   }
 
-  // --- OYUN MOTORU & ORANLAR ---
+  // OYUN MOTORU & ORANLAR
   function updateMenuRatesPreview() {
     const preview = document.getElementById('menu-rates-preview');
     const currentTiers = GAME_MODES[selectedModeKey].tiers;
@@ -1754,4 +1753,3 @@
 
 </body>
 </html>
-
