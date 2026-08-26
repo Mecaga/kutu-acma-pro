@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <title>Kutu Açma Pro - 1v1 PvP & Social Hub</title>
+  <title>Kutu Açma Pro - Fix Sync</title>
 
   <!-- Firebase SDK (v9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -72,7 +72,7 @@
     }
     #toast-notification.show { transform: translateX(-50%) translateY(0); }
 
-    /* GİRİŞ EKRANI */
+    /* GİRİŞ */
     #auth-screen {
       display: flex;
       flex-direction: column;
@@ -245,7 +245,6 @@
       display: none;
     }
 
-    /* 2x3 GRID OYUN MODU DÜZENİ */
     .mode-grid-2x3 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -617,7 +616,7 @@
     .btn-accept { background: #10b981; border: none; padding: 4px 8px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 9px; }
     .btn-reject { background: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 9px; margin-left: 2px; }
 
-    /* MODAL */
+    /* MODALLAR */
     .modal-overlay {
       display: none;
       position: absolute;
@@ -712,7 +711,6 @@
         </div>
       </div>
 
-      <!-- 2 Sütun x 3 Satır Mod Kutuları -->
       <div class="mode-grid-2x3">
         <div class="mode-btn-box active" onclick="selectMode('standard', this)">
           <b>⚔️ Normal Kasa</b>
@@ -1333,7 +1331,6 @@
   let currentlyInspectingUser = null;
   let selectedActionMsg = null;
 
-  // 1v1 Online PvP Değişkenleri
   let currentDuelRoomCode = null;
   let duelListenerRef = null;
   let duelMyRole = 'p1';
@@ -1669,7 +1666,7 @@
     }
   }
 
-  // --- CANLI 1v1 PvP SAVAŞ ODASI (ODA KODU İLE GERÇEK ZAMANLI) ---
+  // --- CANLI 1v1 PvP SAVAŞ ODASI ---
   function openDuelRoomModal() {
     document.getElementById('duel-room-modal').style.display = 'flex';
   }
@@ -1835,7 +1832,7 @@
     if (firebaseReady && db && currentUid) {
       const channelId = Math.floor(10000 + Math.random() * 90000);
       const fullChannelTag = `${groupName.trim()}#${channelId}`;
-      const newGroupId = db.ref('groups').push().key;
+      const newGroupId = db.ref('channels').push().key;
 
       const groupData = {
         id: newGroupId,
@@ -1849,7 +1846,7 @@
         }
       };
 
-      db.ref(`groups/${newGroupId}`).set(groupData);
+      db.ref(`channels/${newGroupId}`).set(groupData);
       db.ref(`channel_tags/${fullChannelTag.toLowerCase()}`).set(newGroupId);
       db.ref(`users/${currentUid}/my_groups/${newGroupId}`).set(groupData);
       showToast(`'${fullChannelTag}' kanalı kuruldu!`);
@@ -1873,10 +1870,10 @@
           return;
         }
 
-        db.ref(`groups/${groupId}`).once('value').then(gSnap => {
+        db.ref(`channels/${groupId}`).once('value').then(gSnap => {
           const gData = gSnap.val();
           if (gData) {
-            db.ref(`groups/${groupId}/members/${currentUid}`).set({
+            db.ref(`channels/${groupId}/members/${currentUid}`).set({
               username: currentUser,
               uid: currentUid,
               role: 'member'
@@ -1924,7 +1921,7 @@
     container.innerHTML = '';
 
     if (userFriends.length === 0) {
-      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:8px;">Henüz arkadaşın yok.</div>`;
+      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:8px;">Henüz özel sohbet edecek arkadaşın yok.</div>`;
       return;
     }
 
@@ -1968,8 +1965,8 @@
     showScreen('chat-screen');
 
     if (firebaseReady && db) {
-      db.ref(`group_messages/${groupId}`).limitToLast(30).on('value', (snapshot) => {
-        renderWhatsAppChat(snapshot.val(), `group_messages/${groupId}`);
+      db.ref(`channel_messages/${groupId}`).limitToLast(30).on('value', (snapshot) => {
+        renderWhatsAppChat(snapshot.val(), `channel_messages/${groupId}`);
       });
     }
   }
@@ -1977,7 +1974,7 @@
   function openGroupManageScreen() {
     if (!currentActiveGroupId || !db) return;
 
-    db.ref(`groups/${currentActiveGroupId}`).once('value').then(snap => {
+    db.ref(`channels/${currentActiveGroupId}`).once('value').then(snap => {
       const gData = snap.val();
       if (!gData) return;
 
@@ -2015,7 +2012,7 @@
     if (!newName || !newName.trim()) return;
 
     if (db && currentActiveGroupId) {
-      db.ref(`groups/${currentActiveGroupId}`).once('value').then(snap => {
+      db.ref(`channels/${currentActiveGroupId}`).once('value').then(snap => {
         const gData = snap.val() || {};
         const oldTag = (gData.tag || "").toLowerCase();
         const randId = Math.floor(10000 + Math.random() * 90000);
@@ -2024,8 +2021,8 @@
         if (oldTag) db.ref(`channel_tags/${oldTag}`).remove();
         db.ref(`channel_tags/${newTag.toLowerCase()}`).set(currentActiveGroupId);
 
-        db.ref(`groups/${currentActiveGroupId}/name`).set(newName.trim());
-        db.ref(`groups/${currentActiveGroupId}/tag`).set(newTag);
+        db.ref(`channels/${currentActiveGroupId}/name`).set(newName.trim());
+        db.ref(`channels/${currentActiveGroupId}/tag`).set(newTag);
         db.ref(`users/${currentUid}/my_groups/${currentActiveGroupId}/name`).set(newName.trim());
         db.ref(`users/${currentUid}/my_groups/${currentActiveGroupId}/tag`).set(newTag);
 
@@ -2039,7 +2036,7 @@
   function removeMemberFromGroup(memberUid) {
     if (confirm("Bu üyeyi kanaldan çıkarmak istediğinize emin misiniz?")) {
       if (db && currentActiveGroupId) {
-        db.ref(`groups/${currentActiveGroupId}/members/${memberUid}`).remove();
+        db.ref(`channels/${currentActiveGroupId}/members/${memberUid}`).remove();
         db.ref(`users/${memberUid}/my_groups/${currentActiveGroupId}`).remove();
         openGroupManageScreen();
       }
@@ -2049,15 +2046,15 @@
   function deleteCurrentGroup() {
     if (confirm("DİKKAT: Bu kanal ve tüm mesajları kalıcı olarak silinecek! Onaylıyor musunuz?")) {
       if (db && currentActiveGroupId) {
-        db.ref(`groups/${currentActiveGroupId}`).once('value').then(snap => {
+        db.ref(`channels/${currentActiveGroupId}`).once('value').then(snap => {
           const gData = snap.val() || {};
           const members = gData.members || {};
           if (gData.tag) db.ref(`channel_tags/${gData.tag.toLowerCase()}`).remove();
           Object.keys(members).forEach(mUid => {
             db.ref(`users/${mUid}/my_groups/${currentActiveGroupId}`).remove();
           });
-          db.ref(`groups/${currentActiveGroupId}`).remove();
-          db.ref(`group_messages/${currentActiveGroupId}`).remove();
+          db.ref(`channels/${currentActiveGroupId}`).remove();
+          db.ref(`channel_messages/${currentActiveGroupId}`).remove();
           showToast("Kanal silindi!");
           openChatsHub();
         });
@@ -2107,9 +2104,9 @@
       if (firebaseReady && db) db.ref('global_chat').push(chatData);
     } else if (activeChatTarget.startsWith('group_')) {
       const gId = activeChatTarget.replace('group_', '');
-      if (firebaseReady && db) db.ref(`group_messages/${gId}`).push(chatData);
+      if (firebaseReady && db) db.ref(`channel_messages/${gId}`).push(chatData);
     } else {
-      const friendObj = userFriends.find(f => f.username === activeChatTarget);
+      const friendObj = userFriends.find(f => f.username === activeChatTarget) || allRegisteredUsers.find(u => u.username === activeChatTarget);
       if (friendObj) {
         const chatRoomId = [currentUid, friendObj.uid].sort().join('_');
         if (firebaseReady && db) db.ref(`private_chats/${chatRoomId}`).push(chatData);
@@ -2208,19 +2205,10 @@
     document.getElementById('chat-message-input').value = summaryText;
   }
 
-  // --- KUSURSUZ ARKADAŞLIK SİSTEMİ ---
+  // --- ARKADAŞLIK SİSTEMİ ---
   function openFriendsScreen() {
-    renderFriendsList();
     renderAllRegisteredUsersList();
     showScreen('friends-screen');
-  }
-
-  function sendFriendRequest() {
-    const input = document.getElementById('add-friend-input');
-    const target = input.value.trim();
-    if (!target) return;
-    sendDirectFriendRequest(target);
-    input.value = "";
   }
 
   function sendDirectFriendRequest(targetUsername) {
@@ -2250,7 +2238,7 @@
             if (foundEntry) {
               executeSendRequest(foundEntry[0], targetUsername);
             } else {
-              alert("HATA: Bu kullanıcı adına ve etiketine sahip kayıtlı bir oyuncu bulunamadı!");
+              alert("HATA: Bu kullanıcı adına sahip bir oyuncu bulunamadı!");
             }
           });
         }
@@ -2308,19 +2296,6 @@
     if (firebaseReady && db && currentUid) {
       db.ref(`friend_requests/${currentUid}/${senderUid}`).remove();
     }
-  }
-
-  function removeFriend(friendUid, friendName) {
-    if (confirm(`${friendName} arkadaş listenden silinsin mi?`)) {
-      if (firebaseReady && db && currentUid) {
-        db.ref(`users/${currentUid}/friends/${friendUid}`).remove();
-        db.ref(`users/${friendUid}/friends/${currentUid}`).remove();
-      }
-    }
-  }
-
-  function renderFriendsList() {
-    renderAllRegisteredUsersList();
   }
 
   // --- AYARLAR & SERBEST UNVAN SEÇİMİ ---
