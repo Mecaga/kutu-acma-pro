@@ -12,147 +12,173 @@
   <div class="app-container">
     <div class="top-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çık</a>
-      <div id="pvp-title" style="font-weight:bold; font-size:12px;">PvP (3 Kişi - 15 Kutu)</div>
-      <div id="pvp-timer" style="color:var(--danger); font-weight:bold; font-size:12px;">Bekleniyor</div>
+      <div id="pvp-room-tag" style="font-weight:bold; font-size:12px;">PvP Arenası</div>
+      <div id="pvp-status-badge" style="color:var(--gold); font-weight:bold; font-size:11px;">Oda Seç</div>
     </div>
 
-    <!-- Mod Seçimi -->
-    <div style="display:flex; gap:4px; margin-bottom:6px;">
-      <button class="nav-action-btn" style="flex:1;" onclick="setPvPPlayerCount(2)">1v1</button>
-      <button class="nav-action-btn" style="flex:1; background:var(--btn-blue);" onclick="setPvPPlayerCount(3)">1v1v1</button>
-      <button class="nav-action-btn" style="flex:1;" onclick="setPvPPlayerCount(4)">1v1v1v1</button>
+    <!-- Oda Kurma & Katılma Paneli -->
+    <div id="pvp-lobby-panel" style="display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:11px; color:var(--text-dim);">Oyun Türü Seç:</div>
+      <div style="display:flex; gap:4px;">
+        <button class="nav-action-btn" id="btn-p2" style="flex:1; background:var(--btn-blue);" onclick="setRoomSize(2)">1v1</button>
+        <button class="nav-action-btn" id="btn-p3" style="flex:1;" onclick="setRoomSize(3)">1v1v1</button>
+        <button class="nav-action-btn" id="btn-p4" style="flex:1;" onclick="setRoomSize(4)">1v1v1v1</button>
+      </div>
+
+      <div style="display:flex; gap:6px; margin-top:6px;">
+        <button class="btn-start" style="flex:1; background:var(--neon-purple);" onclick="createOnlineRoom()">Oda Kur</button>
+      </div>
+
+      <div style="display:flex; gap:4px; margin-top:10px;">
+        <input type="text" id="in-room-code" class="input-field" style="margin:0; font-size:11px;" placeholder="Oda Adı (Örn: arena#1234)">
+        <button class="icon-btn" style="background:var(--btn-green); white-space:nowrap;" onclick="joinOnlineRoom()">Odaya Katıl</button>
+      </div>
     </div>
 
-    <!-- Oyuncu Sütunları -->
-    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; margin-bottom:8px;" id="pvp-players-row"></div>
-
-    <!-- Kutular -->
-    <div style="font-size:10px; color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📦 Sana Ait 5 Kutu (Hepsini Aç):</div>
-    <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; flex:1; align-content:start;" id="pvp-boxes-grid"></div>
+    <!-- Canlı Oyun Alanı -->
+    <div id="pvp-game-panel" style="display:none; flex-direction:column; flex:1;">
+      <div style="display:grid; gap:4px; margin-bottom:8px;" id="pvp-players-row"></div>
+      <div style="font-size:10px; color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📦 Sana Ait 5 Kutu (Hepsini Aç):</div>
+      <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; flex:1; align-content:start;" id="pvp-boxes-grid"></div>
+    </div>
   </div>
 
   <script src="app.js"></script>
   <script>
-    let pCount = 3;
-    let myBoxesOpened = 0;
-    let myScore = 0;
-    let pvpState = [];
+    let roomCapacity = 2;
+    let currentRoomCode = null;
+    let myOpenedCount = 0;
+    let myTotalScore = 0;
 
-    const PVP_DROPS = [
+    const PVP_TIERS = [
       { name: "Tahta Kılıç", p: 2, c: "#fff" },
-      { name: "Demir Balta", p: 4, c: "#38bdf8" },
-      { name: "Gümüş Yüzük", p: 8, c: "#c084fc" },
-      { name: "Deri Kask", p: 2, c: "#fff" },
-      { name: "Taş Parçası", p: 1, c: "#94a3b8" }
+      { name: "Demir Balta", p: 6, c: "#38bdf8" },
+      { name: "Gümüş Yüzük", p: 15, c: "#c084fc" },
+      { name: "Ejder Baltası", p: 40, c: "#fb923c" },
+      { name: "Efsane Kılıç", p: 100, c: "#f43f5e" }
     ];
 
-    window.onload = () => {
-      initPvPStage();
-    };
-
-    function setPvPPlayerCount(c) {
-      pCount = c;
-      document.getElementById("pvp-title").innerText = `PvP (${c} Kişi - ${c*5} Kutu)`;
-      initPvPStage();
+    function setRoomSize(num) {
+      roomCapacity = num;
+      document.getElementById("btn-p2").style.background = num === 2 ? "var(--btn-blue)" : "#0f172a";
+      document.getElementById("btn-p3").style.background = num === 3 ? "var(--btn-blue)" : "#0f172a";
+      document.getElementById("btn-p4").style.background = num === 4 ? "var(--btn-blue)" : "#0f172a";
     }
 
-    function initPvPStage() {
+    function createOnlineRoom() {
       const u = getActiveUser();
-      myBoxesOpened = 0;
-      myScore = 0;
-      pvpState = [];
+      if (!u) return;
+      const code = `oda#${Math.floor(1000 + Math.random() * 9000)}`;
+      currentRoomCode = code;
 
-      for (let i = 1; i < pCount; i++) {
-        pvpState.push({ name: `Rakip_${i}#${Math.floor(1000+Math.random()*9000)}`, score: 0, opened: 0, isMe: false });
-      }
-      pvpState.push({ name: `${u.name}${u.tag} (Sen)`, score: 0, opened: 0, isMe: true });
+      const pData = {};
+      pData[u.uid] = { fullName: `${u.name}${u.tag}`, score: 0, opened: 0 };
 
-      renderPlayersGrid();
-      renderBoxesGrid();
-      startPvPSimulation();
-    }
-
-    function renderPlayersGrid() {
-      const grid = document.getElementById("pvp-players-row");
-      grid.style.gridTemplateColumns = `repeat(${pCount}, 1fr)`;
-      grid.innerHTML = "";
-
-      pvpState.forEach((p, i) => {
-        grid.innerHTML += `
-          <div style="background:#070c18; border:1px solid ${p.isMe ? 'var(--btn-blue)' : 'var(--danger)'}; border-radius:6px; padding:6px 2px; text-align:center;">
-            <div style="font-size:9px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
-            <div style="font-size:18px; font-weight:bold; color:var(--btn-green); margin:2px 0;" id="pscore-${i}">${p.score} P</div>
-            <div style="font-size:8px; color:#94a3b8;" id="pbox-${i}">${p.opened}/5 Kutu</div>
-          </div>
-        `;
+      db.ref("pvp_rooms/" + code.replace('#', '_')).set({
+        code: code,
+        capacity: roomCapacity,
+        status: "waiting",
+        players: pData
+      }).then(() => {
+        listenRoom(code);
       });
     }
 
-    function renderBoxesGrid() {
+    function joinOnlineRoom() {
+      const code = document.getElementById("in-room-code").value.trim();
+      if (!code) return alert("Oda adı#id giriniz!");
+      const u = getActiveUser();
+      currentRoomCode = code;
+
+      db.ref("pvp_rooms/" + code.replace('#', '_')).transaction(room => {
+        if (room) {
+          if (!room.players) room.players = {};
+          if (Object.keys(room.players).length < room.capacity) {
+            room.players[u.uid] = { fullName: `${u.name}${u.tag}`, score: 0, opened: 0 };
+            if (Object.keys(room.players).length === room.capacity) {
+              room.status = "playing";
+            }
+          }
+        }
+        return room;
+      }, (err, committed, snap) => {
+        if (committed) listenRoom(code);
+        else alert("Oda dolu veya bulunamadı!");
+      });
+    }
+
+    function listenRoom(code) {
+      document.getElementById("pvp-lobby-panel").style.display = "none";
+      document.getElementById("pvp-game-panel").style.display = "flex";
+      document.getElementById("pvp-room-tag").innerText = code;
+
+      const u = getActiveUser();
+
+      db.ref("pvp_rooms/" + code.replace('#', '_')).on("value", snap => {
+        const room = snap.val();
+        if (!room) return;
+
+        const pList = Object.values(room.players || {});
+        const pRow = document.getElementById("pvp-players-row");
+        pRow.style.gridTemplateColumns = `repeat(${room.capacity}, 1fr)`;
+        pRow.innerHTML = "";
+
+        pList.forEach(p => {
+          const isMe = p.fullName === `${u.name}${u.tag}`;
+          pRow.innerHTML += `
+            <div style="background:#070c18; border:1px solid ${isMe ? 'var(--btn-blue)' : 'var(--danger)'}; border-radius:6px; padding:6px 2px; text-align:center;">
+              <div style="font-size:9px; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.fullName}</div>
+              <div style="font-size:18px; font-weight:bold; color:var(--btn-green); margin:2px 0;">${p.score} P</div>
+              <div style="font-size:8px; color:#94a3b8;">${p.opened}/5 Kutu</div>
+            </div>
+          `;
+        });
+
+        if (room.status === "playing") {
+          document.getElementById("pvp-status-badge").innerText = "⚔️ Maç Başladı!";
+          document.getElementById("pvp-status-badge").style.color = "var(--btn-green)";
+          renderBoxes(room.code);
+        } else {
+          document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${pList.length}/${room.capacity})`;
+        }
+      });
+    }
+
+    function renderBoxes(roomKey) {
       const grid = document.getElementById("pvp-boxes-grid");
-      grid.innerHTML = "";
+      if (grid.children.length > 0) return;
+
+      const u = getActiveUser();
+
       for (let i = 0; i < 5; i++) {
         const b = document.createElement("div");
         b.className = "roulette-item";
-        b.style.width = "100%";
-        b.style.height = "60px";
-        b.style.cursor = "pointer";
+        b.style.cssText = "width:100%; height:60px; cursor:pointer;";
         b.innerHTML = `<span>📦</span><span style="font-size:8px;">${i+1}</span>`;
-        b.onclick = () => openPvPBox(i, b);
+
+        b.onclick = () => {
+          if (b.dataset.opened || myOpenedCount >= 5) return;
+          b.dataset.opened = "1";
+          b.style.background = "#050a14";
+
+          const d = PVP_TIERS[Math.floor(Math.random() * PVP_TIERS.length)];
+          myTotalScore += d.p;
+          myOpenedCount++;
+
+          b.innerHTML = `<span style="color:${d.c}; font-size:7px;">${d.name}</span><b style="color:var(--btn-green); font-size:9px;">+${d.p}P</b>`;
+
+          db.ref(`pvp_rooms/${roomKey.replace('#', '_')}/players/${u.uid}`).update({
+            score: myTotalScore,
+            opened: myOpenedCount
+          });
+
+          if (myOpenedCount === 5) {
+            setTimeout(() => {
+              alert(`🏁 5 Kutunuzu açtınız! Toplam Puanınız: ${myTotalScore}`);
+            }, 500);
+          }
+        };
         grid.appendChild(b);
-      }
-    }
-
-    function openPvPBox(idx, el) {
-      if (el.classList.contains("opened") || myBoxesOpened >= 5) return;
-      el.classList.add("opened");
-      el.style.background = "#050a14";
-
-      const d = PVP_DROPS[Math.floor(Math.random() * PVP_DROPS.length)];
-      myScore += d.p;
-      myBoxesOpened++;
-
-      el.innerHTML = `<span style="color:${d.c}; font-size:7px;">${d.name}</span><b style="color:var(--btn-green); font-size:9px;">+${d.p}P</b>`;
-
-      const meIdx = pvpState.findIndex(p => p.isMe);
-      pvpState[meIdx].score = myScore;
-      pvpState[meIdx].opened = myBoxesOpened;
-
-      document.getElementById(`pscore-${meIdx}`).innerText = `${myScore} P`;
-      document.getElementById(`pbox-${meIdx}`).innerText = `${myBoxesOpened}/5 Kutu`;
-
-      checkFinish();
-    }
-
-    function startPvPSimulation() {
-      const sim = setInterval(() => {
-        pvpState.forEach((p, i) => {
-          if (!p.isMe && p.opened < 5 && Math.random() > 0.4) {
-            p.opened++;
-            p.score += Math.floor(Math.random() * 6) + 2;
-            document.getElementById(`pscore-${i}`).innerText = `${p.score} P`;
-            document.getElementById(`pbox-${i}`).innerText = `${p.opened}/5 Kutu`;
-          }
-        });
-        if (pvpState.every(p => p.opened === 5)) clearInterval(sim);
-      }, 1000);
-    }
-
-    function checkFinish() {
-      if (pvpState.every(p => p.opened === 5)) {
-        document.getElementById("pvp-timer").innerText = "10s";
-        let c = 10;
-        const cd = setInterval(() => {
-          c--;
-          document.getElementById("pvp-timer").innerText = `${c}s`;
-          if (c <= 0) {
-            clearInterval(cd);
-            pvpState.sort((a,b) => b.score - a.score);
-            const rank = pvpState.findIndex(p => p.isMe) + 1;
-            alert(`🏁 Maç Bitti! ${rank}. oldunuz! Puan: ${myScore}`);
-            window.location.href = "menu.html";
-          }
-        }, 1000);
       }
     }
   </script>
