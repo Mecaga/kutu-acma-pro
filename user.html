@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profilim</title>
+  <title>Profilim & İstatistikler</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -12,22 +12,18 @@
   <div class="app-container">
     <div class="top-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
-      <div style="font-weight:bold; font-size:12px;">👤 Oyuncu Profili</div>
+      <div style="font-weight:bold; font-size:12px;">👤 Oyuncu İstatistikleri</div>
       <div></div>
     </div>
 
-    <div style="background:#0b1329; border:1px solid var(--border-blue); border-radius:12px; padding:16px; text-align:center; margin-bottom:8px;">
+    <div style="background:#120826; border:1px solid var(--neon-purple); border-radius:12px; padding:16px; text-align:center; margin-bottom:8px;">
       <div style="font-size:45px; margin-bottom:4px;">👑</div>
       <h2 id="u-fullname" style="color:var(--neon-blue); font-size:16px;">...</h2>
-
-      <div style="background:#050a14; padding:8px; border-radius:8px; text-align:left; font-size:11px; line-height:2; margin-top:10px;">
-        <div><b>Toplam Oynanan Oyun:</b> <span id="u-played" style="color:var(--neon-blue);">0</span></div>
-        <div><b>Kazanma / Başarı Oranı:</b> <span id="u-winrate" style="color:var(--btn-green);">%100</span></div>
-      </div>
+      <div id="u-title-badge" style="color:var(--neon-gold); font-size:12px;">[Çaylak]</div>
     </div>
 
-    <div style="font-size:11px; font-weight:bold; color:var(--gold); margin-bottom:4px;">🏆 Mod Bazlı En Yüksek Rekorlar:</div>
-    <div id="records-list" style="display:flex; flex-direction:column; gap:4px;"></div>
+    <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Oyun Bazlı Detaylı İstatistikler:</div>
+    <div id="stats-table-box" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:5px;"></div>
   </div>
 
   <script src="app.js"></script>
@@ -37,26 +33,36 @@
       if (!u) return window.location.href = "index.html";
 
       document.getElementById("u-fullname").innerText = `${u.name}${u.tag}`;
-      document.getElementById("u-played").innerText = u.gamesPlayed || 0;
-      document.getElementById("u-winrate").innerText = `%${Math.min(100, Math.max(70, ((u.gamesPlayed || 1) * 8) % 100))}`;
+      document.getElementById("u-title-badge").innerText = `[${u.title || 'Çaylak'}]`;
 
-      const recBox = document.getElementById("records-list");
-      recBox.innerHTML = "";
-      const modLabels = {
-        standard: "Normal Kasa (30s)",
+      const box = document.getElementById("stats-table-box");
+      box.innerHTML = "";
+
+      const modNames = {
+        standard: "Normal Kasa",
         ten_cases: "10 Kutu Modu",
-        catch_open: "Yakala & Aç Modu",
+        catch_open: "Yakala & Aç",
         upgrade_mode: "Şans Yükseltme",
         mines_mode: "Mayınlı Kasa",
         pvp_mode: "Online PvP"
       };
 
-      const recs = u.records || {};
-      for (let k in modLabels) {
-        recBox.innerHTML += `
-          <div class="rank-card">
-            <span style="font-size:11px;">${modLabels[k]}</span>
-            <b style="color:var(--btn-green);">${recs[k] || 0} P</b>
+      const userStats = u.stats || {};
+
+      for (let k in modNames) {
+        const s = userStats[k] || { played: 0, wins: 0, best: 0 };
+        const rate = s.played > 0 ? Math.round((s.wins / s.played) * 100) : 0;
+
+        box.innerHTML += `
+          <div class="rank-card" style="font-size:10px; line-height:1.4;">
+            <div>
+              <b style="color:#fff;">${modNames[k]}</b><br>
+              <span style="color:#94a3b8;">Tur / Galibiyet: ${s.played} / ${s.wins}</span>
+            </div>
+            <div style="text-align:right;">
+              <span style="color:var(--neon-gold);">Rekor: ${s.best} P</span><br>
+              <b style="color:var(--neon-green);">Oran: %${rate}</b>
+            </div>
           </div>
         `;
       }
