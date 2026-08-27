@@ -1,138 +1,155 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1v1 Canlı Arena</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online PvP Arenası</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-
+  <div class="app-container">
     <div class="lobby-header">
-        <button class="btn btn-purple" onclick="location.href='menu.html'">‹ Lobiye Dön</button>
-        <span id="header-user-tag"></span>
+      <a href="menu.html" class="btn-sm" style="background:var(--danger);">‹ Çık</a>
+      <div id="pvp-title" style="font-size:12px; font-weight:bold;">2 Kişilik Oda (10 Kutu)</div>
+      <div id="pvp-time-badge" style="color:var(--gold); font-weight:bold;">30s</div>
     </div>
 
-    <div class="content-box">
-        <h2>⚔️ 1v1 Canlı Düello Arenası</h2>
-        <div style="display: flex; gap: 8px; margin: 15px 0;">
-            <button class="btn btn-purple" onclick="createRoom()">Oda Kur</button>
-            <input type="text" id="join-room-code" placeholder="Oda Kodunu Girin">
-            <button class="btn btn-green" onclick="joinRoom()">Odaya Katıl</button>
-        </div>
+    <!-- Mod Seçimi (1v1, 1v1v1, 1v1v1v1) -->
+    <div style="padding:8px 12px; display:flex; gap:4px;">
+      <button class="btn-sm" style="background:#1e0d3d;" onclick="setMode(2)">1v1</button>
+      <button class="btn-sm" style="background:#1e0d3d;" onclick="setMode(3)">1v1v1</button>
+      <button class="btn-sm" style="background:#1e0d3d;" onclick="setMode(4)">1v1v1v1</button>
+    </div>
 
-        <div class="mode-card" style="text-align: center; padding: 25px;">
-            <div style="display: flex; justify-content: space-around; align-items: center; margin-bottom: 20px;">
-                <div>
-                    <h3 id="p1-title">Oyuncu 1</h3>
-                    <h1 id="p1-pts" style="color: var(--gold); font-size: 32px;">0</h1>
-                    <small id="p1-left">Kalan: 5</small>
-                </div>
+    <div style="padding:0 12px; display:flex; gap:6px;">
+      <button class="btn-sm" style="background:var(--neon-purple);" onclick="createRoom()">Oda Kur</button>
+      <input type="text" id="room-code-in" placeholder="Oda Kodu" class="auth-input" style="margin:0; padding:6px; font-size:11px;">
+      <button class="btn-sm" style="background:var(--btn-green);" onclick="joinRoom()">Katıl</button>
+    </div>
 
-                <div>
-                    <div style="font-size: 36px; font-weight: bold; color: var(--neon-purple);">30s</div>
-                    <span id="pvp-lock-status" style="font-size: 13px; color: var(--gold);">⏳ Rakip Bekleniyor</span>
-                </div>
+    <div id="pvp-status-txt" style="text-align:center; font-size:11px; font-weight:bold; color:var(--gold); margin:8px 0;">⏳ Rakip Bekleniyor</div>
+    <div class="pvp-room-grid" id="pvp-players-box" style="padding:0 12px;"></div>
 
-                <div>
-                    <h3 id="p2-title">Oyuncu 2 (Bekleniyor)</h3>
-                    <h1 id="p2-pts" style="color: var(--gold); font-size: 32px;">0</h1>
-                    <small id="p2-left">Kalan: 5</small>
-                </div>
+    <div style="padding:12px; margin-top:auto;">
+      <div style="font-size:11px; font-weight:bold; color:var(--neon-purple); margin-bottom:4px;">📦 Açılabilir Kutuların:</div>
+      <div class="pvp-box-grid" id="pvp-boxes"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let pvpPlayers = 2;
+    let totalBoxes = 10;
+    let activeRoom = null;
+    let opened = 0;
+    let myScore = 0;
+
+    function setMode(p) {
+      pvpPlayers = p;
+      totalBoxes = p * 5;
+      document.getElementById("pvp-title").innerText = `${p} Kişilik Oda (${totalBoxes} Kutu)`;
+    }
+
+    function createRoom() {
+      let code = "PVP_" + Math.floor(1000 + Math.random() * 9000);
+      let u = getUser();
+      activeRoom = code;
+      opened = 0;
+      myScore = 0;
+
+      let pData = {};
+      pData[u.uid] = { name: `${u.name}${u.tag}`, score: 0, opened: 0 };
+
+      db.ref("arenas/" + code).set({
+        max: pvpPlayers,
+        totalBoxes: totalBoxes,
+        status: "waiting",
+        players: pData
+      });
+      listenRoom(code);
+      alert("Oda Kodu: " + code);
+    }
+
+    function joinRoom() {
+      let code = document.getElementById("room-code-in").value.trim();
+      if (!code) return;
+      let u = getUser();
+      activeRoom = code;
+      opened = 0;
+      myScore = 0;
+
+      db.ref("arenas/" + code).transaction(r => {
+        if (r && Object.keys(r.players || {}).length < r.max) {
+          r.players[u.uid] = { name: `${u.name}${u.tag}`, score: 0, opened: 0 };
+          if (Object.keys(r.players).length === r.max) r.status = "playing";
+        }
+        return r;
+      });
+      listenRoom(code);
+    }
+
+    function listenRoom(code) {
+      let u = getUser();
+      db.ref("arenas/" + code).on("value", snap => {
+        let r = snap.val();
+        if (!r) return;
+
+        let list = Object.values(r.players || {});
+        let pBox = document.getElementById("pvp-players-box");
+        pBox.innerHTML = "";
+        list.forEach(p => {
+          pBox.innerHTML += `
+            <div class="pvp-player-col filled">
+              <div style="font-size:10px; color:#38bdf8;">${p.name}</div>
+              <div style="font-size:20px; font-weight:bold; color:var(--btn-green);">${p.score} P</div>
+              <div style="font-size:9px; color:#aaa;">${p.opened}/${r.totalBoxes} Kutu</div>
             </div>
+          `;
+        });
 
-            <button id="pvp-open-btn" class="btn btn-green btn-play-big" onclick="pvpOpenBox()" disabled>Rakip Gelmeden Kutu Açılamaz</button>
-        </div>
-    </div>
-
-    <script src="app.js"></script>
-    <script>
-        window.onload = renderHeader;
-        let activeRoom = null;
-        let myBoxesLeft = 5;
-
-        function createRoom() {
-            let u = getCurrentUser();
-            let roomId = "DUEL_" + Math.floor(1000 + Math.random() * 9000);
-            activeRoom = roomId;
-            myBoxesLeft = 5;
-            db.ref("arenas/" + roomId).set({
-                status: "waiting",
-                p1: { uid: u.uid, name: `${u.username}${u.tag}`, score: 0, rem: 5 },
-                p2: null
-            });
-            listenDuel(roomId);
-            alert("Oda oluşturuldu! Kod: " + roomId);
+        let st = document.getElementById("pvp-status-txt");
+        if (r.status === "playing") {
+          st.innerText = "⚔️ MAÇ BAŞLADI!";
+          st.style.color = "var(--btn-green)";
+          buildBoxes(r.totalBoxes);
+        } else {
+          st.innerText = `⏳ Oyuncular Bekleniyor (${list.length}/${r.max})`;
         }
+      });
+    }
 
-        function joinRoom() {
-            let u = getCurrentUser();
-            let roomId = document.getElementById("join-room-code").value.trim();
-            if (!roomId) return alert("Oda kodu giriniz!");
-            activeRoom = roomId;
-            myBoxesLeft = 5;
+    function buildBoxes(count) {
+      let grid = document.getElementById("pvp-boxes");
+      if (grid.children.length > 0) return;
+      grid.innerHTML = "";
 
-            db.ref("arenas/" + roomId).transaction(room => {
-                if (room && !room.p2 && room.p1.uid !== u.uid) {
-                    room.p2 = { uid: u.uid, name: `${u.username}${u.tag}`, score: 0, rem: 5 };
-                    room.status = "active";
-                }
-                return room;
-            });
-            listenDuel(roomId);
-        }
+      for (let i = 0; i < count; i++) {
+        let b = document.createElement("div");
+        b.className = "pvp-box-slot";
+        b.innerHTML = `📦<br>${i + 1}`;
+        b.onclick = () => {
+          if (b.classList.contains("opened") || opened >= count) return;
+          b.classList.add("opened");
+          let pt = Math.floor(Math.random() * 20) + 2;
+          b.innerHTML = `<span style="color:#60a5fa; font-size:8px;">Kılıç</span><br><b style="color:#10b981;">+${pt}P</b>`;
+          opened++;
+          myScore += pt;
 
-        function listenDuel(roomId) {
-            let u = getCurrentUser();
-            db.ref("arenas/" + roomId).on("value", snap => {
-                let data = snap.val();
-                if (!data) return;
+          let u = getUser();
+          db.ref(`arenas/${activeRoom}/players/${u.uid}`).update({
+            score: myScore,
+            opened: opened
+          });
 
-                document.getElementById("p1-title").innerText = data.p1 ? data.p1.name : "Bekleniyor";
-                document.getElementById("p1-pts").innerText = data.p1 ? data.p1.score : 0;
-                document.getElementById("p1-left").innerText = "Kalan: " + (data.p1 ? data.p1.rem : 5);
-
-                if (data.p2) {
-                    document.getElementById("p2-title").innerText = data.p2.name;
-                    document.getElementById("p2-pts").innerText = data.p2.score;
-                    document.getElementById("p2-left").innerText = "Kalan: " + data.p2.rem;
-                }
-
-                const btn = document.getElementById("pvp-open-btn");
-                const lockStatus = document.getElementById("pvp-lock-status");
-
-                if (data.status === "active" && data.p2) {
-                    lockStatus.innerText = "⚔️ Düello Başladı!";
-                    lockStatus.style.color = "var(--btn-green)";
-                    btn.disabled = myBoxesLeft <= 0;
-                    btn.innerText = myBoxesLeft > 0 ? `Kutu Aç (${myBoxesLeft}/5)` : "Kutuların Bitti";
-                } else {
-                    lockStatus.innerText = "⏳ Rakip Bekleniyor...";
-                    lockStatus.style.color = "var(--gold)";
-                    btn.disabled = true;
-                    btn.innerText = "Rakip Gelmeden Kutu Açılamaz";
-                }
-            });
-        }
-
-        function pvpOpenBox() {
-            if (!activeRoom || myBoxesLeft <= 0) return;
-            let u = getCurrentUser();
-            myBoxesLeft--;
-            let gain = Math.floor(Math.random() * 90) + 10;
-
-            db.ref("arenas/" + activeRoom).once("value", snap => {
-                let d = snap.val();
-                let isP1 = d.p1.uid === u.uid;
-                let target = isP1 ? "p1" : "p2";
-                db.ref(`arenas/${activeRoom}/${target}`).update({
-                    score: d[target].score + gain,
-                    rem: myBoxesLeft
-                });
-            });
-        }
-    </script>
+          if (opened === count) {
+            setTimeout(() => alert("🏁 Tüm kutular açıldı! 10sn içinde kazanan belirleniyor."), 1000);
+          }
+        };
+        grid.appendChild(b);
+      }
+    }
+  </script>
 </body>
 </html>
