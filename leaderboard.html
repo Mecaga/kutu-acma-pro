@@ -16,6 +16,7 @@
       <div></div>
     </div>
 
+    <!-- Mod Filtre Sekmeleri -->
     <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:6px;">
       <button class="icon-btn active" style="background:var(--btn-blue);" onclick="loadLB('all', this)">Tümü</button>
       <button class="icon-btn" onclick="loadLB('standard', this)">Normal</button>
@@ -23,28 +24,31 @@
       <button class="icon-btn" onclick="loadLB('catch_open', this)">Yakala & Aç</button>
       <button class="icon-btn" onclick="loadLB('upgrade_mode', this)">Şans Yükseltme</button>
       <button class="icon-btn" onclick="loadLB('mines_mode', this)">Mayın</button>
-      <button class="icon-btn" onclick="loadLB('pvp_mode', this)">PvP</button>
     </div>
 
     <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
+  <!-- Profil & Geçmiş Modalı -->
   <div id="modal-lb-details" class="modal-overlay">
     <div class="modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <h3 id="det-user" style="color:var(--neon-blue); font-size:13px;">Kullanıcı#12345</h3>
-        <button class="icon-btn" style="border-color:var(--danger);" onclick="closeLBDetails()">X</button>
+      <div style="text-align:center;">
+        <div style="font-size:36px;">👤</div>
+        <h3 id="det-user" style="color:var(--neon-blue); font-size:14px;">Kullanıcı#12345</h3>
+        <div id="det-stats" style="font-size:10px; color:var(--gold); margin:4px 0;">Oynanan: 0 | En Yüksek Skor: 0 P</div>
       </div>
-      <div id="det-mode-info" style="font-size:10px; color:var(--gold); margin-bottom:2px;">Mod: Normal Kasa</div>
-      <div id="det-date" style="font-size:9px; color:#94a3b8; margin-bottom:8px;">Tarih: -</div>
 
-      <div style="font-size:10px; font-weight:bold; color:#fff; margin-bottom:4px;">📦 Çıkan Eşyalar ve Puanlar:</div>
-      <div id="det-drops-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:10px;"></div>
+      <div style="font-size:10px; font-weight:bold; color:#fff; margin:6px 0 2px 0;">📦 Kasa Dökümü & Tarih:</div>
+      <div id="det-date" style="font-size:9px; color:#94a3b8; margin-bottom:4px;">Tarih: -</div>
+      <div id="det-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
 
-      <div style="display:flex; gap:4px;">
-        <button id="btn-add-f" class="nav-action-btn" style="flex:1; background:var(--btn-green);">➕ Arkadaş Ekle</button>
-        <button id="btn-send-m" class="nav-action-btn" style="flex:1; background:var(--btn-blue);">💬 Mesaj Yaz</button>
+      <!-- Kendi Profilimizde Gizlenecek Aksiyon Butonları -->
+      <div id="det-actions-group" style="display:flex; gap:4px;">
+        <button id="btn-add-f" class="btn-start" style="flex:1; background:var(--btn-green); font-size:11px; padding:8px;">➕ Arkadaş Ekle</button>
+        <button id="btn-send-m" class="btn-start" style="flex:1; background:var(--btn-blue); font-size:11px; padding:8px;">💬 Mesaj Yaz</button>
       </div>
+
+      <button class="btn-close" onclick="closeLBDetails()">Kapat</button>
     </div>
   </div>
 
@@ -76,7 +80,6 @@
           }
         });
 
-        // En yüksek skora göre sırala
         allScores.sort((a, b) => b.score - a.score);
 
         if (allScores.length === 0) {
@@ -86,22 +89,27 @@
 
         allScores.forEach((rec, idx) => {
           const itemRow = document.createElement("div");
-          itemRow.className = "quest-box";
-          itemRow.style.cssText = "align-items:center; cursor:pointer;";
+          let rankClass = "rank-card";
+          if (idx === 0) rankClass += " rank-1";
+          else if (idx === 1) rankClass += " rank-2";
+          else if (idx === 2) rankClass += " rank-3";
+
+          itemRow.className = rankClass;
           itemRow.innerHTML = `
             <span><b>${idx+1}.</b> ${rec.fullName} <small style="color:var(--gold);">[${rec.modeName || 'Normal'}]</small></span>
             <b style="color:var(--btn-green); font-size:13px;">${rec.score} P</b>
           `;
-          itemRow.onclick = () => showPlayerDetails(rec);
+          itemRow.onclick = () => openPlayerProfileCard(rec);
           listContainer.appendChild(itemRow);
         });
       });
     }
 
-    function showPlayerDetails(data) {
+    function openPlayerProfileCard(data) {
+      const u = getActiveUser();
       document.getElementById("det-user").innerText = data.fullName;
-      document.getElementById("det-mode-info").innerText = `Mod: ${data.modeName}`;
-      document.getElementById("det-date").innerText = `Oynanma Tarihi: ${data.date || 'Bilinmiyor'}`;
+      document.getElementById("det-stats").innerText = `Mod: ${data.modeName} | Rekor: ${data.score} P`;
+      document.getElementById("det-date").innerText = `Tarih: ${data.date || 'Bilinmiyor'}`;
 
       const dropsBox = document.getElementById("det-drops-list");
       dropsBox.innerHTML = "";
@@ -118,21 +126,20 @@
         dropsBox.innerHTML = "<div style='color:#666; font-size:9px;'>Eşya dökümü yok.</div>";
       }
 
-      document.getElementById("btn-add-f").onclick = () => {
-        const u = getActiveUser();
-        if (u && data.uid) {
+      // Kendi profilimize bakarken butonları gizleme
+      const isMe = data.uid === u.uid;
+      document.getElementById("det-actions-group").style.display = isMe ? "none" : "flex";
+
+      if (!isMe) {
+        document.getElementById("btn-add-f").onclick = () => {
           db.ref(`friend_requests/${data.uid}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
           alert(`${data.fullName} kullanıcısına istek yollandı!`);
-        }
-      };
-
-      document.getElementById("btn-send-m").onclick = () => {
-        if (data.uid) {
-          localStorage.setItem("active_dm_target", data.uid);
-          localStorage.setItem("active_dm_name", data.fullName);
+        };
+        document.getElementById("btn-send-m").onclick = () => {
+          db.ref(`friends/${u.uid}/${data.uid}`).set({ fullName: data.fullName });
           window.location.href = "chat.html";
-        }
-      };
+        };
+      }
 
       document.getElementById("modal-lb-details").style.display = "flex";
     }
