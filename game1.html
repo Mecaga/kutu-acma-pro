@@ -39,7 +39,7 @@
       <div style="text-align:center; font-size:10px; color:#fbbf24; margin-top:4px;">⚡ Düşen kutulara dokunarak topla!</div>
     </div>
 
-    <!-- 2. YAKALA & AÇ (2. AŞAMA: CS RULETİYLE TEKER TEKER AÇMA) -->
+    <!-- 2. YAKALA & AÇ (2. AŞAMA: CS:GO RULETİYLE AÇMA) -->
     <div id="screen-catch-p2" style="display:none; flex-direction:column; flex:1;">
       <div class="roulette-container" id="catch-roulette-wrap">
         <div class="roulette-needle"></div>
@@ -88,35 +88,35 @@
 
     const GAME_MODES = {
       standard: { name: "Normal Kasa (30s)", tiers: [
-        { name: 'Classic', rate: 58, minP: 1, maxP: 3, c: '#fff', items: ['Tahta Kılıç', 'Deri Kask'] },
-        { name: 'Super', rate: 29, minP: 4, maxP: 10, c: '#38bdf8', items: ['Demir Balta', 'Gümüş Yüzük'] },
-        { name: 'Ultra', rate: 10, minP: 12, maxP: 30, c: '#c084fc', items: ['Büyülü Asa', 'Ateş Pelerini'] },
-        { name: 'Omega', rate: 2.8, minP: 35, maxP: 120, c: '#fb923c', items: ['Ejder Baltası'] },
-        { name: 'Godly', rate: 0.2, minP: 500, maxP: 1000, c: '#f43f5e', items: ['Ebedi Kristal Kılıç'] }
+        { name: 'Classic', rate: 58.0, minP: 1, maxP: 3, c: '#ffffff', items: ['Tahta Kılıç', 'Deri Kask', 'Taş Parçası'] },
+        { name: 'Super',   rate: 29.0, minP: 4, maxP: 10, c: '#38bdf8', items: ['Demir Balta', 'Gümüş Yüzük', 'Çelik Kalkan'] },
+        { name: 'Ultra',   rate: 10.0, minP: 12, maxP: 30, c: '#c084fc', items: ['Büyülü Asa', 'Ateş Pelerini', 'Rünik Yay'] },
+        { name: 'Omega',   rate: 2.8,  minP: 35, maxP: 120, c: '#fb923c', items: ['Ejder Baltası', 'Lich Tacı'] },
+        { name: 'Godly',   rate: 0.2,  minP: 500, maxP: 1000, c: '#f43f5e', items: ['Ebedi Kristal Kılıç'] }
       ]},
       ten_cases: { name: "10 Kutu Modu", tiers: [
-        { name: 'Classic', rate: 35, minP: 2, maxP: 5, c: '#fff', items: ['Gelişmiş Kalkan'] },
-        { name: 'Super', rate: 35, minP: 6, maxP: 15, c: '#38bdf8', items: ['Safir Kılıç'] },
-        { name: 'Ultra', rate: 20, minP: 20, maxP: 50, c: '#c084fc', items: ['Karanlık Asa'] },
-        { name: 'Omega', rate: 8.5, minP: 60, maxP: 200, c: '#fb923c', items: ['Kıyamet Baltası'] },
-        { name: 'Godly', rate: 1.5, minP: 600, maxP: 1200, c: '#f43f5e', items: ['Tanrısal Hüküm'] }
+        { name: 'Classic', rate: 35.0, minP: 2, maxP: 5, c: '#ffffff', items: ['Gelişmiş Kalkan', 'Bronz Zırh'] },
+        { name: 'Super',   rate: 35.0, minP: 6, maxP: 15, c: '#38bdf8', items: ['Safir Kılıç', 'Titan Başlığı'] },
+        { name: 'Ultra',   rate: 20.0, minP: 20, maxP: 50, c: '#c084fc', items: ['Karanlık Asa', 'Yıldırım Yayı'] },
+        { name: 'Omega',   rate: 8.5,  minP: 60, maxP: 200, c: '#fb923c', items: ['Kıyamet Baltası', 'Zaman Tacı'] },
+        { name: 'Godly',   rate: 1.5,  minP: 600, maxP: 1200, c: '#f43f5e', items: ['Tanrısal Hüküm Kılıcı'] }
       ]},
       catch_open: { name: "Yakala & Aç Modu", tiers: [
-        { name: 'Classic Kasa', rate: 45, minP: 2, maxP: 5, c: '#fff', items: ['Deri Çanta'] },
-        { name: 'Super Kasa', rate: 30, minP: 6, maxP: 18, c: '#38bdf8', items: ['Buz Asası'] },
-        { name: 'Ultra Kasa', rate: 15, minP: 25, maxP: 60, c: '#c084fc', items: ['Gök Gürültüsü Baltası'] },
-        { name: 'Omega Kasa', rate: 8, minP: 80, maxP: 250, c: '#fb923c', items: ['Ejderha Kalbi'] },
-        { name: 'Godly Kasa', rate: 2, minP: 750, maxP: 1500, c: '#f43f5e', items: ['Kainatın Asası'] }
+        { name: 'Classic Kasa', rate: 45.0, minP: 2, maxP: 5, c: '#ffffff', items: ['Deri Çanta', 'Taş Kolye', 'Bakır Hançer'] },
+        { name: 'Super Kasa',   rate: 30.0, minP: 6, maxP: 18, c: '#38bdf8', items: ['Buz Asası', 'Rüzgar Pelerini', 'Platin Kalkan'] },
+        { name: 'Ultra Kasa',   rate: 15.0, minP: 25, maxP: 60, c: '#c084fc', items: ['Gök Gürültüsü Baltası', 'Anka Tüyü'] },
+        { name: 'Omega Kasa',   rate: 8.0,  minP: 80, maxP: 250, c: '#fb923c', items: ['Ejderha Kalbi', 'Gölge Tacı'] },
+        { name: 'Godly Kasa',   rate: 2.0,  minP: 750, maxP: 1500, c: '#f43f5e', items: ['Kainatın Asası', 'Ebedi Yıldız Taşı'] }
       ]},
       upgrade_mode: { name: "Şans Yükseltme Modu", tiers: [
-        { name: 'Kademe 1', rate: 60, minP: 5, maxP: 15, c: '#fff', items: ['Gelişen Kılıç'] },
-        { name: 'Kademe 2', rate: 25, minP: 20, maxP: 60, c: '#38bdf8', items: ['Aura Yayı'] },
-        { name: 'Kademe 3', rate: 10, minP: 70, maxP: 180, c: '#c084fc', items: ['Hiçlik Kalkanı'] },
-        { name: 'Kozmik', rate: 5, minP: 250, maxP: 800, c: '#f43f5e', items: ['Tanrı Katili'] }
+        { name: 'Kademe 1', rate: 60.0, minP: 5, maxP: 15, c: '#ffffff', items: ['Gelişen Kılıç', 'Dinamik Zırh'] },
+        { name: 'Kademe 2', rate: 25.0, minP: 20, maxP: 60, c: '#38bdf8', items: ['Aura Yayı', 'Işık Kristali'] },
+        { name: 'Kademe 3', rate: 10.0, minP: 70, maxP: 180, c: '#c084fc', items: ['Yükseltilmiş Asa', 'Hiçlik Kalkanı'] },
+        { name: 'Kozmik Güç', rate: 5.0, minP: 250, maxP: 800, c: '#f43f5e', items: ['Sonsuzluk Matrisi', 'Tanrı Katili'] }
       ]},
       mines_mode: { name: "Mayınlı Kasa", tiers: [
-        { name: 'Güvenli Kasa', rate: 70, minP: 15, maxP: 45, c: '#10b981', items: ['Elmas Külçesi', 'Zümrüt Heykel'] },
-        { name: 'Büyük Hazine', rate: 30, minP: 60, maxP: 160, c: '#fbbf24', items: ['Kraliyet Tacı', 'Kutsal Kupa'] }
+        { name: 'Güvenli Kasa', rate: 70.0, minP: 15, maxP: 45, c: '#10b981', items: ['Elmas Külçesi', 'Zümrüt Heykel'] },
+        { name: 'Büyük Hazine', rate: 30.0, minP: 60, maxP: 160, c: '#fbbf24', items: ['Kraliyet Tacı', 'Kutsal Kupa'] }
       ]}
     };
 
@@ -150,7 +150,10 @@
       }
 
       let rand = Math.random() * 100;
-      if (mKey === 'upgrade_mode') rand = Math.max(0, rand - ((upgradeLvl - 1) * 8));
+      if (mKey === 'upgrade_mode') {
+        const bonusChance = (upgradeLvl - 1) * 6;
+        rand = Math.max(0, rand - bonusChance);
+      }
 
       let cum = 0;
       for (let t of tiers) {
