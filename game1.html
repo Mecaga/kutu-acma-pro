@@ -1,85 +1,66 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kutu Açma Modu</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oyun Modu</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-    <header>
-        <div class="user-meta">
-            <span style="font-weight: bold;" id="p-name"></span>
-            <span class="badge" id="p-lvl"></span>
-            <div class="xp-bar-bg"><div class="xp-bar-inner" id="p-xp-fill"></div></div>
-            <span style="font-size: 11px;" id="p-xp-num"></span>
-        </div>
-        <div>💰 <span id="p-coins" style="color:var(--gold); font-weight:bold;"></span> Altın</div>
-    </header>
+  <div class="app-container">
+    <div class="lobby-header">
+      <a href="menu.html" class="btn-sm" style="background:var(--danger);">‹ Çıkış</a>
+      <div id="game-mode-name" style="font-weight:bold; font-size:12px;">Normal Kasa</div>
+      <div id="game-timer" style="color:var(--gold); font-weight:bold;">30s</div>
+    </div>
 
-    <nav>
-        <a href="menu.html">🏠 Menü</a>
-        <a href="game1.html" class="active">📦 Kutu Açma</a>
-        <a href="pvp.html">⚔️ 1v1 Arena</a>
-        <a href="chat.html">💬 Sohbet</a>
-        <a href="leaderboard.html">🏆 Sıralama</a>
-        <a href="user.html">👤 Profil</a>
-    </nav>
+    <div style="padding:15px; display:flex; justify-content:space-between;">
+      <div>Puan: <b id="g-score" style="color:var(--btn-green); font-size:18px;">0</b></div>
+      <div>Kalan: <b id="g-rem" style="color:var(--gold);">10</b></div>
+    </div>
 
-    <main>
-        <h2>Sandık Pazarı</h2>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
-            <div class="card" style="text-align: center;">
-                <h3 style="color: #ffd700;">Tahta Sandık</h3>
-                <p style="font-size: 12px; color: #8b949e;">Maliyet: 50 Altın</p>
-                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(50, 10, 'Tahta Sandık')">Aç</button>
-            </div>
-            <div class="card" style="text-align: center;">
-                <h3 style="color: #ffd700;">Gümüş Sandık</h3>
-                <p style="font-size: 12px; color: #8b949e;">Maliyet: 150 Altın</p>
-                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(150, 25, 'Gümüş Sandık')">Aç</button>
-            </div>
-            <div class="card" style="text-align: center;">
-                <h3 style="color: #ffd700;">Altın Sandık</h3>
-                <p style="font-size: 12px; color: #8b949e;">Maliyet: 300 Altın</p>
-                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(300, 50, 'Altın Sandık')">Aç</button>
-            </div>
-            <div class="card" style="text-align: center;">
-                <h3 style="color: #ffd700;">Elmas Sandık</h3>
-                <p style="font-size: 12px; color: #8b949e;">Maliyet: 600 Altın</p>
-                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(600, 100, 'Elmas Sandık')">Aç</button>
-            </div>
-            <div class="card" style="text-align: center;">
-                <h3 style="color: #ffd700;">Zümrüt Sandık</h3>
-                <p style="font-size: 12px; color: #8b949e;">Maliyet: 1000 Altın</p>
-                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(1000, 180, 'Zümrüt Sandık')">Aç</button>
-            </div>
-            <div class="card" style="text-align: center;">
-                <h3 style="color: #ffd700;">Mecaga Özel</h3>
-                <p style="font-size: 12px; color: #8b949e;">Maliyet: 2000 Altın</p>
-                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(2000, 400, 'Mecaga Özel')">Aç</button>
-            </div>
-        </div>
-        <div id="result-log" class="card" style="margin-top: 15px; font-weight: bold; color: var(--gold); text-align: center;">Bir sandık seçin.</div>
-    </main>
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
+      <div id="box-visual" style="font-size:70px; margin-bottom:10px;">📦</div>
+      <div id="drop-result" style="font-size:14px; font-weight:bold; color:#60a5fa; text-align:center;">Kasayı Açmak İçin Dokun!</div>
+    </div>
 
-    <script src="app.js"></script>
-    <script>
-        window.onload = updateGlobalHeader;
+    <button id="open-btn" class="btn-play-main" onclick="openBox()">KASAYI AÇ</button>
+  </div>
 
-        function openBox(cost, xp, name) {
-            let u = getUser();
-            if (u.coins < cost) return alert("Yetersiz Altın!");
-            u.coins -= cost;
-            u.boxesOpened = (u.boxesOpened || 0) + 1;
-            let win = Math.floor(Math.random() * (cost * 2));
-            u.coins += win;
-            saveUser(u);
-            addExp(xp);
-            document.getElementById("result-log").innerText = `🎁 ${name} Açıldı: +${win} Altın, +${xp} XP!`;
-        }
-    </script>
+  <script src="app.js"></script>
+  <script>
+    let score = 0;
+    let rem = 10;
+    const drops = [
+      { name: "Tahta Kılıç", pts: 2, r: "Classic" },
+      { name: "Demir Balta", pts: 6, r: "Super" },
+      { name: "Büyülü Asa", pts: 20, r: "Ultra" },
+      { name: "Ejder Baltası", pts: 80, r: "Omega" },
+      { name: "Kristal Kılıç", pts: 750, r: "Godly" }
+    ];
+
+    function openBox() {
+      if (rem <= 0) return;
+      rem--;
+      let d = drops[Math.floor(Math.random() * drops.length)];
+      score += d.pts;
+      document.getElementById("g-score").innerText = score;
+      document.getElementById("g-rem").innerText = rem;
+      document.getElementById("drop-result").innerHTML = `<span style="color:var(--gold);">[${d.r}]</span> ${d.name} (+${d.pts}P)`;
+
+      let u = getUser();
+      u.dailyQuest = Math.min(3, u.dailyQuest + 1);
+      addXP(15);
+      saveUser(u);
+
+      if (rem === 0) {
+        document.getElementById("open-btn").disabled = true;
+        document.getElementById("open-btn").innerText = "TAMAMLANDI!";
+        setTimeout(() => { alert("Oyun Bitti! Puanınız: " + score); window.location.href="menu.html"; }, 1000);
+      }
+    }
+  </script>
 </body>
 </html>
