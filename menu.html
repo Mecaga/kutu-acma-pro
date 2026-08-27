@@ -3,54 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ana Menü - Kutu Açma</title>
+    <title>Kutu Açma Pro - Lobi</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-    <header>
-        <div class="user-meta">
-            <span style="font-weight: bold;" id="p-name"></span>
-            <span class="badge" id="p-lvl"></span>
-            <div class="xp-bar-bg"><div class="xp-bar-inner" id="p-xp-fill"></div></div>
-            <span style="font-size: 11px;" id="p-xp-num"></span>
+
+    <div class="lobby-header">
+        <div>
+            <span style="font-weight: bold;">👤 Profilim:</span>
+            <span id="header-user-tag">Yükleniyor...</span>
         </div>
-        <div>💰 <span id="p-coins" style="color:var(--gold); font-weight:bold;"></span> Altın</div>
-    </header>
-
-    <nav>
-        <a href="menu.html" class="active">🏠 Menü</a>
-        <a href="game1.html">📦 Kutu Açma</a>
-        <a href="pvp.html">⚔️ 1v1 Arena</a>
-        <a href="chat.html">💬 Sohbet</a>
-        <a href="leaderboard.html">🏆 Sıralama</a>
-        <a href="user.html">👤 Profil</a>
-    </nav>
-
-    <main>
-        <h2>Oyun Modları</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-top: 15px;">
-            <div class="card" style="text-align: center;">
-                <h3>📦 Kutu Açma Modu</h3>
-                <p style="font-size: 13px; color: #8b949e; margin: 10px 0;">Farklı sandıkları açarak altın ve XP kazan.</p>
-                <a href="game1.html" class="btn" style="width: 100%;">Kutulara Git</a>
-            </div>
-            <div class="card" style="text-align: center;">
-                <h3>⚔️ 1v1 PvP Düello</h3>
-                <p style="font-size: 13px; color: #8b949e; margin: 10px 0;">30 saniye içinde rakibinden çok puan topla.</p>
-                <a href="pvp.html" class="btn btn-blue" style="width: 100%;">Arenaya Gir</a>
-            </div>
-            <div class="card" style="text-align: center;">
-                <h3>💬 Canlı Kanallar</h3>
-                <p style="font-size: 13px; color: #8b949e; margin: 10px 0;">Diğer oyuncularla mesajlaş, mesaj düzenle ve sil.</p>
-                <a href="chat.html" class="btn" style="width: 100%;">Sohbete Katıl</a>
-            </div>
+        <div class="header-actions">
+            <button class="btn btn-purple" onclick="location.href='leaderboard.html'">🏆 Sıralama</button>
+            <button class="btn btn-danger" onclick="location.href='index.html'">Çıkış</button>
         </div>
-    </main>
+    </div>
 
-    <footer>Geliştirici: MecagaTR</footer>
+    <div style="background: #110924; padding: 8px 20px; font-size: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #3b206b;">
+        <span>🎯 Günlük Görev: 3 Kutu Aç</span>
+        <span id="quest-count" style="color: var(--gold); font-weight: bold;">0/3</span>
+    </div>
+
+    <div class="main-nav">
+        <div class="nav-tab" onclick="location.href='chat.html'">💬 Sohbetler</div>
+        <div class="nav-tab" onclick="location.href='friends.html'">👥 Arkadaşlar</div>
+        <div class="nav-tab active">📦 Oyun Modları</div>
+    </div>
+
+    <div class="content-box">
+        <div class="mode-card selected" onclick="selectGame('normal', this)">
+            <h3>⚔️ Normal Kutu (PvP & Klasik)</h3>
+            <p style="font-size: 12px; color: var(--text-dim);">Standart ödüller ve 1v1 düello eşleşmesi.</p>
+        </div>
+
+        <div class="mode-card" onclick="selectGame('ten_box', this)">
+            <h3>📦 10 Kutu Modu (Sürat)</h3>
+            <p style="font-size: 12px; color: var(--text-dim);">Tam 10 kutu aç ve en yüksek puanı topla.</p>
+        </div>
+
+        <div class="mode-card" style="border-color: var(--neon-purple); background: #241349;" onclick="selectGame('catch', this)">
+            <h3 style="color: #c084fc;">⚡ YAKALA & AÇ MODU (Özel)</h3>
+            <p style="font-size: 12px; color: #d8b4fe;">Derece, Süper, Ultra ve Mega Kasalarla puan katlama.</p>
+        </div>
+
+        <div class="mode-card" onclick="selectGame('compare', this)">
+            <h3>⚖️ Şans Kıyaslama Modu (7 Kutu)</h3>
+            <p style="font-size: 12px; color: var(--text-dim);">7 kutu açarak şans oranını test et.</p>
+        </div>
+
+        <button class="btn btn-green btn-play-big" onclick="startGameLaunch()">OYUNA BAŞLA</button>
+    </div>
+
     <script src="app.js"></script>
-    <script>window.onload = updateGlobalHeader;</script>
+    <script>
+        window.onload = renderHeader;
+        let selectedMode = 'normal';
+
+        function selectGame(mode, elem) {
+            selectedMode = mode;
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+            elem.classList.add('selected');
+        }
+
+        function startGameLaunch() {
+            if (selectedMode === 'normal') {
+                window.location.href = "pvp.html";
+            } else {
+                window.location.href = "game1.html";
+            }
+        }
+    </script>
 </body>
 </html>
