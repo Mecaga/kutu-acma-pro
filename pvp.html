@@ -8,7 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<body>
+<body class="bg-pvp_mode">
   <div class="app-container">
     <div class="top-header">
       <button id="btn-leave-room" class="icon-btn" style="border-color:var(--danger);" onclick="leavePvPRoom()">‹ Çıkış</button>
@@ -36,15 +36,15 @@
     <!-- Canlı Oyun Alanı -->
     <div id="pvp-game-panel" style="display:none; flex-direction:column; flex:1;">
       <div style="display:grid; gap:4px; margin-bottom:8px;" id="pvp-players-row"></div>
-      <div style="font-size:10px; color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📦 Açılacak 5 Kutunuz (2sn Cooldown):</div>
+      <div style="font-size:10px; color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📦 Açılacak 5 Kutunuz:</div>
       <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; flex:1; align-content:start;" id="pvp-boxes-grid"></div>
     </div>
 
-    <!-- Podyum / Kazanan Paneli -->
+    <!-- Podyum / Kazanan Paneli (Kullanıcıya Tıklayınca Profil Açar) -->
     <div id="pvp-podium-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:1px solid var(--neon-purple);">
       <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:10px;">🏆 MAÇ BİTTİ - SIRALAMA</div>
       <div id="podium-list" style="display:flex; flex-direction:column; gap:6px; flex:1; overflow-y:auto;"></div>
-      <button class="btn-start" style="margin-top:10px;" onclick="location.href='menu.html'">Lobiye Dön</button>
+      <button class="icon-btn" style="margin-top:10px; width:100%; justify-content:center; padding:10px;" onclick="location.href='menu.html'">Lobiye Dön</button>
     </div>
   </div>
 
@@ -54,6 +54,10 @@
       <div style="font-size:36px;">👤</div>
       <h3 id="pvp-prof-name" style="color:var(--neon-blue);">Oyuncu</h3>
       <div id="pvp-prof-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:8px;">[Çaylak]</div>
+      <div style="background:#050a14; padding:8px; border-radius:6px; font-size:11px; text-align:left; line-height:1.8;">
+        <div><b>Oynanan Oyun:</b> <span id="pvp-prof-played">0</span></div>
+        <div><b>Kazanma Oranı:</b> <span id="pvp-prof-winrate">%100</span></div>
+      </div>
       <button class="btn-close" onclick="document.getElementById('modal-pvp-profile').style.display='none'">Geri Dön</button>
     </div>
   </div>
@@ -66,7 +70,6 @@
     let myTotalScore = 0;
     let isLocked = true;
     let startTimeout = null;
-    let lastPvPOpenTime = 0;
 
     const PVP_TIERS = [
       { name: "Tahta Kılıç", p: 2, c: "#fff" },
@@ -153,7 +156,7 @@
           `;
         });
 
-        // Oyuncu eksikse sayacı sıfırla
+        // Biri çıkarsa sayacı anında sıfırla
         if (pList.length < room.capacity) {
           if (startTimeout) clearTimeout(startTimeout);
           document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${pList.length}/${room.capacity})`;
@@ -168,7 +171,7 @@
         } else if (room.status === "playing") {
           document.getElementById("pvp-status-badge").innerText = "⚔️ Maç Başladı!";
           document.getElementById("pvp-status-badge").style.color = "var(--neon-green)";
-          document.getElementById("btn-leave-room").disabled = true; // Maç devam ederken çıkış yapılamaz
+          document.getElementById("btn-leave-room").disabled = true; // Maç sırasında çıkılamaz
           isLocked = false;
           renderPvPBoxes(room.code);
         }
@@ -197,10 +200,6 @@
 
         b.onclick = () => {
           if (isLocked || b.dataset.opened || myOpenedCount >= 5) return;
-          const now = Date.now();
-          if (now - lastPvPOpenTime < 2000) return alert("Kutuları 2 saniyede bir açabilirsiniz!");
-          lastPvPOpenTime = now;
-
           b.dataset.opened = "1";
           b.style.background = "#070212";
 
@@ -233,7 +232,7 @@
       pList.forEach((p, idx) => {
         const isMe = p.fullName === `${u.name}${u.tag}`;
         podBox.innerHTML += `
-          <div class="rank-card ${idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''))}" style="${isMe ? 'border:2px solid var(--neon-gold); color:var(--neon-gold);' : ''}">
+          <div class="rank-card ${idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''))}" style="${isMe ? 'border:2px solid var(--neon-gold); color:var(--neon-gold);' : ''}" onclick="inspectPvPPlayer('${p.uid}', '${p.fullName}')">
             <span><b>${idx+1}.</b> ${p.fullName} ${isMe ? '(SEN)' : ''}</span>
             <b style="color:var(--neon-green); font-size:13px;">${p.score} P</b>
           </div>
