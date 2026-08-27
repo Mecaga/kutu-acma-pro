@@ -13,7 +13,7 @@
     <div class="top-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
       <div id="game-header-title" style="font-weight:bold; font-size:12px;">Yükleniyor...</div>
-      <div id="game-stat-badge" style="color:var(--gold); font-weight:bold; font-size:12px;">0 P</div>
+      <div id="game-stat-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
     </div>
 
     <!-- 1. KLASİK / 10 KUTU / ŞANS YÜKSELTME EKRANI -->
@@ -31,11 +31,11 @@
 
     <!-- 2. YAKALA & AÇ (1. AŞAMA: TOPLAMA) -->
     <div id="screen-catch-p1" style="display:none; flex-direction:column; flex:1;">
-      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--gold); margin-bottom:4px;">
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--neon-gold); margin-bottom:4px;">
         <span>Toplama Süresi: <b id="lbl-catch-timer">15s</b></span>
         <span>Yakalanan: <b id="lbl-caught-count">0</b></span>
       </div>
-      <div id="catch-arena" style="flex:1; min-height:260px; background:#050a14; border:2px dashed #1e293b; border-radius:8px; position:relative; overflow:hidden;"></div>
+      <div id="catch-arena" style="flex:1; min-height:260px; background:#050a14; border:2px dashed #3b1d6e; border-radius:8px; position:relative; overflow:hidden;"></div>
       <div style="text-align:center; font-size:10px; color:#fbbf24; margin-top:4px;">⚡ Düşen kutulara dokunarak topla!</div>
     </div>
 
@@ -54,7 +54,7 @@
 
     <!-- 3. MAYINLI KASA MODU EKRANI -->
     <div id="screen-mines" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
-      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--gold); margin-bottom:6px;">
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--neon-gold); margin-bottom:6px;">
         <span id="lbl-mine-status">9 Kutuda 1 Mayın!</span>
         <span>Kasa: <b id="lbl-mine-score">0 P</b></span>
       </div>
@@ -66,13 +66,13 @@
     </div>
 
     <!-- 4. ORTAK OYUN SONU ÖZET EKRANI -->
-    <div id="screen-summary" style="display:none; flex-direction:column; flex:1; background:#0b1329; padding:12px; border-radius:8px;">
-      <div style="text-align:center; font-size:14px; font-weight:bold; color:var(--gold); margin-bottom:8px;" id="lbl-summary-title">OYUN ÖZETİ</div>
-      <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070d1a; padding:6px; border-radius:6px;">
-        <div>Toplam Puan: <b id="sum-score" style="color:var(--btn-green);">0</b></div>
+    <div id="screen-summary" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:1px solid var(--neon-purple);">
+      <div style="text-align:center; font-size:14px; font-weight:bold; color:var(--neon-gold); margin-bottom:8px;" id="lbl-summary-title">OYUN ÖZETİ</div>
+      <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
+        <div>Toplam Puan: <b id="sum-score" style="color:var(--neon-green);">0</b></div>
         <div>Açılan: <b id="sum-count" style="color:var(--neon-blue);">0</b></div>
       </div>
-      <div style="font-size:11px; color:var(--gold); font-weight:bold; margin-bottom:4px;">📋 Çıkan Eşyalar:</div>
+      <div style="font-size:11px; color:var(--neon-gold); font-weight:bold; margin-bottom:4px;">📋 Çıkan Eşyalar:</div>
       <div id="summary-drops-box" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
       <div style="display:flex; gap:6px;">
         <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar Oyna</button>
@@ -123,6 +123,7 @@
     let totalScore = 0;
     let sessionDrops = [];
     let isOpening = false;
+    let lastOpenTime = 0; // 2sn Cooldown Kontrolü
 
     let timeLeft = 30;
     let timerInt = null;
@@ -139,6 +140,15 @@
       else if (modeKey === 'mines_mode') startMines();
       else startClassicMode();
     };
+
+    function checkCooldown() {
+      const now = Date.now();
+      if (now - lastOpenTime < 2000) {
+        return false;
+      }
+      lastOpenTime = now;
+      return true;
+    }
 
     function getRandomItem(mKey = modeKey, forcedTier = null) {
       const tiers = GAME_MODES[mKey].tiers;
@@ -194,6 +204,8 @@
 
     function spinClassicCase() {
       if (isOpening || remCount <= 0) return;
+      if (!checkCooldown()) return alert("Kutuları 2 saniyede bir açabilirsiniz!");
+
       isOpening = true;
       document.getElementById("btn-classic-open").disabled = true;
 
@@ -221,7 +233,6 @@
       });
     }
 
-    // Ortak CS:GO Rulet Bandı Fonksiyonu
     function runRouletteAnimation(trackId, wrapId, mKey, forcedTier, onComplete) {
       const track = document.getElementById(trackId);
       const wrap = document.getElementById(wrapId);
@@ -239,7 +250,7 @@
           <div class="roulette-item" style="border-bottom:3px solid ${d.c};">
             <span style="color:${d.c}; font-weight:bold;">${d.tier}</span>
             <span style="font-size:8px; margin:2px 0;">${d.item}</span>
-            <span style="color:var(--btn-green);">+${d.pts}P</span>
+            <span style="color:var(--neon-green);">+${d.pts}P</span>
           </div>
         `;
       }
@@ -327,8 +338,9 @@
 
     function openSingleCaughtWithRoulette(idx) {
       if (isOpening || caughtBoxes[idx].opened) return;
-      isOpening = true;
+      if (!checkCooldown()) return alert("Kutuları 2 saniyede bir açabilirsiniz!");
 
+      isOpening = true;
       const targetBox = caughtBoxes[idx];
       runRouletteAnimation("catch-roulette-track", "catch-roulette-wrap", 'catch_open', targetBox.tier, (winDrop) => {
         targetBox.opened = true;
@@ -382,6 +394,8 @@
 
         card.onclick = () => {
           if (card.dataset.opened) return;
+          if (!checkCooldown()) return alert("Kutuları 2 saniyede bir seçebilirsiniz!");
+
           card.dataset.opened = "1";
 
           if (i === bombIdx) {
@@ -400,7 +414,7 @@
             sessionDrops.push(d);
 
             card.style.background = "#064e3b";
-            card.style.borderColor = "var(--btn-green)";
+            card.style.borderColor = "var(--neon-green)";
             card.innerHTML = `💎<br><b style="font-size:9px; color:#34d399;">+${d.pts}P</b>`;
 
             document.getElementById("lbl-mine-score").innerText = `${totalScore} P`;
@@ -437,20 +451,22 @@
       dBox.innerHTML = "";
       sessionDrops.forEach(d => {
         dBox.innerHTML += `
-          <div style="background:#070c18; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px;">
+          <div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px; border:1px solid #3b1d6e;">
             <span><b style="color:${d.c};">[${d.tier}]</b> ${d.item}</span>
-            <b style="color:var(--btn-green);">+${d.pts} P</b>
+            <b style="color:var(--neon-green);">+${d.pts} P</b>
           </div>
         `;
       });
 
       const u = getActiveUser();
       if (u) {
-        u.gamesPlayed = (u.gamesPlayed || 0) + 1;
-        if (!u.records) u.records = {};
-        if (!u.records[modeKey] || totalScore > u.records[modeKey]) {
-          u.records[modeKey] = totalScore;
-        }
+        if (!u.stats) u.stats = {};
+        if (!u.stats[modeKey]) u.stats[modeKey] = { played: 0, wins: 0, best: 0 };
+
+        u.stats[modeKey].played = (u.stats[modeKey].played || 0) + 1;
+        if (totalScore > 0) u.stats[modeKey].wins = (u.stats[modeKey].wins || 0) + 1;
+        if (totalScore > (u.stats[modeKey].best || 0)) u.stats[modeKey].best = totalScore;
+
         setActiveUser(u);
 
         const recRef = db.ref(`leaderboards/${modeKey}/${u.uid}`);
