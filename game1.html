@@ -17,16 +17,19 @@
     </div>
 
     <!-- 1. KLASİK / 10 KUTU / ŞANS YÜKSELTME EKRANI -->
-    <div id="screen-classic" style="display:none; flex-direction:column; flex:1;">
-      <div class="roulette-container" id="roulette-wrap">
-        <div class="roulette-needle"></div>
-        <div class="roulette-track" id="roulette-track"></div>
+    <div id="screen-classic" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
+      <div>
+        <div class="roulette-container" id="roulette-wrap">
+          <div class="roulette-needle"></div>
+          <div class="roulette-track" id="roulette-track"></div>
+        </div>
+        <div id="status-text" style="text-align:center; font-size:12px; font-weight:bold; color:var(--neon-blue); margin:8px 0;">
+          Kasayı açmak için butona bas!
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:8px; text-align:center;" id="lbl-classic-info">Kalan: 10</div>
       </div>
-      <div id="status-text" style="text-align:center; font-size:12px; font-weight:bold; color:var(--neon-blue); margin:8px 0;">
-        Kasayı açmak için butona bas!
-      </div>
-      <div style="font-size:11px; color:#94a3b8; margin-bottom:8px; text-align:center;" id="lbl-classic-info">Kalan: 10</div>
-      <button id="btn-classic-open" class="btn-start" style="margin-top:auto;" onclick="spinClassicCase()">KASAYI AÇ (3s)</button>
+      <!-- Sabit Görünür Kutu Açma Butonu -->
+      <button id="btn-classic-open" class="btn-start" onclick="spinClassicCase()">KASAYI AÇ (3s)</button>
     </div>
 
     <!-- 2. YAKALA & AÇ (1. AŞAMA: TOPLAMA) -->
@@ -87,34 +90,34 @@
     const modeKey = urlParams.get('mode') || 'standard';
 
     const GAME_MODES = {
-      standard: { name: "Normal Kasa (30s)", tiers: [
+      standard: { bg: "bg-standard", name: "Normal Kasa (30s)", tiers: [
         { name: 'Classic', rate: 58.0, minP: 1, maxP: 3, c: '#ffffff', items: ['Tahta Kılıç', 'Deri Kask', 'Taş Parçası'] },
         { name: 'Super',   rate: 29.0, minP: 4, maxP: 10, c: '#38bdf8', items: ['Demir Balta', 'Gümüş Yüzük', 'Çelik Kalkan'] },
         { name: 'Ultra',   rate: 10.0, minP: 12, maxP: 30, c: '#c084fc', items: ['Büyülü Asa', 'Ateş Pelerini', 'Rünik Yay'] },
         { name: 'Omega',   rate: 2.8,  minP: 35, maxP: 120, c: '#fb923c', items: ['Ejder Baltası', 'Lich Tacı'] },
         { name: 'Godly',   rate: 0.2,  minP: 500, maxP: 1000, c: '#f43f5e', items: ['Ebedi Kristal Kılıç'] }
       ]},
-      ten_cases: { name: "10 Kutu Modu", tiers: [
+      ten_cases: { bg: "bg-ten_cases", name: "10 Kutu Modu", tiers: [
         { name: 'Classic', rate: 35.0, minP: 2, maxP: 5, c: '#ffffff', items: ['Gelişmiş Kalkan', 'Bronz Zırh'] },
         { name: 'Super',   rate: 35.0, minP: 6, maxP: 15, c: '#38bdf8', items: ['Safir Kılıç', 'Titan Başlığı'] },
         { name: 'Ultra',   rate: 20.0, minP: 20, maxP: 50, c: '#c084fc', items: ['Karanlık Asa', 'Yıldırım Yayı'] },
         { name: 'Omega',   rate: 8.5,  minP: 60, maxP: 200, c: '#fb923c', items: ['Kıyamet Baltası', 'Zaman Tacı'] },
         { name: 'Godly',   rate: 1.5,  minP: 600, maxP: 1200, c: '#f43f5e', items: ['Tanrısal Hüküm Kılıcı'] }
       ]},
-      catch_open: { name: "Yakala & Aç Modu", tiers: [
+      catch_open: { bg: "bg-catch_open", name: "Yakala & Aç Modu", tiers: [
         { name: 'Classic Kasa', rate: 45.0, minP: 2, maxP: 5, c: '#ffffff', items: ['Deri Çanta', 'Taş Kolye', 'Bakır Hançer'] },
         { name: 'Super Kasa',   rate: 30.0, minP: 6, maxP: 18, c: '#38bdf8', items: ['Buz Asası', 'Rüzgar Pelerini', 'Platin Kalkan'] },
         { name: 'Ultra Kasa',   rate: 15.0, minP: 25, maxP: 60, c: '#c084fc', items: ['Gök Gürültüsü Baltası', 'Anka Tüyü'] },
         { name: 'Omega Kasa',   rate: 8.0,  minP: 80, maxP: 250, c: '#fb923c', items: ['Ejderha Kalbi', 'Gölge Tacı'] },
         { name: 'Godly Kasa',   rate: 2.0,  minP: 750, maxP: 1500, c: '#f43f5e', items: ['Kainatın Asası', 'Ebedi Yıldız Taşı'] }
       ]},
-      upgrade_mode: { name: "Şans Yükseltme Modu", tiers: [
+      upgrade_mode: { bg: "bg-upgrade_mode", name: "Şans Yükseltme Modu", tiers: [
         { name: 'Kademe 1', rate: 60.0, minP: 5, maxP: 15, c: '#ffffff', items: ['Gelişen Kılıç', 'Dinamik Zırh'] },
         { name: 'Kademe 2', rate: 25.0, minP: 20, maxP: 60, c: '#38bdf8', items: ['Aura Yayı', 'Işık Kristali'] },
         { name: 'Kademe 3', rate: 10.0, minP: 70, maxP: 180, c: '#c084fc', items: ['Yükseltilmiş Asa', 'Hiçlik Kalkanı'] },
         { name: 'Kozmik Güç', rate: 5.0, minP: 250, maxP: 800, c: '#f43f5e', items: ['Sonsuzluk Matrisi', 'Tanrı Katili'] }
       ]},
-      mines_mode: { name: "Mayınlı Kasa", tiers: [
+      mines_mode: { bg: "bg-mines_mode", name: "Mayınlı Kasa", tiers: [
         { name: 'Güvenli Kasa', rate: 70.0, minP: 15, maxP: 45, c: '#10b981', items: ['Elmas Külçesi', 'Zümrüt Heykel'] },
         { name: 'Büyük Hazine', rate: 30.0, minP: 60, maxP: 160, c: '#fbbf24', items: ['Kraliyet Tacı', 'Kutsal Kupa'] }
       ]}
@@ -123,7 +126,6 @@
     let totalScore = 0;
     let sessionDrops = [];
     let isOpening = false;
-    let lastOpenTime = 0; // 2sn Cooldown Kontrolü
 
     let timeLeft = 30;
     let timerInt = null;
@@ -134,21 +136,13 @@
 
     window.onload = () => {
       const mode = GAME_MODES[modeKey] || GAME_MODES.standard;
+      document.body.className = mode.bg;
       document.getElementById("game-header-title").innerText = mode.name;
 
       if (modeKey === 'catch_open') startCatchPhase1();
       else if (modeKey === 'mines_mode') startMines();
       else startClassicMode();
     };
-
-    function checkCooldown() {
-      const now = Date.now();
-      if (now - lastOpenTime < 2000) {
-        return false;
-      }
-      lastOpenTime = now;
-      return true;
-    }
 
     function getRandomItem(mKey = modeKey, forcedTier = null) {
       const tiers = GAME_MODES[mKey].tiers;
@@ -204,7 +198,6 @@
 
     function spinClassicCase() {
       if (isOpening || remCount <= 0) return;
-      if (!checkCooldown()) return alert("Kutuları 2 saniyede bir açabilirsiniz!");
 
       isOpening = true;
       document.getElementById("btn-classic-open").disabled = true;
@@ -338,7 +331,6 @@
 
     function openSingleCaughtWithRoulette(idx) {
       if (isOpening || caughtBoxes[idx].opened) return;
-      if (!checkCooldown()) return alert("Kutuları 2 saniyede bir açabilirsiniz!");
 
       isOpening = true;
       const targetBox = caughtBoxes[idx];
@@ -372,7 +364,7 @@
       setTimeout(() => showSummary("Yakala & Aç - Tüm Kutular Açıldı"), 2000);
     }
 
-    // --- 3. MAYINLI KASA ---
+    // --- 3. MAYINLI KASA (BEKLEMESİZ SERİ KUTU SEÇİMİ) ---
     function startMines() {
       document.getElementById("screen-mines").style.display = "flex";
       const grid = document.getElementById("mines-grid");
@@ -394,8 +386,6 @@
 
         card.onclick = () => {
           if (card.dataset.opened) return;
-          if (!checkCooldown()) return alert("Kutuları 2 saniyede bir seçebilirsiniz!");
-
           card.dataset.opened = "1";
 
           if (i === bombIdx) {
