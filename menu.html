@@ -1,79 +1,137 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kutu Açma Pro - Lobi</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kutu Açma Pro - Lobi</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-
+  <div class="app-container">
+    <!-- Üst Bar -->
     <div class="lobby-header">
-        <div>
-            <span style="font-weight: bold;">👤 Profilim:</span>
-            <span id="header-user-tag">Yükleniyor...</span>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-purple" onclick="location.href='leaderboard.html'">🏆 Sıralama</button>
-            <button class="btn btn-danger" onclick="location.href='index.html'">Çıkış</button>
-        </div>
+      <div class="user-tag-badge">
+        <a href="user.html" style="color:#fff; text-decoration:none;">👤 <span id="m-user"></span></a>
+        <span class="badge-title" id="m-title"></span>
+      </div>
+      <div class="btn-group">
+        <a href="leaderboard.html" class="btn-sm" style="background:#d97706;">🏆 Sıralama</a>
+        <button class="btn-sm" style="background:#6b21a8;" onclick="openSettings()">⚙️ Ayarlar</button>
+        <button class="btn-sm" style="background:var(--danger);" onclick="logout()">🚪 Çıkış</button>
+      </div>
     </div>
 
-    <div style="background: #110924; padding: 8px 20px; font-size: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #3b206b;">
-        <span>🎯 Günlük Görev: 3 Kutu Aç</span>
-        <span id="quest-count" style="color: var(--gold); font-weight: bold;">0/3</span>
+    <!-- Görev -->
+    <div class="quest-strip">
+      <span>🎯 Günlük Görev: 3 Kasa Aç</span>
+      <span id="m-quest" style="color:var(--gold); font-weight:bold;">0/3</span>
     </div>
 
-    <div class="main-nav">
-        <div class="nav-tab" onclick="location.href='chat.html'">💬 Sohbetler</div>
-        <div class="nav-tab" onclick="location.href='friends.html'">👥 Arkadaşlar</div>
-        <div class="nav-tab active">📦 Oyun Modları</div>
+    <!-- Sohbetler ve Arkadaşlar Butonları -->
+    <div class="action-grid">
+      <a href="chat.html" class="btn-nav-large">💬 Sohbetler - Kanallar</a>
+      <a href="friends.html" class="btn-nav-large">👥 Arkadaşlar</a>
     </div>
 
-    <div class="content-box">
-        <div class="mode-card selected" onclick="selectGame('normal', this)">
-            <h3>⚔️ Normal Kutu (PvP & Klasik)</h3>
-            <p style="font-size: 12px; color: var(--text-dim);">Standart ödüller ve 1v1 düello eşleşmesi.</p>
+    <!-- Modlar Listesi -->
+    <div class="modes-box">
+      <div class="mode-card" onclick="selectMode('standard', this)">
+        <div class="mode-header"><span>⚔️ Normal Kasa (30s)</span></div>
+        <div class="mode-desc">Dengeli klasik oranlar</div>
+      </div>
+      <div class="mode-card" onclick="selectMode('ten', this)">
+        <div class="mode-header"><span>📦 10 Kutu Modu (Süresiz)</span></div>
+        <div class="mode-desc">Tam 10 kutu açma hakkı</div>
+      </div>
+      <div class="mode-card selected" onclick="selectMode('catch', this)">
+        <div class="mode-header"><span style="color:#c084fc;">⚡ Yakala & Aç Modu (15s)</span></div>
+        <div class="mode-desc">Kutuları yakala, teker teker aç</div>
+        <div class="rates-preview">
+          <div><b>Classic Kasa (%45):</b> 2-5 P</div>
+          <div><b>Super Kasa (%30):</b> 6-18 P</div>
+          <div><b>Ultra Kasa (%15):</b> 25-60 P</div>
+          <div><b>Omega Kasa (%8):</b> 80-250 P</div>
+          <div><b>Godly Kasa (%2):</b> 750-1500 P</div>
         </div>
-
-        <div class="mode-card" onclick="selectGame('ten_box', this)">
-            <h3>📦 10 Kutu Modu (Sürat)</h3>
-            <p style="font-size: 12px; color: var(--text-dim);">Tam 10 kutu aç ve en yüksek puanı topla.</p>
-        </div>
-
-        <div class="mode-card" style="border-color: var(--neon-purple); background: #241349;" onclick="selectGame('catch', this)">
-            <h3 style="color: #c084fc;">⚡ YAKALA & AÇ MODU (Özel)</h3>
-            <p style="font-size: 12px; color: #d8b4fe;">Derece, Süper, Ultra ve Mega Kasalarla puan katlama.</p>
-        </div>
-
-        <div class="mode-card" onclick="selectGame('compare', this)">
-            <h3>⚖️ Şans Kıyaslama Modu (7 Kutu)</h3>
-            <p style="font-size: 12px; color: var(--text-dim);">7 kutu açarak şans oranını test et.</p>
-        </div>
-
-        <button class="btn btn-green btn-play-big" onclick="startGameLaunch()">OYUNA BAŞLA</button>
+      </div>
+      <div class="mode-card" onclick="selectMode('upgrade', this)">
+        <div class="mode-header"><span>📈 Şans Yükseltme (7 Kutu)</span></div>
+        <div class="mode-desc">Her kutuda kademe & puan artar</div>
+      </div>
+      <div class="mode-card" onclick="selectMode('mines', this)">
+        <div class="mode-header"><span>💣 Mayınlı Kasa Modu (Risk)</span></div>
+        <div class="mode-desc">Mayına basarsan puanlar gider!</div>
+      </div>
+      <div class="mode-card" onclick="selectMode('pvp', this)">
+        <div class="mode-header"><span style="color:#38bdf8;">🔥 Online PvP (1v1 / Çoklu)</span></div>
+        <div class="mode-desc">Karşılıklı kişi başı 5 kutu, canlı sıralama</div>
+      </div>
     </div>
 
-    <script src="app.js"></script>
-    <script>
-        window.onload = renderHeader;
-        let selectedMode = 'normal';
+    <button class="btn-play-main" onclick="startPlay()">OYUNA BAŞLA</button>
+  </div>
 
-        function selectGame(mode, elem) {
-            selectedMode = mode;
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-            elem.classList.add('selected');
-        }
+  <!-- Ayarlar Modalı -->
+  <div id="modal-settings" class="modal">
+    <div class="modal-card">
+      <div class="modal-title">⚙️ Oyun Ayarları</div>
+      <button id="sound-btn" class="btn-auth" style="margin-bottom:10px;" onclick="toggleSound()">🔊 Ses: Açık</button>
+      <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;">Unvan Seç:</div>
+      <select id="title-select" class="auth-input" onchange="updateTitle(this.value)">
+        <option value="Çaylak">Çaylak</option>
+        <option value="Usta">Usta</option>
+        <option value="Efsane">Efsane</option>
+        <option value="Kral">Kral</option>
+      </select>
+      <button class="btn-auth" style="background:var(--danger); margin-top:10px;" onclick="closeSettings()">Kapat</button>
+    </div>
+  </div>
 
-        function startGameLaunch() {
-            if (selectedMode === 'normal') {
-                window.location.href = "pvp.html";
-            } else {
-                window.location.href = "game1.html";
-            }
-        }
-    </script>
+  <script src="app.js"></script>
+  <script>
+    let currentMode = "catch";
+
+    window.onload = () => {
+      let u = getUser();
+      document.getElementById("m-user").innerText = `${u.name}${u.tag}`;
+      document.getElementById("m-title").innerText = `[${u.title}]`;
+      document.getElementById("m-quest").innerText = `${u.dailyQuest}/3`;
+      document.getElementById("title-select").value = u.title;
+      document.getElementById("sound-btn").innerText = u.sound ? "🔊 Ses: Açık" : "🔇 Ses: Kapalı";
+    };
+
+    function selectMode(m, el) {
+      currentMode = m;
+      document.querySelectorAll(".mode-card").forEach(c => c.classList.remove("selected"));
+      el.classList.add("selected");
+    }
+
+    function startPlay() {
+      if (currentMode === "pvp") window.location.href = "pvp.html";
+      else window.location.href = "game1.html?mode=" + currentMode;
+    }
+
+    function openSettings() { document.getElementById("modal-settings").style.display = "flex"; }
+    function closeSettings() { document.getElementById("modal-settings").style.display = "none"; }
+    function toggleSound() {
+      let u = getUser();
+      u.sound = !u.sound;
+      saveUser(u);
+      document.getElementById("sound-btn").innerText = u.sound ? "🔊 Ses: Açık" : "🔇 Ses: Kapalı";
+    }
+    function updateTitle(val) {
+      let u = getUser();
+      u.title = val;
+      saveUser(u);
+      document.getElementById("m-title").innerText = `[${val}]`;
+    }
+    function logout() {
+      let u = getUser();
+      saveUser(u);
+      window.location.href = "index.html";
+    }
+  </script>
 </body>
 </html>
