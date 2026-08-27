@@ -98,11 +98,15 @@
         const box = document.getElementById("active-chat-messages");
         box.innerHTML = "";
         snap.forEach(c => {
-          const m = c.val(), isMe = m.uid === u.uid;
+          const m = c.val(), k = c.key, isMe = m.uid === u.uid;
           box.innerHTML += `
             <div class="msg-bubble ${isMe ? 'me' : 'other'}">
               <div style="font-size:9px; color:#60a5fa; font-weight:bold;">${m.sender}</div>
-              <div>${m.text}</div>
+              <div id="msg-${k}">${m.text}</div>
+              <div class="msg-actions">
+                <span onclick="navigator.clipboard.writeText('${m.text}'); alert('Kopyalandı');">📋 Kopyala</span>
+                ${isMe ? `<span onclick="editMessage('${k}')">✏️ Düzenle</span><span onclick="deleteMessage('${k}')" style="color:var(--danger)">🗑️ Sil</span>` : ''}
+              </div>
             </div>
           `;
         });
@@ -120,6 +124,16 @@
         text: inp.value.trim()
       });
       inp.value = "";
+    }
+
+    function editMessage(key) {
+      const old = document.getElementById(`msg-${key}`).innerText;
+      const val = prompt("Mesajı düzenle:", old);
+      if (val && val !== old) db.ref(`${currentChatPath}/${key}/text`).set(val + " (düzenlendi)");
+    }
+
+    function deleteMessage(key) {
+      if (confirm("Bu mesajı silmek istiyor musunuz?")) db.ref(`${currentChatPath}/${key}`).remove();
     }
   </script>
 </body>
