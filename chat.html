@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sohbet & Kanallar</title>
+  <title>Sohbetler & DM</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -12,91 +12,97 @@
   <div class="app-container">
     <div class="top-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
-      <div style="font-weight:bold; font-size:12px;" id="chat-header-title">Sohbetler</div>
-      <div class="btn-group-top">
-        <button class="icon-btn" style="border-color:var(--btn-green);" onclick="promptJoinChannel()">Katıl</button>
-        <button class="icon-btn" style="border-color:var(--neon-purple);" onclick="promptCreateChannel()">Kanal Kur</button>
-      </div>
+      <div style="font-weight:bold; font-size:12px;" id="lbl-chat-view-title">Sohbetler</div>
+      <div></div>
     </div>
 
-    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:6px;" id="channel-buttons-bar">
-      <button class="icon-btn" style="background:var(--btn-blue); white-space:nowrap;" onclick="switchChatPanel('global')">🌐 Global</button>
-      <button class="icon-btn" style="white-space:nowrap;" onclick="switchChatPanel('dm')">💬 Özel DM</button>
+    <!-- Sohbet Seçim Listesi (Ana Ekran) -->
+    <div id="panel-chat-select" style="display:flex; flex-direction:column; flex:1;">
+      <!-- Büyük Global Buton -->
+      <button class="mode-btn" style="padding:14px; font-weight:bold; font-size:13px; color:#fff; background:linear-gradient(90deg, #0284c7, #0ea5e9); margin-bottom:8px;" onclick="openChatRoom('global', '🌐 Global Sohbet')">
+        🌐 GLOBAL SOHBET (HERKESE AÇIK)
+      </button>
+
+      <!-- Ayrım Çizgisi -->
+      <div style="height:1px; background:#334155; margin:6px 0 10px 0;"></div>
+
+      <div style="font-size:11px; color:var(--gold); font-weight:bold; margin-bottom:6px;">💬 Özel Sohbet Blokları (DM):</div>
+      <div id="dm-conversations-list" style="display:flex; flex-direction:column; gap:4px; flex:1; overflow-y:auto;"></div>
+    </div>
+
+    <!-- Mesajlaşma Odası Paneli -->
+    <div id="panel-chat-room" style="display:none; flex-direction:column; flex:1;">
+      <div class="top-header" style="background:#0b1329; border-bottom:1px solid #1e293b; padding:6px 8px; margin-bottom:4px;">
+        <button class="icon-btn" onclick="closeChatRoom()">‹ Geri</button>
+        <div id="room-active-title" style="font-size:11px; font-weight:bold; color:#38bdf8;">Oda</div>
+        <div></div>
       </div>
 
-    <div class="chat-scroll-box" id="active-chat-box" style="flex:1; height:auto; margin-bottom:6px;"></div>
+      <div id="active-chat-messages" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:6px; background:#070c18; border-radius:8px; margin-bottom:6px;"></div>
 
-    <div class="chat-input-row">
-      <input type="text" id="chat-text-input" placeholder="Mesajınızı yazın...">
-      <button class="icon-btn" style="background:var(--btn-green); border-radius:50%; width:32px; height:32px; justify-content:center;" onclick="sendActiveMsg()">➤</button>
+      <div style="display:flex; gap:4px;">
+        <input type="text" id="in-msg-text" class="input-field" style="margin:0; font-size:11px; flex:1;" placeholder="Mesaj yazın...">
+        <button class="icon-btn" style="background:var(--btn-green); border-radius:50%; width:34px; height:34px; justify-content:center;" onclick="sendMessage()">➤</button>
+      </div>
     </div>
   </div>
 
   <script src="app.js"></script>
   <script>
-    let activeChannelType = 'global'; // 'global', 'dm', veya 'custom_kanaladi#1234'
-    let activeDMTargetUID = localStorage.getItem("active_dm_target");
-    let activeDMTargetName = localStorage.getItem("active_dm_name");
+    let currentChatPath = null;
 
     window.onload = () => {
-      loadChannelButtons();
-      listenMessages();
+      loadDMConversations();
     };
 
-    function switchChatPanel(type, name = null) {
-      activeChannelType = type;
-      document.getElementById("chat-header-title").innerText = name ? `# ${name}` : (type === 'global' ? "🌐 Global Chat" : "💬 Özel DM");
-      listenMessages();
-    }
+    function loadDMConversations() {
+      const u = getActiveUser();
+      const list = document.getElementById("dm-conversations-list");
+      list.innerHTML = "";
 
-    function loadChannelButtons() {
-      const bar = document.getElementById("channel-buttons-bar");
-      db.ref("channels").on("value", snap => {
-        // Global ve DM butonlarını koruyarak temizle
-        bar.innerHTML = `
-          <button class="icon-btn ${activeChannelType === 'global' ? 'active' : ''}" style="${activeChannelType === 'global' ? 'background:var(--btn-blue);' : ''} white-space:nowrap;" onclick="switchChatPanel('global')">🌐 Global</button>
-          <button class="icon-btn ${activeChannelType === 'dm' ? 'active' : ''}" style="${activeChannelType === 'dm' ? 'background:var(--btn-blue);' : ''} white-space:nowrap;" onclick="switchChatPanel('dm')">💬 Özel DM</button>
-        `;
+      db.ref("friends/" + u.uid).on("value", snap => {
+        list.innerHTML = "";
+        if (!snap.exists()) {
+          list.innerHTML = "<div style='color:#666; font-size:10px; text-align:center; padding:15px;'>Henüz mesajlaştığınız kimse yok. Arkadaşlar menüsünden mesaj başlatın.</div>";
+          return;
+        }
         snap.forEach(c => {
-          const ch = c.val();
+          const f = c.val();
           const btn = document.createElement("button");
-          btn.className = "icon-btn";
-          btn.style.white-space = "nowrap";
-          btn.innerText = `# ${ch.name}`;
-          btn.onclick = () => switchChatPanel('custom_' + c.key, ch.name);
-          bar.appendChild(btn);
+          btn.className = "mode-btn";
+          btn.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px;";
+          btn.innerHTML = `<span>👤 <b>${f.fullName}</b></span><span style="font-size:10px; color:#38bdf8;">Sohbete Gir ›</span>`;
+          btn.onclick = () => openChatRoom('dm_' + [u.uid, c.key].sort().join("_"), f.fullName);
+          list.appendChild(btn);
         });
       });
     }
 
-    function listenMessages() {
+    function openChatRoom(pathKey, title) {
+      currentChatPath = pathKey === 'global' ? 'global_chat' : 'dm_chats/' + pathKey.replace('dm_', '');
+      document.getElementById("panel-chat-select").style.display = "none";
+      document.getElementById("panel-chat-room").style.display = "flex";
+      document.getElementById("room-active-title").innerText = title;
+      listenRoomMessages();
+    }
+
+    function closeChatRoom() {
+      document.getElementById("panel-chat-room").style.display = "none";
+      document.getElementById("panel-chat-select").style.display = "flex";
+      currentChatPath = null;
+    }
+
+    function listenRoomMessages() {
       const u = getActiveUser();
-      const box = document.getElementById("active-chat-box");
-      box.innerHTML = "";
-
-      let dbPath = "global_chat";
-      if (activeChannelType === 'dm') {
-        if (!activeDMTargetUID) {
-          box.innerHTML = "<div style='text-align:center; color:#666; font-size:11px; margin-top:30px;'>Arkadaşlar veya Sıralama sayfasından bir oyuncunun yanındaki mesaja basınız.</div>";
-          return;
-        }
-        dbPath = "dm_chats/" + [u.uid, activeDMTargetUID].sort().join("_");
-      } else if (activeChannelType.startsWith('custom_')) {
-        dbPath = "channel_msgs/" + activeChannelType.replace('custom_', '');
-      }
-
-      db.ref(dbPath).limitToLast(40).on("value", snap => {
+      db.ref(currentChatPath).limitToLast(35).on("value", snap => {
+        const box = document.getElementById("active-chat-messages");
         box.innerHTML = "";
         snap.forEach(c => {
-          const m = c.val(), k = c.key, isMe = m.uid === u.uid;
+          const m = c.val(), isMe = m.uid === u.uid;
           box.innerHTML += `
             <div class="msg-bubble ${isMe ? 'me' : 'other'}">
-              <div style="font-size:9px; color:#60a5fa; font-weight:bold;">${m.sender || ''}</div>
-              <div id="msg-${k}">${m.text}</div>
-              <div class="msg-actions">
-                <span onclick="navigator.clipboard.writeText('${m.text}'); alert('Kopyalandı');">📋</span>
-                ${isMe ? `<span onclick="editMessage('${dbPath}', '${k}')">✏️</span><span onclick="delMessage('${dbPath}', '${k}')" style="color:var(--danger)">🗑️</span>` : ''}
-              </div>
+              <div style="font-size:9px; color:#60a5fa; font-weight:bold;">${m.sender}</div>
+              <div>${m.text}</div>
             </div>
           `;
         });
@@ -104,47 +110,16 @@
       });
     }
 
-    function sendActiveMsg() {
-      const inp = document.getElementById("chat-text-input");
-      if (!inp.value.trim()) return;
+    function sendMessage() {
+      const inp = document.getElementById("in-msg-text");
+      if (!inp.value.trim() || !currentChatPath) return;
       const u = getActiveUser();
-
-      let dbPath = "global_chat";
-      if (activeChannelType === 'dm') {
-        if (!activeDMTargetUID) return;
-        dbPath = "dm_chats/" + [u.uid, activeDMTargetUID].sort().join("_");
-      } else if (activeChannelType.startsWith('custom_')) {
-        dbPath = "channel_msgs/" + activeChannelType.replace('custom_', '');
-      }
-
-      db.ref(dbPath).push({
+      db.ref(currentChatPath).push({
         uid: u.uid,
         sender: `${u.name}${u.tag}`,
         text: inp.value.trim()
       });
       inp.value = "";
-    }
-
-    function editMessage(path, key) {
-      const old = document.getElementById(`msg-${key}`).innerText;
-      const val = prompt("Mesajı düzenle:", old);
-      if (val && val !== old) db.ref(`${path}/${key}/text`).set(val + " (düzenlendi)");
-    }
-
-    function delMessage(path, key) {
-      if (confirm("Bu mesajı silmek istiyor musunuz?")) db.ref(`${path}/${key}`).remove();
-    }
-
-    function promptCreateChannel() {
-      const name = prompt("Kanal Adı:");
-      if (!name) return;
-      const chId = `${name.toLowerCase()}#${Math.floor(1000 + Math.random() * 9000)}`;
-      db.ref("channels/" + chId.replace('#', '_')).set({ name: chId });
-    }
-
-    function promptJoinChannel() {
-      const target = prompt("Katılmak istediğiniz kanaladı#id girin:");
-      if (target) alert(`${target} kanalına katıldınız!`);
     }
   </script>
 </body>
