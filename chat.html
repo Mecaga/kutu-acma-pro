@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sohbet Odası</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <header>
+        <div class="user-meta"><span style="font-weight: bold;" id="p-name"></span></div>
+        <div>💰 <span id="p-coins" style="color:var(--gold); font-weight:bold;"></span> Altın</div>
+    </header>
+
+    <nav>
+        <a href="menu.html">🏠 Menü</a>
+        <a href="game1.html">📦 Kutu Açma</a>
+        <a href="pvp.html">⚔️ 1v1 Arena</a>
+        <a href="chat.html" class="active">💬 Sohbet</a>
+        <a href="leaderboard.html">🏆 Sıralama</a>
+        <a href="user.html">👤 Profil</a>
+    </nav>
+
+    <main>
+        <h2>Global Sohbet</h2>
+        <div class="card" id="chat-stream" style="height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="msg-box" placeholder="Mesajınızı girin..." style="flex: 1; margin: 0;">
+            <button class="btn btn-blue" onclick="sendMsg()">Gönder</button>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        window.onload = () => {
+            updateGlobalHeader();
+            let u = getUser();
+            db.ref("global_chat").limitToLast(30).on("value", snap => {
+                let box = document.getElementById("chat-stream");
+                box.innerHTML = "";
+                snap.forEach(c => {
+                    let m = c.val();
+                    let k = c.key;
+                    let isMe = m.uid === u.uid;
+                    let row = document.createElement("div");
+                    row.style.background = isMe ? "#1f6feb22" : "#21262d";
+                    row.style.padding = "8px 12px";
+                    row.style.borderRadius = "6px";
+                    row.style.alignSelf = isMe ? "flex-end" : "flex-start";
+                    row.style.maxWidth = "80%";
+                    row.innerHTML = `
+                        <div style="font-size:11px; color:var(--gold);">${m.sender}</div>
+                        <div id="val-${k}">${m.text}</div>
+                        <div style="font-size:11px; display:flex; gap:8px; margin-top:4px; color:#8b949e;">
+                            <span style="cursor:pointer;" onclick="navigator.clipboard.writeText('${m.text}'); alert('Kopyalandı');">📋 Kopyala</span>
+                            ${isMe ? `<span style="cursor:pointer;" onclick="editMsg('${k}')">✏️ Düzenle</span>` : ''}
+                            ${isMe ? `<span style="cursor:pointer; color:var(--danger);" onclick="deleteMsg('${k}')">🗑️ Sil</span>` : ''}
+                        </div>
+                    `;
+                    box.appendChild(row);
+                });
+                box.scrollTop = box.scrollHeight;
+            });
+        };
+
+        function sendMsg() {
+            let u = getUser();
+            let input = document.getElementById("msg-box");
+            if (!input.value.trim()) return;
+            db.ref("global_chat").push({ uid: u.uid, sender: u.name, text: input.value.trim(), time: Date.now() });
+            input.value = "";
+        }
+
+        function editMsg(k) {
+            let old = document.getElementById(`val-${k}`).innerText;
+            let updated = prompt("Mesajı düzenle:", old);
+            if (updated && updated !== old) db.ref(`global_chat/${k}/text`).set(updated + " (düzenlendi)");
+        }
+
+        function deleteMsg(k) {
+            if (confirm("Silinsin mi?")) db.ref(`global_chat/${k}`).remove();
+        }
+    </script>
+</body>
+</html>
