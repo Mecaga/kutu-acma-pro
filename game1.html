@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kutu Açma Modu</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <header>
+        <div class="user-meta">
+            <span style="font-weight: bold;" id="p-name"></span>
+            <span class="badge" id="p-lvl"></span>
+            <div class="xp-bar-bg"><div class="xp-bar-inner" id="p-xp-fill"></div></div>
+            <span style="font-size: 11px;" id="p-xp-num"></span>
+        </div>
+        <div>💰 <span id="p-coins" style="color:var(--gold); font-weight:bold;"></span> Altın</div>
+    </header>
+
+    <nav>
+        <a href="menu.html">🏠 Menü</a>
+        <a href="game1.html" class="active">📦 Kutu Açma</a>
+        <a href="pvp.html">⚔️ 1v1 Arena</a>
+        <a href="chat.html">💬 Sohbet</a>
+        <a href="leaderboard.html">🏆 Sıralama</a>
+        <a href="user.html">👤 Profil</a>
+    </nav>
+
+    <main>
+        <h2>Sandık Pazarı</h2>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+            <div class="card" style="text-align: center;">
+                <h3 style="color: #ffd700;">Tahta Sandık</h3>
+                <p style="font-size: 12px; color: #8b949e;">Maliyet: 50 Altın</p>
+                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(50, 10, 'Tahta Sandık')">Aç</button>
+            </div>
+            <div class="card" style="text-align: center;">
+                <h3 style="color: #ffd700;">Gümüş Sandık</h3>
+                <p style="font-size: 12px; color: #8b949e;">Maliyet: 150 Altın</p>
+                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(150, 25, 'Gümüş Sandık')">Aç</button>
+            </div>
+            <div class="card" style="text-align: center;">
+                <h3 style="color: #ffd700;">Altın Sandık</h3>
+                <p style="font-size: 12px; color: #8b949e;">Maliyet: 300 Altın</p>
+                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(300, 50, 'Altın Sandık')">Aç</button>
+            </div>
+            <div class="card" style="text-align: center;">
+                <h3 style="color: #ffd700;">Elmas Sandık</h3>
+                <p style="font-size: 12px; color: #8b949e;">Maliyet: 600 Altın</p>
+                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(600, 100, 'Elmas Sandık')">Aç</button>
+            </div>
+            <div class="card" style="text-align: center;">
+                <h3 style="color: #ffd700;">Zümrüt Sandık</h3>
+                <p style="font-size: 12px; color: #8b949e;">Maliyet: 1000 Altın</p>
+                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(1000, 180, 'Zümrüt Sandık')">Aç</button>
+            </div>
+            <div class="card" style="text-align: center;">
+                <h3 style="color: #ffd700;">Mecaga Özel</h3>
+                <p style="font-size: 12px; color: #8b949e;">Maliyet: 2000 Altın</p>
+                <button class="btn" style="width: 100%; margin-top: 8px;" onclick="openBox(2000, 400, 'Mecaga Özel')">Aç</button>
+            </div>
+        </div>
+        <div id="result-log" class="card" style="margin-top: 15px; font-weight: bold; color: var(--gold); text-align: center;">Bir sandık seçin.</div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        window.onload = updateGlobalHeader;
+
+        function openBox(cost, xp, name) {
+            let u = getUser();
+            if (u.coins < cost) return alert("Yetersiz Altın!");
+            u.coins -= cost;
+            u.boxesOpened = (u.boxesOpened || 0) + 1;
+            let win = Math.floor(Math.random() * (cost * 2));
+            u.coins += win;
+            saveUser(u);
+            addExp(xp);
+            document.getElementById("result-log").innerText = `🎁 ${name} Açıldı: +${win} Altın, +${xp} XP!`;
+        }
+    </script>
+</body>
+</html>
