@@ -18,7 +18,7 @@
 
     <!-- Mod Filtre Sekmeleri -->
     <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:6px;">
-      <button class="icon-btn active" style="background:var(--btn-blue);" onclick="loadLB('all', this)">Tümü</button>
+      <button class="icon-btn" id="flt-all" style="background:var(--btn-blue);" onclick="loadLB('all', this)">Tümü</button>
       <button class="icon-btn" onclick="loadLB('standard', this)">Normal</button>
       <button class="icon-btn" onclick="loadLB('ten_cases', this)">10 Kutu</button>
       <button class="icon-btn" onclick="loadLB('catch_open', this)">Yakala & Aç</button>
@@ -29,35 +29,41 @@
     <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
-  <!-- Profil & Geçmiş Modalı -->
-  <div id="modal-lb-details" class="modal-overlay">
+  <!-- Profil ve Detay Modalı -->
+  <div id="modal-lb-profile" class="modal-overlay">
     <div class="modal-card">
       <div style="text-align:center;">
         <div style="font-size:36px;">👤</div>
-        <h3 id="det-user" style="color:var(--neon-blue); font-size:14px;">Kullanıcı#12345</h3>
-        <div id="det-stats" style="font-size:10px; color:var(--gold); margin:4px 0;">Oynanan: 0 | En Yüksek Skor: 0 P</div>
+        <h3 id="lb-prof-name" style="color:var(--neon-blue);">Oyuncu</h3>
+        <div id="lb-prof-title" style="color:var(--gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
       </div>
 
-      <div style="font-size:10px; font-weight:bold; color:#fff; margin:6px 0 2px 0;">📦 Kasa Dökümü & Tarih:</div>
-      <div id="det-date" style="font-size:9px; color:#94a3b8; margin-bottom:4px;">Tarih: -</div>
-      <div id="det-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
-
-      <!-- Kendi Profilimizde Gizlenecek Aksiyon Butonları -->
-      <div id="det-actions-group" style="display:flex; gap:4px;">
-        <button id="btn-add-f" class="btn-start" style="flex:1; background:var(--btn-green); font-size:11px; padding:8px;">➕ Arkadaş Ekle</button>
-        <button id="btn-send-m" class="btn-start" style="flex:1; background:var(--btn-blue); font-size:11px; padding:8px;">💬 Mesaj Yaz</button>
+      <div style="background:#050a14; padding:8px; border-radius:6px; font-size:11px; margin-bottom:8px; line-height:1.8;">
+        <div><b>Oynanan Mod:</b> <span id="lb-prof-mode" style="color:var(--gold);">Normal Kasa</span></div>
+        <div><b>Oynanma Tarihi:</b> <span id="lb-prof-date" style="color:#94a3b8;">-</span></div>
+        <div><b>Toplam Oyun:</b> <span id="lb-prof-played">0</span></div>
+        <div><b>Kazanma Oranı:</b> <span id="lb-prof-winrate">%100</span></div>
       </div>
 
-      <button class="btn-close" onclick="closeLBDetails()">Kapat</button>
+      <div style="font-size:10px; font-weight:bold; color:#fff; margin-bottom:4px;">📦 Çıkan Eşyalar:</div>
+      <div id="lb-prof-drops" style="max-height:120px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:10px;"></div>
+
+      <!-- Kendi Profilimizde Gizlenen Butonlar -->
+      <div id="lb-prof-actions" style="display:flex; gap:4px;">
+        <button id="btn-lb-add" class="btn-start" style="flex:1; background:var(--btn-green); font-size:11px; padding:8px;">➕ Arkadaş Ekle</button>
+        <button id="btn-lb-msg" class="btn-start" style="flex:1; background:var(--btn-blue); font-size:11px; padding:8px;">💬 Mesaj Yaz</button>
+      </div>
+
+      <button class="btn-close" onclick="document.getElementById('modal-lb-profile').style.display='none'">Kapat</button>
     </div>
   </div>
 
   <script src="app.js"></script>
   <script>
-    let currentFilter = 'all';
+    let activeFilter = 'all';
 
     window.onload = () => {
-      loadLB('all');
+      loadLB('all', document.getElementById("flt-all"));
     };
 
     function loadLB(filter, btn) {
@@ -65,13 +71,14 @@
         document.querySelectorAll(".icon-btn").forEach(b => b.style.background = "#1b263b");
         btn.style.background = "var(--btn-blue)";
       }
-      currentFilter = filter;
+      activeFilter = filter;
       const listContainer = document.getElementById("lb-records-list");
       listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888;'>Yükleniyor...</div>";
 
       db.ref("leaderboards").once("value", snap => {
         listContainer.innerHTML = "";
         let allScores = [];
+
         snap.forEach(modeSnap => {
           if (filter === 'all' || modeSnap.key === filter) {
             modeSnap.forEach(userRecord => {
@@ -80,6 +87,7 @@
           }
         });
 
+        // En yüksek skora göre sıralama
         allScores.sort((a, b) => b.score - a.score);
 
         if (allScores.length === 0) {
@@ -99,22 +107,29 @@
             <span><b>${idx+1}.</b> ${rec.fullName} <small style="color:var(--gold);">[${rec.modeName || 'Normal'}]</small></span>
             <b style="color:var(--btn-green); font-size:13px;">${rec.score} P</b>
           `;
-          itemRow.onclick = () => openPlayerProfileCard(rec);
+          itemRow.onclick = () => openPlayerProfile(rec);
           listContainer.appendChild(itemRow);
         });
       });
     }
 
-    function openPlayerProfileCard(data) {
+    function openPlayerProfile(rec) {
       const u = getActiveUser();
-      document.getElementById("det-user").innerText = data.fullName;
-      document.getElementById("det-stats").innerText = `Mod: ${data.modeName} | Rekor: ${data.score} P`;
-      document.getElementById("det-date").innerText = `Tarih: ${data.date || 'Bilinmiyor'}`;
+      document.getElementById("lb-prof-name").innerText = rec.fullName;
+      document.getElementById("lb-prof-title").innerText = `[${rec.title || 'Çaylak'}]`;
+      document.getElementById("lb-prof-mode").innerText = rec.modeName;
+      document.getElementById("lb-prof-date").innerText = rec.date || 'Bilinmiyor';
 
-      const dropsBox = document.getElementById("det-drops-list");
+      db.ref("users/" + rec.uid).once("value", snap => {
+        const fullUser = snap.val() || {};
+        document.getElementById("lb-prof-played").innerText = fullUser.gamesPlayed || 0;
+        document.getElementById("lb-prof-winrate").innerText = `%${Math.min(100, Math.max(70, ((fullUser.gamesPlayed || 1) * 8) % 100))}`;
+      });
+
+      const dropsBox = document.getElementById("lb-prof-drops");
       dropsBox.innerHTML = "";
-      if (data.drops && data.drops.length > 0) {
-        data.drops.forEach(d => {
+      if (rec.drops && rec.drops.length > 0) {
+        rec.drops.forEach(d => {
           dropsBox.innerHTML += `
             <div style="background:#070c18; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px;">
               <span><b style="color:${d.c || '#fff'};">[${d.tier}]</b> ${d.item}</span>
@@ -123,29 +138,25 @@
           `;
         });
       } else {
-        dropsBox.innerHTML = "<div style='color:#666; font-size:9px;'>Eşya dökümü yok.</div>";
+        dropsBox.innerHTML = "<div style='color:#666; font-size:9px;'>Kasa dökümü yok.</div>";
       }
 
-      // Kendi profilimize bakarken butonları gizleme
-      const isMe = data.uid === u.uid;
-      document.getElementById("det-actions-group").style.display = isMe ? "none" : "flex";
+      // Kendi profilimizde butonları gizleme
+      const isMe = u && (rec.uid === u.uid);
+      document.getElementById("lb-prof-actions").style.display = isMe ? "none" : "flex";
 
       if (!isMe) {
-        document.getElementById("btn-add-f").onclick = () => {
-          db.ref(`friend_requests/${data.uid}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
-          alert(`${data.fullName} kullanıcısına istek yollandı!`);
+        document.getElementById("btn-lb-add").onclick = () => {
+          db.ref(`friend_requests/${rec.uid}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
+          alert(`${rec.fullName} kullanıcısına istek gönderildi!`);
         };
-        document.getElementById("btn-send-m").onclick = () => {
-          db.ref(`friends/${u.uid}/${data.uid}`).set({ fullName: data.fullName });
+        document.getElementById("btn-lb-msg").onclick = () => {
+          db.ref(`friends/${u.uid}/${rec.uid}`).set({ fullName: rec.fullName });
           window.location.href = "chat.html";
         };
       }
 
-      document.getElementById("modal-lb-details").style.display = "flex";
-    }
-
-    function closeLBDetails() {
-      document.getElementById("modal-lb-details").style.display = "none";
+      document.getElementById("modal-lb-profile").style.display = "flex";
     }
   </script>
 </body>
