@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Menü - Kutu Açma</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <header>
+        <div class="user-meta">
+            <span style="font-weight: bold;" id="p-name"></span>
+            <span class="badge" id="p-lvl"></span>
+            <div class="xp-bar-bg"><div class="xp-bar-inner" id="p-xp-fill"></div></div>
+            <span style="font-size: 11px;" id="p-xp-num"></span>
+        </div>
+        <div>💰 <span id="p-coins" style="color:var(--gold); font-weight:bold;"></span> Altın</div>
+    </header>
+
+    <nav>
+        <a href="menu.html" class="active">🏠 Menü</a>
+        <a href="game1.html">📦 Kutu Açma</a>
+        <a href="pvp.html">⚔️ 1v1 Arena</a>
+        <a href="chat.html">💬 Sohbet</a>
+        <a href="leaderboard.html">🏆 Sıralama</a>
+        <a href="user.html">👤 Profil</a>
+    </nav>
+
+    <main>
+        <h2>Oyun Modları</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-top: 15px;">
+            <div class="card" style="text-align: center;">
+                <h3>📦 Kutu Açma Modu</h3>
+                <p style="font-size: 13px; color: #8b949e; margin: 10px 0;">Farklı sandıkları açarak altın ve XP kazan.</p>
+                <a href="game1.html" class="btn" style="width: 100%;">Kutulara Git</a>
+            </div>
+            <div class="card" style="text-align: center;">
+                <h3>⚔️ 1v1 PvP Düello</h3>
+                <p style="font-size: 13px; color: #8b949e; margin: 10px 0;">30 saniye içinde rakibinden çok puan topla.</p>
+                <a href="pvp.html" class="btn btn-blue" style="width: 100%;">Arenaya Gir</a>
+            </div>
+            <div class="card" style="text-align: center;">
+                <h3>💬 Canlı Kanallar</h3>
+                <p style="font-size: 13px; color: #8b949e; margin: 10px 0;">Diğer oyuncularla mesajlaş, mesaj düzenle ve sil.</p>
+                <a href="chat.html" class="btn" style="width: 100%;">Sohbete Katıl</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>Geliştirici: MecagaTR</footer>
+    <script src="app.js"></script>
+    <script>window.onload = updateGlobalHeader;</script>
+</body>
+</html>
