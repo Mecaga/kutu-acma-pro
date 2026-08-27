@@ -10,42 +10,45 @@
 </head>
 <body>
   <div class="app-container">
-    <div class="lobby-header">
-      <a href="menu.html" class="btn-sm" style="background:var(--neon-purple);">‹ Lobi</a>
-      <div style="font-weight:bold; font-size:12px;">Arkadaşlar</div>
-      <button class="btn-sm" style="background:#d97706;" onclick="showRequests()">📩 İstekler</button>
+    <div class="top-header">
+      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
+      <div style="font-weight:bold; font-size:12px;">👥 Arkadaşlar</div>
+      <button class="icon-btn" style="border-color:var(--gold);" onclick="openRequestsModal()">📩 İstekler</button>
     </div>
 
-    <div style="padding: 10px 14px; flex:1; overflow-y:auto;">
-      <div style="font-size:12px; font-weight:bold; color:var(--gold); margin-bottom:6px;">Kayıtlı Tüm Oyuncular</div>
-      <div id="all-users" style="display:flex; flex-direction:column; gap:6px;"></div>
+    <div style="display:flex; gap:4px; margin-bottom:8px;">
+      <input type="text" id="in-tag-search" class="input-field" style="margin:0; font-size:11px; padding:6px;" placeholder="KullanıcıAdı#12345">
+      <button class="icon-btn" style="background:var(--btn-green); white-space:nowrap;" onclick="sendFriendRequest()">Ekle</button>
     </div>
+
+    <div style="font-size:11px; font-weight:bold; color:var(--gold); margin-bottom:4px;">Kayıtlı Tüm Oyuncular</div>
+    <div id="users-list-container" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
-  <div id="modal-req" class="modal">
+  <div id="modal-reqs" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-title">📩 Gelen Arkadaşlık İstekleri</div>
-      <div id="req-list" style="display:flex; flex-direction:column; gap:6px;"></div>
-      <button class="btn-auth" style="background:var(--danger); margin-top:10px;" onclick="document.getElementById('modal-req').style.display='none'">Kapat</button>
+      <div style="font-size:13px; font-weight:bold; color:var(--gold); text-align:center; margin-bottom:8px;">Gelen İstekler</div>
+      <div id="reqs-list-box" style="display:flex; flex-direction:column; gap:4px;"></div>
+      <button class="btn-close" onclick="document.getElementById('modal-reqs').style.display='none'">Kapat</button>
     </div>
   </div>
 
   <script src="app.js"></script>
   <script>
     window.onload = () => {
-      let u = getUser();
-      db.ref("registered_users").on("value", snap => {
-        let b = document.getElementById("all-users");
-        b.innerHTML = "";
+      const u = getActiveUser();
+      db.ref("users").on("value", snap => {
+        const box = document.getElementById("users-list-container");
+        box.innerHTML = "";
         snap.forEach(c => {
-          let reg = c.val();
-          if (reg.uid === u.uid) return;
-          b.innerHTML += `
-            <div class="mode-card" style="display:flex; justify-content:space-between; align-items:center;">
-              <span>👤 ${reg.fullName} <small style="color:#c084fc;">[${reg.title}]</small></span>
+          const reg = c.val();
+          if (!reg || reg.uid === u.uid) return;
+          box.innerHTML += `
+            <div class="quest-box" style="align-items:center;">
+              <span>👤 ${reg.fullName} <small style="color:var(--gold);">[${reg.title || 'Çaylak'}]</small></span>
               <div style="display:flex; gap:4px;">
-                <button class="btn-sm" style="background:var(--btn-green);" onclick="sendReq('${reg.uid}', '${reg.fullName}')">➕ İstek</button>
-                <button class="btn-sm" style="background:var(--neon-purple);" onclick="goDM('${reg.uid}')">💬 Mesaj</button>
+                <button class="icon-btn" style="border-color:var(--btn-green);" onclick="requestUser('${reg.uid}', '${reg.fullName}')">➕</button>
+                <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="directMessageUser('${reg.uid}', '${reg.fullName}')">💬</button>
               </div>
             </div>
           `;
@@ -53,52 +56,66 @@
       });
     };
 
-    function sendReq(targetUID, name) {
-      let u = getUser();
-      db.ref(`friend_reqs/${targetUID}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
-      alert(`${name} kullanıcısına istek yollandı!`);
+    function sendFriendRequest() {
+      const tag = document.getElementById("in-tag-search").value.trim();
+      if (!tag) return;
+      const u = getActiveUser();
+      db.ref("users").orderByChild("fullName").equalTo(tag).once("value", snap => {
+        if (!snap.exists()) return alert("Bu etikete sahip kullanıcı bulunamadı!");
+        snap.forEach(c => {
+          requestUser(c.val().uid, c.val().fullName);
+        });
+      });
+      document.getElementById("in-tag-search").value = "";
     }
 
-    function showRequests() {
-      let u = getUser();
-      db.ref("friend_reqs/" + u.uid).once("value", snap => {
-        let b = document.getElementById("req-list");
-        b.innerHTML = "";
+    function requestUser(targetUID, targetName) {
+      const u = getActiveUser();
+      db.ref(`friend_requests/${targetUID}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
+      alert(`${targetName} kullanıcısına istek gönderildi!`);
+    }
+
+    function directMessageUser(targetUID, targetName) {
+      localStorage.setItem("active_dm_target", targetUID);
+      localStorage.setItem("active_dm_name", targetName);
+      window.location.href = "chat.html";
+    }
+
+    function openRequestsModal() {
+      const u = getActiveUser();
+      db.ref("friend_requests/" + u.uid).once("value", snap => {
+        const box = document.getElementById("reqs-list-box");
+        box.innerHTML = "";
         snap.forEach(c => {
-          let r = c.val();
-          b.innerHTML += `
-            <div class="mode-card" style="display:flex; justify-content:space-between; align-items:center;">
+          const r = c.val();
+          box.innerHTML += `
+            <div class="quest-box" style="align-items:center;">
               <span>${r.fromName}</span>
               <div style="display:flex; gap:4px;">
-                <button class="btn-sm" style="background:var(--btn-green);" onclick="accept('${r.fromUID}', '${r.fromName}')">Kabul</button>
-                <button class="btn-sm" style="background:var(--danger);" onclick="reject('${r.fromUID}', '${r.fromName}')">Reddet</button>
+                <button class="icon-btn" style="border-color:var(--btn-green);" onclick="acceptReq('${r.fromUID}', '${r.fromName}')">Kabul</button>
+                <button class="icon-btn" style="border-color:var(--danger);" onclick="rejectReq('${r.fromUID}', '${r.fromName}')">Reddet</button>
               </div>
             </div>
           `;
         });
-        document.getElementById("modal-req").style.display = "flex";
+        document.getElementById("modal-reqs").style.display = "flex";
       });
     }
 
-    function accept(uid, name) {
-      let u = getUser();
-      db.ref(`friends/${u.uid}/${uid}`).set({ name: name });
-      db.ref(`friends/${uid}/${u.uid}`).set({ name: `${u.name}${u.tag}` });
-      db.ref(`friend_reqs/${u.uid}/${uid}`).remove();
-      alert(`${name} kabul edildi!`);
-      document.getElementById("modal-req").style.display = "none";
+    function acceptReq(uid, name) {
+      const u = getActiveUser();
+      db.ref(`friends/${u.uid}/${uid}`).set({ fullName: name });
+      db.ref(`friends/${uid}/${u.uid}`).set({ fullName: `${u.name}${u.tag}` });
+      db.ref(`friend_requests/${u.uid}/${uid}`).remove();
+      alert(`${name} arkadaş olarak eklendi!`);
+      document.getElementById("modal-reqs").style.display = "none";
     }
 
-    function reject(uid, name) {
-      let u = getUser();
-      db.ref(`friend_reqs/${u.uid}/${uid}`).remove();
+    function rejectReq(uid, name) {
+      const u = getActiveUser();
+      db.ref(`friend_requests/${u.uid}/${uid}`).remove();
       alert(`${name} kullanıcısına gönderdiğiniz arkadaşlık isteğini kabul etmedi.`);
-      document.getElementById("modal-req").style.display = "none";
-    }
-
-    function goDM(uid) {
-      localStorage.setItem("active_dm_target", uid);
-      window.location.href = "chat.html";
+      document.getElementById("modal-reqs").style.display = "none";
     }
   </script>
 </body>
