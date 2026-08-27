@@ -16,49 +16,129 @@
       <div></div>
     </div>
 
-    <div style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;" id="lb-list"></div>
+    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:6px;">
+      <button class="icon-btn active" style="background:var(--btn-blue);" onclick="loadLB('all', this)">Tümü</button>
+      <button class="icon-btn" onclick="loadLB('standard', this)">Normal</button>
+      <button class="icon-btn" onclick="loadLB('ten_cases', this)">10 Kutu</button>
+      <button class="icon-btn" onclick="loadLB('catch_open', this)">Yakala & Aç</button>
+      <button class="icon-btn" onclick="loadLB('upgrade_mode', this)">Şans Yükseltme</button>
+      <button class="icon-btn" onclick="loadLB('mines_mode', this)">Mayın</button>
+      <button class="icon-btn" onclick="loadLB('pvp_mode', this)">PvP</button>
+    </div>
+
+    <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
   <div id="modal-lb-details" class="modal-overlay">
-    <div class="modal-card" style="text-align:center;">
-      <div style="font-size:36px;">👤</div>
-      <h3 id="det-user-name" style="color:var(--neon-blue);">Oyuncu</h3>
-      <div id="det-user-title" style="color:var(--gold); font-size:11px;">[Usta]</div>
-      <div style="font-size:11px; margin:8px 0; background:#050a14; padding:6px; border-radius:6px; text-align:left;">
-        <div><b>Seviye:</b> <span id="det-lvl">Lvl 1</span></div>
-        <div><b>Altın:</b> <span id="det-gold">500</span></div>
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <h3 id="det-user" style="color:var(--neon-blue); font-size:13px;">Kullanıcı#12345</h3>
+        <button class="icon-btn" style="border-color:var(--danger);" onclick="closeLBDetails()">X</button>
       </div>
-      <button class="btn-close" onclick="document.getElementById('modal-lb-details').style.display='none'">Kapat</button>
+      <div id="det-mode-info" style="font-size:10px; color:var(--gold); margin-bottom:2px;">Mod: Normal Kasa</div>
+      <div id="det-date" style="font-size:9px; color:#94a3b8; margin-bottom:8px;">Tarih: -</div>
+
+      <div style="font-size:10px; font-weight:bold; color:#fff; margin-bottom:4px;">📦 Çıkan Eşyalar ve Puanlar:</div>
+      <div id="det-drops-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:10px;"></div>
+
+      <div style="display:flex; gap:4px;">
+        <button id="btn-add-f" class="nav-action-btn" style="flex:1; background:var(--btn-green);">➕ Arkadaş Ekle</button>
+        <button id="btn-send-m" class="nav-action-btn" style="flex:1; background:var(--btn-blue);">💬 Mesaj Yaz</button>
+      </div>
     </div>
   </div>
 
   <script src="app.js"></script>
   <script>
-    window.onload = () => {
-      db.ref("users").orderByChild("level").limitToLast(20).on("value", snap => {
-        const box = document.getElementById("lb-list");
-        box.innerHTML = "";
-        let list = [];
-        snap.forEach(c => list.push(c.val()));
-        list.reverse();
+    let currentFilter = 'all';
 
-        list.forEach((p, idx) => {
-          box.innerHTML += `
-            <div class="quest-box" style="align-items:center; cursor:pointer;" onclick="showLBDetails('${p.fullName}', '${p.title}', ${p.level||1}, ${p.gold||500})">
-              <span><b>${idx+1}.</b> ${p.fullName} <small style="color:var(--gold);">[${p.title||'Çaylak'}]</small></span>
-              <b style="color:var(--btn-green);">Lvl ${p.level||1}</b>
+    window.onload = () => {
+      loadLB('all');
+    };
+
+    function loadLB(filter, btn) {
+      if (btn) {
+        document.querySelectorAll(".icon-btn").forEach(b => b.style.background = "#1b263b");
+        btn.style.background = "var(--btn-blue)";
+      }
+      currentFilter = filter;
+      const listContainer = document.getElementById("lb-records-list");
+      listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888;'>Yükleniyor...</div>";
+
+      db.ref("leaderboards").once("value", snap => {
+        listContainer.innerHTML = "";
+        let allScores = [];
+        snap.forEach(modeSnap => {
+          if (filter === 'all' || modeSnap.key === filter) {
+            modeSnap.forEach(userRecord => {
+              allScores.push(userRecord.val());
+            });
+          }
+        });
+
+        // En yüksek skora göre sırala
+        allScores.sort((a, b) => b.score - a.score);
+
+        if (allScores.length === 0) {
+          listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888; padding:20px;'>Kayıt bulunamadı.</div>";
+          return;
+        }
+
+        allScores.forEach((rec, idx) => {
+          const itemRow = document.createElement("div");
+          itemRow.className = "quest-box";
+          itemRow.style.cssText = "align-items:center; cursor:pointer;";
+          itemRow.innerHTML = `
+            <span><b>${idx+1}.</b> ${rec.fullName} <small style="color:var(--gold);">[${rec.modeName || 'Normal'}]</small></span>
+            <b style="color:var(--btn-green); font-size:13px;">${rec.score} P</b>
+          `;
+          itemRow.onclick = () => showPlayerDetails(rec);
+          listContainer.appendChild(itemRow);
+        });
+      });
+    }
+
+    function showPlayerDetails(data) {
+      document.getElementById("det-user").innerText = data.fullName;
+      document.getElementById("det-mode-info").innerText = `Mod: ${data.modeName}`;
+      document.getElementById("det-date").innerText = `Oynanma Tarihi: ${data.date || 'Bilinmiyor'}`;
+
+      const dropsBox = document.getElementById("det-drops-list");
+      dropsBox.innerHTML = "";
+      if (data.drops && data.drops.length > 0) {
+        data.drops.forEach(d => {
+          dropsBox.innerHTML += `
+            <div style="background:#070c18; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px;">
+              <span><b style="color:${d.c || '#fff'};">[${d.tier}]</b> ${d.item}</span>
+              <b style="color:var(--btn-green);">+${d.pts}P</b>
             </div>
           `;
         });
-      });
-    };
+      } else {
+        dropsBox.innerHTML = "<div style='color:#666; font-size:9px;'>Eşya dökümü yok.</div>";
+      }
 
-    function showLBDetails(name, title, lvl, gold) {
-      document.getElementById("det-user-name").innerText = name;
-      document.getElementById("det-user-title").innerText = `[${title||'Çaylak'}]`;
-      document.getElementById("det-lvl").innerText = `Lvl ${lvl}`;
-      document.getElementById("det-gold").innerText = gold;
+      document.getElementById("btn-add-f").onclick = () => {
+        const u = getActiveUser();
+        if (u && data.uid) {
+          db.ref(`friend_requests/${data.uid}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
+          alert(`${data.fullName} kullanıcısına istek yollandı!`);
+        }
+      };
+
+      document.getElementById("btn-send-m").onclick = () => {
+        if (data.uid) {
+          localStorage.setItem("active_dm_target", data.uid);
+          localStorage.setItem("active_dm_name", data.fullName);
+          window.location.href = "chat.html";
+        }
+      };
+
       document.getElementById("modal-lb-details").style.display = "flex";
+    }
+
+    function closeLBDetails() {
+      document.getElementById("modal-lb-details").style.display = "none";
     }
   </script>
 </body>
