@@ -8,7 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<body>
+<body class="bg-standard">
   <div class="app-container">
     <div class="top-header">
       <div class="app-title" onclick="location.href='user.html'">
@@ -63,7 +63,7 @@
 
   <!-- Ayarlar Modalı -->
   <div id="modal-settings" class="modal-overlay">
-    <div class="modal-card panel-theme-settings">
+    <div class="modal-card">
       <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:10px;">⚙️ Oyun Ayarları</div>
       <button id="btn-sound-toggle" class="mode-btn" style="margin-bottom:8px; text-align:center; color:#fff;" onclick="toggleSound()">🔊 Ses: Açık</button>
       <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;">Unvan Seç:</div>
@@ -73,6 +73,8 @@
         <option value="Efsane">Efsane</option>
         <option value="Kral">Kral</option>
       </select>
+
+      <button class="btn-start" style="background:var(--danger); margin-top:12px; font-size:12px;" onclick="deleteAccountPermanently()">🗑️ Hesabı Kalıcı Olarak Sil</button>
       <button class="btn-close" onclick="closeSettingsModal()">Kapat</button>
     </div>
   </div>
@@ -82,6 +84,7 @@
     let activeMode = 'standard';
     const MODE_RATES = {
       standard: {
+        bgClass: "bg-standard",
         title: "NORMAL KASA ORANLARI",
         tiers: [
           { name: "Classic (%58)", pts: "1-3 P", c: "#ffffff" },
@@ -92,6 +95,7 @@
         ]
       },
       ten_cases: {
+        bgClass: "bg-ten_cases",
         title: "10 KUTU MODU ORANLARI",
         tiers: [
           { name: "Classic (%35)", pts: "2-5 P", c: "#ffffff" },
@@ -102,6 +106,7 @@
         ]
       },
       catch_open: {
+        bgClass: "bg-catch_open",
         title: "YAKALA & AÇ ORANLARI",
         tiers: [
           { name: "Classic Kasa (%45)", pts: "2-5 P", c: "#ffffff" },
@@ -112,6 +117,7 @@
         ]
       },
       upgrade_mode: {
+        bgClass: "bg-upgrade_mode",
         title: "ŞANS YÜKSELTME ORANLARI",
         tiers: [
           { name: "Kademe 1 (%60)", pts: "5-15 P", c: "#ffffff" },
@@ -121,6 +127,7 @@
         ]
       },
       mines_mode: {
+        bgClass: "bg-mines_mode",
         title: "MAYINLI KASA ORANLARI",
         tiers: [
           { name: "Güvenli Kasa (%70)", pts: "15-45 P", c: "#10b981" },
@@ -128,6 +135,7 @@
         ]
       },
       pvp_mode: {
+        bgClass: "bg-pvp_mode",
         title: "ONLINE PVP ORANLARI",
         tiers: [
           { name: "Bronz (%50)", pts: "2-6 P", c: "#ffffff" },
@@ -151,6 +159,9 @@
       activeMode = key;
       document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
+      
+      // Arka plan rengini seçilen moda göre değiştir
+      document.body.className = MODE_RATES[key].bgClass;
       renderRatesPreview(key);
     }
 
