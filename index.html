@@ -7,23 +7,31 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    @keyframes chestPulse {
+      0% { transform: scale(1); filter: drop-shadow(0 0 10px #a855f7); }
+      50% { transform: scale(1.08); filter: drop-shadow(0 0 22px #c084fc); }
+      100% { transform: scale(1); filter: drop-shadow(0 0 10px #a855f7); }
+    }
+    .chest-animated { font-size: 48px; display: inline-block; animation: chestPulse 2.5s infinite ease-in-out; margin-bottom: 6px; }
+  </style>
 </head>
 <body>
   <div class="app-container" style="justify-content:center;">
-    <div style="background:rgba(11,19,41,0.95); border:2px solid var(--neon-blue); border-radius:16px; padding:20px 16px; text-align:center;">
-      <div style="font-size:40px; margin-bottom:4px;">👑📦</div>
-      <div style="font-size:22px; font-weight:900; color:var(--neon-blue); margin-bottom:14px;">Kutu Açma Pro</div>
+    <div style="background:radial-gradient(circle, #1e0b3d 0%, #100624 100%); border:2px solid var(--neon-purple); border-radius:20px; padding:24px 16px; text-align:center; box-shadow:0 0 25px var(--neon-purple-glow);">
+      <div class="chest-animated">👑📦</div>
+      <div style="font-size:24px; font-weight:900; color:#fff; text-shadow:0 0 12px var(--neon-purple); margin-bottom:16px;">Kutu Açma Pro</div>
 
-      <div style="display:flex; gap:6px; margin-bottom:12px;">
-        <button class="mode-btn" id="tab-l" style="flex:1; background:var(--btn-blue); color:#fff; text-align:center;" onclick="toggleAuth(true)">Giriş</button>
+      <div style="display:flex; gap:8px; margin-bottom:14px;">
+        <button class="mode-btn" id="tab-l" style="flex:1; background:var(--neon-purple); color:#fff; font-weight:bold; text-align:center;" onclick="toggleAuth(true)">Giriş</button>
         <button class="mode-btn" id="tab-r" style="flex:1; text-align:center;" onclick="toggleAuth(false)">Kayıt Ol</button>
       </div>
 
       <input type="text" id="auth-user" class="input-field" placeholder="Kullanıcı Adı" maxlength="14">
       <input type="password" id="auth-pass" class="input-field" placeholder="Şifre" maxlength="20">
 
-      <button id="auth-btn" class="btn-start" onclick="handleAuth()">Giriş Yap</button>
-      <div style="font-size:10px; color:var(--text-dim); margin-top:10px;">Kaydınız varsa giriş yapın, yoksa Kayıt Ol sekmesini kullanın.</div>
+      <button id="auth-btn" class="btn-start" style="background:linear-gradient(90deg, #9333ea, #a855f7);" onclick="handleAuth()">Giriş Yap</button>
+      <div style="font-size:10px; color:var(--text-dim); margin-top:12px;">Güvenli bulut kayıtlı kutu açma dünyasına katılın.</div>
     </div>
   </div>
 
@@ -33,9 +41,9 @@
 
     function toggleAuth(loginMode) {
       isLogin = loginMode;
-      document.getElementById("tab-l").style.background = loginMode ? "var(--btn-blue)" : "#0f172a";
+      document.getElementById("tab-l").style.background = loginMode ? "var(--neon-purple)" : "#13072b";
       document.getElementById("tab-l").style.color = loginMode ? "#fff" : "var(--text-dim)";
-      document.getElementById("tab-r").style.background = !loginMode ? "var(--btn-blue)" : "#0f172a";
+      document.getElementById("tab-r").style.background = !loginMode ? "var(--neon-purple)" : "#13072b";
       document.getElementById("tab-r").style.color = !loginMode ? "#fff" : "var(--text-dim)";
       document.getElementById("auth-btn").innerText = loginMode ? "Giriş Yap" : "Kayıt Ol ve Başla";
     }
@@ -69,8 +77,15 @@
             tag: tag,
             title: "Çaylak",
             gold: 500,
-            gamesPlayed: 0,
-            records: { standard: 0, ten_cases: 0, catch_open: 0, upgrade_mode: 0, mines_mode: 0, pvp_mode: 0 },
+            sound: true,
+            stats: {
+              standard: { played: 0, wins: 0, best: 0 },
+              ten_cases: { played: 0, wins: 0, best: 0 },
+              catch_open: { played: 0, wins: 0, best: 0 },
+              upgrade_mode: { played: 0, wins: 0, best: 0 },
+              mines_mode: { played: 0, wins: 0, best: 0 },
+              pvp_mode: { played: 0, wins: 0, best: 0 }
+            },
             password: uPass
           };
 
