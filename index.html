@@ -3,50 +3,551 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kutu Açma Pro - Giriş</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Kutu Açma Pro</title>
+    <!-- Firebase SDK (v8 Standart) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-</head>
-<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
-
-    <div class="auth-container">
-        <div class="auth-logo">👑 Kutu Açma<br><span style="color: var(--neon-purple);">Pro</span></div>
-
-        <div class="auth-tabs">
-            <button class="auth-tab-btn active" id="tab-login-btn" onclick="toggleAuth(true)">🎮 Giriş</button>
-            <button class="auth-tab-btn" id="tab-register-btn" onclick="toggleAuth(false)">👤+ Kayıt</button>
-        </div>
-
-        <div class="input-group">
-            <input type="text" id="auth-username" placeholder="Kullanıcı Adı" value="MecagaTR">
-        </div>
-
-        <div class="input-group">
-            <input type="password" id="auth-password" placeholder="Şifre" value="123456">
-        </div>
-
-        <button class="btn btn-purple" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="handleAuthSubmit()">Giriş Yap</button>
-        <p style="font-size: 11px; color: var(--text-dim); margin-top: 15px;">🛡️ Güvenli ve hızlı oyun deneyimi için kutu açma dünyasına katıl!</p>
-    </div>
-
-    <script src="app.js"></script>
-    <script>
-        let isLoginMode = true;
-        function toggleAuth(login) {
-            isLoginMode = login;
-            document.getElementById('tab-login-btn').classList.toggle('active', login);
-            document.getElementById('tab-register-btn').classList.toggle('active', !login);
+    <style>
+        :root {
+            --bg: #070312;
+            --card-bg: #120924;
+            --card-border: #3b1d6e;
+            --purple-bright: #a855f7;
+            --purple-dark: #6b21a8;
+            --btn-green: #059669;
+            --btn-green-hover: #10b981;
+            --danger: #dc2626;
+            --gold: #f59e0b;
+            --text: #ffffff;
+            --text-dim: #9ca3af;
+            --chat-me: #064e3b;
+            --chat-other: #1f2937;
         }
 
-        function handleAuthSubmit() {
-            let uName = document.getElementById('auth-username').value.trim();
-            if (!uName) return alert("Kullanıcı adı giriniz!");
-            
-            let u = getCurrentUser();
-            u.username = uName;
-            saveCurrentUser(u);
-            window.location.href = "menu.html";
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+        .screen { display: none; width: 100%; max-width: 480px; margin: 0 auto; min-height: 100vh; flex-direction: column; }
+        .screen.active { display: flex; }
+
+        /* --- 1. GİRİŞ EKRANI (SCREENSHOT 3) --- */
+        #screen-auth { justify-content: center; align-items: center; padding: 20px; }
+        .auth-box { width: 100%; background: radial-gradient(circle at top, #240c4f, #100624); border: 2px solid var(--purple-bright); border-radius: 24px; padding: 30px 20px; box-shadow: 0 0 30px rgba(168, 85, 247, 0.4); text-align: center; }
+        .auth-title { font-size: 32px; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--purple-bright); margin-bottom: 25px; }
+        .auth-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .auth-tab { flex: 1; padding: 10px; border-radius: 10px; background: #1c0b3b; border: 1px solid var(--card-border); color: #fff; cursor: pointer; font-weight: bold; }
+        .auth-tab.active { background: var(--purple-bright); box-shadow: 0 0 10px var(--purple-bright); border-color: #fff; }
+        .auth-input { width: 100%; padding: 14px; border-radius: 12px; background: #0c041a; border: 1px solid var(--card-border); color: #fff; margin-bottom: 12px; outline: none; }
+        .auth-input:focus { border-color: var(--purple-bright); }
+        .btn-auth { width: 100%; padding: 14px; border-radius: 12px; background: linear-gradient(90deg, #9333ea, #a855f7); color: #fff; border: none; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+
+        /* --- 2. LOBİ & OYUN MODLARI (SCREENSHOT 1) --- */
+        .top-bar { background: #170a33; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); }
+        .user-info { display: flex; align-items: center; gap: 6px; font-weight: bold; font-size: 14px; }
+        .badge-title { color: #c084fc; font-size: 12px; }
+        .top-btn-group { display: flex; gap: 6px; }
+        .btn-sm { border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; color: #fff; }
+
+        .quest-bar { background: #120729; padding: 8px 16px; font-size: 12px; display: flex; justify-content: space-between; border-bottom: 1px solid #28124d; }
+
+        .nav-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; padding: 10px 16px; background: #0d051f; }
+        .nav-btn { background: #1c0d3d; border: 1px solid var(--card-border); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
+
+        .modes-list { padding: 16px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .mode-item { background: #160933; border: 1px solid var(--card-border); border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: 0.2s; }
+        .mode-item.active-mode { background: linear-gradient(90deg, #7e22ce, #a855f7); border-color: #f3e8ff; box-shadow: 0 0 12px rgba(168, 85, 247, 0.6); }
+        .mode-title { font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; }
+        .mode-desc { font-size: 11px; color: #d1d5db; margin-top: 4px; }
+
+        .mode-stats-table { background: #0c041d; border: 1px solid var(--card-border); border-radius: 8px; padding: 10px; margin-top: 8px; font-size: 11px; line-height: 1.6; }
+
+        .lobby-footer { padding: 16px; background: #0d051f; border-top: 1px solid #28124d; }
+        .btn-play { width: 100%; padding: 16px; border-radius: 12px; background: #10b981; color: #fff; border: none; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); text-transform: uppercase; }
+        .btn-play:hover { background: #059669; }
+
+        /* --- 3. SOHBET EKRANI (SCREENSHOT 2) --- */
+        .chat-header { background: #15092e; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); }
+        .chat-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #080314; }
+        .msg-bubble { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 13px; position: relative; word-break: break-word; }
+        .msg-bubble.me { align-self: flex-end; background: var(--chat-me); border-bottom-right-radius: 2px; }
+        .msg-bubble.other { align-self: flex-start; background: var(--chat-other); border-bottom-left-radius: 2px; }
+        .msg-author { font-size: 11px; color: #60a5fa; font-weight: bold; margin-bottom: 2px; }
+        .msg-time { font-size: 9px; color: #9ca3af; text-align: right; margin-top: 4px; }
+        .msg-actions { display: flex; gap: 8px; font-size: 10px; margin-top: 4px; opacity: 0.7; }
+        .msg-actions span { cursor: pointer; text-decoration: underline; color: #e5e7eb; }
+
+        .chat-input-row { padding: 10px 14px; background: #120726; display: flex; gap: 8px; align-items: center; border-top: 1px solid var(--card-border); }
+        .chat-input-row input { flex: 1; padding: 12px 16px; border-radius: 20px; background: #0c041a; border: 1px solid var(--card-border); color: #fff; outline: none; }
+        .btn-send { width: 44px; height: 44px; border-radius: 50%; background: #10b981; color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+        /* --- 4. 1V1 PVP OYUN ALANI --- */
+        .pvp-card { background: #160933; border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin: 20px 16px; text-align: center; }
+        .pvp-players { display: flex; justify-content: space-around; align-items: center; margin-bottom: 20px; }
+        .pvp-p-box h2 { font-size: 28px; color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <!-- 1. GİRİŞ EKRANI -->
+    <div id="screen-auth" class="screen active">
+        <div class="auth-box">
+            <div class="auth-title">Kutu Açma<br><span style="color: var(--purple-bright);">Pro</span></div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tab-login" onclick="setAuthTab(true)">🎮 Giriş</button>
+                <button class="auth-tab" id="tab-register" onclick="setAuthTab(false)">👤+ Kayıt</button>
+            </div>
+            <input type="text" id="auth-name" class="auth-input" placeholder="Kullanıcı Adı" value="MecagaTR">
+            <input type="password" id="auth-pass" class="auth-input" placeholder="Şifre" value="123456">
+            <button class="btn-auth" onclick="handleAuth()">Giriş Yap</button>
+            <p style="font-size: 11px; color: var(--text-dim); margin-top: 15px;">🛡️ Güvenli ve hızlı oyun deneyimi için kutu açma dünyasına katıl!</p>
+        </div>
+    </div>
+
+    <!-- 2. ANA LOBİ EKRANI -->
+    <div id="screen-lobby" class="screen">
+        <div class="top-bar">
+            <div class="user-info">
+                <span>👤</span>
+                <span id="lobby-username">MecagaTR#12345</span>
+                <span class="badge-title" id="lobby-title">[Çaylak]</span>
+            </div>
+            <div class="top-btn-group">
+                <button class="btn-sm" style="background:#6b21a8;" onclick="showModal('profile')">Profilim</button>
+                <button class="btn-sm" style="background:#d97706;" onclick="showModal('leaderboard')">Sıralama</button>
+                <button class="btn-sm" style="background:var(--danger);" onclick="logout()">Çıkış</button>
+            </div>
+        </div>
+
+        <div class="quest-bar">
+            <span>🎯 Günlük Görev: 3 Kutu Aç</span>
+            <span id="quest-status" style="color: var(--gold); font-weight: bold;">0/3</span>
+        </div>
+
+        <div class="nav-buttons">
+            <div class="nav-btn" onclick="openChat()">💬 Sohbetler</div>
+            <div class="nav-btn" onclick="showModal('friends')">👥 Arkadaşlar</div>
+            <div class="nav-btn" onclick="claimDailyQuest()">🏆 Görevler</div>
+        </div>
+
+        <div class="modes-list">
+            <div class="mode-item" onclick="chooseMode('pvp', this)">
+                <div class="mode-title"><span>⚔️ Normal Kutu (PvP)</span></div>
+                <div class="mode-desc">Birebir canlı düello.</div>
+            </div>
+
+            <div class="mode-item" onclick="chooseMode('10box', this)">
+                <div class="mode-title"><span>📦 10 Kutu Modu (Sürat)</span></div>
+                <div class="mode-desc">Tam 10 kutu aç ve puan topla.</div>
+            </div>
+
+            <div class="mode-item active-mode" onclick="chooseMode('catch', this)">
+                <div class="mode-title"><span>⚡ Yakala & Aç Modu (19s)</span></div>
+                <div class="mode-desc">Süreli kutuları yakalayarak puan topla.</div>
+                <div class="mode-stats-table">
+                    <div><b>Derece Kasa (%49):</b> 2-5 P</div>
+                    <div><b>Süper Kasa (%30):</b> 6-10 P</div>
+                    <div><b>Ultra Kasa (%15):</b> 20-50 P</div>
+                    <div><b>Mega Kasa (%6):</b> 60-250 P</div>
+                </div>
+            </div>
+
+            <div class="mode-item" onclick="chooseMode('compare', this)">
+                <div class="mode-title"><span>⚖️ Şans Kıyaslama Modu (7 kutu)</span></div>
+                <div class="mode-desc">7 kutu açarak şansını kıyasla.</div>
+            </div>
+
+            <div class="mode-item" onclick="chooseMode('mine', this)">
+                <div class="mode-title"><span>💣 Mayınlı Kutu Modu (Risk)</span></div>
+                <div class="mode-desc">Mayına basmadan puanları götür!</div>
+            </div>
+        </div>
+
+        <div class="lobby-footer">
+            <button class="btn-play" onclick="launchSelectedGame()">OYUNA BAŞLA</button>
+        </div>
+    </div>
+
+    <!-- 3. CANLI SOHBET EKRANI -->
+    <div id="screen-chat" class="screen">
+        <div class="chat-header">
+            <button class="btn-sm" style="background:var(--danger); padding: 8px 12px;" onclick="goToScreen('screen-lobby')">‹ Sohbetler</button>
+            <div style="font-weight: bold; color:#60a5fa;" id="chat-title">🌐 # Genel Sohbet</div>
+            <select id="chat-channels" onchange="switchChannel(this.value)" style="background:#0c041a; color:#fff; border:1px solid var(--card-border); padding:4px; border-radius:4px; font-size:11px;">
+                <option value="genel">Genel</option>
+            </select>
+        </div>
+
+        <div style="background:#110724; padding:6px 14px; display:flex; gap:6px; border-bottom:1px solid var(--card-border);">
+            <input type="text" id="new-channel-in" placeholder="Kanal adı..." style="flex:1; background:#0c041a; border:1px solid var(--card-border); color:#fff; padding:6px 10px; border-radius:6px; font-size:12px;">
+            <button class="btn-sm" style="background:var(--purple-bright);" onclick="addNewChannel()">Oluştur</button>
+        </div>
+
+        <div class="chat-body" id="chat-messages"></div>
+
+        <div class="chat-input-row">
+            <input type="text" id="chat-text-input" placeholder="Bir mesaj yazın...">
+            <button class="btn-send" onclick="sendChatMessage()">➤</button>
+        </div>
+    </div>
+
+    <!-- 4. 1V1 PVP OYUN ALANI -->
+    <div id="screen-pvp" class="screen">
+        <div class="top-bar">
+            <button class="btn-sm" style="background:var(--danger);" onclick="goToScreen('screen-lobby')">‹ Çık</button>
+            <span>⚔️ 1v1 Arena Düellosu</span>
+            <div></div>
+        </div>
+
+        <div style="padding: 16px; display:flex; gap:6px;">
+            <button class="btn-sm" style="background:var(--purple-bright); padding:8px;" onclick="createPvPRoom()">Oda Kur</button>
+            <input type="text" id="pvp-room-code-in" placeholder="Oda Kodu" style="flex:1; background:#0c041a; border:1px solid var(--card-border); color:#fff; padding:6px; border-radius:6px;">
+            <button class="btn-sm" style="background:var(--btn-green); padding:8px;" onclick="joinPvPRoom()">Katıl</button>
+        </div>
+
+        <div class="pvp-card">
+            <div class="pvp-players">
+                <div class="pvp-p-box">
+                    <div id="pvp-p1-user">Oyuncu 1</div>
+                    <h2 id="pvp-p1-score">0</h2>
+                    <small id="pvp-p1-rem">Kalan: 5</small>
+                </div>
+                <div>
+                    <div style="font-size: 32px; font-weight: bold; color: var(--purple-bright);">30s</div>
+                    <span id="pvp-lock-msg" style="font-size: 12px; color: var(--gold);">⏳ Rakip Bekleniyor</span>
+                </div>
+                <div class="pvp-p-box">
+                    <div id="pvp-p2-user">Oyuncu 2</div>
+                    <h2 id="pvp-p2-score">0</h2>
+                    <small id="pvp-p2-rem">Kalan: 5</small>
+                </div>
+            </div>
+
+            <button id="pvp-box-action-btn" class="btn-play" style="font-size: 15px; padding: 12px;" onclick="pvpOpenBoxClick()" disabled>Rakip Gelmeden Kutu Açılamaz</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. FIREBASE BAĞLANTISI ---
+        const firebaseConfig = {
+            apiKey: "SENIN_API_KEY",
+            authDomain: "SENIN_AUTH_DOMAIN",
+            databaseURL: "SENIN_DATABASE_URL",
+            projectId: "SENIN_PROJECT_ID",
+            storageBucket: "SENIN_STORAGE_BUCKET",
+            messagingSenderId: "SENIN_SENDER_ID",
+            appId: "SENIN_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- 2. KULLANICI MODELİ ---
+        let player = {
+            uid: localStorage.getItem("kutu_uid") || "U_" + Math.floor(1000 + Math.random() * 9000),
+            name: localStorage.getItem("kutu_name") || "MecagaTR",
+            tag: localStorage.getItem("kutu_tag") || "#" + Math.floor(10000 + Math.random() * 90000),
+            title: localStorage.getItem("kutu_title") || "Çaylak",
+            level: parseInt(localStorage.getItem("kutu_lvl")) || 1,
+            xp: parseInt(localStorage.getItem("kutu_xp")) || 0,
+            gold: parseInt(localStorage.getItem("kutu_gold")) || 500,
+            dailyCount: parseInt(localStorage.getItem("kutu_quest")) || 0
+        };
+
+        let activeGameMode = 'catch';
+        let currentChatChannel = 'genel';
+        let activePvPRoom = null;
+        let myPvPBoxesLeft = 5;
+
+        window.onload = () => {
+            savePlayerData();
+            updateLobbyHeader();
+        };
+
+        function savePlayerData() {
+            localStorage.setItem("kutu_uid", player.uid);
+            localStorage.setItem("kutu_name", player.name);
+            localStorage.setItem("kutu_tag", player.tag);
+            localStorage.setItem("kutu_title", player.title);
+            localStorage.setItem("kutu_lvl", player.level);
+            localStorage.setItem("kutu_xp", player.xp);
+            localStorage.setItem("kutu_gold", player.gold);
+            localStorage.setItem("kutu_quest", player.dailyCount);
+
+            db.ref("leaderboard/" + player.uid).set({
+                fullTag: `${player.name}${player.tag}`,
+                title: player.title,
+                level: player.level,
+                gold: player.gold
+            });
+        }
+
+        function updateLobbyHeader() {
+            document.getElementById('lobby-username').innerText = `${player.name}${player.tag}`;
+            document.getElementById('lobby-title').innerText = `[${player.title}] (Lvl ${player.level})`;
+            document.getElementById('quest-status').innerText = `${player.dailyCount}/3`;
+        }
+
+        function goToScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // --- 3. GİRİŞ & ÇIKIŞ ---
+        function setAuthTab(isLogin) {
+            document.getElementById('tab-login').classList.toggle('active', isLogin);
+            document.getElementById('tab-register').classList.toggle('active', !isLogin);
+        }
+
+        function handleAuth() {
+            let n = document.getElementById('auth-name').value.trim();
+            if (!n) return alert("Kullanıcı adı giriniz!");
+            player.name = n;
+            savePlayerData();
+            updateLobbyHeader();
+            goToScreen('screen-lobby');
+        }
+
+        function logout() {
+            goToScreen('screen-auth');
+        }
+
+        // --- 4. LOBİ & OYUN MODLARI ---
+        function chooseMode(mode, elem) {
+            activeGameMode = mode;
+            document.querySelectorAll('.mode-item').forEach(m => m.classList.remove('active-mode'));
+            elem.classList.add('active-mode');
+        }
+
+        function launchSelectedGame() {
+            if (activeGameMode === 'pvp') {
+                goToScreen('screen-pvp');
+            } else {
+                player.dailyCount = Math.min(3, player.dailyCount + 1);
+                addXP(25);
+                alert(`${activeGameMode.toUpperCase()} Modu Oynandı! +25 XP kazanıldı.`);
+                savePlayerData();
+                updateLobbyHeader();
+            }
+        }
+
+        function addXP(val) {
+            player.xp += val;
+            let req = player.level * 100;
+            if (player.xp >= req) {
+                player.xp -= req;
+                player.level++;
+                if (player.level >= 5 && player.title === "Çaylak") player.title = "Usta";
+                if (player.level >= 10) player.title = "Efsane";
+                alert(`🎉 Seviye Atladın! Lvl ${player.level} [${player.title}]`);
+            }
+            savePlayerData();
+            updateLobbyHeader();
+        }
+
+        function claimDailyQuest() {
+            if (player.dailyCount >= 3) {
+                player.gold += 300;
+                player.dailyCount = 0;
+                addXP(50);
+                alert("🏆 Günlük Görev Tamamlandı! +300 Altın, +50 XP");
+            } else {
+                alert(`Görev Tamamlanmadı! İlerleme: ${player.dailyCount}/3`);
+            }
+            savePlayerData();
+            updateLobbyHeader();
+        }
+
+        // --- 5. 1V1 PVP KİLİTLİ DÜELLO SİSTEMİ ---
+        function createPvPRoom() {
+            let code = "DUEL_" + Math.floor(1000 + Math.random() * 9000);
+            activePvPRoom = code;
+            myPvPBoxesLeft = 5;
+            db.ref('arenas/' + code).set({
+                status: 'waiting',
+                p1: { uid: player.uid, name: `${player.name}${player.tag}`, score: 0, rem: 5 },
+                p2: null
+            });
+            listenArena(code);
+            alert("Oda oluşturuldu! Kod: " + code);
+        }
+
+        function joinPvPRoom() {
+            let code = document.getElementById('pvp-room-code-in').value.trim();
+            if (!code) return alert("Oda kodu giriniz!");
+            activePvPRoom = code;
+            myPvPBoxesLeft = 5;
+
+            db.ref('arenas/' + code).transaction(r => {
+                if (r && !r.p2 && r.p1.uid !== player.uid) {
+                    r.p2 = { uid: player.uid, name: `${player.name}${player.tag}`, score: 0, rem: 5 };
+                    r.status = 'active';
+                }
+                return r;
+            });
+            listenArena(code);
+        }
+
+        function listenArena(code) {
+            db.ref('arenas/' + code).on('value', snap => {
+                let data = snap.val();
+                if (!data) return;
+
+                document.getElementById('pvp-p1-user').innerText = data.p1 ? data.p1.name : "Bekleniyor";
+                document.getElementById('pvp-p1-score').innerText = data.p1 ? data.p1.score : 0;
+                document.getElementById('pvp-p1-rem').innerText = "Kalan: " + (data.p1 ? data.p1.rem : 5);
+
+                if (data.p2) {
+                    document.getElementById('pvp-p2-user').innerText = data.p2.name;
+                    document.getElementById('pvp-p2-score').innerText = data.p2.score;
+                    document.getElementById('pvp-p2-rem').innerText = "Kalan: " + data.p2.rem;
+                }
+
+                const btn = document.getElementById('pvp-box-action-btn');
+                const lockMsg = document.getElementById('pvp-lock-msg');
+
+                if (data.status === 'active' && data.p2) {
+                    lockMsg.innerText = "⚔️ Düello Başladı!";
+                    lockMsg.style.color = "var(--btn-green)";
+                    btn.disabled = myPvPBoxesLeft <= 0;
+                    btn.innerText = myPvPBoxesLeft > 0 ? `Kutu Aç (${myPvPBoxesLeft}/5)` : "Kutuların Bitti";
+                } else {
+                    lockMsg.innerText = "⏳ Rakip Bekleniyor...";
+                    lockMsg.style.color = "var(--gold)";
+                    btn.disabled = true;
+                    btn.innerText = "Rakip Gelmeden Kutu Açılamaz";
+                }
+            });
+        }
+
+        function pvpOpenBoxClick() {
+            if (!activePvPRoom || myPvPBoxesLeft <= 0) return;
+            myPvPBoxesLeft--;
+            let pts = Math.floor(Math.random() * 80) + 20;
+
+            db.ref('arenas/' + activePvPRoom).once('value', snap => {
+                let d = snap.val();
+                let isP1 = d.p1.uid === player.uid;
+                let target = isP1 ? 'p1' : 'p2';
+                db.ref(`arenas/${activePvPRoom}/${target}`).update({
+                    score: d[target].score + pts,
+                    rem: myPvPBoxesLeft
+                });
+            });
+        }
+
+        // --- 6. SOHBET SİSTEMİ (DÜZENLE, SİL, KOPYALA, KANAL) ---
+        function openChat() {
+            goToScreen('screen-chat');
+            initChannels();
+            listenChat(currentChatChannel);
+        }
+
+        function addNewChannel() {
+            let name = document.getElementById('new-channel-in').value.trim();
+            if (!name) return;
+            let id = name.toLowerCase().replace(/\s+/g, '-');
+            db.ref('channels/' + id).set({ title: name });
+            document.getElementById('new-channel-in').value = "";
+        }
+
+        function initChannels() {
+            db.ref('channels').on('value', snap => {
+                let sel = document.getElementById('chat-channels');
+                sel.innerHTML = '<option value="genel">Genel</option>';
+                snap.forEach(c => {
+                    sel.innerHTML += `<option value="${c.key}">${c.val().title}</option>`;
+                });
+            });
+        }
+
+        function switchChannel(ch) {
+            currentChatChannel = ch;
+            document.getElementById('chat-title').innerText = "🌐 # " + ch;
+            listenChat(ch);
+        }
+
+        function listenChat(ch) {
+            db.ref('messages/' + ch).limitToLast(40).on('value', snap => {
+                let box = document.getElementById('chat-messages');
+                box.innerHTML = "";
+                snap.forEach(child => {
+                    let m = child.val();
+                    let key = child.key;
+                    let isMe = m.uid === player.uid;
+
+                    let bubble = document.createElement('div');
+                    bubble.className = `msg-bubble ${isMe ? 'me' : 'other'}`;
+                    bubble.innerHTML = `
+                        <div class="msg-author">${m.author} <span style="color:#c084fc;">[${m.title}]</span></div>
+                        <div id="m-text-${key}">${m.text}</div>
+                        <div class="msg-time">${m.time}</div>
+                        <div class="msg-actions">
+                            <span onclick="copyMsg('${encodeURIComponent(m.text)}')">Kopyala</span>
+                            ${isMe ? `<span onclick="editMsg('${ch}', '${key}')">Düzenle</span>` : ''}
+                            ${isMe ? `<span onclick="deleteMsg('${ch}', '${key}')" style="color:var(--danger)">Sil</span>` : ''}
+                        </div>
+                    `;
+                    box.appendChild(bubble);
+                });
+                box.scrollTop = box.scrollHeight;
+            });
+        }
+
+        function sendChatMessage() {
+            let input = document.getElementById('chat-text-input');
+            if (!input.value.trim()) return;
+            let now = new Date();
+            let time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            db.ref('messages/' + currentChatChannel).push({
+                uid: player.uid,
+                author: `${player.name}${player.tag}`,
+                title: player.title,
+                text: input.value.trim(),
+                time: time
+            });
+            input.value = "";
+        }
+
+        function copyMsg(t) {
+            navigator.clipboard.writeText(decodeURIComponent(t));
+            alert("Mesaj kopyalandı!");
+        }
+
+        function editMsg(ch, key) {
+            let cur = document.getElementById(`m-text-${key}`).innerText;
+            let updated = prompt("Mesajı düzenle:", cur);
+            if (updated && updated !== cur) {
+                db.ref(`messages/${ch}/${key}/text`).set(updated + " (düzenlendi)");
+            }
+        }
+
+        function deleteMsg(ch, key) {
+            if (confirm("Bu mesajı silmek istiyor musunuz?")) {
+                db.ref(`messages/${ch}/${key}`).remove();
+            }
+        }
+
+        // --- 7. MODALLAR (SIRALAMA & ARKADAŞLIK & PROFİL) ---
+        function showModal(type) {
+            if (type === 'profile') {
+                alert(`👤 PROFİL BİLGİLERİ\n\nAd: ${player.name}${player.tag}\nUnvan: [${player.title}]\nSeviye: ${player.level} (${player.xp} XP)\nAltın: ${player.gold}`);
+            } else if (type === 'friends') {
+                let target = prompt("Arkadaşının etiketli adını gir (Örn: Oyuncu#12345):");
+                if (target) {
+                    db.ref(`friends/${player.uid}/${target.replace('#', '_')}`).set({ tag: target });
+                    alert("Arkadaş başarıyla eklendi!");
+                }
+            } else if (type === 'leaderboard') {
+                db.ref('leaderboard').orderByChild('level').limitToLast(5).once('value', snap => {
+                    let str = "🏆 EN İYİ OYUNCULAR:\n\n";
+                    let list = [];
+                    snap.forEach(c => list.push(c.val()));
+                    list.reverse().forEach((p, i) => {
+                        str += `${i + 1}. ${p.fullTag} - Lvl ${p.level} [${p.title}]\n`;
+                    });
+                    alert(str);
+                });
+            }
         }
     </script>
 </body>
