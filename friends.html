@@ -1,72 +1,105 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arkadaşlar</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arkadaşlar</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-
+  <div class="app-container">
     <div class="lobby-header">
-        <button class="btn btn-purple" onclick="location.href='menu.html'">‹ Lobi</button>
-        <span id="header-user-tag"></span>
+      <a href="menu.html" class="btn-sm" style="background:var(--neon-purple);">‹ Lobi</a>
+      <div style="font-weight:bold; font-size:12px;">Arkadaşlar</div>
+      <button class="btn-sm" style="background:#d97706;" onclick="showRequests()">📩 İstekler</button>
     </div>
 
-    <div class="content-box">
-        <h2>👥 Arkadaş Ekle & Yönet</h2>
-        <div style="display: flex; gap: 8px; margin: 15px 0;">
-            <input type="text" id="friend-tag-input" placeholder="Örn: MecagaTR#12345" style="flex: 1;">
-            <button class="btn btn-green" onclick="sendFriendRequest()">İstek Gönder</button>
-        </div>
-
-        <h3 style="margin-top: 20px;">Ekli Arkadaşlar</h3>
-        <div id="friends-list" style="margin-top: 10px;"></div>
+    <div style="padding: 10px 14px; flex:1; overflow-y:auto;">
+      <div style="font-size:12px; font-weight:bold; color:var(--gold); margin-bottom:6px;">Kayıtlı Tüm Oyuncular</div>
+      <div id="all-users" style="display:flex; flex-direction:column; gap:6px;"></div>
     </div>
+  </div>
 
-    <script src="app.js"></script>
-    <script>
-        window.onload = () => {
-            renderHeader();
-            loadFriends();
-        };
+  <div id="modal-req" class="modal">
+    <div class="modal-card">
+      <div class="modal-title">📩 Gelen Arkadaşlık İstekleri</div>
+      <div id="req-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+      <button class="btn-auth" style="background:var(--danger); margin-top:10px;" onclick="document.getElementById('modal-req').style.display='none'">Kapat</button>
+    </div>
+  </div>
 
-        function sendFriendRequest() {
-            let targetTag = document.getElementById("friend-tag-input").value.trim();
-            if (!targetTag) return alert("Etiketli kullanıcı adı giriniz!");
-            let u = getCurrentUser();
+  <script src="app.js"></script>
+  <script>
+    window.onload = () => {
+      let u = getUser();
+      db.ref("registered_users").on("value", snap => {
+        let b = document.getElementById("all-users");
+        b.innerHTML = "";
+        snap.forEach(c => {
+          let reg = c.val();
+          if (reg.uid === u.uid) return;
+          b.innerHTML += `
+            <div class="mode-card" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>👤 ${reg.fullName} <small style="color:#c084fc;">[${reg.title}]</small></span>
+              <div style="display:flex; gap:4px;">
+                <button class="btn-sm" style="background:var(--btn-green);" onclick="sendReq('${reg.uid}', '${reg.fullName}')">➕ İstek</button>
+                <button class="btn-sm" style="background:var(--neon-purple);" onclick="goDM('${reg.uid}')">💬 Mesaj</button>
+              </div>
+            </div>
+          `;
+        });
+      });
+    };
 
-            db.ref(`friends/${u.uid}/${targetTag.replace('#', '_')}`).set({
-                fullTag: targetTag,
-                addedDate: Date.now()
-            });
-            document.getElementById("friend-tag-input").value = "";
-            alert("Arkadaş başarıyla eklendi!");
-        }
+    function sendReq(targetUID, name) {
+      let u = getUser();
+      db.ref(`friend_reqs/${targetUID}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
+      alert(`${name} kullanıcısına istek yollandı!`);
+    }
 
-        function loadFriends() {
-            let u = getCurrentUser();
-            db.ref("friends/" + u.uid).on("value", snap => {
-                let container = document.getElementById("friends-list");
-                container.innerHTML = "";
-                snap.forEach(f => {
-                    container.innerHTML += `
-                        <div class="mode-card" style="display: flex; justify-content: space-between; align-items: center;">
-                            <span>👤 <b>${f.val().fullTag}</b></span>
-                            <button class="btn btn-danger" style="font-size: 11px; padding: 4px 8px;" onclick="removeFriend('${f.key}')">Sil</button>
-                        </div>
-                    `;
-                });
-            });
-        }
+    function showRequests() {
+      let u = getUser();
+      db.ref("friend_reqs/" + u.uid).once("value", snap => {
+        let b = document.getElementById("req-list");
+        b.innerHTML = "";
+        snap.forEach(c => {
+          let r = c.val();
+          b.innerHTML += `
+            <div class="mode-card" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>${r.fromName}</span>
+              <div style="display:flex; gap:4px;">
+                <button class="btn-sm" style="background:var(--btn-green);" onclick="accept('${r.fromUID}', '${r.fromName}')">Kabul</button>
+                <button class="btn-sm" style="background:var(--danger);" onclick="reject('${r.fromUID}', '${r.fromName}')">Reddet</button>
+              </div>
+            </div>
+          `;
+        });
+        document.getElementById("modal-req").style.display = "flex";
+      });
+    }
 
-        function removeFriend(key) {
-            let u = getCurrentUser();
-            db.ref(`friends/${u.uid}/${key}`).remove();
-        }
-    </script>
+    function accept(uid, name) {
+      let u = getUser();
+      db.ref(`friends/${u.uid}/${uid}`).set({ name: name });
+      db.ref(`friends/${uid}/${u.uid}`).set({ name: `${u.name}${u.tag}` });
+      db.ref(`friend_reqs/${u.uid}/${uid}`).remove();
+      alert(`${name} kabul edildi!`);
+      document.getElementById("modal-req").style.display = "none";
+    }
+
+    function reject(uid, name) {
+      let u = getUser();
+      db.ref(`friend_reqs/${u.uid}/${uid}`).remove();
+      alert(`${name} kullanıcısına gönderdiğiniz arkadaşlık isteğini kabul etmedi.`);
+      document.getElementById("modal-req").style.display = "none";
+    }
+
+    function goDM(uid) {
+      localStorage.setItem("active_dm_target", uid);
+      window.location.href = "chat.html";
+    }
+  </script>
 </body>
 </html>
-
