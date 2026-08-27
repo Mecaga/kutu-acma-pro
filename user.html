@@ -3,30 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kullanıcı Profili</title>
+  <title>Profilim</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
   <div class="app-container">
-    <div class="lobby-header">
-      <a href="menu.html" class="btn-sm" style="background:var(--neon-purple);">‹ Lobi</a>
+    <div class="top-header">
+      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
       <div style="font-weight:bold; font-size:12px;">👤 Oyuncu Profili</div>
       <div></div>
     </div>
 
-    <div style="padding:15px; display:flex; flex-direction:column; gap:10px;">
-      <div class="mode-card" style="text-align:center; padding:20px;">
-        <div style="font-size:45px;">👑</div>
-        <h2 id="u-fullname" style="color:#fff; margin:5px 0;">Mecaga#12345</h2>
-        <span class="badge-title" id="u-title" style="font-size:14px;">[Çaylak]</span>
+    <div style="background:#0b1329; border:1px solid var(--border-blue); border-radius:12px; padding:20px; text-align:center; margin-top:20px;">
+      <div style="font-size:50px; margin-bottom:6px;">👤</div>
+      <h2 id="u-name" style="color:var(--neon-blue);">Mecaga#12345</h2>
+      <div id="u-title" style="color:var(--gold); font-size:13px; margin-bottom:15px;">[Çaylak]</div>
+
+      <div style="background:#050a14; padding:10px; border-radius:8px; text-align:left; font-size:12px; line-height:2;">
+        <div><b>Seviye:</b> <span id="u-lvl" style="color:var(--gold);">Lvl 1</span></div>
+        <div><b>XP İlerlemesi:</b> <span id="u-xp">0 / 100</span></div>
+        <div><b>Toplam Altın:</b> <span id="u-gold" style="color:var(--btn-green);">500</span></div>
       </div>
 
-      <div class="mode-card" style="line-height:2; font-size:13px;">
-        <div><b>Seviye:</b> <span id="u-lvl" style="color:var(--gold);">Lvl 1</span></div>
-        <div><b>XP Puanı:</b> <span id="u-xp">0/100</span></div>
-        <div><b>Altın:</b> <span id="u-gold" style="color:var(--gold);">500</span></div>
+      <div style="display:flex; gap:6px; margin-top:15px;">
+        <a href="chat.html" class="nav-action-btn" style="flex:1; background:var(--btn-blue);">💬 Mesaj Gönder</a>
+        <a href="friends.html" class="nav-action-btn" style="flex:1; background:var(--btn-green);">➕ Arkadaş Ekle</a>
       </div>
     </div>
   </div>
@@ -34,12 +37,13 @@
   <script src="app.js"></script>
   <script>
     window.onload = () => {
-      let u = getUser();
-      document.getElementById("u-fullname").innerText = `${u.name}${u.tag}`;
-      document.getElementById("u-title").innerText = `[${u.title}]`;
-      document.getElementById("u-lvl").innerText = `Lvl ${u.level}`;
-      document.getElementById("u-xp").innerText = `${u.xp}/${u.level * 100}`;
-      document.getElementById("u-gold").innerText = u.gold;
+      const u = getActiveUser();
+      if (!u) return window.location.href = "index.html";
+      document.getElementById("u-name").innerText = `${u.name}${u.tag}`;
+      document.getElementById("u-title").innerText = `[${u.title||'Çaylak'}]`;
+      document.getElementById("u-lvl").innerText = `Lvl ${u.level||1}`;
+      document.getElementById("u-xp").innerText = `${u.xp||0} / ${(u.level||1)*100}`;
+      document.getElementById("u-gold").innerText = u.gold||500;
     };
   </script>
 </body>
