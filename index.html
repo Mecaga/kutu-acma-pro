@@ -3,176 +3,246 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kutu Açma Pro - v8</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Kutu Açma Pro - Giriş</title>
+  <!-- Firebase SDK (v8) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    :root {
+      --bg-dark: #05020d;
+      --card-bg: #120826;
+      --neon-purple: #a855f7;
+      --neon-purple-dark: #6b21a8;
+      --border-purple: #3b1d6e;
+      --text-main: #ffffff;
+      --text-dim: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 400px;
+      background: radial-gradient(circle at top, #1e0b3d 0%, var(--card-bg) 100%);
+      border: 2px solid var(--neon-purple);
+      border-radius: 24px;
+      padding: 30px 20px;
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.35);
+      text-align: center;
+    }
+
+    .chest-icon {
+      font-size: 54px;
+      margin-bottom: 6px;
+      display: inline-block;
+      filter: drop-shadow(0 0 12px #ffd700);
+    }
+
+    .auth-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 12px var(--neon-purple);
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
+
+    .auth-title span {
+      color: var(--neon-purple);
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: #090314;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-purple);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--neon-purple);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: #090314;
+      border: 1px solid var(--border-purple);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .auth-input:focus {
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(90deg, #9333ea, #a855f7);
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+      margin-top: 6px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-submit:active {
+      opacity: 0.85;
+    }
+
+    .auth-footer {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 20px;
+      line-height: 1.4;
+    }
+  </style>
 </head>
 <body>
 
-<div class="app-container">
+  <div class="auth-card">
+    <div class="chest-icon">👑📦</div>
+    <div class="auth-title">Kutu Açma<br><span>Pro</span></div>
 
-  <!-- 1. GİRİŞ VE KAYIT EKRANI -->
-  <div id="screen-auth" class="screen active">
-    <div class="auth-box">
-      <div class="auth-logo">👑 Kutu Açma<br><span style="color: var(--neon-purple);">Pro</span></div>
-      <div class="auth-tabs">
-        <button class="auth-tab active">🎮 Giriş</button>
-        <button class="auth-tab">👤+ Kayıt</button>
-      </div>
-      <input type="text" id="auth-name" class="auth-input" placeholder="Kullanıcı Adı" value="Mecaga">
-      <input type="password" class="auth-input" placeholder="Şifre" value="123456">
-      <button class="btn-auth" onclick="login()">Giriş Yap</button>
+    <!-- Giriş / Kayıt Sekmeleri -->
+    <div class="auth-tabs">
+      <button class="tab-btn active" id="tab-login-btn" onclick="switchAuthTab(true)">🎮 Giriş</button>
+      <button class="tab-btn" id="tab-register-btn" onclick="switchAuthTab(false)">👤+ Kayıt</button>
+    </div>
+
+    <!-- Giriş Alanları -->
+    <div class="input-group">
+      <input type="text" id="username-in" class="auth-input" placeholder="Kullanıcı Adı" value="Mecaga">
+    </div>
+
+    <div class="input-group">
+      <input type="password" id="password-in" class="auth-input" placeholder="Şifre" value="123456">
+    </div>
+
+    <button class="btn-submit" id="submit-btn" onclick="handleAuthSubmit()">Giriş Yap</button>
+
+    <div class="auth-footer">
+      🛡️ Güvenli ve hızlı oyun deneyimi için kutu açma dünyasına katıl!
     </div>
   </div>
 
-  <!-- 2. ANA LOBİ EKRANI -->
-  <div id="screen-lobby" class="screen">
-    <div class="lobby-header">
-      <div class="user-tag-badge">
-        👤 <span id="lobby-user-tag">Mecaga#12345</span>
-        <span class="badge-title" id="lobby-user-title">[Çaylak]</span>
-      </div>
-      <div class="btn-group">
-        <button class="btn-sm" style="background:#d97706;">🏆 Sıralama</button>
-        <button class="btn-sm" style="background:#6b21a8;" onclick="openSettings()">⚙️ Ayarlar</button>
-        <button class="btn-sm" style="background:var(--danger);" onclick="logout()">🚪 Çıkış</button>
-      </div>
-    </div>
+  <script>
+    // --- 1. FIREBASE BAĞLANTISI ---
+    const firebaseConfig = {
+      apiKey: "SENIN_API_KEY",
+      authDomain: "SENIN_AUTH_DOMAIN",
+      databaseURL: "SENIN_DATABASE_URL",
+      projectId: "SENIN_PROJECT_ID",
+      storageBucket: "SENIN_STORAGE_BUCKET",
+      messagingSenderId: "SENIN_SENDER_ID",
+      appId: "SENIN_APP_ID"
+    };
 
-    <div class="quest-strip">
-      <span>🎯 Günlük Görev: 3 Kasa Aç</span>
-      <span id="quest-txt" style="color:var(--gold); font-weight:bold;">0/3</span>
-    </div>
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
 
-    <div class="action-grid">
-      <button class="btn-nav-large" onclick="switchScreen('screen-chat')">💬 Sohbetler - Kanallar</button>
-      <button class="btn-nav-large" onclick="switchScreen('screen-friends')">👥 Arkadaşlar</button>
-    </div>
+    let isLoginMode = true;
 
-    <div class="modes-box">
-      <div class="mode-card selected" onclick="setGameMode('standard', this)">
-        <div class="mode-header"><span>⚔️ Normal Kasa (30s)</span></div>
-        <div class="mode-desc">Dengeli klasik oranlar</div>
-      </div>
-      <div class="mode-card" onclick="setGameMode('pvp', this)">
-        <div class="mode-header"><span style="color:#60a5fa;">🔥 Online PvP (1v1 / Çoklu)</span></div>
-        <div class="mode-desc">Kişi başı 5 kutu, canlı eşya ve sıralama</div>
-      </div>
-      <div class="mode-card" onclick="setGameMode('catch', this)">
-        <div class="mode-header"><span style="color:#c084fc;">⚡ Yakala & Aç Modu (15s)</span></div>
-        <div class="mode-desc">Kutuları yakala, teker teker aç</div>
-      </div>
-      <div class="mode-card" onclick="setGameMode('upgrade', this)">
-        <div class="mode-header"><span>📈 Şans Yükseltme (7 Kutu)</span></div>
-        <div class="mode-desc">Her adımda Godly şansı katlanır</div>
-      </div>
-      <div class="mode-card" onclick="setGameMode('mines', this)">
-        <div class="mode-header"><span>💣 Mayınlı Kasa Modu (Risk)</span></div>
-        <div class="mode-desc">Bombaya basmadan puanı çek!</div>
-      </div>
-    </div>
+    function switchAuthTab(loginMode) {
+      isLoginMode = loginMode;
+      document.getElementById('tab-login-btn').classList.toggle('active', loginMode);
+      document.getElementById('tab-register-btn').classList.toggle('active', !loginMode);
+      document.getElementById('submit-btn').innerText = loginMode ? "Giriş Yap" : "Yeni Hesap Oluştur";
+    }
 
-    <button class="btn-play-main" onclick="startGame()">OYUNA BAŞLA</button>
-  </div>
+    function handleAuthSubmit() {
+      const username = document.getElementById('username-in').value.trim();
+      const password = document.getElementById('password-in').value.trim();
 
-  <!-- 3. SOHBET VE KANALLAR -->
-  <div id="screen-chat" class="screen">
-    <div class="lobby-header">
-      <button class="btn-sm" style="background:var(--danger);" onclick="switchScreen('screen-lobby')">‹ Çıkış</button>
-      <div style="font-weight:bold; font-size:12px;">Sohbetler & Kanallar</div>
-      <div class="btn-group">
-        <button class="btn-sm" style="background:var(--btn-green);" onclick="loadChannels()">Katıl</button>
-        <button class="btn-sm" style="background:var(--neon-purple);" onclick="createNewChannel()">Kanal Kur</button>
-      </div>
-    </div>
+      if (!username || !password) {
+        return alert("Lütfen kullanıcı adı ve şifre giriniz!");
+      }
 
-    <div class="chat-subnav">
-      <div class="chat-subtab active" onclick="setChatTab(1)">1. Global Chat</div>
-      <div class="chat-subtab" onclick="setChatTab(2)">2. Kanallar</div>
-      <div class="chat-subtab" onclick="setChatTab(3)">3. Özel DM</div>
-    </div>
+      // Mevcut kullanıcı verisini al veya sıfırdan etiket/unvan ile oluştur
+      let savedUser = JSON.parse(localStorage.getItem("kutu_user")) || {};
+      
+      const tagNumber = savedUser.tag || ("#" + Math.floor(10000 + Math.random() * 90000));
+      const userUID = savedUser.uid || ("U_" + Math.floor(1000 + Math.random() * 9000));
 
-    <div class="chat-area" id="chat-global-view"></div>
-    <div class="chat-area" id="chat-channels-view" style="display:none;"></div>
-    <div class="chat-area" id="chat-dm-view" style="display:none;"></div>
+      const userData = {
+        uid: userUID,
+        name: username,
+        tag: tagNumber,
+        title: savedUser.title || "Çaylak",
+        sound: savedUser.sound !== undefined ? savedUser.sound : true,
+        dailyQuest: savedUser.dailyQuest || 0,
+        gold: savedUser.gold || 500,
+        level: savedUser.level || 1,
+        xp: savedUser.xp || 0
+      };
 
-    <div class="chat-input-bar">
-      <input type="text" id="chat-input-text" placeholder="Bir mesaj yazın...">
-      <button class="btn-sm" style="background:var(--btn-green); border-radius:50%; width:36px; height:36px;" onclick="sendChatMessage()">➤</button>
-    </div>
-  </div>
+      // 1. Yerel Depolamaya Kaydet
+      localStorage.setItem("kutu_user", JSON.stringify(userData));
 
-  <!-- 4. ARKADAŞLAR EKRANI -->
-  <div id="screen-friends" class="screen">
-    <div class="lobby-header">
-      <button class="btn-sm" style="background:var(--neon-purple);" onclick="switchScreen('screen-lobby')">‹ Lobi</button>
-      <div style="font-weight:bold; font-size:12px;">Arkadaşlar</div>
-      <button class="btn-sm" style="background:#d97706;" onclick="openFriendRequests()">📩 İstekler</button>
-    </div>
-
-    <div style="padding: 10px 14px; flex:1; overflow-y:auto;">
-      <div style="font-size:12px; font-weight:bold; color:var(--gold); margin-bottom:6px;">Kayıtlı Oyuncular</div>
-      <div id="friends-all-users-list" style="display:flex; flex-direction:column; gap:6px;"></div>
-    </div>
-  </div>
-
-  <!-- 5. ONLINE PVP EKRANI -->
-  <div id="screen-pvp" class="screen">
-    <div class="lobby-header">
-      <button class="btn-sm" style="background:var(--danger);" onclick="switchScreen('screen-lobby')">‹ Çık</button>
-      <div id="pvp-mode-title" style="font-size:12px; font-weight:bold;">2 Kişilik Oda (10 Kutu)</div>
-      <div></div>
-    </div>
-
-    <div style="padding:8px 12px; display:flex; gap:4px;">
-      <button class="btn-sm" style="background:#1e0d3d;" onclick="changePvPMode(2)">1v1</button>
-      <button class="btn-sm" style="background:#1e0d3d;" onclick="changePvPMode(3)">1v1v1</button>
-      <button class="btn-sm" style="background:#1e0d3d;" onclick="changePvPMode(4)">1v1v1v1</button>
-    </div>
-
-    <div style="padding:0 12px; display:flex; gap:6px;">
-      <button class="btn-sm" style="background:var(--neon-purple);" onclick="createPvPRoom()">Oda Kur</button>
-      <input type="text" id="pvp-room-code" placeholder="Oda Kodu" class="auth-input" style="margin:0; padding:6px; font-size:11px;">
-      <button class="btn-sm" style="background:var(--btn-green);" onclick="joinPvPRoom()">Katıl</button>
-    </div>
-
-    <div id="pvp-status-banner" style="text-align:center; font-size:12px; font-weight:bold; color:var(--gold); margin:8px 0;">⏳ Rakip Bekleniyor</div>
-    <div class="pvp-room-grid" id="pvp-players-row" style="padding:0 12px;"></div>
-
-    <div style="padding:12px; margin-top:auto;">
-      <div style="font-size:11px; font-weight:bold; color:var(--neon-purple); margin-bottom:4px;">📦 Açılabilir Kutular:</div>
-      <div class="pvp-box-grid" id="pvp-box-grid"></div>
-    </div>
-  </div>
-
-  <!-- AYARLAR MODALI -->
-  <div id="modal-settings" class="modal">
-    <div class="modal-card">
-      <div class="modal-title">⚙️ Oyun Ayarları</div>
-      <button id="sound-toggle-btn" class="btn-auth" style="margin-bottom:10px;" onclick="toggleSound()">🔊 Ses: Açık</button>
-      <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;">Unvan Seç:</div>
-      <select id="settings-title-select" class="auth-input" onchange="changeTitle(this.value)">
-        <option value="Çaylak">Çaylak</option>
-        <option value="Usta">Usta</option>
-        <option value="Efsane">Efsane</option>
-        <option value="Kral">Kral</option>
-      </select>
-      <button class="btn-auth" style="background:var(--danger);" onclick="closeSettings()">Kapat</button>
-    </div>
-  </div>
-
-  <!-- İSTEKLER MODALI -->
-  <div id="modal-requests" class="modal">
-    <div class="modal-card">
-      <div class="modal-title">📩 Gelen İstekler</div>
-      <div id="request-list-items" style="display:flex; flex-direction:column; gap:6px;"></div>
-      <button class="btn-auth" style="background:var(--danger); margin-top:10px;" onclick="document.getElementById('modal-requests').style.display='none'">Kapat</button>
-    </div>
-  </div>
-
-</div>
-
-<script src="app.js"></script>
+      // 2. Firebase Kayıtlı Kullanıcılar Tablosuna Yaz
+      db.ref("registered_users/" + userData.uid).set({
+        uid: userData.uid,
+        fullName: `${userData.name}${userData.tag}`,
+        title: userData.title,
+        lastLogin: Date.now()
+      }).then(() => {
+        // Doğrudan ana menüye yönlendir
+        window.location.href = "menu.html";
+      }).catch((err) => {
+        console.error("Firebase yazma hatası:", err);
+        // Hata durumunda da akışı kesmeden lobiye geçir
+        window.location.href = "menu.html";
+      });
+    }
+  </script>
 </body>
 </html>
