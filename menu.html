@@ -11,11 +11,12 @@
 <body>
   <div class="app-container">
     <div class="top-header">
-      <div class="app-title" onclick="openMyProfile()">
+      <div class="app-title" onclick="location.href='user.html'">
         👤 <span id="lbl-username">...</span>
       </div>
       <div style="display:flex; gap:4px;">
         <a href="leaderboard.html" class="icon-btn">🏆 Sıralama</a>
+        <button class="icon-btn" onclick="openSettingsModal()">⚙️ Ayarlar</button>
         <button class="icon-btn" onclick="logout()" style="border-color:var(--danger);">🚪 Çıkış</button>
       </div>
     </div>
@@ -58,6 +59,22 @@
     <div class="menu-preview-box" id="rates-preview-box"></div>
 
     <button class="btn-start" onclick="launchGame()">OYUNA BAŞLA</button>
+  </div>
+
+  <!-- Ayarlar Modalı -->
+  <div id="modal-settings" class="modal-overlay">
+    <div class="modal-card panel-theme-settings">
+      <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:10px;">⚙️ Oyun Ayarları</div>
+      <button id="btn-sound-toggle" class="mode-btn" style="margin-bottom:8px; text-align:center; color:#fff;" onclick="toggleSound()">🔊 Ses: Açık</button>
+      <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;">Unvan Seç:</div>
+      <select id="sel-title" class="input-field" onchange="changeTitle(this.value)">
+        <option value="Çaylak">Çaylak</option>
+        <option value="Usta">Usta</option>
+        <option value="Efsane">Efsane</option>
+        <option value="Kral">Kral</option>
+      </select>
+      <button class="btn-close" onclick="closeSettingsModal()">Kapat</button>
+    </div>
   </div>
 
   <script src="app.js"></script>
@@ -125,6 +142,8 @@
       const u = getActiveUser();
       if (!u) return window.location.href = "index.html";
       document.getElementById("lbl-username").innerText = `${u.name}${u.tag}`;
+      document.getElementById("sel-title").value = u.title || "Çaylak";
+      document.getElementById("btn-sound-toggle").innerText = u.sound ? "🔊 Ses: Açık" : "🔇 Ses: Kapalı";
       renderRatesPreview('standard');
     };
 
@@ -137,7 +156,7 @@
 
     function renderRatesPreview(key) {
       const info = MODE_RATES[key];
-      let html = `<div style="color:var(--gold); font-weight:bold; margin-bottom:4px;">📊 ${info.title}</div>`;
+      let html = `<div style="color:var(--neon-gold); font-weight:bold; margin-bottom:4px;">📊 ${info.title}</div>`;
       info.tiers.forEach(t => {
         html += `<div style="display:flex; justify-content:space-between; color:${t.c};"><span>${t.name}</span><span>${t.pts}</span></div>`;
       });
@@ -149,8 +168,18 @@
       else window.location.href = "game1.html?mode=" + activeMode;
     }
 
-    function openMyProfile() {
-      window.location.href = "user.html";
+    function openSettingsModal() { document.getElementById("modal-settings").style.display = "flex"; }
+    function closeSettingsModal() { document.getElementById("modal-settings").style.display = "none"; }
+    function toggleSound() {
+      let u = getActiveUser();
+      u.sound = !u.sound;
+      setActiveUser(u);
+      document.getElementById("btn-sound-toggle").innerText = u.sound ? "🔊 Ses: Açık" : "🔇 Ses: Kapalı";
+    }
+    function changeTitle(val) {
+      let u = getActiveUser();
+      u.title = val;
+      setActiveUser(u);
     }
 
     function logout() {
