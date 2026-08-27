@@ -3,29 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kutu Açma & Arena - Giriş</title>
+    <title>Kutu Açma Pro - Giriş</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<body>
-    <main style="display: flex; align-items: center; justify-content: center; height: 80vh;">
-        <div class="card" style="text-align: center; max-width: 400px; width: 100%; padding: 30px;">
-            <h1 style="color: var(--gold); margin-bottom: 10px;">📦 Kutu Açma Pro</h1>
-            <p style="margin-bottom: 20px; color: #8b949e;">MecagaTR Evrenine Hoş Geldiniz!</p>
-            <input type="text" id="username-input" placeholder="Oyuncu Adınızı Girin" value="MecagaTR">
-            <button class="btn btn-blue" style="width: 100%; margin-top: 15px; padding: 12px;" onclick="startGame()">Oyuna Başla</button>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+
+    <div class="auth-container">
+        <div class="auth-logo">👑 Kutu Açma<br><span style="color: var(--neon-purple);">Pro</span></div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" id="tab-login-btn" onclick="toggleAuth(true)">🎮 Giriş</button>
+            <button class="auth-tab-btn" id="tab-register-btn" onclick="toggleAuth(false)">👤+ Kayıt</button>
         </div>
-    </main>
-    <footer>Geliştirici: MecagaTR | Tüm Hakları Saklıdır</footer>
+
+        <div class="input-group">
+            <input type="text" id="auth-username" placeholder="Kullanıcı Adı" value="MecagaTR">
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="auth-password" placeholder="Şifre" value="123456">
+        </div>
+
+        <button class="btn btn-purple" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="handleAuthSubmit()">Giriş Yap</button>
+        <p style="font-size: 11px; color: var(--text-dim); margin-top: 15px;">🛡️ Güvenli ve hızlı oyun deneyimi için kutu açma dünyasına katıl!</p>
+    </div>
 
     <script src="app.js"></script>
     <script>
-        function startGame() {
-            let name = document.getElementById("username-input").value.trim();
-            let u = getUser();
-            if (name) u.name = name;
-            saveUser(u);
+        let isLoginMode = true;
+        function toggleAuth(login) {
+            isLoginMode = login;
+            document.getElementById('tab-login-btn').classList.toggle('active', login);
+            document.getElementById('tab-register-btn').classList.toggle('active', !login);
+        }
+
+        function handleAuthSubmit() {
+            let uName = document.getElementById('auth-username').value.trim();
+            if (!uName) return alert("Kullanıcı adı giriniz!");
+            
+            let u = getCurrentUser();
+            u.username = uName;
+            saveCurrentUser(u);
             window.location.href = "menu.html";
         }
     </script>
