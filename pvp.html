@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1v1 Arena</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <header>
+        <div class="user-meta">
+            <span style="font-weight: bold;" id="p-name"></span>
+            <span class="badge" id="p-lvl"></span>
+        </div>
+        <div>💰 <span id="p-coins" style="color:var(--gold); font-weight:bold;"></span> Altın</div>
+    </header>
+
+    <nav>
+        <a href="menu.html">🏠 Menü</a>
+        <a href="game1.html">📦 Kutu Açma</a>
+        <a href="pvp.html" class="active">⚔️ 1v1 Arena</a>
+        <a href="chat.html">💬 Sohbet</a>
+        <a href="leaderboard.html">🏆 Sıralama</a>
+        <a href="user.html">👤 Profil</a>
+    </nav>
+
+    <main>
+        <h2>1v1 Canlı Düello</h2>
+        <div style="display:flex; gap:8px; margin: 10px 0;">
+            <button class="btn btn-blue" onclick="createRoom()">Oda Kur</button>
+            <input type="text" id="room-code" placeholder="Oda Kodu">
+            <button class="btn" onclick="joinRoom()">Katıl</button>
+        </div>
+
+        <div class="card" style="text-align: center;">
+            <div style="display:flex; justify-content: space-around; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h3 id="p1-name">Oyuncu 1</h3>
+                    <h2 id="p1-score" style="color: var(--gold);">0 Puan</h2>
+                    <small id="p1-rem">Kalan Kutu: 5</small>
+                </div>
+                <div>
+                    <div style="font-size: 32px; font-weight: bold; color: var(--gold);" id="timer">30</div>
+                    <span id="p-status" style="color: #f1c40f;">Rakip Bekleniyor</span>
+                </div>
+                <div>
+                    <h3 id="p2-name">Oyuncu 2 (Bekleniyor)</h3>
+                    <h2 id="p2-score" style="color: var(--gold);">0 Puan</h2>
+                    <small id="p2-rem">Kalan Kutu: 5</small>
+                </div>
+            </div>
+            <button id="pvp-action" class="btn" style="width: 100%; padding: 12px;" onclick="duelBox()" disabled>Rakip Gelmeden Kutu Açılamaz</button>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        window.onload = updateGlobalHeader;
+        let activeRoom = null;
+        let myBoxes = 5;
+
+        function createRoom() {
+            let u = getUser();
+            let id = "ODA_" + Math.floor(1000 + Math.random() * 9000);
+            activeRoom = id;
+            myBoxes = 5;
+            db.ref("arenas/" + id).set({
+                status: "waiting",
+                p1: { uid: u.uid, name: u.name, score: 0, rem: 5 },
+                p2: null
+            });
+            listen(id);
+            alert("Oda Kodu: " + id);
+        }
+
+        function joinRoom() {
+            let u = getUser();
+            let id = document.getElementById("room-code").value.trim();
+            if (!id) return;
+            activeRoom = id;
+            myBoxes = 5;
+            db.ref("arenas/" + id).transaction(r => {
+                if (r && !r.p2 && r.p1.uid !== u.uid) {
+                    r.p2 = { uid: u.uid, name: u.name, score: 0, rem: 5 };
+                    r.status = "playing";
+                }
+                return r;
+            });
+            listen(id);
+        }
+
+        function listen(id) {
+            let u = getUser();
+            db.ref("arenas/" + id).on("value", snap => {
+                let d = snap.val();
+                if (!d) return;
+
+                document.getElementById("p1-name").innerText = d.p1 ? d.p1.name : "Bekleniyor";
+                document.getElementById("p1-score").innerText = (d.p1 ? d.p1.score : 0) + " Puan";
+                document.getElementById("p1-rem").innerText = "Kalan Kutu: " + (d.p1 ? d.p1.rem : 5);
+
+                if (d.p2) {
+                    document.getElementById("p2-name").innerText = d.p2.name;
+                    document.getElementById("p2-score").innerText = d.p2.score + " Puan";
+                    document.getElementById("p2-rem").innerText = "Kalan Kutu: " + d.p2.rem;
+                }
+
+                let btn = document.getElementById("pvp-action");
+                let st = document.getElementById("p-status");
+
+                if (d.status === "playing" && d.p2) {
+                    st.innerText = "⚔️ Maç Başladı!";
+                    btn.disabled = myBoxes <= 0;
+                    btn.innerText = myBoxes > 0 ? `Kutu Aç (${myBoxes}/5)` : "Kutuların Bitti";
+                } else {
+                    st.innerText = "⏳ Rakip Bekleniyor...";
+                    btn.disabled = true;
+                    btn.innerText = "Rakip Gelmeden Kutu Açılamaz";
+                }
+            });
+        }
+
+        function duelBox() {
+            if (!activeRoom || myBoxes <= 0) return;
+            let u = getUser();
+            myBoxes--;
+            let pts = Math.floor(Math.random() * 80) + 20;
+            db.ref("arenas/" + activeRoom).once("value", snap => {
+                let d = snap.val();
+                let isP1 = d.p1.uid === u.uid;
+                let target = isP1 ? "p1" : "p2";
+                db.ref(`arenas/${activeRoom}/${target}`).update({
+                    score: d[target].score + pts,
+                    rem: myBoxes
+                });
+            });
+        }
+    </script>
+</body>
+</html>
