@@ -44,8 +44,8 @@
           const reg = c.val();
           if (!reg || reg.uid === u.uid) return;
           box.innerHTML += `
-            <div class="quest-box" style="align-items:center;">
-              <span>👤 ${reg.fullName} <small style="color:var(--gold);">[${reg.title || 'Çaylak'}]</small></span>
+            <div class="rank-card">
+              <span style="font-size:11px;">👤 ${reg.fullName}</span>
               <div style="display:flex; gap:4px;">
                 <button class="icon-btn" style="border-color:var(--btn-green);" onclick="requestUser('${reg.uid}', '${reg.fullName}')">➕</button>
                 <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="directMessageUser('${reg.uid}', '${reg.fullName}')">💬</button>
@@ -58,8 +58,10 @@
 
     function sendFriendRequest() {
       const tag = document.getElementById("in-tag-search").value.trim();
-      if (!tag) return;
       const u = getActiveUser();
+      if (!tag) return;
+      if (tag === `${u.name}${u.tag}`) return alert("Kendinize arkadaşlık isteği gönderemezsiniz!");
+
       db.ref("users").orderByChild("fullName").equalTo(tag).once("value", snap => {
         if (!snap.exists()) return alert("Bu etikete sahip kullanıcı bulunamadı!");
         snap.forEach(c => {
@@ -71,13 +73,14 @@
 
     function requestUser(targetUID, targetName) {
       const u = getActiveUser();
+      if (targetUID === u.uid) return alert("Kendinize istek atamazsınız!");
       db.ref(`friend_requests/${targetUID}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
       alert(`${targetName} kullanıcısına istek gönderildi!`);
     }
 
     function directMessageUser(targetUID, targetName) {
-      localStorage.setItem("active_dm_target", targetUID);
-      localStorage.setItem("active_dm_name", targetName);
+      const u = getActiveUser();
+      db.ref(`friends/${u.uid}/${targetUID}`).set({ fullName: targetName });
       window.location.href = "chat.html";
     }
 
@@ -89,8 +92,8 @@
         snap.forEach(c => {
           const r = c.val();
           box.innerHTML += `
-            <div class="quest-box" style="align-items:center;">
-              <span>${r.fromName}</span>
+            <div class="rank-card">
+              <span style="font-size:11px;">${r.fromName}</span>
               <div style="display:flex; gap:4px;">
                 <button class="icon-btn" style="border-color:var(--btn-green);" onclick="acceptReq('${r.fromUID}', '${r.fromName}')">Kabul</button>
                 <button class="icon-btn" style="border-color:var(--danger);" onclick="rejectReq('${r.fromUID}', '${r.fromName}')">Reddet</button>
@@ -114,7 +117,7 @@
     function rejectReq(uid, name) {
       const u = getActiveUser();
       db.ref(`friend_requests/${u.uid}/${uid}`).remove();
-      alert(`${name} kullanıcısına gönderdiğiniz arkadaşlık isteğini kabul etmedi.`);
+      alert(`${name} kullanıcısına gönderdiğiniz istek kabul edilmedi.`);
       document.getElementById("modal-reqs").style.display = "none";
     }
   </script>
