@@ -3,84 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sohbet Odası</title>
+    <title>Canlı Sohbet</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<body>
-    <header>
-        <div class="user-meta"><span style="font-weight: bold;" id="p-name"></span></div>
-        <div>💰 <span id="p-coins" style="color:var(--gold); font-weight:bold;"></span> Altın</div>
-    </header>
+<body style="padding: 10px;">
 
-    <nav>
-        <a href="menu.html">🏠 Menü</a>
-        <a href="game1.html">📦 Kutu Açma</a>
-        <a href="pvp.html">⚔️ 1v1 Arena</a>
-        <a href="chat.html" class="active">💬 Sohbet</a>
-        <a href="leaderboard.html">🏆 Sıralama</a>
-        <a href="user.html">👤 Profil</a>
-    </nav>
-
-    <main>
-        <h2>Global Sohbet</h2>
-        <div class="card" id="chat-stream" style="height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
-        <div style="display: flex; gap: 8px;">
-            <input type="text" id="msg-box" placeholder="Mesajınızı girin..." style="flex: 1; margin: 0;">
-            <button class="btn btn-blue" onclick="sendMsg()">Gönder</button>
+    <div class="chat-wrapper">
+        <div class="chat-top">
+            <button class="btn btn-danger" style="font-size: 12px; padding: 6px 10px;" onclick="location.href='menu.html'">‹ Sohbetler</button>
+            <div style="font-weight: bold; color: #60a5fa;" id="active-chat-title">🌐 Genel Sohbet</div>
+            <select id="channel-dropdown" onchange="changeChannel(this.value)" style="width: 110px; padding: 4px; font-size: 12px;">
+                <option value="genel"># Genel</option>
+            </select>
         </div>
-    </main>
+
+        <div style="padding: 6px 12px; background: #120924; display: flex; gap: 6px; border-bottom: 1px solid #3b206b;">
+            <input type="text" id="new-ch-name" placeholder="Kanal Adı..." style="padding: 6px; font-size: 12px; border-radius: 6px; flex: 1; background: #0a0514; border: 1px solid #3b206b; color: #fff;">
+            <button class="btn btn-purple" style="font-size: 12px; padding: 6px 12px;" onclick="createChannel()">Kanal Aç</button>
+        </div>
+
+        <div class="chat-msgs-area" id="chat-stream"></div>
+
+        <div class="chat-input-bar">
+            <input type="text" id="chat-input" placeholder="Bir mesaj yazın...">
+            <button class="btn btn-green" style="border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;" onclick="sendMsg()">➤</button>
+        </div>
+    </div>
 
     <script src="app.js"></script>
     <script>
+        let currentCh = "genel";
+
         window.onload = () => {
-            updateGlobalHeader();
-            let u = getUser();
-            db.ref("global_chat").limitToLast(30).on("value", snap => {
-                let box = document.getElementById("chat-stream");
-                box.innerHTML = "";
-                snap.forEach(c => {
-                    let m = c.val();
-                    let k = c.key;
-                    let isMe = m.uid === u.uid;
-                    let row = document.createElement("div");
-                    row.style.background = isMe ? "#1f6feb22" : "#21262d";
-                    row.style.padding = "8px 12px";
-                    row.style.borderRadius = "6px";
-                    row.style.alignSelf = isMe ? "flex-end" : "flex-start";
-                    row.style.maxWidth = "80%";
-                    row.innerHTML = `
-                        <div style="font-size:11px; color:var(--gold);">${m.sender}</div>
-                        <div id="val-${k}">${m.text}</div>
-                        <div style="font-size:11px; display:flex; gap:8px; margin-top:4px; color:#8b949e;">
-                            <span style="cursor:pointer;" onclick="navigator.clipboard.writeText('${m.text}'); alert('Kopyalandı');">📋 Kopyala</span>
-                            ${isMe ? `<span style="cursor:pointer;" onclick="editMsg('${k}')">✏️ Düzenle</span>` : ''}
-                            ${isMe ? `<span style="cursor:pointer; color:var(--danger);" onclick="deleteMsg('${k}')">🗑️ Sil</span>` : ''}
-                        </div>
-                    `;
-                    box.appendChild(row);
-                });
-                box.scrollTop = box.scrollHeight;
-            });
+            renderHeader();
+            listenChannels();
+            listenMessages(currentCh);
         };
 
+        function createChannel() {
+            let name = document.getElementById("new-ch-name").value.trim();
+            if (!name) return alert("Kanal adı girin!");
+            let id = name.toLowerCase().replace(/\s+/g, '-');
+            db.ref("channels/" + id).set({ title: name });
+            document.getElementById("new-ch-name").value = "";
+        }
+
+        function listenChannels() {
+            db.ref("channels").on("value", snap => {
+                let sel = document.getElementById("channel-dropdown");
+                sel.innerHTML = '<option value="genel"># Genel</option>';
+                snap.forEach(c => {
+                    sel.innerHTML += `<option value="${c.key}"># ${c.val().title}</option>`;
+                });
+            });
+        }
+
+        function changeChannel(val) {
+            currentCh = val;
+            document.getElementById("active-chat-title").innerText = "# " + val;
+            listenMessages(val);
+        }
+
+        function listenMessages(chId) {
+            let u = getCurrentUser();
+            db.ref("chat_messages/" + chId).limitToLast(40).on("value", snap => {
+                let stream = document.getElementById("chat-stream");
+                stream.innerHTML = "";
+                snap.forEach(child => {
+                    let msg = child.val();
+                    let key = child.key;
+                    let isMe = msg.uid === u.uid;
+
+                    let bubble = document.createElement("div");
+                    bubble.className = `chat-bubble ${isMe ? 'me' : 'other'}`;
+                    bubble.innerHTML = `
+                        <div class="chat-meta">${msg.author} <span style="color:#c084fc;">[${msg.title}]</span></div>
+                        <div id="msg-text-${key}">${msg.text}</div>
+                        <div class="chat-time">${msg.time}</div>
+                        <div class="chat-actions">
+                            <span onclick="copyMsg('${encodeURIComponent(msg.text)}')">📋 Kopyala</span>
+                            ${isMe ? `<span onclick="editMsg('${chId}', '${key}')">✏️ Düzenle</span>` : ''}
+                            ${isMe ? `<span onclick="deleteMsg('${chId}', '${key}')" style="color:var(--danger)">🗑️ Sil</span>` : ''}
+                        </div>
+                    `;
+                    stream.appendChild(bubble);
+                });
+                stream.scrollTop = stream.scrollHeight;
+            });
+        }
+
         function sendMsg() {
-            let u = getUser();
-            let input = document.getElementById("msg-box");
+            let input = document.getElementById("chat-input");
             if (!input.value.trim()) return;
-            db.ref("global_chat").push({ uid: u.uid, sender: u.name, text: input.value.trim(), time: Date.now() });
+            let u = getCurrentUser();
+            let now = new Date();
+            let timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            db.ref("chat_messages/" + currentCh).push({
+                uid: u.uid,
+                author: `${u.username}${u.tag}`,
+                title: u.title,
+                text: input.value.trim(),
+                time: timeStr
+            });
             input.value = "";
         }
 
-        function editMsg(k) {
-            let old = document.getElementById(`val-${k}`).innerText;
-            let updated = prompt("Mesajı düzenle:", old);
-            if (updated && updated !== old) db.ref(`global_chat/${k}/text`).set(updated + " (düzenlendi)");
+        function copyMsg(text) {
+            navigator.clipboard.writeText(decodeURIComponent(text));
+            alert("Mesaj kopyalandı!");
         }
 
-        function deleteMsg(k) {
-            if (confirm("Silinsin mi?")) db.ref(`global_chat/${k}`).remove();
+        function editMsg(chId, key) {
+            let cur = document.getElementById(`msg-text-${key}`).innerText;
+            let updated = prompt("Mesajı düzenle:", cur);
+            if (updated && updated !== cur) {
+                db.ref(`chat_messages/${chId}/${key}/text`).set(updated + " (düzenlendi)");
+            }
+        }
+
+        function deleteMsg(chId, key) {
+            if (confirm("Mesajı silmek istiyor musun?")) {
+                db.ref(`chat_messages/${chId}/${key}`).remove();
+            }
         }
     </script>
 </body>
