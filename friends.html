@@ -13,21 +13,27 @@
     <div class="top-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
       <div style="font-weight:bold; font-size:12px;">👥 Arkadaşlar</div>
-      <button class="icon-btn" style="border-color:var(--gold);" onclick="openRequestsModal()">📩 İstekler</button>
+      <button class="icon-btn" style="border-color:var(--neon-gold);" onclick="openRequestsModal()">📩 İstekler</button>
     </div>
 
+    <!-- Arkadaş Ekle Input -->
     <div style="display:flex; gap:4px; margin-bottom:8px;">
       <input type="text" id="in-tag-search" class="input-field" style="margin:0; font-size:11px; padding:6px;" placeholder="KullanıcıAdı#12345">
-      <button class="icon-btn" style="background:var(--btn-green); white-space:nowrap;" onclick="sendFriendRequest()">Ekle</button>
+      <button class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="sendFriendRequest()">Ekle</button>
     </div>
 
-    <div style="font-size:11px; font-weight:bold; color:var(--gold); margin-bottom:4px;">Kayıtlı Tüm Oyuncular</div>
-    <div id="users-list-container" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
+    <!-- 1. KATEGORİ: ARKADAŞLARIM -->
+    <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">⭐ Arkadaşlarım:</div>
+    <div id="my-friends-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:12px;"></div>
+
+    <!-- 2. KATEGORİ: KAYITLI DİĞER TÜM OYUNCULAR (Arkadaşlar Hariç) -->
+    <div style="font-size:11px; font-weight:bold; color:#38bdf8; margin-bottom:4px;">🌐 Kayıtlı Diğer Oyuncular:</div>
+    <div id="other-users-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
   <div id="modal-reqs" class="modal-overlay">
     <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:var(--gold); text-align:center; margin-bottom:8px;">Gelen İstekler</div>
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">Gelen İstekler</div>
       <div id="reqs-list-box" style="display:flex; flex-direction:column; gap:4px;"></div>
       <button class="btn-close" onclick="document.getElementById('modal-reqs').style.display='none'">Kapat</button>
     </div>
@@ -35,32 +41,73 @@
 
   <script src="app.js"></script>
   <script>
+    let myFriendUIDs = [];
+
     window.onload = () => {
+      loadFriendsAndUsers();
+    };
+
+    function loadFriendsAndUsers() {
       const u = getActiveUser();
+      if (!u) return;
+
+      // 1. Arkadaşlarımı Çek
+      db.ref("friends/" + u.uid).on("value", snap => {
+        const myBox = document.getElementById("my-friends-list");
+        myBox.innerHTML = "";
+        myFriendUIDs = [];
+
+        if (!snap.exists()) {
+          myBox.innerHTML = "<div style='color:#666; font-size:10px; padding:6px;'>Henüz ekli arkadaşınız yok.</div>";
+        } else {
+          snap.forEach(c => {
+            const f = c.val();
+            myFriendUIDs.push(c.key);
+            myBox.innerHTML += `
+              <div class="rank-card">
+                <span style="font-size:11px;">⭐ <b>${f.fullName}</b></span>
+                <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="directMessageUser('${c.key}', '${f.fullName}')">💬 Mesaj</button>
+              </div>
+            `;
+          });
+        }
+
+        // 2. Kayıtlı Diğer Kullanıcıları Çek (Ekli olanlar gizlenir)
+        loadOtherUsers(u);
+      });
+    }
+
+    function loadOtherUsers(u) {
       db.ref("users").on("value", snap => {
-        const box = document.getElementById("users-list-container");
-        box.innerHTML = "";
+        const otherBox = document.getElementById("other-users-list");
+        otherBox.innerHTML = "";
+
         snap.forEach(c => {
           const reg = c.val();
           if (!reg || reg.uid === u.uid) return;
-          box.innerHTML += `
+          if (myFriendUIDs.includes(reg.uid)) return; // Arkadaş ise diğerler listesinde gösterme
+
+          const isDeleted = reg.fullName && reg.fullName.startsWith("deleteUser");
+
+          otherBox.innerHTML += `
             <div class="rank-card">
               <span style="font-size:11px;">👤 ${reg.fullName}</span>
               <div style="display:flex; gap:4px;">
-                <button class="icon-btn" style="border-color:var(--btn-green);" onclick="requestUser('${reg.uid}', '${reg.fullName}')">➕</button>
+                ${!isDeleted ? `<button class="icon-btn" style="border-color:var(--neon-green);" onclick="requestUser('${reg.uid}', '${reg.fullName}')">➕ İstek</button>` : '<span style="font-size:9px; color:#666;">Silinmiş</span>'}
                 <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="directMessageUser('${reg.uid}', '${reg.fullName}')">💬</button>
               </div>
             </div>
           `;
         });
       });
-    };
+    }
 
     function sendFriendRequest() {
       const tag = document.getElementById("in-tag-search").value.trim();
       const u = getActiveUser();
       if (!tag) return;
       if (tag === `${u.name}${u.tag}`) return alert("Kendinize arkadaşlık isteği gönderemezsiniz!");
+      if (tag.startsWith("deleteUser")) return alert("Silinmiş bir hesaba istek gönderemezsiniz!");
 
       db.ref("users").orderByChild("fullName").equalTo(tag).once("value", snap => {
         if (!snap.exists()) return alert("Bu etikete sahip kullanıcı bulunamadı!");
@@ -74,6 +121,8 @@
     function requestUser(targetUID, targetName) {
       const u = getActiveUser();
       if (targetUID === u.uid) return alert("Kendinize istek atamazsınız!");
+      if (targetName.startsWith("deleteUser")) return alert("Silinmiş kullanıcıya istek atılamaz!");
+
       db.ref(`friend_requests/${targetUID}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
       alert(`${targetName} kullanıcısına istek gönderildi!`);
     }
@@ -95,7 +144,7 @@
             <div class="rank-card">
               <span style="font-size:11px;">${r.fromName}</span>
               <div style="display:flex; gap:4px;">
-                <button class="icon-btn" style="border-color:var(--btn-green);" onclick="acceptReq('${r.fromUID}', '${r.fromName}')">Kabul</button>
+                <button class="icon-btn" style="border-color:var(--neon-green);" onclick="acceptReq('${r.fromUID}', '${r.fromName}')">Kabul</button>
                 <button class="icon-btn" style="border-color:var(--danger);" onclick="rejectReq('${r.fromUID}', '${r.fromName}')">Reddet</button>
               </div>
             </div>
