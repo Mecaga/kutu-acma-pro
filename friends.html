@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arkadaşlar</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+    <div class="lobby-header">
+        <button class="btn btn-purple" onclick="location.href='menu.html'">‹ Lobi</button>
+        <span id="header-user-tag"></span>
+    </div>
+
+    <div class="content-box">
+        <h2>👥 Arkadaş Ekle & Yönet</h2>
+        <div style="display: flex; gap: 8px; margin: 15px 0;">
+            <input type="text" id="friend-tag-input" placeholder="Örn: MecagaTR#12345" style="flex: 1;">
+            <button class="btn btn-green" onclick="sendFriendRequest()">İstek Gönder</button>
+        </div>
+
+        <h3 style="margin-top: 20px;">Ekli Arkadaşlar</h3>
+        <div id="friends-list" style="margin-top: 10px;"></div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        window.onload = () => {
+            renderHeader();
+            loadFriends();
+        };
+
+        function sendFriendRequest() {
+            let targetTag = document.getElementById("friend-tag-input").value.trim();
+            if (!targetTag) return alert("Etiketli kullanıcı adı giriniz!");
+            let u = getCurrentUser();
+
+            db.ref(`friends/${u.uid}/${targetTag.replace('#', '_')}`).set({
+                fullTag: targetTag,
+                addedDate: Date.now()
+            });
+            document.getElementById("friend-tag-input").value = "";
+            alert("Arkadaş başarıyla eklendi!");
+        }
+
+        function loadFriends() {
+            let u = getCurrentUser();
+            db.ref("friends/" + u.uid).on("value", snap => {
+                let container = document.getElementById("friends-list");
+                container.innerHTML = "";
+                snap.forEach(f => {
+                    container.innerHTML += `
+                        <div class="mode-card" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>👤 <b>${f.val().fullTag}</b></span>
+                            <button class="btn btn-danger" style="font-size: 11px; padding: 4px 8px;" onclick="removeFriend('${f.key}')">Sil</button>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function removeFriend(key) {
+            let u = getCurrentUser();
+            db.ref(`friends/${u.uid}/${key}`).remove();
+        }
+    </script>
+</body>
+</html>
+
