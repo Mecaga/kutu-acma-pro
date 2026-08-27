@@ -29,19 +29,23 @@
       <button id="btn-classic-open" class="btn-start" style="margin-top:auto;" onclick="spinClassicCase()">KASAYI AÇ (3s)</button>
     </div>
 
-    <!-- 2. YAKALA & AÇ 1. AŞAMA (ARENA) -->
+    <!-- 2. YAKALA & AÇ (1. AŞAMA: TOPLAMA) -->
     <div id="screen-catch-p1" style="display:none; flex-direction:column; flex:1;">
       <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--gold); margin-bottom:4px;">
-        <span>Süre: <b id="lbl-catch-timer">15s</b></span>
-        <span>Toplanan: <b id="lbl-caught-count">0</b></span>
+        <span>Toplama Süresi: <b id="lbl-catch-timer">15s</b></span>
+        <span>Yakalanan: <b id="lbl-caught-count">0</b></span>
       </div>
       <div id="catch-arena" style="flex:1; min-height:260px; background:#050a14; border:2px dashed #1e293b; border-radius:8px; position:relative; overflow:hidden;"></div>
       <div style="text-align:center; font-size:10px; color:#fbbf24; margin-top:4px;">⚡ Düşen kutulara dokunarak topla!</div>
     </div>
 
-    <!-- 2. YAKALA & AÇ 2. AŞAMA (KUTULARI AÇMA) -->
+    <!-- 2. YAKALA & AÇ (2. AŞAMA: CS RULETİYLE TEKER TEKER AÇMA) -->
     <div id="screen-catch-p2" style="display:none; flex-direction:column; flex:1;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <div class="roulette-container" id="catch-roulette-wrap">
+        <div class="roulette-needle"></div>
+        <div class="roulette-track" id="catch-roulette-track"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:4px 0;">
         <span style="font-size:11px; color:#38bdf8;">📦 Yakalanan Kutular (<span id="lbl-catch-rem">0</span>)</span>
         <button id="btn-open-all" class="icon-btn" style="background:var(--neon-purple);" onclick="openAllCaughtBoxes()">⚡ Tümünü Aç</button>
       </div>
@@ -55,7 +59,10 @@
         <span>Kasa: <b id="lbl-mine-score">0 P</b></span>
       </div>
       <div class="mines-grid-wrapper" id="mines-grid"></div>
-      <button id="btn-cashout" class="btn-start" style="margin-top:10px;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
+      <div style="display:flex; gap:6px; margin-top:10px;">
+        <button class="icon-btn" style="flex:1; border-color:var(--danger); justify-content:center;" onclick="location.href='menu.html'">‹ Geri Dön</button>
+        <button id="btn-cashout" class="btn-start" style="flex:2;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
+      </div>
     </div>
 
     <!-- 4. ORTAK OYUN SONU ÖZET EKRANI -->
@@ -68,8 +75,8 @@
       <div style="font-size:11px; color:var(--gold); font-weight:bold; margin-bottom:4px;">📋 Çıkan Eşyalar:</div>
       <div id="summary-drops-box" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
       <div style="display:flex; gap:6px;">
-        <button class="nav-action-btn" style="flex:1; background:var(--btn-blue);" onclick="location.reload()">🔄 Tekrar Oyna</button>
-        <a href="menu.html" class="nav-action-btn" style="flex:1; background:var(--danger);">🚪 Ana Menü</a>
+        <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar Oyna</button>
+        <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Ana Menü</a>
       </div>
     </div>
   </div>
@@ -117,7 +124,6 @@
     let sessionDrops = [];
     let isOpening = false;
 
-    // Mod Değişkenleri
     let timeLeft = 30;
     let timerInt = null;
     let remCount = 10;
@@ -134,8 +140,15 @@
       else startClassicMode();
     };
 
-    function getRandomItem(mKey = modeKey) {
+    function getRandomItem(mKey = modeKey, forcedTier = null) {
       const tiers = GAME_MODES[mKey].tiers;
+      if (forcedTier) {
+        const t = tiers.find(x => x.name === forcedTier) || tiers[0];
+        const it = t.items[Math.floor(Math.random() * t.items.length)];
+        const pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
+        return { tier: t.name, item: it, pts: pts, c: t.c };
+      }
+
       let rand = Math.random() * 100;
       if (mKey === 'upgrade_mode') rand = Math.max(0, rand - ((upgradeLvl - 1) * 8));
 
@@ -171,6 +184,7 @@
         document.getElementById("lbl-classic-info").innerText = "Kalan Kutu: 10";
       } else if (modeKey === 'upgrade_mode') {
         remCount = 7;
+        upgradeLvl = 1;
         document.getElementById("lbl-classic-info").innerText = "Kalan: 7 (Kademe 1)";
       }
     }
@@ -189,7 +203,25 @@
         document.getElementById("lbl-classic-info").innerText = `Kalan: ${remCount} (Kademe ${upgradeLvl})`;
       }
 
-      const track = document.getElementById("roulette-track");
+      runRouletteAnimation("roulette-track", "roulette-wrap", modeKey, null, (winDrop) => {
+        totalScore += winDrop.pts;
+        sessionDrops.push(winDrop);
+        document.getElementById("game-stat-badge").innerText = `${totalScore} P`;
+        document.getElementById("status-text").innerHTML = `🎉 <span style="color:${winDrop.c};">${winDrop.tier}</span> - ${winDrop.item} (+${winDrop.pts}P)`;
+
+        isOpening = false;
+        if (remCount === 0 || (modeKey === 'standard' && timeLeft <= 0)) {
+          setTimeout(() => showSummary(`${GAME_MODES[modeKey].name} Sonu`), 1500);
+        } else {
+          document.getElementById("btn-classic-open").disabled = false;
+        }
+      });
+    }
+
+    // Ortak CS:GO Rulet Bandı Fonksiyonu
+    function runRouletteAnimation(trackId, wrapId, mKey, forcedTier, onComplete) {
+      const track = document.getElementById(trackId);
+      const wrap = document.getElementById(wrapId);
       track.style.transition = "none";
       track.style.transform = "translateX(0px)";
       track.innerHTML = "";
@@ -198,7 +230,7 @@
       let winDrop = null;
 
       for (let i = 0; i < totalCards; i++) {
-        let d = getRandomItem();
+        let d = getRandomItem(mKey, i === winIdx ? forcedTier : null);
         if (i === winIdx) winDrop = d;
         track.innerHTML += `
           <div class="roulette-item" style="border-bottom:3px solid ${d.c};">
@@ -212,24 +244,12 @@
       setTimeout(() => {
         track.style.transition = "transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)";
         const itemWidth = 80;
-        const targetX = -(winIdx * itemWidth) + (document.getElementById("roulette-wrap").offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 20 - 10);
+        const targetX = -(winIdx * itemWidth) + (wrap.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 20 - 10);
         track.style.transform = `translateX(${targetX}px)`;
       }, 20);
 
       setTimeout(() => {
-        totalScore += winDrop.pts;
-        sessionDrops.push(winDrop);
-        document.getElementById("game-stat-badge").innerText = `${totalScore} P`;
-        document.getElementById("status-text").innerHTML = `🎉 <span style="color:${winDrop.c};">${winDrop.tier}</span> - ${winDrop.item} (+${winDrop.pts}P)`;
-
-        addXP(15);
-        isOpening = false;
-
-        if (remCount === 0 || (modeKey === 'standard' && timeLeft <= 0)) {
-          setTimeout(() => showSummary(`${GAME_MODES[modeKey].name} Sonu`), 2000);
-        } else {
-          document.getElementById("btn-classic-open").disabled = false;
-        }
+        onComplete(winDrop);
       }, 3100);
     }
 
@@ -248,7 +268,7 @@
         box.innerHTML = `<span>📦</span><span style="color:${d.c}; font-size:7px;">${d.tier}</span>`;
         box.onclick = (e) => {
           e.stopPropagation();
-          caughtBoxes.push({ ...d, opened: false });
+          caughtBoxes.push({ tier: d.tier, c: d.c, opened: false });
           document.getElementById("lbl-caught-count").innerText = caughtBoxes.length;
           box.remove();
         };
@@ -263,7 +283,7 @@
         if (cTime <= 0) {
           clearInterval(cd);
           clearInterval(spawnInt);
-          setTimeout(startCatchPhase2, 2000);
+          setTimeout(startCatchPhase2, 1000);
         }
       }, 1000);
     }
@@ -293,35 +313,43 @@
         itemBox.innerHTML = `
           <span>📦</span>
           <span style="color:${b.c}; font-size:8px;">${b.tier}</span>
-          <span style="font-size:7px;">${b.opened ? '+'+b.pts+'P' : 'DOKUN AÇ'}</span>
+          <span style="font-size:7px;">${b.opened ? 'AÇILDI' : 'DOKUN AÇ'}</span>
         `;
         if (!b.opened) {
-          itemBox.onclick = () => openSingleCaught(idx);
+          itemBox.onclick = () => openSingleCaughtWithRoulette(idx);
         }
         grid.appendChild(itemBox);
       });
     }
 
-    function openSingleCaught(idx) {
-      if (caughtBoxes[idx].opened) return;
-      caughtBoxes[idx].opened = true;
-      totalScore += caughtBoxes[idx].pts;
-      sessionDrops.push(caughtBoxes[idx]);
-      document.getElementById("game-stat-badge").innerText = `${totalScore} P`;
-      renderCatchGrid();
+    function openSingleCaughtWithRoulette(idx) {
+      if (isOpening || caughtBoxes[idx].opened) return;
+      isOpening = true;
 
-      if (caughtBoxes.every(b => b.opened)) {
-        setTimeout(() => showSummary("Yakala & Aç Tamamlandı!"), 2000);
-      }
+      const targetBox = caughtBoxes[idx];
+      runRouletteAnimation("catch-roulette-track", "catch-roulette-wrap", 'catch_open', targetBox.tier, (winDrop) => {
+        targetBox.opened = true;
+        totalScore += winDrop.pts;
+        sessionDrops.push(winDrop);
+        document.getElementById("game-stat-badge").innerText = `${totalScore} P`;
+        isOpening = false;
+        renderCatchGrid();
+
+        if (caughtBoxes.every(b => b.opened)) {
+          setTimeout(() => showSummary("Yakala & Aç Tamamlandı!"), 2000);
+        }
+      });
     }
 
     function openAllCaughtBoxes() {
+      if (isOpening) return;
       document.getElementById("btn-open-all").disabled = true;
       caughtBoxes.forEach(b => {
         if (!b.opened) {
           b.opened = true;
-          totalScore += b.pts;
-          sessionDrops.push(b);
+          const drop = getRandomItem('catch_open', b.tier);
+          totalScore += drop.pts;
+          sessionDrops.push(drop);
         }
       });
       document.getElementById("game-stat-badge").innerText = `${totalScore} P`;
@@ -329,7 +357,7 @@
       setTimeout(() => showSummary("Yakala & Aç - Tüm Kutular Açıldı"), 2000);
     }
 
-    // --- 3. MAYINLI KASA (TAM ÇALIŞAN GARANTİ PANEL) ---
+    // --- 3. MAYINLI KASA ---
     function startMines() {
       document.getElementById("screen-mines").style.display = "flex";
       const grid = document.getElementById("mines-grid");
@@ -361,7 +389,7 @@
             document.getElementById("lbl-mine-status").innerText = "BOMBA PATLADI!";
             totalScore = 0;
             sessionDrops = [{ tier: "Mayın", item: "Bomba Patladı (Puan Sıfırlandı)", pts: 0, c: "#ef4444" }];
-            setTimeout(() => showSummary("💣 MAYINA BASTIN - 0 PUAN"), 2000);
+            setTimeout(() => showSummary("💣 MAYINA BASTIN - 0 PUAN"), 1500);
           } else {
             safeMineCount++;
             const d = getRandomItem('mines_mode');
@@ -390,7 +418,7 @@
       showSummary("💰 KASADAN BAŞARIYLA ÇEKİLDİN!");
     }
 
-    // --- ORTAK ÖZET & SKOR KAYIT ---
+    // --- ORTAK ÖZET & SIRALAMAYA YAZMA ---
     function showSummary(title) {
       document.getElementById("screen-classic").style.display = "none";
       document.getElementById("screen-catch-p1").style.display = "none";
