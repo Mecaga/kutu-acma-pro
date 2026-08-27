@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kutu Açma & Arena - Giriş</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <main style="display: flex; align-items: center; justify-content: center; height: 80vh;">
+        <div class="card" style="text-align: center; max-width: 400px; width: 100%; padding: 30px;">
+            <h1 style="color: var(--gold); margin-bottom: 10px;">📦 Kutu Açma Pro</h1>
+            <p style="margin-bottom: 20px; color: #8b949e;">MecagaTR Evrenine Hoş Geldiniz!</p>
+            <input type="text" id="username-input" placeholder="Oyuncu Adınızı Girin" value="MecagaTR">
+            <button class="btn btn-blue" style="width: 100%; margin-top: 15px; padding: 12px;" onclick="startGame()">Oyuna Başla</button>
+        </div>
+    </main>
+    <footer>Geliştirici: MecagaTR | Tüm Hakları Saklıdır</footer>
+
+    <script src="app.js"></script>
+    <script>
+        function startGame() {
+            let name = document.getElementById("username-input").value.trim();
+            let u = getUser();
+            if (name) u.name = name;
+            saveUser(u);
+            window.location.href = "menu.html";
+        }
+    </script>
+</body>
+</html>
