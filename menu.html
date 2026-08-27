@@ -11,27 +11,22 @@
 <body>
   <div class="app-container">
     <div class="top-header">
-      <div class="app-title" onclick="openProfileModal()">
-        👤 <span id="lbl-username">Yükleniyor...</span> <span id="lbl-title" style="color:var(--gold); font-size:12px;"></span>
+      <div class="app-title" onclick="openMyProfile()">
+        👤 <span id="lbl-username">...</span>
       </div>
-      <div class="btn-group-top">
+      <div style="display:flex; gap:4px;">
         <a href="leaderboard.html" class="icon-btn">🏆 Sıralama</a>
-        <button class="icon-btn" onclick="openSettingsModal()">⚙️ Ayarlar</button>
-        <button class="icon-btn" style="border-color:var(--danger);" onclick="logout()">🚪 Çıkış</button>
+        <button class="icon-btn" onclick="logout()" style="border-color:var(--danger);">🚪 Çıkış</button>
       </div>
     </div>
 
-    <div class="quest-box">
-      <span>🎯 Günlük Görev: 3 Kasa Aç</span>
-      <span id="lbl-quest" style="color:var(--gold); font-weight:bold;">0/3</span>
+    <!-- Sohbetler ve Arkadaşlar -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px;">
+      <a href="chat.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff;">💬 Sohbetler</a>
+      <a href="friends.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff;">👥 Arkadaşlar</a>
     </div>
 
-    <div class="nav-action-grid">
-      <a href="chat.html" class="nav-action-btn">💬 Sohbetler - Kanallar</a>
-      <a href="friends.html" class="nav-action-btn">👥 Arkadaşlar</a>
-    </div>
-
-    <!-- Modlar -->
+    <!-- 6 Farklı Mod -->
     <div class="mode-grid">
       <button class="mode-btn active" onclick="selectGameMode('standard', this)">
         ⚔️ Normal Kasa (30s)
@@ -43,7 +38,7 @@
       </button>
       <button class="mode-btn" onclick="selectGameMode('catch_open', this)">
         🎯 Yakala & Aç Modu (15s)
-        <div style="font-size:9px; color:#94a3b8;">Kutuları yakala, teker teker aç</div>
+        <div style="font-size:9px; color:#94a3b8;">Kutuları yakala, CS ruletinde aç</div>
       </button>
       <button class="mode-btn" onclick="selectGameMode('upgrade_mode', this)">
         📈 Şans Yükseltme Modu (7 Kutu)
@@ -59,67 +54,77 @@
       </button>
     </div>
 
-    <!-- Seçilen Modun Dinamik Oran Kutusu -->
+    <!-- Renkli Nadirlik Tablosu -->
     <div class="menu-preview-box" id="rates-preview-box"></div>
 
     <button class="btn-start" onclick="launchGame()">OYUNA BAŞLA</button>
-  </div>
-
-  <!-- Ayarlar Modalı -->
-  <div id="modal-settings" class="modal-overlay">
-    <div class="modal-card">
-      <div style="font-size:14px; font-weight:bold; color:var(--gold); text-align:center; margin-bottom:10px;">⚙️ Oyun Ayarları</div>
-      <button id="btn-sound-toggle" class="nav-action-btn" style="margin-bottom:8px;" onclick="toggleSound()">🔊 Ses: Açık</button>
-      <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;">Unvan Seç:</div>
-      <select id="sel-title" class="input-field" onchange="changeTitle(this.value)">
-        <option value="Çaylak">Çaylak</option>
-        <option value="Usta">Usta</option>
-        <option value="Efsane">Efsane</option>
-        <option value="Kral">Kral</option>
-      </select>
-      <button class="btn-close" onclick="closeSettingsModal()">Kapat</button>
-    </div>
-  </div>
-
-  <!-- Profil Modalı (Kullanıcı Adına Basınca) -->
-  <div id="modal-profile" class="modal-overlay">
-    <div class="modal-card" style="text-align:center;">
-      <div style="font-size:36px; margin:6px 0;">👤</div>
-      <h3 id="prof-name">Mecaga#12345</h3>
-      <div id="prof-title" style="color:var(--gold); font-size:12px; margin-bottom:10px;">[Çaylak]</div>
-      <div style="font-size:11px; line-height:1.8; text-align:left; background:#050a14; padding:8px; border-radius:6px;">
-        <div><b>Seviye:</b> <span id="prof-lvl">Lvl 1</span></div>
-        <div><b>XP:</b> <span id="prof-xp">0/100</span></div>
-        <div><b>Altın:</b> <span id="prof-gold">500</span></div>
-      </div>
-      <div style="display:flex; gap:4px; margin-top:10px;">
-        <a href="chat.html" class="nav-action-btn" style="flex:1; background:var(--btn-blue);">💬 Mesaj Yaz</a>
-        <a href="friends.html" class="nav-action-btn" style="flex:1; background:var(--btn-green);">➕ Arkadaş Ekle</a>
-      </div>
-      <button class="btn-close" onclick="closeProfileModal()">Kapat</button>
-    </div>
   </div>
 
   <script src="app.js"></script>
   <script>
     let activeMode = 'standard';
     const MODE_RATES = {
-      standard: { title: "NORMAL KASA ORANLARI", rates: "Classic (%58): 1-3P | Super (%29): 4-10P | Ultra (%10): 12-30P | Omega (%2.8): 35-120P | Godly (%0.2): 500-1000P" },
-      ten_cases: { title: "10 KUTU MODU ORANLARI", rates: "Classic (%35): 2-5P | Super (%35): 6-15P | Ultra (%20): 20-50P | Omega (%8.5): 60-200P | Godly (%1.5): 600-1200P" },
-      catch_open: { title: "YAKALA & AÇ ORANLARI", rates: "Classic (%45): 2-5P | Super (%30): 6-18P | Ultra (%15): 25-60P | Omega (%8): 80-250P | Godly (%2): 750-1500P" },
-      upgrade_mode: { title: "ŞANS YÜKSELTME ORANLARI", rates: "Kademe 1 (%60): 5-15P | Kademe 2 (%25): 20-60P | Kademe 3 (%10): 70-180P | Kozmik (%5): 250-800P" },
-      mines_mode: { title: "MAYINLI KASA ORANLARI", rates: "Güvenli Kasa (%70): 15-45P | Büyük Hazine (%30): 60-160P" },
-      pvp_mode: { title: "ONLINE PVP ORANLARI", rates: "Bronz (%50): 2-6P | Gümüş (%30): 8-20P | Altın (%15): 25-70P | Elmas (%5): 80-300P" }
+      standard: {
+        title: "NORMAL KASA ORANLARI",
+        tiers: [
+          { name: "Classic (%58)", pts: "1-3 P", c: "#ffffff" },
+          { name: "Super (%29)", pts: "4-10 P", c: "#38bdf8" },
+          { name: "Ultra (%10)", pts: "12-30 P", c: "#c084fc" },
+          { name: "Omega (%2.8)", pts: "35-120 P", c: "#fb923c" },
+          { name: "Godly (%0.2)", pts: "500-1000 P", c: "#f43f5e" }
+        ]
+      },
+      ten_cases: {
+        title: "10 KUTU MODU ORANLARI",
+        tiers: [
+          { name: "Classic (%35)", pts: "2-5 P", c: "#ffffff" },
+          { name: "Super (%35)", pts: "6-15 P", c: "#38bdf8" },
+          { name: "Ultra (%20)", pts: "20-50 P", c: "#c084fc" },
+          { name: "Omega (%8.5)", pts: "60-200 P", c: "#fb923c" },
+          { name: "Godly (%1.5)", pts: "600-1200 P", c: "#f43f5e" }
+        ]
+      },
+      catch_open: {
+        title: "YAKALA & AÇ ORANLARI",
+        tiers: [
+          { name: "Classic Kasa (%45)", pts: "2-5 P", c: "#ffffff" },
+          { name: "Super Kasa (%30)", pts: "6-18 P", c: "#38bdf8" },
+          { name: "Ultra Kasa (%15)", pts: "25-60 P", c: "#c084fc" },
+          { name: "Omega Kasa (%8)", pts: "80-250 P", c: "#fb923c" },
+          { name: "Godly Kasa (%2)", pts: "750-1500 P", c: "#f43f5e" }
+        ]
+      },
+      upgrade_mode: {
+        title: "ŞANS YÜKSELTME ORANLARI",
+        tiers: [
+          { name: "Kademe 1 (%60)", pts: "5-15 P", c: "#ffffff" },
+          { name: "Kademe 2 (%25)", pts: "20-60 P", c: "#38bdf8" },
+          { name: "Kademe 3 (%10)", pts: "70-180 P", c: "#c084fc" },
+          { name: "Kozmik (%5)", pts: "250-800 P", c: "#f43f5e" }
+        ]
+      },
+      mines_mode: {
+        title: "MAYINLI KASA ORANLARI",
+        tiers: [
+          { name: "Güvenli Kasa (%70)", pts: "15-45 P", c: "#10b981" },
+          { name: "Büyük Hazine (%30)", pts: "60-160 P", c: "#fbbf24" }
+        ]
+      },
+      pvp_mode: {
+        title: "ONLINE PVP ORANLARI",
+        tiers: [
+          { name: "Bronz (%50)", pts: "2-6 P", c: "#ffffff" },
+          { name: "Gümüş (%30)", pts: "8-20 P", c: "#38bdf8" },
+          { name: "Altın (%15)", pts: "25-70 P", c: "#fbbf24" },
+          { name: "Elmas (%5)", pts: "80-300 P", c: "#f43f5e" }
+        ]
+      }
     };
 
     window.onload = () => {
       const u = getActiveUser();
       if (!u) return window.location.href = "index.html";
-
       document.getElementById("lbl-username").innerText = `${u.name}${u.tag}`;
-      document.getElementById("lbl-title").innerText = `[${u.title || 'Çaylak'}]`;
-      document.getElementById("sel-title").value = u.title || "Çaylak";
-      document.getElementById("btn-sound-toggle").innerText = u.sound ? "🔊 Ses: Açık" : "🔇 Ses: Kapalı";
       renderRatesPreview('standard');
     };
 
@@ -132,10 +137,11 @@
 
     function renderRatesPreview(key) {
       const info = MODE_RATES[key];
-      document.getElementById("rates-preview-box").innerHTML = `
-        <div style="color:var(--gold); font-weight:bold; margin-bottom:2px;">📊 ${info.title}</div>
-        <div style="color:#cbd5e1;">${info.rates}</div>
-      `;
+      let html = `<div style="color:var(--gold); font-weight:bold; margin-bottom:4px;">📊 ${info.title}</div>`;
+      info.tiers.forEach(t => {
+        html += `<div style="display:flex; justify-content:space-between; color:${t.c};"><span>${t.name}</span><span>${t.pts}</span></div>`;
+      });
+      document.getElementById("rates-preview-box").innerHTML = html;
     }
 
     function launchGame() {
@@ -143,31 +149,9 @@
       else window.location.href = "game1.html?mode=" + activeMode;
     }
 
-    function openSettingsModal() { document.getElementById("modal-settings").style.display = "flex"; }
-    function closeSettingsModal() { document.getElementById("modal-settings").style.display = "none"; }
-    function toggleSound() {
-      let u = getActiveUser();
-      u.sound = !u.sound;
-      setActiveUser(u);
-      document.getElementById("btn-sound-toggle").innerText = u.sound ? "🔊 Ses: Açık" : "🔇 Ses: Kapalı";
+    function openMyProfile() {
+      window.location.href = "user.html";
     }
-    function changeTitle(val) {
-      let u = getActiveUser();
-      u.title = val;
-      setActiveUser(u);
-      document.getElementById("lbl-title").innerText = `[${val}]`;
-    }
-
-    function openProfileModal() {
-      let u = getActiveUser();
-      document.getElementById("prof-name").innerText = `${u.name}${u.tag}`;
-      document.getElementById("prof-title").innerText = `[${u.title || 'Çaylak'}]`;
-      document.getElementById("prof-lvl").innerText = `Lvl ${u.level || 1}`;
-      document.getElementById("prof-xp").innerText = `${u.xp || 0}/${(u.level || 1) * 100}`;
-      document.getElementById("prof-gold").innerText = u.gold || 500;
-      document.getElementById("modal-profile").style.display = "flex";
-    }
-    function closeProfileModal() { document.getElementById("modal-profile").style.display = "none"; }
 
     function logout() {
       localStorage.removeItem("kutu_active_session");
