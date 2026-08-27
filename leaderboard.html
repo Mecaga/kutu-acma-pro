@@ -1,60 +1,60 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sıralama Tablosu</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sıralama Tablosu</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-
+  <div class="app-container">
     <div class="lobby-header">
-        <button class="btn btn-purple" onclick="location.href='menu.html'">‹ Lobi</button>
-        <span id="header-user-tag"></span>
+      <a href="menu.html" class="btn-sm" style="background:var(--neon-purple);">‹ Lobi</a>
+      <div style="font-weight:bold; font-size:12px;">🏆 Sıralama Tablosu</div>
+      <div></div>
     </div>
 
-    <div class="content-box">
-        <h2>🏆 En İyi Oyuncular Sıralaması</h2>
-        <div class="mode-card" style="margin-top: 15px;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                <thead>
-                    <tr style="border-bottom: 1px solid #3b206b; color: var(--gold); font-size: 14px;">
-                        <th style="padding: 10px;">#</th>
-                        <th style="padding: 10px;">Oyuncu</th>
-                        <th style="padding: 10px;">Unvan</th>
-                        <th style="padding: 10px;">Seviye</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-rows"></tbody>
-            </table>
-        </div>
+    <div style="padding: 10px 14px; flex:1; overflow-y:auto;">
+      <div class="mode-card">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Oyuncu</th>
+              <th>Unvan</th>
+              <th>Seviye</th>
+            </tr>
+          </thead>
+          <tbody id="lb-rows"></tbody>
+        </table>
+      </div>
     </div>
+  </div>
 
-    <script src="app.js"></script>
-    <script>
-        window.onload = () => {
-            renderHeader();
-            db.ref("leaderboard").orderByChild("level").limitToLast(15).on("value", snap => {
-                let tbody = document.getElementById("leaderboard-rows");
-                tbody.innerHTML = "";
-                let list = [];
-                snap.forEach(c => list.push(c.val()));
-                list.reverse();
+  <script src="app.js"></script>
+  <script>
+    window.onload = () => {
+      db.ref("registered_users").orderByChild("level").limitToLast(20).on("value", snap => {
+        let b = document.getElementById("lb-rows");
+        b.innerHTML = "";
+        let list = [];
+        snap.forEach(c => list.push(c.val()));
+        list.reverse();
 
-                list.forEach((p, idx) => {
-                    tbody.innerHTML += `
-                        <tr style="border-bottom: 1px solid #241349; font-size: 14px;">
-                            <td style="padding: 10px; font-weight: bold; color: var(--neon-purple);">${idx + 1}</td>
-                            <td style="padding: 10px;">${p.fullName}</td>
-                            <td style="padding: 10px; color: #c084fc;">[${p.title}]</td>
-                            <td style="padding: 10px; font-weight: bold; color: var(--gold);">Lvl ${p.level}</td>
-                        </tr>
-                    `;
-                });
-            });
-        };
-    </script>
+        list.forEach((p, i) => {
+          b.innerHTML += `
+            <tr>
+              <td style="font-weight:bold; color:var(--neon-purple);">${i + 1}</td>
+              <td>${p.fullName}</td>
+              <td style="color:#c084fc;">[${p.title}]</td>
+              <td style="font-weight:bold; color:var(--gold);">Lvl ${p.level || 1}</td>
+            </tr>
+          `;
+        });
+      });
+    };
+  </script>
 </body>
 </html>
