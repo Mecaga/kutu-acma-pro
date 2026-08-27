@@ -3,63 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oyun Modu</title>
+  <title>Kutu Açma Modu</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
   <div class="app-container">
-    <div class="lobby-header">
-      <a href="menu.html" class="btn-sm" style="background:var(--danger);">‹ Çıkış</a>
-      <div id="game-mode-name" style="font-weight:bold; font-size:12px;">Normal Kasa</div>
-      <div id="game-timer" style="color:var(--gold); font-weight:bold;">30s</div>
+    <div class="top-header">
+      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+      <div id="game-title" style="font-weight:bold; font-size:12px;">CS Kasa Ruleti</div>
+      <div id="game-score-badge" style="color:var(--gold); font-weight:bold;">0 P</div>
     </div>
 
-    <div style="padding:15px; display:flex; justify-content:space-between;">
-      <div>Puan: <b id="g-score" style="color:var(--btn-green); font-size:18px;">0</b></div>
-      <div>Kalan: <b id="g-rem" style="color:var(--gold);">10</b></div>
+    <!-- CS:GO Rulet Bandı -->
+    <div class="roulette-container" id="roulette-wrap">
+      <div class="roulette-needle"></div>
+      <div class="roulette-track" id="roulette-track"></div>
     </div>
 
-    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:15px;">
-      <div id="box-visual" style="font-size:70px; margin-bottom:10px;">📦</div>
-      <div id="drop-result" style="font-size:14px; font-weight:bold; color:#60a5fa; text-align:center;">Kasayı Açmak İçin Dokun!</div>
+    <div id="status-text" style="text-align:center; font-size:12px; font-weight:bold; color:var(--neon-blue); margin:6px 0;">
+      Kasayı açmak için butona bas!
     </div>
 
-    <button id="open-btn" class="btn-play-main" onclick="openBox()">KASAYI AÇ</button>
+    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+      <span style="font-size:10px; color:#94a3b8;">Kalan Kutu: <b id="lbl-rem-boxes">10</b></span>
+      <button id="btn-all-open" class="icon-btn" style="background:var(--neon-purple); display:none;" onclick="openAllBoxesInstant()">⚡ Tümünü Aç</button>
+    </div>
+
+    <div id="inventory-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; flex:1; overflow-y:auto; margin-bottom:6px;"></div>
+
+    <button id="btn-action-open" class="btn-start" onclick="spinCSCase()">KASAYI AÇ (3s)</button>
   </div>
 
   <script src="app.js"></script>
   <script>
-    let score = 0;
-    let rem = 10;
-    const drops = [
-      { name: "Tahta Kılıç", pts: 2, r: "Classic" },
-      { name: "Demir Balta", pts: 6, r: "Super" },
-      { name: "Büyülü Asa", pts: 20, r: "Ultra" },
-      { name: "Ejder Baltası", pts: 80, r: "Omega" },
-      { name: "Kristal Kılıç", pts: 750, r: "Godly" }
+    const TIERS = [
+      { name: 'Classic', rate: 58, minP: 1, maxP: 3, c: '#fff', items: ['Tahta Kılıç', 'Deri Kask'] },
+      { name: 'Super',   rate: 29, minP: 4, maxP: 10, c: '#38bdf8', items: ['Demir Balta', 'Gümüş Yüzük'] },
+      { name: 'Ultra',   rate: 10, minP: 12, maxP: 30, c: '#c084fc', items: ['Büyülü Asa', 'Ateş Pelerini'] },
+      { name: 'Omega',   rate: 2.8, minP: 35, maxP: 120, c: '#fb923c', items: ['Ejder Baltası'] },
+      { name: 'Godly',   rate: 0.2, minP: 500, maxP: 1000, c: '#f43f5e', items: ['Kristal Kılıç'] }
     ];
 
-    function openBox() {
-      if (rem <= 0) return;
-      rem--;
-      let d = drops[Math.floor(Math.random() * drops.length)];
-      score += d.pts;
-      document.getElementById("g-score").innerText = score;
-      document.getElementById("g-rem").innerText = rem;
-      document.getElementById("drop-result").innerHTML = `<span style="color:var(--gold);">[${d.r}]</span> ${d.name} (+${d.pts}P)`;
+    let currentScore = 0;
+    let remBoxes = 10;
+    let isSpinning = false;
 
-      let u = getUser();
-      u.dailyQuest = Math.min(3, u.dailyQuest + 1);
-      addXP(15);
-      saveUser(u);
-
-      if (rem === 0) {
-        document.getElementById("open-btn").disabled = true;
-        document.getElementById("open-btn").innerText = "TAMAMLANDI!";
-        setTimeout(() => { alert("Oyun Bitti! Puanınız: " + score); window.location.href="menu.html"; }, 1000);
+    function getRandomItem() {
+      let rand = Math.random() * 100, cum = 0;
+      for (let t of TIERS) {
+        cum += t.rate;
+        if (rand <= cum) {
+          let item = t.items[Math.floor(Math.random() * t.items.length)];
+          let pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
+          return { tier: t.name, item: item, pts: pts, c: t.c };
+        }
       }
+      return { tier: TIERS[0].name, item: TIERS[0].items[0], pts: TIERS[0].minP, c: TIERS[0].c };
+    }
+
+    function spinCSCase() {
+      if (isSpinning || remBoxes <= 0) return;
+      isSpinning = true;
+      remBoxes--;
+      document.getElementById("lbl-rem-boxes").innerText = remBoxes;
+      document.getElementById("btn-action-open").disabled = true;
+
+      const track = document.getElementById("roulette-track");
+      track.style.transition = "none";
+      track.style.transform = "translateX(0px)";
+      track.innerHTML = "";
+
+      const totalItems = 30, winIdx = 24;
+      let winDrop = null;
+
+      for (let i = 0; i < totalItems; i++) {
+        let drop = getRandomItem();
+        if (i === winIdx) winDrop = drop;
+
+        let card = document.createElement("div");
+        card.className = "roulette-item";
+        card.style.borderBottom = `3px solid ${drop.c}`;
+        card.innerHTML = `
+          <span style="color:${drop.c}; font-weight:bold;">${drop.tier}</span>
+          <span style="font-size:8px; margin:2px 0;">${drop.item}</span>
+          <span style="color:var(--btn-green);">+${drop.pts}P</span>
+        `;
+        track.appendChild(card);
+      }
+
+      setTimeout(() => {
+        track.style.transition = "transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)";
+        const itemWidth = 80;
+        const targetX = -(winIdx * itemWidth) + (document.getElementById("roulette-wrap").offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 20 - 10);
+        track.style.transform = `translateX(${targetX}px)`;
+      }, 20);
+
+      setTimeout(() => {
+        currentScore += winDrop.pts;
+        document.getElementById("game-score-badge").innerText = `${currentScore} P`;
+        document.getElementById("status-text").innerHTML = `🎉 <span style="color:${winDrop.c};">${winDrop.tier}</span> - ${winDrop.item} (+${winDrop.pts}P)`;
+
+        addXP(15);
+        isSpinning = false;
+        document.getElementById("btn-action-open").disabled = false;
+
+        if (remBoxes === 0) {
+          document.getElementById("status-text").innerText = "Tüm kutular bitti! 5 saniye içinde menüye dönülüyor...";
+          setTimeout(() => {
+            alert(`Oyun Bitti! Toplam Puan: ${currentScore}`);
+            window.location.href = "menu.html";
+          }, 5000);
+        }
+      }, 3100);
     }
   </script>
 </body>
