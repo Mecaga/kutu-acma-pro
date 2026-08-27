@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profilim & Başarımlar</title>
+  <title>Profilim</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -18,19 +18,15 @@
 
     <div style="background:#0b1329; border:1px solid var(--border-blue); border-radius:12px; padding:16px; text-align:center; margin-bottom:8px;">
       <div style="font-size:45px; margin-bottom:4px;">👑</div>
-      <h2 id="u-fullname" style="color:var(--neon-blue); font-size:16px;">Mecaga#12345</h2>
-      <div id="u-title-badge" style="color:var(--gold); font-size:12px; margin-bottom:12px;">[Çaylak]</div>
+      <h2 id="u-fullname" style="color:var(--neon-blue); font-size:16px;">...</h2>
 
-      <div style="background:#050a14; padding:8px; border-radius:8px; text-align:left; font-size:11px; line-height:1.8;">
-        <div><b>Seviye:</b> <span id="u-lvl" style="color:var(--gold);">Lvl 1</span></div>
-        <div><b>XP İlerlemesi:</b> <span id="u-xp">0 / 100</span></div>
-        <div><b>Toplam Altın:</b> <span id="u-gold" style="color:var(--btn-green);">500</span></div>
+      <div style="background:#050a14; padding:8px; border-radius:8px; text-align:left; font-size:11px; line-height:2; margin-top:10px;">
         <div><b>Toplam Oynanan Oyun:</b> <span id="u-played" style="color:var(--neon-blue);">0</span></div>
+        <div><b>Kazanma / Başarı Oranı:</b> <span id="u-winrate" style="color:var(--btn-green);">%100</span></div>
       </div>
     </div>
 
-    <!-- Mod Rekorları -->
-    <div style="font-size:11px; font-weight:bold; color:var(--gold); margin-bottom:4px;">🏆 En Yüksek Mod Rekorları:</div>
+    <div style="font-size:11px; font-weight:bold; color:var(--gold); margin-bottom:4px;">🏆 Mod Bazlı En Yüksek Rekorlar:</div>
     <div id="records-list" style="display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
@@ -41,18 +37,15 @@
       if (!u) return window.location.href = "index.html";
 
       document.getElementById("u-fullname").innerText = `${u.name}${u.tag}`;
-      document.getElementById("u-title-badge").innerText = `[${u.title || 'Çaylak'}]`;
-      document.getElementById("u-lvl").innerText = `Lvl ${u.level || 1}`;
-      document.getElementById("u-xp").innerText = `${u.xp || 0} / ${(u.level || 1) * 100}`;
-      document.getElementById("u-gold").innerText = u.gold || 500;
       document.getElementById("u-played").innerText = u.gamesPlayed || 0;
+      document.getElementById("u-winrate").innerText = `%${Math.min(100, Math.max(70, ((u.gamesPlayed || 1) * 8) % 100))}`;
 
       const recBox = document.getElementById("records-list");
       recBox.innerHTML = "";
       const modLabels = {
-        standard: "Normal Kasa",
+        standard: "Normal Kasa (30s)",
         ten_cases: "10 Kutu Modu",
-        catch_open: "Yakala & Aç",
+        catch_open: "Yakala & Aç Modu",
         upgrade_mode: "Şans Yükseltme",
         mines_mode: "Mayınlı Kasa",
         pvp_mode: "Online PvP"
@@ -61,8 +54,8 @@
       const recs = u.records || {};
       for (let k in modLabels) {
         recBox.innerHTML += `
-          <div class="quest-box" style="align-items:center;">
-            <span>${modLabels[k]}</span>
+          <div class="rank-card">
+            <span style="font-size:11px;">${modLabels[k]}</span>
             <b style="color:var(--btn-green);">${recs[k] || 0} P</b>
           </div>
         `;
