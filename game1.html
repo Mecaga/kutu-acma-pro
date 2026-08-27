@@ -35,7 +35,7 @@
         <span>Süre: <b id="lbl-catch-timer">15s</b></span>
         <span>Toplanan: <b id="lbl-caught-count">0</b></span>
       </div>
-      <div id="catch-arena" style="flex:1; background:#050a14; border:2px dashed #1e293b; border-radius:8px; position:relative; overflow:hidden;"></div>
+      <div id="catch-arena" style="flex:1; min-height:260px; background:#050a14; border:2px dashed #1e293b; border-radius:8px; position:relative; overflow:hidden;"></div>
       <div style="text-align:center; font-size:10px; color:#fbbf24; margin-top:4px;">⚡ Düşen kutulara dokunarak topla!</div>
     </div>
 
@@ -49,13 +49,13 @@
     </div>
 
     <!-- 3. MAYINLI KASA MODU EKRANI -->
-    <div id="screen-mines" style="display:none; flex-direction:column; flex:1;">
+    <div id="screen-mines" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
       <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--gold); margin-bottom:6px;">
         <span id="lbl-mine-status">9 Kutuda 1 Mayın!</span>
         <span>Kasa: <b id="lbl-mine-score">0 P</b></span>
       </div>
-      <div id="mines-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; flex:1; align-content:center;"></div>
-      <button id="btn-cashout" class="btn-start" style="margin-top:auto;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
+      <div class="mines-grid-wrapper" id="mines-grid"></div>
+      <button id="btn-cashout" class="btn-start" style="margin-top:10px;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
     </div>
 
     <!-- 4. ORTAK OYUN SONU ÖZET EKRANI -->
@@ -117,7 +117,7 @@
     let sessionDrops = [];
     let isOpening = false;
 
-    // Mod Durum Değişkenleri
+    // Mod Değişkenleri
     let timeLeft = 30;
     let timerInt = null;
     let remCount = 10;
@@ -243,7 +243,8 @@
         if (cTime <= 0) return clearInterval(spawnInt);
         const d = getRandomItem('catch_open');
         const box = document.createElement("div");
-        box.style.cssText = `position:absolute; width:45px; height:45px; border-radius:8px; border:2px solid ${d.c}; background:#0d1b2a; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; cursor:pointer; left:${Math.random() * (arena.offsetWidth - 55 || 250)}px; top:-50px; transition:top 2s linear;`;
+        const maxW = Math.max(180, (arena.offsetWidth || 300) - 50);
+        box.style.cssText = `position:absolute; width:45px; height:45px; border-radius:8px; border:2px solid ${d.c}; background:#0d1b2a; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; cursor:pointer; left:${Math.random() * maxW}px; top:-50px; transition:top 2s linear;`;
         box.innerHTML = `<span>📦</span><span style="color:${d.c}; font-size:7px;">${d.tier}</span>`;
         box.onclick = (e) => {
           e.stopPropagation();
@@ -252,7 +253,7 @@
           box.remove();
         };
         arena.appendChild(box);
-        setTimeout(() => box.style.top = "380px", 20);
+        setTimeout(() => box.style.top = "300px", 20);
         setTimeout(() => { if (box.parentNode) box.remove(); }, 2100);
       }, 850);
 
@@ -328,7 +329,7 @@
       setTimeout(() => showSummary("Yakala & Aç - Tüm Kutular Açıldı"), 2000);
     }
 
-    // --- 3. MAYINLI KASA (TAMAMEN ONARILDI) ---
+    // --- 3. MAYINLI KASA (TAM ÇALIŞAN GARANTİ PANEL) ---
     function startMines() {
       document.getElementById("screen-mines").style.display = "flex";
       const grid = document.getElementById("mines-grid");
@@ -344,19 +345,18 @@
       const bombIdx = Math.floor(Math.random() * 9);
 
       for (let i = 0; i < 9; i++) {
-        const tile = document.createElement("div");
-        tile.className = "roulette-item";
-        tile.style.cssText = "width:100%; height:80px; cursor:pointer; background:#0d1527; border:2px solid #334155; border-radius:8px;";
-        tile.innerHTML = `<span style="font-size:24px;">📦</span>`;
+        const card = document.createElement("div");
+        card.className = "mine-card";
+        card.innerHTML = `<span style="font-size:24px;">📦</span>`;
 
-        tile.onclick = () => {
-          if (tile.dataset.opened) return;
-          tile.dataset.opened = "1";
+        card.onclick = () => {
+          if (card.dataset.opened) return;
+          card.dataset.opened = "1";
 
           if (i === bombIdx) {
-            tile.style.background = "#7f1d1d";
-            tile.style.borderColor = "var(--danger)";
-            tile.innerHTML = `💣<br><span style="font-size:9px; color:#fca5a5; font-weight:bold;">PATLADIN!</span>`;
+            card.style.background = "#7f1d1d";
+            card.style.borderColor = "var(--danger)";
+            card.innerHTML = `💣<br><span style="font-size:9px; color:#fca5a5; font-weight:bold;">PATLADIN!</span>`;
             document.getElementById("btn-cashout").disabled = true;
             document.getElementById("lbl-mine-status").innerText = "BOMBA PATLADI!";
             totalScore = 0;
@@ -368,9 +368,9 @@
             totalScore += d.pts;
             sessionDrops.push(d);
 
-            tile.style.background = "#064e3b";
-            tile.style.borderColor = "var(--btn-green)";
-            tile.innerHTML = `💎<br><b style="font-size:9px; color:#34d399;">+${d.pts}P</b>`;
+            card.style.background = "#064e3b";
+            card.style.borderColor = "var(--btn-green)";
+            card.innerHTML = `💎<br><b style="font-size:9px; color:#34d399;">+${d.pts}P</b>`;
 
             document.getElementById("lbl-mine-score").innerText = `${totalScore} P`;
             document.getElementById("game-stat-badge").innerText = `${totalScore} P`;
@@ -381,7 +381,7 @@
             }
           }
         };
-        grid.appendChild(tile);
+        grid.appendChild(card);
       }
     }
 
@@ -390,7 +390,7 @@
       showSummary("💰 KASADAN BAŞARIYLA ÇEKİLDİN!");
     }
 
-    // --- ORTAK ÖZET & SIRALAMAYA EN İYİ SKORU YAZMA ---
+    // --- ORTAK ÖZET & SKOR KAYIT ---
     function showSummary(title) {
       document.getElementById("screen-classic").style.display = "none";
       document.getElementById("screen-catch-p1").style.display = "none";
@@ -415,6 +415,13 @@
 
       const u = getActiveUser();
       if (u) {
+        u.gamesPlayed = (u.gamesPlayed || 0) + 1;
+        if (!u.records) u.records = {};
+        if (!u.records[modeKey] || totalScore > u.records[modeKey]) {
+          u.records[modeKey] = totalScore;
+        }
+        setActiveUser(u);
+
         const recRef = db.ref(`leaderboards/${modeKey}/${u.uid}`);
         recRef.once("value", snap => {
           const old = snap.val();
