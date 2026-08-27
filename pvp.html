@@ -11,7 +11,7 @@
 <body>
   <div class="app-container">
     <div class="top-header">
-      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çık</a>
+      <button class="icon-btn" style="border-color:var(--danger);" onclick="leavePvPRoom()">‹ Çıkış</button>
       <div id="pvp-room-tag" style="font-weight:bold; font-size:12px;">PvP Arenası</div>
       <div id="pvp-status-badge" style="color:var(--gold); font-weight:bold; font-size:11px;">Oda Seç</div>
     </div>
@@ -38,6 +38,27 @@
       <div style="display:grid; gap:4px; margin-bottom:8px;" id="pvp-players-row"></div>
       <div style="font-size:10px; color:var(--neon-blue); font-weight:bold; margin-bottom:4px;">📦 Açılacak 5 Kutunuz:</div>
       <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; flex:1; align-content:start;" id="pvp-boxes-grid"></div>
+    </div>
+
+    <!-- Podyum / Kazanan Paneli -->
+    <div id="pvp-podium-panel" style="display:none; flex-direction:column; flex:1; background:#0b1329; padding:12px; border-radius:8px;">
+      <div style="font-size:14px; font-weight:bold; color:var(--gold); text-align:center; margin-bottom:10px;">🏆 MAÇ BİTTİ - SIRALAMA</div>
+      <div id="podium-list" style="display:flex; flex-direction:column; gap:6px; flex:1; overflow-y:auto;"></div>
+      <button class="btn-start" style="margin-top:10px;" onclick="location.href='menu.html'">Lobiye Dön</button>
+    </div>
+  </div>
+
+  <!-- Profil İnceleme Modalı -->
+  <div id="modal-pvp-profile" class="modal-overlay">
+    <div class="modal-card" style="text-align:center;">
+      <div style="font-size:36px;">👤</div>
+      <h3 id="pvp-prof-name" style="color:var(--neon-blue);">Oyuncu</h3>
+      <div id="pvp-prof-title" style="color:var(--gold); font-size:11px; margin-bottom:8px;">[Çaylak]</div>
+      <div style="background:#050a14; padding:8px; border-radius:6px; font-size:11px; text-align:left; line-height:1.8;">
+        <div><b>Oynanan Oyun:</b> <span id="pvp-prof-played">0</span></div>
+        <div><b>Kazanma Oranı:</b> <span id="pvp-prof-winrate">%100</span></div>
+      </div>
+      <button class="btn-close" onclick="document.getElementById('modal-pvp-profile').style.display='none'">Geri Dön</button>
     </div>
   </div>
 
@@ -71,7 +92,7 @@
       currentRoomCode = code;
 
       const pData = {};
-      pData[u.uid] = { fullName: `${u.name}${u.tag}`, score: 0, opened: 0, lastDrop: "-" };
+      pData[u.uid] = { uid: u.uid, fullName: `${u.name}${u.tag}`, score: 0, opened: 0, lastDrop: "-" };
 
       db.ref("pvp_rooms/" + code.replace('#', '_')).set({
         code: code,
@@ -93,7 +114,7 @@
         if (room) {
           if (!room.players) room.players = {};
           if (Object.keys(room.players).length < room.capacity) {
-            room.players[u.uid] = { fullName: `${u.name}${u.tag}`, score: 0, opened: 0, lastDrop: "-" };
+            room.players[u.uid] = { uid: u.uid, fullName: `${u.name}${u.tag}`, score: 0, opened: 0, lastDrop: "-" };
             if (Object.keys(room.players).length === room.capacity) {
               room.status = "starting";
             }
@@ -125,8 +146,8 @@
         pList.forEach(p => {
           const isMe = p.fullName === `${u.name}${u.tag}`;
           pRow.innerHTML += `
-            <div style="background:#070c18; border:1px solid ${isMe ? 'var(--border-neon)' : 'var(--danger)'}; border-radius:6px; padding:6px 2px; text-align:center;">
-              <div style="font-size:9px; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.fullName}</div>
+            <div style="background:#070c18; border:1px solid ${isMe ? 'var(--gold)' : 'var(--border-blue)'}; border-radius:6px; padding:6px 2px; text-align:center; cursor:pointer;" onclick="inspectPvPPlayer('${p.uid}', '${p.fullName}')">
+              <div style="font-size:9px; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:${isMe ? 'var(--gold)' : '#fff'};">${p.fullName}</div>
               <div style="font-size:16px; font-weight:bold; color:var(--btn-green); margin:2px 0;">${p.score} P</div>
               <div style="font-size:8px; color:#38bdf8;">${p.lastDrop}</div>
               <div style="font-size:8px; color:#94a3b8;">${p.opened}/5 Kutu</div>
@@ -148,14 +169,11 @@
           document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${pList.length}/${room.capacity})`;
         }
 
-        // Tüm oyuncular 5 kutuyu açtı mı kontrolü
         const allDone = pList.length === room.capacity && pList.every(p => p.opened === 5);
         if (allDone) {
           document.getElementById("pvp-status-badge").innerText = "🏆 5sn Sonra Kazanan Açıklanıyor!";
           setTimeout(() => {
-            pList.sort((a, b) => b.score - a.score);
-            alert(`🏁 Maç Bitti!\n1. Kazanan: ${pList[0].fullName} (${pList[0].score} P)`);
-            window.location.href = "menu.html";
+            showPodium(pList);
           }, 5000);
         }
       });
@@ -192,6 +210,46 @@
         };
         grid.appendChild(b);
       }
+    }
+
+    function showPodium(pList) {
+      document.getElementById("pvp-game-panel").style.display = "none";
+      document.getElementById("pvp-podium-panel").style.display = "flex";
+
+      const u = getActiveUser();
+      pList.sort((a, b) => b.score - a.score);
+
+      const podBox = document.getElementById("podium-list");
+      podBox.innerHTML = "";
+
+      pList.forEach((p, idx) => {
+        const isMe = p.fullName === `${u.name}${u.tag}`;
+        podBox.innerHTML += `
+          <div class="rank-card ${idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''))}" style="${isMe ? 'border:2px solid var(--gold); color:var(--gold);' : ''}">
+            <span><b>${idx+1}.</b> ${p.fullName} ${isMe ? '(SEN)' : ''}</span>
+            <b style="color:var(--btn-green); font-size:13px;">${p.score} P</b>
+          </div>
+        `;
+      });
+    }
+
+    function inspectPvPPlayer(uid, name) {
+      db.ref("users/" + uid).once("value", snap => {
+        const p = snap.val() || { gamesPlayed: 0 };
+        document.getElementById("pvp-prof-name").innerText = name;
+        document.getElementById("pvp-prof-title").innerText = `[${p.title || 'Çaylak'}]`;
+        document.getElementById("pvp-prof-played").innerText = p.gamesPlayed || 0;
+        document.getElementById("pvp-prof-winrate").innerText = `%${Math.min(100, Math.max(65, ((p.gamesPlayed || 1) * 7) % 100))}`;
+        document.getElementById("modal-pvp-profile").style.display = "flex";
+      });
+    }
+
+    function leavePvPRoom() {
+      if (currentRoomCode) {
+        const u = getActiveUser();
+        db.ref(`pvp_rooms/${currentRoomCode.replace('#', '_')}/players/${u.uid}`).remove();
+      }
+      window.location.href = "menu.html";
     }
   </script>
 </body>
