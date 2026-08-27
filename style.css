@@ -1,81 +1,66 @@
 :root {
-  --bg-dark: #070312;
-  --bg-card: #120826;
+  --bg-dark: #05070d;
+  --bg-card: #0d1b2a;
+  --border-blue: #1e293b;
   --border-purple: #3b1d6e;
   --neon-purple: #a855f7;
-  --neon-glow: rgba(168, 85, 247, 0.45);
+  --neon-blue: #38bdf8;
   --btn-green: #10b981;
-  --btn-green-hover: #059669;
-  --danger: #dc2626;
-  --gold: #f59e0b;
+  --btn-blue: #0284c7;
+  --danger: #ef4444;
+  --gold: #fbbf24;
   --text: #ffffff;
-  --text-dim: #9ca3af;
+  --text-dim: #94a3b8;
   --chat-me: #064e3b;
   --chat-other: #1f2937;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Segoe UI', system-ui, sans-serif; }
-body { background-color: var(--bg-dark); color: var(--text); min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow-x: hidden; }
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+body { background-color: var(--bg-dark); color: var(--text); height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-.app-container { width: 100%; max-width: 440px; height: 100vh; background: radial-gradient(circle at top, #180938 0%, #070312 100%); border: 1px solid var(--border-purple); display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.app-container { width: 100%; max-width: 420px; height: 100vh; background: radial-gradient(circle at center, #0d1b2a 0%, #000814 100%); border: 1px solid var(--border-blue); display: flex; flex-direction: column; position: relative; padding: 12px; overflow-y: auto; }
 
-/* Giriş / Kayıt */
-.auth-box { margin: auto 15px; background: #120826; border: 2px solid var(--neon-purple); border-radius: 20px; padding: 25px 18px; box-shadow: 0 0 25px var(--neon-glow); text-align: center; }
-.auth-logo { font-size: 28px; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--neon-purple); margin-bottom: 20px; }
-.auth-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
-.auth-tab { flex: 1; padding: 10px; border-radius: 8px; background: #1f0c3d; border: 1px solid var(--border-purple); color: #fff; cursor: pointer; font-weight: bold; }
-.auth-tab.active { background: var(--neon-purple); box-shadow: 0 0 8px var(--neon-purple); }
-.auth-input { width: 100%; padding: 12px; border-radius: 10px; background: #090314; border: 1px solid var(--border-purple); color: #fff; margin-bottom: 10px; outline: none; }
-.btn-auth { width: 100%; padding: 12px; border-radius: 10px; background: linear-gradient(90deg, #9333ea, #a855f7); color: #fff; border: none; font-weight: bold; font-size: 15px; cursor: pointer; }
+/* Header & Üst Bar */
+.top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; position: sticky; top: 0; z-index: 20; background: rgba(5,7,13,0.9); padding: 4px 0; }
+.app-title { font-size: 17px; font-weight: 800; color: #fff; cursor: pointer; }
+.btn-group-top { display: flex; gap: 4px; }
+.icon-btn { background: #1b263b; border: 1px solid #415a77; color: #fff; padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 2px; }
 
-/* Lobi Üst Menü */
-.lobby-header { background: #15092e; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-purple); }
-.user-tag-badge { font-size: 13px; font-weight: bold; }
-.badge-title { color: #c084fc; margin-left: 4px; }
-.btn-group { display: flex; gap: 5px; }
-.btn-sm { border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
+/* Görev & Hızlı Aksiyon */
+.quest-box { background: rgba(11, 19, 41, 0.85); border: 1px solid var(--border-blue); border-radius: 8px; padding: 6px 10px; font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 6px; }
+.nav-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+.nav-action-btn { background: #0f172a; border: 1px solid var(--border-blue); color: #fff; padding: 8px; border-radius: 8px; font-size: 11px; font-weight: bold; text-align: center; text-decoration: none; }
+.nav-action-btn:hover { background: var(--btn-blue); }
 
-/* Görev & Navigasyon */
-.quest-strip { background: #0f0521; padding: 8px 14px; font-size: 11px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-purple); }
-.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 14px; background: #0b031a; }
-.btn-nav-large { background: #1e0d3d; border: 1px solid var(--border-purple); color: #fff; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; text-align: center; text-decoration: none; }
-.btn-nav-large:hover { background: var(--neon-purple); }
+/* Mod Listesi & Önizleme */
+.mode-grid { display: flex; flex-direction: column; gap: 5px; width: 100%; margin-bottom: 6px; }
+.mode-btn { background: #0f172a; border: 1px solid #334155; color: var(--text-dim); padding: 7px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; text-align: left; }
+.mode-btn.active { background: var(--btn-blue); color: #fff; border-color: var(--neon-blue); font-weight: bold; }
+.menu-preview-box { width: 100%; background: rgba(11, 19, 41, 0.9); border: 1px solid var(--border-blue); border-radius: 8px; padding: 6px 10px; font-size: 10px; line-height: 1.5; margin-bottom: 6px; }
 
-/* Modlar */
-.modes-box { padding: 10px 14px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-.mode-card { background: #15082e; border: 1px solid var(--border-purple); border-radius: 8px; padding: 10px 12px; cursor: pointer; }
-.mode-card.selected { background: linear-gradient(90deg, #6b21a8, #a855f7); border-color: #fff; box-shadow: 0 0 10px var(--neon-glow); }
-.mode-header { font-weight: bold; font-size: 13px; display: flex; justify-content: space-between; }
-.mode-desc { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-.rates-preview { background: #090314; border: 1px solid var(--border-purple); border-radius: 6px; padding: 8px; font-size: 10px; line-height: 1.5; margin-top: 4px; }
-.btn-play-main { width: calc(100% - 28px); margin: 10px 14px; padding: 14px; border-radius: 10px; background: var(--btn-green); color: #fff; border: none; font-size: 16px; font-weight: 900; cursor: pointer; }
+/* Butonlar & Girdiler */
+.input-field { width: 100%; padding: 10px; border-radius: 8px; border: 2px solid var(--btn-blue); background-color: #0b1329; color: #fff; font-size: 13px; text-align: center; outline: none; margin-bottom: 6px; }
+.btn-start { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--btn-green); color: white; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
 
-/* Sohbet Stilleri */
-.chat-subnav { display: flex; border-bottom: 1px solid var(--border-purple); background: #0b031a; }
-.chat-subtab { flex: 1; padding: 10px; font-size: 11px; text-align: center; color: var(--text-dim); cursor: pointer; font-weight: bold; }
-.chat-subtab.active { color: #fff; background: #1b0c38; border-bottom: 2px solid var(--neon-purple); }
-.chat-area { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-.msg-bubble { max-width: 80%; padding: 8px 12px; border-radius: 8px; font-size: 12px; word-break: break-word; }
+/* Alt Alta Bölümler (Chat & Kanallar) */
+.section-block { background: #070c18; border: 1px solid var(--border-blue); border-radius: 8px; margin-bottom: 6px; display: flex; flex-direction: column; overflow: hidden; }
+.section-title { background: #0f172a; padding: 6px 10px; font-size: 11px; font-weight: bold; color: var(--gold); border-bottom: 1px solid var(--border-blue); display: flex; justify-content: space-between; }
+.chat-scroll-box { height: 130px; padding: 8px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.msg-bubble { max-width: 85%; padding: 6px 10px; border-radius: 8px; font-size: 11px; word-break: break-word; }
 .msg-bubble.me { align-self: flex-end; background: var(--chat-me); }
 .msg-bubble.other { align-self: flex-start; background: var(--chat-other); }
-.msg-author { font-size: 10px; color: #60a5fa; font-weight: bold; margin-bottom: 2px; }
-.msg-actions { font-size: 9px; margin-top: 4px; display: flex; gap: 8px; opacity: 0.75; }
+.msg-actions { font-size: 9px; margin-top: 2px; display: flex; gap: 6px; opacity: 0.8; }
 .msg-actions span { cursor: pointer; text-decoration: underline; }
-.chat-input-bar { padding: 8px 12px; background: #120826; display: flex; gap: 6px; border-top: 1px solid var(--border-purple); }
-.chat-input-bar input { flex: 1; padding: 10px 14px; border-radius: 20px; background: #080212; border: 1px solid var(--border-purple); color: #fff; outline: none; }
+.chat-input-row { padding: 6px 8px; background: #0d1527; display: flex; gap: 4px; border-top: 1px solid var(--border-blue); }
+.chat-input-row input { flex: 1; padding: 6px 10px; border-radius: 6px; background: #05070d; border: 1px solid var(--border-blue); color: #fff; outline: none; font-size: 11px; }
 
-/* PvP Grid & Kutular */
-.pvp-room-grid { display: grid; gap: 6px; margin-bottom: 10px; }
-.pvp-player-col { background: #0a0317; border: 1px solid var(--border-purple); border-radius: 8px; padding: 8px; text-align: center; }
-.pvp-player-col.filled { border-color: var(--btn-green); }
-.pvp-box-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 10px; }
-.pvp-box-slot { aspect-ratio: 1; background: #170933; border: 1px solid var(--border-purple); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; cursor: pointer; text-align: center; }
-.pvp-box-slot.opened { background: #080214; border-color: #26114a; cursor: default; }
+/* CS Slot Rulet Bandı */
+.roulette-container { width: 100%; height: 90px; background: rgba(2, 6, 23, 0.8); border: 2px solid #334155; border-radius: 8px; position: relative; overflow: hidden; margin: 10px 0; display: flex; align-items: center; }
+.roulette-needle { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: var(--danger); transform: translateX(-50%); z-index: 10; box-shadow: 0 0 12px var(--danger); }
+.roulette-track { display: flex; position: absolute; left: 0; height: 80px; }
+.roulette-item { width: 80px; height: 80px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.85); font-size: 10px; text-align: center; padding: 4px; }
 
 /* Modallar */
-.modal { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 50; padding: 16px; flex-direction: column; justify-content: center; }
-.modal-card { background: #120826; border: 1px solid var(--neon-purple); border-radius: 12px; padding: 16px; max-height: 90%; overflow-y: auto; }
-.modal-title { font-size: 15px; font-weight: bold; color: var(--gold); text-align: center; margin-bottom: 12px; }
-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-th, td { padding: 8px; text-align: left; border-bottom: 1px solid var(--border-purple); font-size: 12px; }
-th { color: var(--gold); }
+.modal-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.88); z-index: 50; padding: 12px; flex-direction: column; justify-content: center; }
+.modal-card { background: #0b1329; border: 1px solid var(--border-blue); border-radius: 12px; padding: 12px; max-height: 90%; overflow-y: auto; display: flex; flex-direction: column; }
+.btn-close { background: var(--danger); color: #fff; padding: 8px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; margin-top: 8px; }
