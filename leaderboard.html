@@ -17,7 +17,7 @@
     </div>
 
     <!-- Mod Filtre Sekmeleri -->
-    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:6px;">
+    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:8px;">
       <button class="icon-btn" id="flt-all" style="background:var(--btn-blue);" onclick="loadLB('all', this)">Tümü</button>
       <button class="icon-btn" onclick="loadLB('standard', this)">Normal</button>
       <button class="icon-btn" onclick="loadLB('ten_cases', this)">10 Kutu</button>
@@ -26,20 +26,20 @@
       <button class="icon-btn" onclick="loadLB('mines_mode', this)">Mayın</button>
     </div>
 
-    <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
+    <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
   </div>
 
-  <!-- Profil ve Detay Modalı -->
+  <!-- Profil & Detay Modalı -->
   <div id="modal-lb-profile" class="modal-overlay">
     <div class="modal-card">
       <div style="text-align:center;">
         <div style="font-size:36px;">👤</div>
         <h3 id="lb-prof-name" style="color:var(--neon-blue);">Oyuncu</h3>
-        <div id="lb-prof-title" style="color:var(--gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
+        <div id="lb-prof-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
       </div>
 
       <div style="background:#050a14; padding:8px; border-radius:6px; font-size:11px; margin-bottom:8px; line-height:1.8;">
-        <div><b>Oynanan Mod:</b> <span id="lb-prof-mode" style="color:var(--gold);">Normal Kasa</span></div>
+        <div><b>Oynanan Mod:</b> <span id="lb-prof-mode" style="color:var(--neon-gold);">Normal Kasa</span></div>
         <div><b>Oynanma Tarihi:</b> <span id="lb-prof-date" style="color:#94a3b8;">-</span></div>
         <div><b>Toplam Oyun:</b> <span id="lb-prof-played">0</span></div>
         <div><b>Kazanma Oranı:</b> <span id="lb-prof-winrate">%100</span></div>
@@ -50,7 +50,7 @@
 
       <!-- Kendi Profilimizde Gizlenen Butonlar -->
       <div id="lb-prof-actions" style="display:flex; gap:4px;">
-        <button id="btn-lb-add" class="btn-start" style="flex:1; background:var(--btn-green); font-size:11px; padding:8px;">➕ Arkadaş Ekle</button>
+        <button id="btn-lb-add" class="btn-start" style="flex:1; background:var(--neon-green); font-size:11px; padding:8px;">➕ Arkadaş Ekle</button>
         <button id="btn-lb-msg" class="btn-start" style="flex:1; background:var(--btn-blue); font-size:11px; padding:8px;">💬 Mesaj Yaz</button>
       </div>
 
@@ -73,7 +73,7 @@
       }
       activeFilter = filter;
       const listContainer = document.getElementById("lb-records-list");
-      listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888;'>Yükleniyor...</div>";
+      listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888; padding:15px;'>Yükleniyor...</div>";
 
       db.ref("leaderboards").once("value", snap => {
         listContainer.innerHTML = "";
@@ -104,8 +104,8 @@
 
           itemRow.className = rankClass;
           itemRow.innerHTML = `
-            <span><b>${idx+1}.</b> ${rec.fullName} <small style="color:var(--gold);">[${rec.modeName || 'Normal'}]</small></span>
-            <b style="color:var(--btn-green); font-size:13px;">${rec.score} P</b>
+            <span><b>${idx+1}.</b> ${rec.fullName} <small style="color:var(--neon-gold);">[${rec.modeName || 'Normal'}]</small></span>
+            <b style="color:var(--neon-green); font-size:13px;">${rec.score} P</b>
           `;
           itemRow.onclick = () => openPlayerProfile(rec);
           listContainer.appendChild(itemRow);
@@ -122,8 +122,14 @@
 
       db.ref("users/" + rec.uid).once("value", snap => {
         const fullUser = snap.val() || {};
-        document.getElementById("lb-prof-played").innerText = fullUser.gamesPlayed || 0;
-        document.getElementById("lb-prof-winrate").innerText = `%${Math.min(100, Math.max(70, ((fullUser.gamesPlayed || 1) * 8) % 100))}`;
+        const stats = fullUser.stats || {};
+        let totalGames = 0, totalWins = 0;
+        for (let k in stats) {
+          totalGames += stats[k].played || 0;
+          totalWins += stats[k].wins || 0;
+        }
+        document.getElementById("lb-prof-played").innerText = totalGames;
+        document.getElementById("lb-prof-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
       });
 
       const dropsBox = document.getElementById("lb-prof-drops");
@@ -131,9 +137,9 @@
       if (rec.drops && rec.drops.length > 0) {
         rec.drops.forEach(d => {
           dropsBox.innerHTML += `
-            <div style="background:#070c18; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px;">
+            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px; border:1px solid #3b1d6e;">
               <span><b style="color:${d.c || '#fff'};">[${d.tier}]</b> ${d.item}</span>
-              <b style="color:var(--btn-green);">+${d.pts}P</b>
+              <b style="color:var(--neon-green);">+${d.pts}P</b>
             </div>
           `;
         });
@@ -141,11 +147,11 @@
         dropsBox.innerHTML = "<div style='color:#666; font-size:9px;'>Kasa dökümü yok.</div>";
       }
 
-      // Kendi profilimizde butonları gizleme
       const isMe = u && (rec.uid === u.uid);
-      document.getElementById("lb-prof-actions").style.display = isMe ? "none" : "flex";
+      const isDeleted = rec.fullName && rec.fullName.startsWith("deleteUser");
+      document.getElementById("lb-prof-actions").style.display = (isMe || isDeleted) ? "none" : "flex";
 
-      if (!isMe) {
+      if (!isMe && !isDeleted) {
         document.getElementById("btn-lb-add").onclick = () => {
           db.ref(`friend_requests/${rec.uid}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
           alert(`${rec.fullName} kullanıcısına istek gönderildi!`);
