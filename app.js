@@ -14,56 +14,59 @@ if (!firebase.apps.length) {
 const db = firebase.database();
 
 // Yerel Kullanıcı Verisini Yükle / Başlat
-function getUser() {
-    let u = localStorage.getItem("mecaga_user");
-    if (!u) {
+function getCurrentUser() {
+    let saved = localStorage.getItem("kutu_user");
+    if (!saved) {
+        let tagNumber = Math.floor(10000 + Math.random() * 90000);
         let newUser = {
-            uid: "USER_" + Math.floor(1000 + Math.random() * 9000),
-            name: "MecagaTR",
+            uid: "UID_" + tagNumber,
+            username: "Oyuncu",
+            tag: "#" + tagNumber,
+            title: "Çaylak",
             level: 1,
             xp: 0,
-            coins: 1000,
-            boxesOpened: 0,
-            pvpWins: 0
+            gold: 500,
+            dailyQuest: 0
         };
-        localStorage.setItem("mecaga_user", JSON.stringify(newUser));
+        localStorage.setItem("kutu_user", JSON.stringify(newUser));
         return newUser;
     }
-    return JSON.parse(u);
+    return JSON.parse(saved);
 }
 
-function saveUser(u) {
-    localStorage.setItem("mecaga_user", JSON.stringify(u));
-    // Firebase liderlik tablosunu da güncelle
+function saveCurrentUser(u) {
+    localStorage.setItem("kutu_user", JSON.stringify(u));
+    // Firebase Genel Sıralamasını Güncelle
     db.ref("leaderboard/" + u.uid).set({
-        name: u.name,
+        fullName: `${u.username}${u.tag}`,
+        title: u.title,
         level: u.level,
-        coins: u.coins,
-        pvpWins: u.pvpWins || 0
+        gold: u.gold
     });
 }
 
-function addExp(amount) {
-    let u = getUser();
+function addXP(amount) {
+    let u = getCurrentUser();
     u.xp += amount;
     let req = u.level * 100;
     if (u.xp >= req) {
         u.xp -= req;
         u.level++;
-        alert(`Tebrikler! Seviye Atladın: Lvl ${u.level}`);
+        if (u.level >= 5 && u.title === "Çaylak") u.title = "Usta";
+        if (u.level >= 10) u.title = "Efsane";
+        alert(`🎉 TEBRİKLER! Lvl ${u.level} oldun! Unvan: [${u.title}]`);
     }
-    saveUser(u);
-    updateGlobalHeader();
+    saveCurrentUser(u);
+    renderHeader();
 }
 
-function updateGlobalHeader() {
-    let u = getUser();
-    if (document.getElementById("p-name")) document.getElementById("p-name").innerText = u.name;
-    if (document.getElementById("p-lvl")) document.getElementById("p-lvl").innerText = `Lvl ${u.level}`;
-    if (document.getElementById("p-coins")) document.getElementById("p-coins").innerText = u.coins;
-    if (document.getElementById("p-xp-num")) {
-        let req = u.level * 100;
-        document.getElementById("p-xp-num").innerText = `${u.xp}/${req}`;
-        document.getElementById("p-xp-fill").style.width = `${(u.xp / req) * 100}%`;
-    }
+function renderHeader() {
+    let u = getCurrentUser();
+    let nameElem = document.getElementById("header-user-tag");
+    let goldElem = document.getElementById("header-gold");
+    let questElem = document.getElementById("quest-count");
+
+    if (nameElem) nameElem.innerHTML = `${u.username}${u.tag} <span class="user-title">[${u.title}]</span> (Lvl ${u.level})`;
+    if (goldElem) goldElem.innerText = u.gold;
+    if (questElem) questElem.innerText = `${u.dailyQuest}/3`;
 }
