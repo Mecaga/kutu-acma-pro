@@ -2,9 +2,8 @@
   --bg-dark: #05070d;
   --bg-card: #0d1b2a;
   --border-blue: #1e293b;
-  --border-purple: #3b1d6e;
-  --neon-purple: #a855f7;
   --neon-blue: #38bdf8;
+  --neon-purple: #a855f7;
   --btn-green: #10b981;
   --btn-blue: #0284c7;
   --danger: #ef4444;
@@ -18,47 +17,53 @@
 * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 body { background-color: var(--bg-dark); color: var(--text); height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-.app-container { width: 100%; max-width: 420px; height: 100vh; background: radial-gradient(circle at center, #0d1b2a 0%, #000814 100%); border: 1px solid var(--border-blue); display: flex; flex-direction: column; position: relative; padding: 12px; overflow-y: auto; }
+/* Dinamik Cihaz Kapsayıcısı */
+.app-container {
+  width: 100%;
+  max-width: 420px; /* Varsayılan Telefon */
+  height: 100vh;
+  background: radial-gradient(circle at center, #0d1b2a 0%, #000814 100%);
+  border: 1px solid var(--border-blue);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 10px;
+  overflow-y: auto;
+  transition: max-width 0.2s ease;
+}
 
-/* Header & Üst Bar */
-.top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; position: sticky; top: 0; z-index: 20; background: rgba(5,7,13,0.9); padding: 4px 0; }
-.app-title { font-size: 17px; font-weight: 800; color: #fff; cursor: pointer; }
-.btn-group-top { display: flex; gap: 4px; }
-.icon-btn { background: #1b263b; border: 1px solid #415a77; color: #fff; padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 2px; }
+body.tablet-mode .app-container {
+  max-width: 700px; /* Tablet Modu */
+}
 
-/* Görev & Hızlı Aksiyon */
+/* Üst Header */
+.top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; position: sticky; top: 0; z-index: 20; background: rgba(5,7,13,0.95); padding: 4px 0; }
+.app-title { font-size: 16px; font-weight: 800; color: #fff; cursor: pointer; }
+.icon-btn { background: #1b263b; border: 1px solid #415a77; color: #fff; padding: 5px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
+
+/* Mod Kartları & Kutular */
 .quest-box { background: rgba(11, 19, 41, 0.85); border: 1px solid var(--border-blue); border-radius: 8px; padding: 6px 10px; font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 6px; }
 .nav-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
-.nav-action-btn { background: #0f172a; border: 1px solid var(--border-blue); color: #fff; padding: 8px; border-radius: 8px; font-size: 11px; font-weight: bold; text-align: center; text-decoration: none; }
+.nav-action-btn { background: #0f172a; border: 1px solid var(--border-blue); color: #fff; padding: 8px; border-radius: 8px; font-size: 11px; font-weight: bold; text-align: center; text-decoration: none; cursor: pointer; }
 .nav-action-btn:hover { background: var(--btn-blue); }
 
-/* Mod Listesi & Önizleme */
 .mode-grid { display: flex; flex-direction: column; gap: 5px; width: 100%; margin-bottom: 6px; }
 .mode-btn { background: #0f172a; border: 1px solid #334155; color: var(--text-dim); padding: 7px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; text-align: left; }
 .mode-btn.active { background: var(--btn-blue); color: #fff; border-color: var(--neon-blue); font-weight: bold; }
 .menu-preview-box { width: 100%; background: rgba(11, 19, 41, 0.9); border: 1px solid var(--border-blue); border-radius: 8px; padding: 6px 10px; font-size: 10px; line-height: 1.5; margin-bottom: 6px; }
 
-/* Butonlar & Girdiler */
-.input-field { width: 100%; padding: 10px; border-radius: 8px; border: 2px solid var(--btn-blue); background-color: #0b1329; color: #fff; font-size: 13px; text-align: center; outline: none; margin-bottom: 6px; }
-.btn-start { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--btn-green); color: white; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+.input-field { width: 100%; padding: 9px; border-radius: 8px; border: 2px solid var(--btn-blue); background-color: #0b1329; color: #fff; font-size: 12px; text-align: center; outline: none; margin-bottom: 6px; }
+.btn-start { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--btn-green); color: white; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
 
-/* Alt Alta Bölümler (Chat & Kanallar) */
-.section-block { background: #070c18; border: 1px solid var(--border-blue); border-radius: 8px; margin-bottom: 6px; display: flex; flex-direction: column; overflow: hidden; }
-.section-title { background: #0f172a; padding: 6px 10px; font-size: 11px; font-weight: bold; color: var(--gold); border-bottom: 1px solid var(--border-blue); display: flex; justify-content: space-between; }
-.chat-scroll-box { height: 130px; padding: 8px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-.msg-bubble { max-width: 85%; padding: 6px 10px; border-radius: 8px; font-size: 11px; word-break: break-word; }
-.msg-bubble.me { align-self: flex-end; background: var(--chat-me); }
-.msg-bubble.other { align-self: flex-start; background: var(--chat-other); }
-.msg-actions { font-size: 9px; margin-top: 2px; display: flex; gap: 6px; opacity: 0.8; }
-.msg-actions span { cursor: pointer; text-decoration: underline; }
-.chat-input-row { padding: 6px 8px; background: #0d1527; display: flex; gap: 4px; border-top: 1px solid var(--border-blue); }
-.chat-input-row input { flex: 1; padding: 6px 10px; border-radius: 6px; background: #05070d; border: 1px solid var(--border-blue); color: #fff; outline: none; font-size: 11px; }
-
-/* CS Slot Rulet Bandı */
-.roulette-container { width: 100%; height: 90px; background: rgba(2, 6, 23, 0.8); border: 2px solid #334155; border-radius: 8px; position: relative; overflow: hidden; margin: 10px 0; display: flex; align-items: center; }
+/* CS Slot Ruleti */
+.roulette-container { width: 100%; height: 90px; background: rgba(2, 6, 23, 0.9); border: 2px solid #334155; border-radius: 8px; position: relative; overflow: hidden; margin: 10px 0; display: flex; align-items: center; }
 .roulette-needle { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: var(--danger); transform: translateX(-50%); z-index: 10; box-shadow: 0 0 12px var(--danger); }
-.roulette-track { display: flex; position: absolute; left: 0; height: 80px; }
+.roulette-track { display: flex; position: absolute; left: 0; height: 80px; will-change: transform; }
 .roulette-item { width: 80px; height: 80px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.85); font-size: 10px; text-align: center; padding: 4px; }
+
+/* Mayın Tarlası Izgarası */
+.mines-grid-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 320px; margin: auto; aspect-ratio: 1; }
+.mine-card { background: #0d1527; border: 2px solid #334155; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; aspect-ratio: 1; transition: 0.1s; }
 
 /* Modallar */
 .modal-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.88); z-index: 50; padding: 12px; flex-direction: column; justify-content: center; }
