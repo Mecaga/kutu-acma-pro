@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı Profili</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <header>
+        <div class="user-meta"><span style="font-weight: bold;" id="p-name"></span></div>
+        <div>💰 <span id="p-coins" style="color:var(--gold); font-weight:bold;"></span> Altın</div>
+    </header>
+
+    <nav>
+        <a href="menu.html">🏠 Menü</a>
+        <a href="game1.html">📦 Kutu Açma</a>
+        <a href="pvp.html">⚔️ 1v1 Arena</a>
+        <a href="chat.html">💬 Sohbet</a>
+        <a href="leaderboard.html">🏆 Sıralama</a>
+        <a href="user.html" class="active">👤 Profil</a>
+    </nav>
+
+    <main>
+        <h2>Oyuncu Profili</h2>
+        <div class="card" style="margin-top: 15px;">
+            <p style="margin: 8px 0;"><b>Benzersiz ID (UID):</b> <span id="u-uid" style="color:#8b949e;">-</span></p>
+            <p style="margin: 8px 0;"><b>Kullanıcı Adı:</b> <span id="u-name" style="color:var(--gold);">-</span></p>
+            <p style="margin: 8px 0;"><b>Seviye:</b> <span id="u-level">-</span></p>
+            <p style="margin: 8px 0;"><b>Açılan Toplam Kutu:</b> <span id="u-boxes">-</span></p>
+            <p style="margin: 8px 0;"><b>Mevcut Altın:</b> <span id="u-gold" style="color:var(--gold);">-</span></p>
+        </div>
+
+        <div class="card">
+            <h3>Profili Güncelle</h3>
+            <input type="text" id="new-name" placeholder="Yeni Kullanıcı Adı">
+            <button class="btn btn-blue" onclick="changeName()">Adı Kaydet</button>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        window.onload = () => {
+            updateGlobalHeader();
+            let u = getUser();
+            document.getElementById("u-uid").innerText = u.uid;
+            document.getElementById("u-name").innerText = u.name;
+            document.getElementById("u-level").innerText = `Lvl ${u.level} (${u.xp} XP)`;
+            document.getElementById("u-boxes").innerText = u.boxesOpened || 0;
+            document.getElementById("u-gold").innerText = u.coins;
+        };
+
+        function changeName() {
+            let n = document.getElementById("new-name").value.trim();
+            if (!n) return;
+            let u = getUser();
+            u.name = n;
+            saveUser(u);
+            alert("Kullanıcı adı güncellendi!");
+            location.reload();
+        }
+    </script>
+</body>
+</html>
