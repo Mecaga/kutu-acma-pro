@@ -10,49 +10,47 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-function getUser() {
-  let u = localStorage.getItem("kutu_user");
-  if (!u) {
-    let tag = "#" + Math.floor(10000 + Math.random() * 90000);
-    let newUser = {
-      uid: "U_" + Math.floor(1000 + Math.random() * 9000),
-      name: "Mecaga",
-      tag: tag,
-      title: "Çaylak",
-      sound: true,
-      dailyQuest: 0,
-      gold: 500,
-      level: 1,
-      xp: 0
-    };
-    localStorage.setItem("kutu_user", JSON.stringify(newUser));
-    return newUser;
-  }
-  return JSON.parse(u);
+function getActiveUser() {
+  const data = localStorage.getItem("kutu_active_session");
+  return data ? JSON.parse(data) : null;
 }
 
-function saveUser(u) {
-  localStorage.setItem("kutu_user", JSON.stringify(u));
-  db.ref("registered_users/" + u.uid).set({
-    uid: u.uid,
-    fullName: `${u.name}${u.tag}`,
-    title: u.title,
-    level: u.level || 1,
-    gold: u.gold || 500,
-    lastSeen: Date.now()
+function setActiveUser(userData) {
+  localStorage.setItem("kutu_active_session", JSON.stringify(userData));
+  if (userData && userData.uid) {
+    db.ref("users/" + userData.uid).update({
+      fullName: `${userData.name}${userData.tag}`,
+      title: userData.title || "Çaylak",
+      level: userData.level || 1,
+      xp: userData.xp || 0,
+      gold: userData.gold || 500,
+      sound: userData.sound !== undefined ? userData.sound : true,
+      lastOnline: Date.now()
+    });
+  }
+}
+
+function syncUserFromDB(uid, callback) {
+  db.ref("users/" + uid).once("value", snap => {
+    const val = snap.val();
+    if (val) {
+      setActiveUser(val);
+      if (callback) callback(val);
+    }
   });
 }
 
 function addXP(amount) {
-  let u = getUser();
-  u.xp += amount;
-  let req = u.level * 100;
-  if (u.xp >= req) {
-    u.xp -= req;
-    u.level++;
+  let u = getActiveUser();
+  if (!u) return;
+  u.xp = (u.xp || 0) + amount;
+  let needed = (u.level || 1) * 100;
+  if (u.xp >= needed) {
+    u.xp -= needed;
+    u.level = (u.level || 1) + 1;
     if (u.level >= 5 && u.title === "Çaylak") u.title = "Usta";
     if (u.level >= 10) u.title = "Efsane";
     alert(`🎉 Seviye Atladın: Lvl ${u.level} [${u.title}]`);
   }
-  saveUser(u);
+  setActiveUser(u);
 }
