@@ -10,51 +10,56 @@
 </head>
 <body>
   <div class="app-container">
-    <div class="lobby-header">
-      <a href="menu.html" class="btn-sm" style="background:var(--neon-purple);">‹ Lobi</a>
+    <div class="top-header">
+      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
       <div style="font-weight:bold; font-size:12px;">🏆 Sıralama Tablosu</div>
       <div></div>
     </div>
 
-    <div style="padding: 10px 14px; flex:1; overflow-y:auto;">
-      <div class="mode-card">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Oyuncu</th>
-              <th>Unvan</th>
-              <th>Seviye</th>
-            </tr>
-          </thead>
-          <tbody id="lb-rows"></tbody>
-        </table>
+    <div style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;" id="lb-list"></div>
+  </div>
+
+  <div id="modal-lb-details" class="modal-overlay">
+    <div class="modal-card" style="text-align:center;">
+      <div style="font-size:36px;">👤</div>
+      <h3 id="det-user-name" style="color:var(--neon-blue);">Oyuncu</h3>
+      <div id="det-user-title" style="color:var(--gold); font-size:11px;">[Usta]</div>
+      <div style="font-size:11px; margin:8px 0; background:#050a14; padding:6px; border-radius:6px; text-align:left;">
+        <div><b>Seviye:</b> <span id="det-lvl">Lvl 1</span></div>
+        <div><b>Altın:</b> <span id="det-gold">500</span></div>
       </div>
+      <button class="btn-close" onclick="document.getElementById('modal-lb-details').style.display='none'">Kapat</button>
     </div>
   </div>
 
   <script src="app.js"></script>
   <script>
     window.onload = () => {
-      db.ref("registered_users").orderByChild("level").limitToLast(20).on("value", snap => {
-        let b = document.getElementById("lb-rows");
-        b.innerHTML = "";
+      db.ref("users").orderByChild("level").limitToLast(20).on("value", snap => {
+        const box = document.getElementById("lb-list");
+        box.innerHTML = "";
         let list = [];
         snap.forEach(c => list.push(c.val()));
         list.reverse();
 
-        list.forEach((p, i) => {
-          b.innerHTML += `
-            <tr>
-              <td style="font-weight:bold; color:var(--neon-purple);">${i + 1}</td>
-              <td>${p.fullName}</td>
-              <td style="color:#c084fc;">[${p.title}]</td>
-              <td style="font-weight:bold; color:var(--gold);">Lvl ${p.level || 1}</td>
-            </tr>
+        list.forEach((p, idx) => {
+          box.innerHTML += `
+            <div class="quest-box" style="align-items:center; cursor:pointer;" onclick="showLBDetails('${p.fullName}', '${p.title}', ${p.level||1}, ${p.gold||500})">
+              <span><b>${idx+1}.</b> ${p.fullName} <small style="color:var(--gold);">[${p.title||'Çaylak'}]</small></span>
+              <b style="color:var(--btn-green);">Lvl ${p.level||1}</b>
+            </div>
           `;
         });
       });
     };
+
+    function showLBDetails(name, title, lvl, gold) {
+      document.getElementById("det-user-name").innerText = name;
+      document.getElementById("det-user-title").innerText = `[${title||'Çaylak'}]`;
+      document.getElementById("det-lvl").innerText = `Lvl ${lvl}`;
+      document.getElementById("det-gold").innerText = gold;
+      document.getElementById("modal-lb-details").style.display = "flex";
+    }
   </script>
 </body>
 </html>
