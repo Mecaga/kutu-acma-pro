@@ -16,33 +16,31 @@
       <div></div>
     </div>
 
-    <!-- Sohbet Seçim Listesi (Ana Ekran) -->
+    <!-- Sohbet Seçim Paneli -->
     <div id="panel-chat-select" style="display:flex; flex-direction:column; flex:1;">
-      <!-- Büyük Global Buton -->
-      <button class="mode-btn" style="padding:14px; font-weight:bold; font-size:13px; color:#fff; background:linear-gradient(90deg, #0284c7, #0ea5e9); margin-bottom:8px;" onclick="openChatRoom('global', '🌐 Global Sohbet')">
+      <button class="mode-btn" style="padding:14px; font-weight:bold; font-size:13px; color:#fff; background:linear-gradient(90deg, #7e22ce, #a855f7); margin-bottom:8px;" onclick="openChatRoom('global', '🌐 Global Sohbet')">
         🌐 GLOBAL SOHBET (HERKESE AÇIK)
       </button>
 
-      <!-- Ayrım Çizgisi -->
-      <div style="height:1px; background:#334155; margin:6px 0 10px 0;"></div>
+      <div style="height:1px; background:#3b1d6e; margin:6px 0 10px 0;"></div>
 
-      <div style="font-size:11px; color:var(--gold); font-weight:bold; margin-bottom:6px;">💬 Özel Sohbet Blokları (DM):</div>
+      <div style="font-size:11px; color:var(--neon-gold); font-weight:bold; margin-bottom:6px;">💬 Özel Sohbet Blokları (DM):</div>
       <div id="dm-conversations-list" style="display:flex; flex-direction:column; gap:4px; flex:1; overflow-y:auto;"></div>
     </div>
 
-    <!-- Mesajlaşma Odası Paneli -->
+    <!-- Mesajlaşma Odası -->
     <div id="panel-chat-room" style="display:none; flex-direction:column; flex:1;">
-      <div class="top-header" style="background:#0b1329; border-bottom:1px solid #1e293b; padding:6px 8px; margin-bottom:4px;">
+      <div class="top-header" style="background:#120826; border-bottom:1px solid #3b1d6e; padding:6px 8px; margin-bottom:4px;">
         <button class="icon-btn" onclick="closeChatRoom()">‹ Geri</button>
-        <div id="room-active-title" style="font-size:11px; font-weight:bold; color:#38bdf8;">Oda</div>
+        <div id="room-active-title" style="font-size:11px; font-weight:bold; color:var(--neon-blue);">Oda</div>
         <div></div>
       </div>
 
-      <div id="active-chat-messages" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:6px; background:#070c18; border-radius:8px; margin-bottom:6px;"></div>
+      <div id="active-chat-messages" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:6px; background:#070212; border-radius:8px; margin-bottom:6px;"></div>
 
       <div style="display:flex; gap:4px;">
         <input type="text" id="in-msg-text" class="input-field" style="margin:0; font-size:11px; flex:1;" placeholder="Mesaj yazın...">
-        <button class="icon-btn" style="background:var(--btn-green); border-radius:50%; width:34px; height:34px; justify-content:center;" onclick="sendMessage()">➤</button>
+        <button class="icon-btn" style="background:var(--neon-green); border-radius:50%; width:34px; height:34px; justify-content:center;" onclick="sendMessage()">➤</button>
       </div>
     </div>
   </div>
@@ -104,8 +102,8 @@
               <div style="font-size:9px; color:#60a5fa; font-weight:bold;">${m.sender}</div>
               <div id="msg-${k}">${m.text}</div>
               <div class="msg-actions">
-                <span onclick="navigator.clipboard.writeText('${m.text}'); alert('Kopyalandı');">📋 Kopyala</span>
-                ${isMe ? `<span onclick="editMessage('${k}')">✏️ Düzenle</span><span onclick="deleteMessage('${k}')" style="color:var(--danger)">🗑️ Sil</span>` : ''}
+                <span onclick="navigator.clipboard.writeText('${m.text}'); alert('Kopyalandı');">📋</span>
+                ${isMe ? `<span onclick="editMessage('${k}')">✏️</span><span onclick="deleteMessage('${k}')" style="color:var(--danger)">🗑️</span>` : ''}
               </div>
             </div>
           `;
