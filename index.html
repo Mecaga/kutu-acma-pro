@@ -1,3127 +1,491 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <title>Kutu Açma Pro - Multiplayer Battle & Social</title>
-
-  <!-- Firebase SDK (v9 Compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    html, body {
-      background-color: #05020a;
-      color: #ffffff;
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #app-container {
-      width: 100%;
-      max-width: 420px;
-      height: 100%;
-      height: 100dvh;
-      background: radial-gradient(circle at 50% 20%, #1e0b36 0%, #08020f 100%);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      padding: 8px;
-      border: 1px solid #2d1254;
-      overflow: hidden;
-    }
-
-    .shake-effect { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
-    @keyframes shake {
-      10%, 90% { transform: translate3d(-2px, 0, 0); }
-      20%, 80% { transform: translate3d(3px, 0, 0); }
-      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-      40%, 60% { transform: translate3d(4px, 0, 0); }
-    }
-
-    #toast-notification {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-100px);
-      background: linear-gradient(135deg, #9333ea, #d946ef);
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: bold;
-      z-index: 999;
-      box-shadow: 0 4px 15px rgba(217, 70, 239, 0.5);
-      transition: transform 0.3s ease;
-      white-space: nowrap;
-    }
-    #toast-notification.show { transform: translateX(-50%) translateY(0); }
-
-    /* GİRİŞ EKRANI */
-    #auth-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      height: 100%;
-      padding: 12px 4px;
-      overflow-y: auto;
-    }
-
-    .chest-icon {
-      font-size: 38px;
-      filter: drop-shadow(0 0 15px #a855f7);
-      animation: floatChest 3s ease-in-out infinite;
-    }
-    @keyframes floatChest {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-    }
-
-    .brand-title {
-      font-size: 24px;
-      font-weight: 900;
-      color: #ffffff;
-      text-shadow: 0 0 15px #c084fc;
-      line-height: 1.1;
-      margin-top: 2px;
-      text-align: center;
-    }
-    .brand-sub { font-size: 18px; font-weight: 900; color: #e879f9; text-align: center; }
-
-    .auth-card-panel {
-      width: 100%;
-      background: rgba(18, 7, 34, 0.85);
-      border: 2px solid #a855f7;
-      border-radius: 14px;
-      padding: 12px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .auth-tab-switch {
-      display: flex;
-      background: rgba(10, 3, 20, 0.8);
-      border-radius: 8px;
-      padding: 2px;
-    }
-
-    .auth-tab {
-      flex: 1;
-      padding: 7px 0;
-      text-align: center;
-      font-size: 11px;
-      font-weight: bold;
-      color: #a855f7;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .auth-tab.active {
-      background: linear-gradient(135deg, #9333ea, #c026d3);
-      color: #ffffff;
-    }
-
-    .neon-input {
-      width: 100%;
-      padding: 9px 10px;
-      background: #0d041a;
-      border: 1.5px solid #6b21a8;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 11px;
-      outline: none;
-    }
-
-    .btn-neon-action {
-      width: 100%;
-      padding: 11px;
-      border-radius: 8px;
-      border: none;
-      background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 900;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    /* ÜST PANEL */
-    .top-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-      flex-shrink: 0;
-      height: 32px;
-    }
-
-    .app-title { font-size: 13px; font-weight: 800; color: #fff; }
-    .header-actions { display: flex; gap: 4px; }
-
-    .icon-btn {
-      background: #1b0e2f;
-      border: 1px solid #6b21a8;
-      color: #fff;
-      padding: 5px 8px;
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .exit-btn { background: #7f1d1d; border-color: #ef4444; }
-
-    /* EKRANLAR */
-    #menu-screen, #game-screen, #catch-game-screen, #inventory-screen, 
-    #mines-game-screen, #duel-game-screen, #duel-summary-screen, #catch-summary-screen, 
-    #chats-hub-screen, #chat-screen, #group-manage-screen, #friends-screen, #profile-screen, #user-inspect-screen, #settings-screen {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      justify-content: space-between;
-      gap: 6px;
-      overflow: hidden;
-    }
-
-    .menu-scroll-content {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      align-items: center;
-      width: 100%;
-      flex: 1;
-      overflow-y: auto;
-      padding-bottom: 4px;
-    }
-
-    .nav-extra-bar {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-      width: 100%;
-      flex-shrink: 0;
-      margin-bottom: 2px;
-    }
-
-    .nav-extra-btn {
-      padding: 8px 2px;
-      background: #190a30;
-      border: 1px solid #6b21a8;
-      border-radius: 6px;
-      color: #e879f9;
-      font-size: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-      position: relative;
-    }
-
-    .badge-dot {
-      width: 6px;
-      height: 6px;
-      background: #ef4444;
-      border-radius: 50%;
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      display: none;
-    }
-
-    /* 2x3 GRID DÜZENİ */
-    .mode-grid-2x3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5px;
-      width: 100%;
-    }
-
-    .mode-btn-box {
-      background: #0f071a;
-      border: 1.5px solid #3b1466;
-      color: #cbd5e1;
-      padding: 8px 6px;
-      border-radius: 8px;
-      font-size: 9px;
-      cursor: pointer;
-      text-align: left;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-height: 48px;
-    }
-
-    .mode-btn-box.active {
-      background: linear-gradient(135deg, #7e22ce, #a855f7);
-      color: #fff;
-      border-color: #d946ef;
-      font-weight: bold;
-    }
-
-    .btn-start {
-      width: 100%;
-      min-height: 44px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      font-size: 14px;
-      font-weight: 900;
-      cursor: pointer;
-      flex-shrink: 0;
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
-    }
-
-    /* STAT BAR */
-    .game-stats-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
-    }
-
-    .stat-card {
-      background: #110521;
-      border: 1px solid #4c1d95;
-      padding: 4px 6px;
-      border-radius: 6px;
-    }
-
-    .stat-card.timer { border-color: #ef4444; }
-    .stat-card.score { border-color: #10b981; text-align: right; }
-    .stat-title { font-size: 8px; color: #94a3b8; }
-    .stat-val { font-size: 13px; font-weight: bold; }
-    .timer-val { color: #f87171; }
-    .score-val { color: #34d399; }
-    .user-tag { font-size: 8px; color: #c084fc; }
-
-    .rates-box {
-      background: rgba(17, 5, 33, 0.95);
-      border: 1px solid #4c1d95;
-      border-radius: 6px;
-      padding: 4px 6px;
-      font-size: 8px;
-      flex-shrink: 0;
-    }
-
-    .rate-row { display: flex; justify-content: space-between; padding: 1px 0; }
-
-    .case-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: #080210;
-      border-radius: 8px;
-      border: 1px solid #3b1466;
-      position: relative;
-      overflow: hidden;
-      min-height: 80px;
-    }
-
-    .roulette-wrapper {
-      width: 100%;
-      height: 65px;
-      position: relative;
-      display: none;
-      overflow: hidden;
-      border-top: 2px solid #4c1d95;
-      border-bottom: 2px solid #4c1d95;
-      background: rgba(5, 1, 10, 0.8);
-    }
-
-    .roulette-needle {
-      position: absolute;
-      left: 50%;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      background: #ef4444;
-      transform: translateX(-50%);
-      z-index: 10;
-    }
-
-    .roulette-track {
-      display: flex;
-      position: absolute;
-      left: 0;
-      top: 2px;
-      height: 61px;
-    }
-
-    .roulette-item {
-      width: 65px;
-      height: 61px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border-right: 1px solid rgba(255,255,255,0.1);
-      background: rgba(22, 9, 41, 0.9);
-      font-size: 8px;
-      text-align: center;
-      padding: 1px;
-    }
-
-    .btn-action {
-      width: 100%;
-      min-height: 44px;
-      font-size: 13px;
-      font-weight: 900;
-      border-radius: 8px;
-      border: none;
-      background: linear-gradient(135deg, #7e22ce, #a855f7);
-      color: white;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
-    }
-
-    .btn-action:disabled {
-      background: #231038;
-      color: #64748b;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .catch-arena {
-      flex: 1;
-      background: #080210;
-      border: 2px dashed #4c1d95;
-      border-radius: 8px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .falling-box {
-      position: absolute;
-      width: 44px;
-      height: 44px;
-      border-radius: 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 8px;
-      cursor: pointer;
-      z-index: 20;
-      border: 2px solid;
-    }
-
-    .inv-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-      flex: 1;
-      overflow-y: auto;
-      padding: 3px;
-      background: #080210;
-      border-radius: 6px;
-      align-content: start;
-    }
-
-    .inv-card {
-      height: 52px;
-      border-radius: 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 7px;
-      font-weight: bold;
-      cursor: pointer;
-      border: 2px solid;
-      background: #110521;
-      text-align: center;
-    }
-
-    .inv-card.opened { opacity: 0.3; cursor: not-allowed; }
-
-    .mines-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
-      flex: 1;
-      background: #080210;
-      border-radius: 6px;
-      padding: 6px;
-      align-content: center;
-    }
-
-    .mine-card {
-      aspect-ratio: 1;
-      background: #110521;
-      border: 2px solid #4c1d95;
-      border-radius: 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 9px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .mine-card.safe { border-color: #10b981; background: #064e3b; }
-    .mine-card.bomb { border-color: #ef4444; background: #7f1d1d; }
-
-    /* DUEL & BATTLE ARENA */
-    .battle-grid-players {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-      gap: 4px;
-      flex: 1;
-      max-height: 180px;
-    }
-
-    .battle-player-card {
-      background: #110521;
-      border: 1.5px solid #6b21a8;
-      border-radius: 8px;
-      padding: 4px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      overflow-y: auto;
-      text-align: center;
-    }
-
-    .battle-boxes-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 4px;
-      width: 100%;
-      max-height: 140px;
-      overflow-y: auto;
-      margin: 4px 0;
-      flex-shrink: 0;
-      padding: 2px;
-    }
-
-    .duel-card-mini {
-      height: 44px;
-      background: #1e0b36;
-      border: 1.5px solid #d946ef;
-      border-radius: 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .duel-card-mini.opened {
-      opacity: 0.4;
-      border-color: #4c1d95;
-      cursor: not-allowed;
-    }
-
-    /* WHATSAPP SOHBET */
-    .whatsapp-chat-box {
-      flex: 1;
-      background: #0b141a;
-      border: 1px solid #1f2c34;
-      border-radius: 8px;
-      padding: 8px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .msg-bubble {
-      max-width: 80%;
-      padding: 6px 9px;
-      border-radius: 8px;
-      font-size: 11px;
-      word-break: break-word;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    .msg-incoming {
-      align-self: flex-start;
-      background: #202c33;
-      color: #e9edef;
-      border-top-left-radius: 0;
-    }
-
-    .msg-outgoing {
-      align-self: flex-end;
-      background: #005c4b;
-      color: #e9edef;
-      border-top-right-radius: 0;
-    }
-
-    .msg-sender { font-size: 9px; font-weight: bold; color: #53bdeb; margin-bottom: 2px; }
-    .msg-title-tag { font-size: 7px; background: #3b1466; padding: 1px 4px; border-radius: 4px; margin-left: 2px; }
-    .msg-time { font-size: 7px; color: #8696a0; align-self: flex-end; margin-top: 2px; }
-
-    .whatsapp-input-bar {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      flex-shrink: 0;
-      background: #202c33;
-      padding: 6px 8px;
-      border-radius: 24px;
-      height: 44px;
-    }
-
-    .whatsapp-input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #fff;
-      font-size: 12px;
-      padding-left: 6px;
-    }
-
-    .whatsapp-send-btn {
-      background: #00a884;
-      border: none;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      color: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      flex-shrink: 0;
-    }
-
-    .chat-hub-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 10px;
-      background: #111c24;
-      border-radius: 8px;
-      border: 1px solid #1f2c34;
-      cursor: pointer;
-      margin-bottom: 4px;
-    }
-
-    .request-box {
-      background: #2d1045;
-      border: 1px solid #d946ef;
-      border-radius: 6px;
-      padding: 4px 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-      font-size: 9px;
-    }
-
-    .btn-accept { background: #10b981; border: none; padding: 4px 8px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 9px; }
-    .btn-reject { background: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; color: #fff; cursor: pointer; font-size: 9px; margin-left: 2px; }
-
-    /* TAB BUTONLARI */
-    .sub-tabs {
-      display: flex;
-      background: #190a30;
-      border-radius: 6px;
-      padding: 2px;
-      margin-bottom: 4px;
-    }
-    .sub-tab {
-      flex: 1;
-      text-align: center;
-      font-size: 10px;
-      padding: 6px 0;
-      border-radius: 4px;
-      cursor: pointer;
-      color: #c084fc;
-      font-weight: bold;
-    }
-    .sub-tab.active {
-      background: #9333ea;
-      color: #ffffff;
-    }
-
-    /* MODAL */
-    .modal-overlay {
-      display: none;
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.92);
-      z-index: 50;
-      padding: 8px;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .modal-card {
-      background: #110521;
-      border: 1.5px solid #6b21a8;
-      border-radius: 10px;
-      padding: 8px;
-      max-height: 90%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .filter-tabs { display: flex; gap: 3px; overflow-x: auto; padding-bottom: 3px; }
-    .tab-btn { background: #1c0b33; border: 1px solid #4c1d95; color: #c084fc; padding: 4px 6px; border-radius: 4px; font-size: 8px; cursor: pointer; }
-    .tab-btn.active { background: #9333ea; color: #fff; font-weight: bold; }
-
-    .scroll-list { display: flex; flex-direction: column; gap: 3px; flex: 1; overflow-y: auto; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 6px; border-radius: 4px; background: #18082d; font-size: 9px; }
-
-    .rank-1 { background: #fbbf24; color: #000; }
-    .rank-2 { background: #cbd5e1; color: #000; }
-    .rank-3 { background: #f97316; color: #fff; }
-    .rank-green { background: #22c55e; color: #000; }
-    .rank-rest { background: #200c3b; color: #c084fc; }
-
-    .btn-modal { padding: 9px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; flex-shrink: 0; }
-    .btn-close { background: #ef4444; color: #fff; }
-    .btn-danger { background: #b91c1c; color: #fff; margin-top: 4px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kutu Açma & PvP Arena</title>
+    <!-- Firebase SDK (v8 Standart) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --bg-main: #12141d;
+            --bg-card: #1c1f2e;
+            --bg-accent: #282d42;
+            --primary: #5865f2;
+            --primary-hover: #4752c4;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f1c40f;
+            --text-main: #ffffff;
+            --text-dim: #9aa0a6;
+            --gold: #ffd700;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sol Navigasyon & Profil */
+        #sidebar { width: 280px; background-color: var(--bg-card); display: flex; flex-direction: column; border-right: 1px solid var(--bg-accent); padding: 15px; gap: 15px; }
+        .profile-card { background: var(--bg-accent); padding: 15px; border-radius: 10px; text-align: center; }
+        .avatar-box { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--gold); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; background: #333; }
+        .level-badge { background: var(--gold); color: #000; font-weight: bold; padding: 2px 8px; border-radius: 12px; font-size: 12px; display: inline-block; margin-bottom: 5px; }
+        .progress-bar-container { background: #111; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 8px; }
+        .progress-bar { background: var(--success); height: 100%; width: 0%; transition: width 0.3s; }
+
+        .nav-btn { background: transparent; color: var(--text-dim); border: none; padding: 12px; text-align: left; border-radius: 8px; cursor: pointer; font-size: 15px; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .nav-btn:hover, .nav-btn.active { background: var(--bg-accent); color: var(--text-main); }
+
+        /* Ana İçerik Alanı */
+        #main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+        .tab-content { display: none; padding: 25px; }
+        .tab-content.active { display: block; }
+
+        /* Grid ve Kart Yapıları */
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px; }
+        .card { background: var(--bg-card); padding: 15px; border-radius: 10px; border: 1px solid var(--bg-accent); }
+        
+        button.btn { background: var(--primary); color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button.btn:hover { background: var(--primary-hover); }
+        button.btn:disabled { background: #555; cursor: not-allowed; opacity: 0.6; }
+        button.btn-danger { background: var(--danger); }
+        button.btn-success { background: var(--success); }
+
+        input, select { width: 100%; padding: 10px; background: var(--bg-main); border: 1px solid var(--bg-accent); color: #fff; border-radius: 6px; margin: 5px 0 10px; }
+
+        /* Chat / Sohbet */
+        .chat-container { display: flex; flex-direction: column; height: 75vh; background: var(--bg-card); border-radius: 10px; border: 1px solid var(--bg-accent); }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .chat-msg { background: var(--bg-accent); padding: 10px 14px; border-radius: 8px; max-width: 75%; position: relative; align-self: flex-start; }
+        .chat-msg.self { align-self: flex-end; background: #3b4261; }
+        .chat-msg .author { font-size: 11px; color: var(--gold); margin-bottom: 3px; }
+        .chat-msg .text { word-break: break-word; }
+        .chat-msg .msg-actions { margin-top: 5px; display: flex; gap: 8px; font-size: 11px; opacity: 0.8; }
+        .chat-msg .msg-actions span { cursor: pointer; text-decoration: underline; color: var(--text-dim); }
+        .chat-msg .msg-actions span:hover { color: #fff; }
+        .chat-input-area { display: flex; gap: 10px; padding: 12px; border-top: 1px solid var(--bg-accent); }
+
+        /* PvP Arena */
+        .pvp-stage { display: flex; justify-content: space-around; align-items: center; min-height: 250px; background: var(--bg-card); border-radius: 12px; margin: 20px 0; border: 1px dashed var(--primary); }
+        .pvp-box { text-align: center; }
+        .pvp-status { text-align: center; font-size: 18px; font-weight: bold; color: var(--warning); }
+    </style>
 </head>
 <body>
 
-<div id="app-container">
-
-  <div id="toast-notification">Bildirim</div>
-
-  <!-- 1. GİRİŞ EKRANI -->
-  <div id="auth-screen">
-    <div style="text-align:center; margin-top:5px;">
-      <div class="chest-icon">👑📦</div>
-      <div class="brand-title">Kutu Açma</div>
-      <div class="brand-sub">Pro</div>
-    </div>
-
-    <div class="auth-card-panel">
-      <div class="auth-tab-switch">
-        <div class="auth-tab active" id="tab-login" onclick="setAuthTab('login')">🎮 Giriş</div>
-        <div class="auth-tab" id="tab-register" onclick="setAuthTab('register')">👤+ Kayıt</div>
-      </div>
-
-      <input type="text" id="auth-username" class="neon-input" placeholder="Kullanıcı Adı">
-      <input type="password" id="auth-password" class="neon-input" placeholder="Şifre">
-
-      <button class="btn-neon-action" id="auth-submit-btn" onclick="executeAuth()">🎮 Giriş Yap</button>
-      <button class="btn-neon-action" id="auth-switch-btn" style="background:#2e1054; border:1px solid #a855f7;" onclick="toggleAuthTab()">👤+ Yeni Hesap Oluştur</button>
-    </div>
-
-    <div style="font-size:8px; color:#c084fc; text-align:center;">
-      🛡️ Verileriniz bulutta güvenle saklanır!
-    </div>
-  </div>
-
-  <!-- 2. ANA MENÜ (2x3 GRID DÜZENİ) -->
-  <div id="menu-screen">
-    <div class="top-header">
-      <div class="app-title" onclick="openProfileScreen()" style="cursor:pointer;">👤 Profilim</div>
-      <div class="header-actions">
-        <button class="icon-btn" onclick="openLeaderboard()">🏆 Sıralama</button>
-        <button class="icon-btn" onclick="openSettings()">⚙️ Ayarlar</button>
-        <button class="icon-btn exit-btn" onclick="handleSignOut()">🚪 Çıkış</button>
-      </div>
-    </div>
-
-    <div class="menu-scroll-content">
-      <div style="font-size:15px; font-weight:900; color:#d946ef; margin-top:2px;">KUTU AÇMA</div>
-      <div style="font-size:11px; color:#34d399; font-weight:bold;" id="menu-user-greeting">👤 Oyuncu#00000 [Çaylak]</div>
-      
-      <div class="nav-extra-bar">
-        <div class="nav-extra-btn" onclick="openChatsHub()">💬 Sohbetler & Kanallar</div>
-        <div class="nav-extra-btn" onclick="openFriendsScreen()">
-          👥 Arkadaşlar & İstekler
-          <div class="badge-dot" id="friend-badge"></div>
-        </div>
-      </div>
-
-      <!-- 2 Sütun x 3 Satır Mod Kutuları -->
-      <div class="mode-grid-2x3">
-        <div class="mode-btn-box active" onclick="selectMode('standard', this)">
-          <b>⚔️ Normal Kasa</b>
-          <div style="font-size:7px; color:#94a3b8;">Dengeli klasik kasa (30s)</div>
-        </div>
-        <div class="mode-btn-box" onclick="selectMode('ten_cases', this)">
-          <b>📦 10 Kutu Modu</b>
-          <div style="font-size:7px; color:#94a3b8;">Kozmik Hüküm (%0.2)</div>
-        </div>
-        <div class="mode-btn-box" onclick="selectMode('catch_open', this)">
-          <b>🎯 Yakala & Aç</b>
-          <div style="font-size:7px; color:#94a3b8;">Uranus Gizemli (%0.01)</div>
-        </div>
-        <div class="mode-btn-box" onclick="selectMode('upgrade_mode', this)">
-          <b>📈 Şans Yükseltme</b>
-          <div style="font-size:7px; color:#94a3b8;">7 Kutu katlanan puan</div>
-        </div>
-        <div class="mode-btn-box" onclick="selectMode('mines_mode', this)">
-          <b>💣 Mayınlı Kasa</b>
-          <div style="font-size:7px; color:#94a3b8;">Risk & Çekilme modu</div>
-        </div>
-        <div class="mode-btn-box" onclick="openDuelRoomModal()" style="border-color:#ef4444; background:rgba(239,68,68,0.15);">
-          <b style="color:#f87171;">⚔️ Canlı PvP Savaş</b>
-          <div style="font-size:7px; color:#fca5a5;">15s - 1v1 / 1v1v1 / 1v1v1v1</div>
-        </div>
-      </div>
-
-      <div class="rates-box" style="width:100%; margin-top:2px;" id="menu-rates-preview"></div>
-    </div>
-
-    <button class="btn-start" onclick="startGame()">OYUNA BAŞLA</button>
-  </div>
-
-  <!-- 3. KASA AÇMA EKRANI -->
-  <div id="game-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:10px; font-weight:bold; color:#d946ef;" id="game-mode-name-txt">Kasa</div>
-      <div></div>
-    </div>
-
-    <div class="game-stats-top">
-      <div class="stat-card timer">
-        <div class="stat-title" id="stat-timer-title">SÜRE</div>
-        <div class="stat-val timer-val" id="timer-txt">30s</div>
-        <div class="user-tag" id="user-tag-txt">@User</div>
-      </div>
-      <div class="stat-card score">
-        <div class="stat-title">PUAN</div>
-        <div class="stat-val score-val" id="score-txt">0</div>
-      </div>
-    </div>
-
-    <div class="rates-box" id="rates-box-container"></div>
-
-    <div class="case-container">
-      <div id="ready-view">
-        <div style="font-size:16px; font-weight:900;" id="ready-banner-txt">HAZIR!</div>
-        <div style="font-size:9px; color:#fbbf24;" id="mode-badge-txt">Kasayı Aç!</div>
-      </div>
-      <div id="roulette-view" class="roulette-wrapper">
-        <div class="roulette-needle"></div>
-        <div id="roulette-track" class="roulette-track"></div>
-      </div>
-    </div>
-
-    <div style="display:flex; justify-content:flex-end; flex-shrink:0;">
-      <div class="stat-card" style="font-size:9px;" id="drop-result-txt">Son Düşen: <span style="color:#64748b;">-</span></div>
-    </div>
-
-    <button id="open-case-btn" class="btn-action" onclick="openCase()">KASAYI AÇ</button>
-  </div>
-
-  <!-- 4. YAKALA & AÇ: 1. AŞAMA -->
-  <div id="catch-game-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:10px; font-weight:bold; color:#d946ef;">Yakala & Aç</div>
-      <div></div>
-    </div>
-
-    <div class="game-stats-top">
-      <div class="stat-card timer">
-        <div class="stat-title">TOPLAMA SÜRESİ</div>
-        <div class="stat-val timer-val" id="catch-timer-txt">15s</div>
-        <div class="user-tag" id="catch-user-tag">@User</div>
-      </div>
-      <div class="stat-card score">
-        <div class="stat-title">YAKALANAN</div>
-        <div class="stat-val score-val" id="caught-count-txt">0</div>
-      </div>
-    </div>
-
-    <div class="catch-arena" id="catch-arena"></div>
-    <div style="font-size:9px; color:#fbbf24; text-align:center; flex-shrink:0;">⚡ Düşen kutulara dokunarak topla!</div>
-  </div>
-
-  <!-- 5. YAKALA & AÇ: 2. AŞAMA -->
-  <div id="inventory-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:10px; font-weight:bold; color:#d946ef;">Kutuları Aç</div>
-      <div></div>
-    </div>
-
-    <div class="game-stats-top">
-      <div class="stat-card score">
-        <div class="stat-title">KALAN KUTU</div>
-        <div class="stat-val score-val" id="inv-remaining-txt">0</div>
-      </div>
-      <div class="stat-card score">
-        <div class="stat-title">TOPLAM PUAN</div>
-        <div class="stat-val score-val" id="inv-score-txt">0</div>
-      </div>
-    </div>
-
-    <div class="case-container" style="min-height: 70px; flex:none;">
-      <div id="inv-ready-view" style="text-align:center;">
-        <div style="font-size:10px; color:#94a3b8;">Kutuları tek tek veya toplu aç!</div>
-      </div>
-      <div id="inv-roulette-view" class="roulette-wrapper">
-        <div class="roulette-needle"></div>
-        <div id="inv-roulette-track" class="roulette-track"></div>
-      </div>
-    </div>
-
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
-      <div style="font-size:9px; color:#d946ef; font-weight:bold;">📦 Yakaladığın Kutular:</div>
-      <button class="icon-btn" style="background:#10b981;" onclick="openAllCaughtBoxes()">⚡ Tümünü Aç</button>
-    </div>
-    <div class="inv-grid" id="inv-grid-container"></div>
-  </div>
-
-  <!-- 6. MAYINLI KASA -->
-  <div id="mines-game-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:10px; font-weight:bold; color:#d946ef;">Mayınlı Kasa</div>
-      <div></div>
-    </div>
-
-    <div class="game-stats-top">
-      <div class="stat-card timer">
-        <div class="stat-title">DURUM</div>
-        <div class="stat-val timer-val" id="mine-status-txt">1 Mayın Var!</div>
-        <div class="user-tag" id="mine-user-tag">@User</div>
-      </div>
-      <div class="stat-card score">
-        <div class="stat-title">BİRİKEN PUAN</div>
-        <div class="stat-val score-val" id="mine-score-txt">0</div>
-      </div>
-    </div>
-
-    <div class="mines-grid" id="mines-grid"></div>
-    <button id="cashout-btn" class="btn-action" style="background:#10b981;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
-  </div>
-
-  <!-- 7. CANLI 1v1 / 1v1v1 / 1v1v1v1 SAVAŞ EKRANI (15sn SÜRE) -->
-  <div id="duel-game-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitDuelRoom()">‹ Çıkış</button>
-      <div style="font-size:10px; font-weight:bold; color:#ef4444;" id="duel-room-title">Oda: #00000</div>
-      <div class="stat-card timer" style="padding:2px 6px;">
-        <span style="font-size:10px; font-weight:bold; color:#f87171;" id="duel-timer-txt">15s</span>
-      </div>
-    </div>
-
-    <div class="battle-grid-players" id="battle-players-grid"></div>
-
-    <div style="font-size:9px; color:#d946ef; font-weight:bold; margin-top:2px;" id="duel-box-count-label">📦 Sana Ait Kutular (Hepsini Aç):</div>
-    <div class="battle-boxes-grid" id="duel-my-boxes-grid"></div>
-  </div>
-
-  <!-- 7.1 SAVAŞ SONUÇ VE KARŞILAŞTIRMA EKRANI -->
-  <div id="duel-summary-screen">
-    <div style="text-align:center; font-weight:bold; font-size:13px; color:#ef4444;">⚔️ CANLI SAVAŞ SONUCU</div>
-    
-    <div class="battle-grid-players" id="duel-summary-players-grid" style="margin:6px 0; max-height:220px;"></div>
-
-    <div style="text-align:center; font-size:16px; font-weight:900; margin:6px 0;" id="duel-winner-banner">🏆 KAZANDIN!</div>
-
-    <button class="btn-modal btn-close" onclick="exitDuelSummary()">🚪 Menüye Dön</button>
-  </div>
-
-  <!-- 8. SOHBETLER LİSTESİ (HUB) -->
-  <div id="chats-hub-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#25D366;">💬 Sohbetler & Kanallar</div>
-      <div style="display:flex; gap:3px;">
-        <button class="icon-btn" style="background:#0284c7;" onclick="promptJoinGroup()">🔗 Katıl</button>
-        <button class="icon-btn" style="background:#10b981;" onclick="promptCreateGroup()">➕ Kur</button>
-      </div>
-    </div>
-
-    <div class="scroll-list" style="padding:4px 0;">
-      <div class="chat-hub-item" onclick="openGlobalChat()">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:20px;">🌐</span>
-          <div>
-            <div style="font-weight:bold; color:#fff; font-size:11px;">Genel Sohbet (Global)</div>
-            <div style="font-size:8px; color:#8696a0;">Tüm oyuncularla canlı konuş</div>
-          </div>
-        </div>
-        <span style="font-size:12px; color:#25D366;">›</span>
-      </div>
-
-      <div style="font-size:9px; color:#8696a0; margin:6px 0 2px 2px; font-weight:bold;">KATILDIĞIN KANALLAR</div>
-      <div id="hub-groups-chats"></div>
-
-      <div style="font-size:9px; color:#8696a0; margin:6px 0 2px 2px; font-weight:bold;">ÖZEL MESAJLAR</div>
-      <div id="hub-friends-chats"></div>
-    </div>
-  </div>
-
-  <!-- 9. WHATSAPP MESAJLAŞMA EKRANI -->
-  <div id="chat-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="openChatsHub()">‹ Sohbetler</button>
-      <div style="font-size:11px; font-weight:bold; color:#25D366;" id="chat-header-title">💬 Sohbet</div>
-      <button class="icon-btn" id="group-manage-btn" style="display:none; background:#9333ea;" onclick="openGroupManageScreen()">⚙️ Kanalı Yönet</button>
-    </div>
-
-    <div class="whatsapp-chat-box" id="chat-messages-box"></div>
-
-    <div class="whatsapp-input-bar">
-      <input type="text" id="chat-message-input" class="whatsapp-input" placeholder="Bir mesaj yazın...">
-      <button class="whatsapp-send-btn" onclick="sendChatMessage()">➤</button>
-    </div>
-  </div>
-
-  <!-- 9.1 KANAL YÖNETİM EKRANI -->
-  <div id="group-manage-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="backToGroupChat()">‹ Geri</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">⚙️ Kanal Yönetimi</div>
-      <div></div>
-    </div>
-
-    <div class="case-container" style="padding: 10px; gap:8px; overflow-y:auto;">
-      <div style="font-size:12px; font-weight:bold; color:#fbbf24;" id="manage-group-name-txt">Kanal Adı#00000</div>
-      
-      <div id="group-admin-tools" style="display:none; width:100%; flex-direction:column; gap:4px;">
-        <button class="icon-btn" style="background:#0284c7; width:100%; padding:8px;" onclick="renameCurrentGroup()">✏️ Kanal Adını Değiştir</button>
-        <button class="icon-btn exit-btn" style="width:100%; padding:8px;" onclick="deleteCurrentGroup()">🗑️ Kanalı Sil</button>
-      </div>
-
-      <div style="font-size:9px; color:#a855f7; font-weight:bold; width:100%; margin-top:4px;">KANALDAKİ ÜYELER:</div>
-      <div class="scroll-list" id="group-members-list" style="width:100%; max-height:140px;"></div>
-    </div>
-
-    <button class="btn-modal btn-close" onclick="backToGroupChat()">Kapat</button>
-  </div>
-
-  <!-- 10. ARKADAŞLAR, İSTEKLER VE TÜM KULLANICILAR -->
-  <div id="friends-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">👥 Arkadaşlar & Kullanıcılar</div>
-      <div></div>
-    </div>
-
-    <!-- Alt Sekmeler: Arkadaşlarım & Tüm Kullanıcılar -->
-    <div class="sub-tabs">
-      <div class="sub-tab active" id="tab-my-friends" onclick="switchFriendsSubTab('my_friends')">👥 Arkadaşlarım</div>
-      <div class="sub-tab" id="tab-all-users" onclick="switchFriendsSubTab('all_users')">🌐 Kayıtlı Oyuncular</div>
-    </div>
-
-    <!-- Arkadaşlarım Sekmesi -->
-    <div id="panel-my-friends" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
-      <div style="font-size:9px; color:#fbbf24; font-weight:bold; margin-bottom:2px;">Gelen Arkadaşlık İstekleri:</div>
-      <div id="friend-requests-container"></div>
-      <div style="font-size:9px; color:#38bdf8; font-weight:bold; margin:4px 0 2px 0;">Ekli Arkadaşlarım:</div>
-      <div class="scroll-list" id="my-friends-list"></div>
-    </div>
-
-    <!-- Tüm Kullanıcılar Sekmesi -->
-    <div id="panel-all-users" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
-      <div style="display:flex; gap:4px; margin-bottom:4px;">
-        <input type="text" id="add-friend-input" class="neon-input" placeholder="Etiketle Ara: Örn Oyuncu#12345">
-        <button class="icon-btn" style="background:#10b981;" onclick="sendFriendRequestFromInput()">İstek At</button>
-      </div>
-      <div class="scroll-list" id="all-registered-users-list"></div>
-    </div>
-  </div>
-
-  <!-- 11. KENDİ PROFİL & İSTATİSTİKLER -->
-  <div id="profile-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">👤 Oyuncu Profili</div>
-      <div></div>
-    </div>
-
-    <div class="case-container" style="padding: 10px; gap:6px; overflow-y:auto;">
-      <div style="font-size:28px;">👑</div>
-      <div style="font-size:13px; font-weight:bold; color:#38bdf8;" id="prof-name-txt">Oyuncu#00000</div>
-      <div style="font-size:9px; color:#fbbf24;" id="prof-title-txt">Unvan: Çaylak</div>
-      
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; width:100%;">
-        <div class="stat-card" style="text-align:center;">
-          <div class="stat-title">TOPLAM OYUN</div>
-          <div class="stat-val score-val" id="prof-boxes-txt">0</div>
-        </div>
-        <div class="stat-card" style="text-align:center;">
-          <div class="stat-title">GENEL KAZANMA</div>
-          <div class="stat-val timer-val" id="prof-winrate-txt">%0</div>
-        </div>
-      </div>
-
-      <div style="font-size:9px; color:#a855f7; font-weight:bold; width:100%; margin-top:2px;">MOD BAZLI İSTATİSTİKLER:</div>
-      <div class="scroll-list" id="prof-mode-stats-list" style="width:100%; max-height:120px;"></div>
-    </div>
-
-    <button class="btn-modal btn-close" onclick="exitToMenu()">Kapat</button>
-  </div>
-
-  <!-- 12. OYUNCU İNCELEME KARTI -->
-  <div id="user-inspect-screen" class="modal-overlay" style="z-index: 80;">
-    <div class="modal-card" style="gap:6px;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <button class="icon-btn" style="background:#10b981;" id="inspect-add-friend-btn">➕ İstek At</button>
-        <button class="icon-btn exit-btn" onclick="closeInspectModal()">✕ Kapat</button>
-      </div>
-
-      <div style="text-align:center; margin:4px 0;">
-        <div style="font-size:26px;">👤</div>
-        <div style="font-size:13px; font-weight:bold; color:#38bdf8;" id="inspect-name-txt">Oyuncu#00000</div>
-        <div style="font-size:9px; color:#fbbf24;" id="inspect-title-txt">Unvan: Çaylak</div>
-      </div>
-
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; width:100%;">
-        <div class="stat-card" style="text-align:center;">
-          <div class="stat-title">TOPLAM OYUN</div>
-          <div class="stat-val score-val" id="inspect-boxes-txt">0</div>
-        </div>
-        <div class="stat-card" style="text-align:center;">
-          <div class="stat-title">KAZANMA ORANI</div>
-          <div class="stat-val timer-val" id="inspect-winrate-txt">%0</div>
-        </div>
-      </div>
-
-      <div style="font-size:9px; color:#a855f7; font-weight:bold;">MOD BAZLI PERFORMANS:</div>
-      <div class="scroll-list" id="inspect-mode-stats-list" style="max-height:110px;"></div>
-    </div>
-  </div>
-
-  <!-- 13. AYARLAR & SERBEST UNVAN SEÇİMİ -->
-  <div id="settings-screen">
-    <div class="top-header">
-      <button class="icon-btn exit-btn" onclick="exitToMenu()">‹ Menü</button>
-      <div style="font-size:11px; font-weight:bold; color:#d946ef;">⚙️ Bulut Ayarları</div>
-      <div></div>
-    </div>
-
-    <div class="case-container" style="padding: 10px; gap:8px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-        <span style="font-size:11px; font-weight:bold;">🔊 Ses Efektleri:</span>
-        <button class="icon-btn" id="audio-toggle-btn" onclick="toggleAudioSetting()">Açık</button>
-      </div>
-
-      <div style="font-size:11px; font-weight:bold; color:#38bdf8; width:100%; margin-top:6px;">Unvanını Seç (Serbest Havuz):</div>
-      <div class="scroll-list" style="width:100%; gap:4px; max-height:160px;" id="titles-container"></div>
-    </div>
-
-    <button class="btn-modal btn-close" onclick="exitToMenu()">Kaydet & Kapat</button>
-  </div>
-
-  <!-- 14. CANLI SAVAŞ LOBİSİ MODALI (1v1, 1v1v1, 1v1v1v1) -->
-  <div id="duel-room-modal" class="modal-overlay" style="z-index: 85;">
-    <div class="modal-card" style="gap:6px;">
-      <div style="font-size:12px; font-weight:bold; color:#ef4444; text-align:center;">⚔️ Canlı PvP Savaş Lobisi (15s)</div>
-      <div style="font-size:8px; color:#94a3b8; text-align:center;">(Sıralama puanına etki etmez - Eğlence Modu)</div>
-
-      <div style="font-size:9px; color:#fbbf24; font-weight:bold; margin-top:4px;">Oda Kur (Kişi Sayısı Seç):</div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:4px;">
-        <button class="btn-action" style="background:#0284c7; font-size:10px;" onclick="createBattleRoom(2, 5)">1v1 (5 Kutu)</button>
-        <button class="btn-action" style="background:#9333ea; font-size:10px;" onclick="createBattleRoom(3, 10)">1v1v1 (10 Kutu)</button>
-        <button class="btn-action" style="background:#ef4444; font-size:10px;" onclick="createBattleRoom(4, 20)">1v1v1v1 (20 Kutu)</button>
-      </div>
-      
-      <div style="font-size:9px; color:#38bdf8; font-weight:bold; margin-top:6px;">Var Olan Odaya Katıl:</div>
-      <div style="display:flex; gap:4px;">
-        <input type="text" id="join-duel-room-input" class="neon-input" placeholder="5 Haneli Oda Kodu (Örn: 12345)">
-        <button class="icon-btn" style="background:#10b981;" onclick="joinBattleRoom()">Katıl</button>
-      </div>
-
-      <button class="btn-modal btn-close" onclick="closeDuelRoomModal()" style="margin-top:4px;">Vazgeç</button>
-    </div>
-  </div>
-
-  <!-- 15. SIRALAMA VE OYUNCU DETAY MODALI -->
-  <div id="details-modal" class="modal-overlay" style="z-index: 70;">
-    <div class="modal-card">
-      <div style="text-align:center; font-weight:bold; font-size:12px; color:#fbbf24; cursor:pointer;" id="detail-player-title" onclick="inspectPlayerFromDetail()">👤 Oyuncu Detayı (Profile Bak)</div>
-      <div style="font-size:9px; color:#94a3b8; text-align:center; margin-bottom:4px;" id="detail-player-sub">Mod ve Puan Aldığı Eşyalar:</div>
-      <div class="scroll-list" id="detail-drops-list"></div>
-      <button class="btn-modal btn-close" style="margin-top:6px;" onclick="closeDetailsModal()">Kapat</button>
-    </div>
-  </div>
-
-  <!-- 16. OYUN BİTTİ MODALI -->
-  <div id="game-over-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div style="text-align:center; font-weight:bold; font-size:13px;">OYUN BİTTİ</div>
-      <div style="text-align:center; margin:8px 0;">
-        <div style="font-size:10px; color:#94a3b8;" id="modal-mod-info">Normal Kasa</div>
-        <div style="font-size:22px; font-weight:bold; color:#10b981;" id="final-score-txt">0</div>
-      </div>
-      <button class="btn-modal btn-close" onclick="exitToMenu()">Ana Menüye Dön</button>
-    </div>
-  </div>
-
-  <!-- 17. SIRALAMA MODALI -->
-  <div id="leaderboard-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div style="text-align:center; font-weight:bold; font-size:12px; margin-bottom:4px;">🏆 SIRALAMA (EN YÜKSEK SKORLAR)</div>
-      <div class="filter-tabs">
-        <button class="tab-btn active" onclick="filterLeaderboard('all', this)">Tümü</button>
-        <button class="tab-btn" onclick="filterLeaderboard('standard', this)">Normal</button>
-        <button class="tab-btn" onclick="filterLeaderboard('ten_cases', this)">10 Kutu</button>
-        <button class="tab-btn" onclick="filterLeaderboard('catch_open', this)">Yakala & Aç</button>
-        <button class="tab-btn" onclick="filterLeaderboard('upgrade_mode', this)">Şans</button>
-        <button class="tab-btn" onclick="filterLeaderboard('mines_mode', this)">Mayın</button>
-      </div>
-      <div class="scroll-list" id="lb-list-container"></div>
-      <div id="admin-lb-controls" style="display:none; margin-top:4px;">
-        <button class="btn-modal btn-danger" style="width:100%;" onclick="confirmClearLeaderboard()">🗑️ Tabloyu Sıfırla (Admin)</button>
-      </div>
-      <button class="btn-modal btn-close" style="margin-top:4px;" onclick="closeLeaderboard()">Kapat</button>
-    </div>
-  </div>
-
-</div>
-
-<!-- JAVASCRIPT & MOTOR -->
-<script>
-  let isAudioEnabled = true;
-
-  const ALL_TITLES_POOL = [
-    'Çaylak', 'Kutucu', 'Avcı', 'Bomba İmha', 'Üstat', 
-    'Tanrısal', 'Milyoner', 'Astronot', 'Galaktik', 'Kozmik Efendi', 
-    'Evrenin Hakimi', 'Kuantum Varlığı', 'Ölümsüz', 'Ejderha Süvarisi'
-  ];
-
-  const AudioEngine = {
-    ctx: null,
-    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-    playTick() {
-      if (!isAudioEnabled) return;
-      try {
-        this.init();
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(600, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.04);
-      } catch(e){}
-    },
-    playGodly() {
-      if (!isAudioEnabled) return;
-      try {
-        this.init();
-        const now = this.ctx.currentTime;
-        [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, i) => {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, now + i * 0.09);
-          gain.gain.setValueAtTime(0.15, now + i * 0.09);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.4);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(now + i * 0.09);
-          osc.stop(now + i * 0.09 + 0.4);
-        });
-      } catch(e){}
-    },
-    playExplosion() {
-      if (!isAudioEnabled) return;
-      try {
-        this.init();
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(120, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.4);
-        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.4);
-      } catch(e){}
-    }
-  };
-
-  function toggleAudioSetting() {
-    isAudioEnabled = !isAudioEnabled;
-    const btn = document.getElementById('audio-toggle-btn');
-    btn.innerText = isAudioEnabled ? "Açık" : "Kapalı";
-    btn.style.color = isAudioEnabled ? "#34d399" : "#ef4444";
-  }
-
-  function showToast(msg) {
-    const el = document.getElementById('toast-notification');
-    el.innerText = msg;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 2500);
-  }
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
-    authDomain: "kutu-acma-pro.firebaseapp.com",
-    projectId: "kutu-acma-pro",
-    storageBucket: "kutu-acma-pro.firebasestorage.app",
-    messagingSenderId: "483395048462",
-    appId: "1:483395048462:web:450f18178e682a4a2f985f"
-  };
-
-  let auth = null;
-  let db = null;
-  let firebaseReady = false;
-
-  try {
-    firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.database();
-    firebaseReady = true;
-  } catch (err) {
-    console.warn("Firebase hazır değil:", err);
-  }
-
-  const GAME_MODES = {
-    standard: {
-      name: "Normal Kasa",
-      tiers: [
-        { name: 'Classic', rate: 58.0, minP: 1, maxP: 3, color: '#ffffff', items: ['Tahta Kılıç', 'Deri Kask', 'Taş Parçası'] },
-        { name: 'Super',   rate: 29.0, minP: 4, maxP: 10, color: '#38bdf8', items: ['Demir Balta', 'Gümüş Yüzük', 'Çelik Kalkan'] },
-        { name: 'Ultra',   rate: 10.0, minP: 12, maxP: 30, color: '#c084fc', items: ['Büyülü Asa', 'Ateş Pelerini', 'Rünik Yay'] },
-        { name: 'Omega',   rate: 2.8,  minP: 35, maxP: 120, color: '#fb923c', items: ['Ejder Baltası', 'Lich Tacı'] },
-        { name: 'Godly',   rate: 0.2,  minP: 500, maxP: 1000, color: '#f43f5e', items: ['Ebedi Kristal Kılıç'] }
-      ]
-    },
-    ten_cases: {
-      name: "10 Kutu Modu",
-      tiers: [
-        { name: 'Classic', rate: 35.0, minP: 2, maxP: 5, color: '#ffffff', items: ['Gelişmiş Kalkan', 'Bronz Zırh'] },
-        { name: 'Super',   rate: 34.8, minP: 6, maxP: 15, color: '#38bdf8', items: ['Safir Kılıç', 'Titan Başlığı'] },
-        { name: 'Ultra',   rate: 20.0, minP: 20, maxP: 50, color: '#c084fc', items: ['Karanlık Asa', 'Yıldırım Yayı'] },
-        { name: 'Omega',   rate: 8.5,  minP: 60, maxP: 200, color: '#fb923c', items: ['Kıyamet Baltası', 'Zaman Tacı'] },
-        { name: 'Godly',   rate: 1.5,  minP: 600, maxP: 1200, color: '#f43f5e', items: ['Tanrısal Hüküm Kılıcı'] },
-        { name: 'Kozmik Hüküm (Cosmic)', rate: 0.2, minP: 3500, maxP: 3500, color: '#e879f9', items: ['Kozmik Hükümdar Asası'] }
-      ]
-    },
-    catch_open: {
-      name: "Yakala & Aç Modu",
-      tiers: [
-        { name: 'Classic Kasa', rate: 45.0, minP: 2, maxP: 5, color: '#ffffff', items: ['Deri Çanta', 'Taş Kolye', 'Bakır Hançer'] },
-        { name: 'Super Kasa',   rate: 30.0, minP: 6, maxP: 18, color: '#38bdf8', items: ['Buz Asası', 'Rüzgar Pelerini', 'Platin Kalkan'] },
-        { name: 'Ultra Kasa',   rate: 15.0, minP: 25, maxP: 60, color: '#c084fc', items: ['Gök Gürültüsü Baltası', 'Anka Tüyü'] },
-        { name: 'Omega Kasa',   rate: 7.99, minP: 80, maxP: 250, color: '#fb923c', items: ['Ejderha Kalbi', 'Gölge Tacı'] },
-        { name: 'Godly Kasa',   rate: 2.0,  minP: 750, maxP: 1500, color: '#f43f5e', items: ['Kainatın Asası', 'Ebedi Yıldız Taşı'] },
-        { name: 'Uranus (Gizemli)', rate: 0.01, minP: 2000, maxP: 2000, color: '#00ffff', items: ['Uranus Kozmik Matrisi', 'Göklerin Gözü'] }
-      ]
-    },
-    upgrade_mode: {
-      name: "Şans Yükseltme Modu",
-      tiers: [
-        { name: 'Kademe 1', rate: 50.0, minP: 10, maxP: 25, color: '#ffffff', items: ['Gelişen Kılıç', 'Dinamik Zırh'] },
-        { name: 'Kademe 2', rate: 30.0, minP: 30, maxP: 75, color: '#38bdf8', items: ['Aura Yayı', 'Işık Kristali'] },
-        { name: 'Kademe 3', rate: 15.0, minP: 80, maxP: 200, color: '#c084fc', items: ['Yükseltilmiş Asa', 'Hiçlik Kalkanı'] },
-        { name: 'Kozmik Güç', rate: 5.0, minP: 300, maxP: 1000, color: '#f43f5e', items: ['Sonsuzluk Matrisi', 'Tanrı Katili'] }
-      ]
-    },
-    mines_mode: {
-      name: "Mayınlı Kasa Modu",
-      tiers: [
-        { name: 'Güvenli Kasa', rate: 70.0, minP: 15, maxP: 45, color: '#10b981', items: ['Elmas Külçesi', 'Zümrüt Heykel'] },
-        { name: 'Büyük Hazine', rate: 30.0, minP: 60, maxP: 160, color: '#fbbf24', items: ['Kraliyet Tacı', 'Kutsal Kupa'] }
-      ]
-    }
-  };
-
-  let leaderboardData = [];
-  let userFriends = [];
-  let userGroups = [];
-  let allRegisteredUsers = [];
-  let currentTitle = 'Çaylak';
-  let currentUser = null;
-  let currentUid = null;
-  let isAdmin = false;
-  let authMode = "login";
-  let activeChatTarget = "global";
-  let currentActiveGroupId = null;
-
-  let totalBoxesOpened = 0;
-  let userHighScore = 0;
-  let userModeStats = {};
-  let currentlyInspectingUser = null;
-
-  // CANLI SAVAŞ (BATTLE) DEĞİŞKENLERİ
-  let currentBattleRoomCode = null;
-  let battleListenerRef = null;
-  let battleMaxPlayers = 2;
-  let battleTotalBoxes = 5;
-  let battleTimerInterval = null;
-  let battleTimeLeft = 15;
-  let battleMyDrops = [];
-
-  let selectedModeKey = 'standard';
-  let currentScore = 0;
-  let timeLeft = 30;
-  let timerInterval = null;
-  let isOpening = false;
-  let currentSessionDrops = [];
-  let selectedFilterMode = 'all';
-
-  let remainingBoxes = 10;
-  let upgradeStep = 1;
-  let caughtBoxes = [];
-  let catchAnimationFrames = [];
-  let spawnInterval = null;
-  let catchTimeLeft = 15;
-  let mineField = [];
-  let safePicksCount = 0;
-
-  if (firebaseReady && auth) {
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        currentUid = user.uid;
-        if (db) {
-          db.ref(`users/${user.uid}/username`).once('value').then(snap => {
-            currentUser = snap.val() || user.email.split('@')[0];
-            isAdmin = (currentUser.toLowerCase().includes("admin"));
-            loginSuccess();
-          });
-        }
-      } else {
-        if (!isAdmin) {
-          currentUser = null;
-          currentUid = null;
-          showScreen('auth-screen');
-        }
-      }
-    });
-  }
-
-  function setAuthTab(tab) {
-    authMode = tab;
-    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-    document.getElementById('auth-submit-btn').innerText = tab === 'login' ? "🎮 Giriş Yap" : "👤+ Kayıt Ol";
-  }
-
-  function toggleAuthTab() { setAuthTab(authMode === 'login' ? 'register' : 'login'); }
-
-  function executeAuth() {
-    const rawUser = document.getElementById('auth-username').value.trim();
-    const pass = document.getElementById('auth-password').value.trim();
-
-    if (!rawUser || !pass) { alert("Kullanıcı adı ve şifre girin!"); return; }
-
-    if (rawUser === "admin" && pass === "54321") {
-      currentUser = "Admin#00000";
-      currentUid = "admin_root";
-      isAdmin = true;
-      loginSuccess();
-      return;
-    }
-
-    if (pass.length < 6) { alert("Şifre en az 6 karakter olmalıdır!"); return; }
-
-    const cleanUser = rawUser.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const email = `${cleanUser}@kutupro.com`;
-
-    if (!firebaseReady || !auth) { alert("Firebase hazır değil."); return; }
-
-    if (authMode === 'register') {
-      auth.createUserWithEmailAndPassword(email, pass)
-        .then((cred) => {
-          currentUid = cred.user.uid;
-          const randomId = Math.floor(10000 + Math.random() * 90000);
-          const fullUsername = `${rawUser}#${randomId}`;
-          currentUser = fullUsername;
-          isAdmin = false;
-          if (db) {
-            db.ref(`users/${cred.user.uid}`).set({ 
-              username: fullUsername,
-              createdAt: Date.now(),
-              title: 'Çaylak',
-              boxesOpened: 0,
-              highScore: 0,
-              modeStats: {}
-            });
-            db.ref(`public_users/${cred.user.uid}`).set({
-              uid: cred.user.uid,
-              username: fullUsername,
-              title: 'Çaylak'
-            });
-            db.ref(`usernames/${fullUsername.toLowerCase()}`).set(cred.user.uid);
-          }
-          loginSuccess();
-        })
-        .catch(err => alert("Kayıt Hatası: " + err.message));
-    } else {
-      auth.signInWithEmailAndPassword(email, pass)
-        .then((cred) => {
-          currentUid = cred.user.uid;
-          if (db) {
-            db.ref(`users/${cred.user.uid}/username`).once('value').then(snap => {
-              currentUser = snap.val() || rawUser;
-              isAdmin = false;
-              loginSuccess();
-            });
-          }
-        })
-        .catch(() => alert("Giriş Başarısız! Hesap yok veya şifre hatalı."));
-    }
-  }
-
-  function loginSuccess() {
-    document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser} [${currentTitle}]` + (isAdmin ? " (👑 Admin)" : "");
-    if (document.getElementById('admin-lb-controls')) {
-      document.getElementById('admin-lb-controls').style.display = isAdmin ? 'block' : 'none';
-    }
-    showScreen('menu-screen');
-    listenFirebaseData();
-    listenAllRegisteredUsers();
-  }
-
-  function handleSignOut() {
-    if (auth) { try { auth.signOut(); } catch(e){} }
-    currentUser = null;
-    currentUid = null;
-    isAdmin = false;
-    showScreen('auth-screen');
-  }
-
-  function showScreen(screenId) {
-    const screens = [
-      'auth-screen', 'menu-screen', 'game-screen',
-      'catch-game-screen', 'inventory-screen', 'mines-game-screen', 'duel-game-screen', 'duel-summary-screen',
-      'catch-summary-screen', 'chats-hub-screen', 'chat-screen', 'group-manage-screen', 
-      'friends-screen', 'profile-screen', 'settings-screen'
-    ];
-    screens.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = (id === screenId) ? 'flex' : 'none';
-    });
-  }
-
-  function exitToMenu() {
-    clearInterval(timerInterval);
-    clearInterval(spawnInterval);
-    clearInterval(battleTimerInterval);
-    catchAnimationFrames.forEach(cancelAnimationFrame);
-    catchAnimationFrames = [];
-    document.getElementById('game-over-modal').style.display = 'none';
-    showScreen('menu-screen');
-  }
-
-  function listenFirebaseData() {
-    if (!firebaseReady || !db || !currentUid) return;
-
-    db.ref('leaderboard').on('value', (snapshot) => {
-      const val = snapshot.val();
-      if (val) {
-        leaderboardData = Object.keys(val).map(key => ({ id: key, ...val[key] }));
-        validateLeaderboard();
-        renderLeaderboard();
-      }
-    });
-
-    db.ref(`users/${currentUid}`).on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        currentTitle = data.title || 'Çaylak';
-        totalBoxesOpened = data.boxesOpened || 0;
-        userHighScore = data.highScore || 0;
-        userModeStats = data.modeStats || {};
-        document.getElementById('menu-user-greeting').innerText = `👤 ${currentUser} [${currentTitle}]` + (isAdmin ? " (👑 Admin)" : "");
-      }
-    });
-
-    // Arkadaş Listesi Dinleyicisi
-    db.ref(`users/${currentUid}/friends`).on('value', (snapshot) => {
-      userFriends = snapshot.val() ? Object.values(snapshot.val()) : [];
-      renderHubFriendsList();
-      renderMyFriendsList();
-      renderAllRegisteredUsersList();
-    });
-
-    db.ref(`users/${currentUid}/my_groups`).on('value', (snapshot) => {
-      const val = snapshot.val();
-      userGroups = val ? Object.values(val) : [];
-      renderHubGroupsList();
-    });
-
-    // Arkadaşlık İstekleri Dinleyicisi
-    db.ref(`friend_requests/${currentUid}`).on('value', (snapshot) => {
-      const reqs = snapshot.val();
-      const dot = document.getElementById('friend-badge');
-      if (dot) dot.style.display = (reqs && Object.keys(reqs).length > 0) ? 'block' : 'none';
-      renderFriendRequests(reqs);
-    });
-  }
-
-  // TÜM GERÇEK KAYITLI KULLANICILARI DİNLEME
-  function listenAllRegisteredUsers() {
-    if (!firebaseReady || !db) return;
-    db.ref('public_users').on('value', (snapshot) => {
-      const val = snapshot.val() || {};
-      allRegisteredUsers = Object.values(val).filter(u => u.uid !== currentUid);
-      renderAllRegisteredUsersList();
-    });
-  }
-
-  // --- ARKADAŞLAR SEKMESİ (AYRI PANELLER) ---
-  function switchFriendsSubTab(tabName) {
-    document.getElementById('tab-my-friends').classList.toggle('active', tabName === 'my_friends');
-    document.getElementById('tab-all-users').classList.toggle('active', tabName === 'all_users');
-
-    document.getElementById('panel-my-friends').style.display = (tabName === 'my_friends') ? 'flex' : 'none';
-    document.getElementById('panel-all-users').style.display = (tabName === 'all_users') ? 'flex' : 'none';
-  }
-
-  function renderMyFriendsList() {
-    const list = document.getElementById('my-friends-list');
-    if (!list) return;
-    list.innerHTML = '';
-
-    if (userFriends.length === 0) {
-      list.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:10px;">Henüz ekli bir arkadaşın yok. 'Kayıtlı Oyuncular' sekmesinden ekle!</div>`;
-      return;
-    }
-
-    const friendsWithScores = userFriends.map(f => {
-      const bestRecord = leaderboardData.find(lb => lb.uid === f.uid);
-      return { ...f, score: bestRecord ? bestRecord.score : 0 };
-    });
-
-    friendsWithScores.sort((a, b) => b.score - a.score);
-
-    friendsWithScores.forEach((f, idx) => {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <div style="cursor:pointer; display:flex; align-items:center; gap:4px;" onclick="openPrivateChat('${f.username}', '${f.uid}')">
-          <span style="font-weight:bold; color:#fbbf24;">#${idx+1}</span>
-          <span style="color:#25D366;">●</span>
-          <b>${f.username}</b>
-          <span style="font-size:8px; color:#34d399;">(${f.score} P)</span>
-        </div>
-        <div style="display:flex; gap:3px;">
-          <button class="icon-btn" style="background:#0284c7;" onclick="openPrivateChat('${f.username}', '${f.uid}')">💬 Mesaj</button>
-          <button class="icon-btn exit-btn" onclick="removeFriend('${f.uid}', '${f.username}')">Sil</button>
-        </div>
-      `;
-      list.appendChild(row);
-    });
-  }
-
-  function renderAllRegisteredUsersList() {
-    const list = document.getElementById('all-registered-users-list');
-    if (!list) return;
-    list.innerHTML = '';
-
-    if (allRegisteredUsers.length === 0) {
-      list.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:10px;">Henüz başka kayıtlı kullanıcı yok.</div>`;
-      return;
-    }
-
-    allRegisteredUsers.forEach(u => {
-      const isFriend = userFriends.some(f => f.uid === u.uid);
-      const row = document.createElement('div');
-      row.className = 'item-row';
-
-      row.innerHTML = `
-        <div style="cursor:pointer; display:flex; align-items:center; gap:4px;" onclick='inspectPlayer(${JSON.stringify({name: u.username, title: u.title, uid: u.uid})})'>
-          <span style="color:#25D366;">●</span>
-          <b>${u.username}</b>
-          <span style="font-size:7px; color:#c084fc;">[${u.title || 'Çaylak'}]</span>
-        </div>
-        <div style="display:flex; gap:3px;">
-          ${!isFriend ? `<button class="icon-btn" style="background:#10b981;" onclick="sendDirectFriendRequest('${u.uid}', '${u.username}')">➕ İstek At</button>` : `<span style="font-size:8px; color:#34d399; margin-top:4px;">✓ Arkadaşsınız</span>`}
-          <button class="icon-btn" style="background:#0284c7;" onclick="openPrivateChat('${u.username}', '${u.uid}')">💬 Mesaj</button>
-        </div>
-      `;
-      list.appendChild(row);
-    });
-  }
-
-  function openFriendsScreen() {
-    renderFriendRequests();
-    renderMyFriendsList();
-    renderAllRegisteredUsersList();
-    switchFriendsSubTab('my_friends');
-    showScreen('friends-screen');
-  }
-
-  function sendFriendRequestFromInput() {
-    const input = document.getElementById('add-friend-input');
-    const targetTag = input.value.trim();
-    if (!targetTag) return;
-
-    if (!targetTag.includes('#')) {
-      alert("Lütfen etiketiyle birlikte yazın! Örn: Oyuncu#12345");
-      return;
-    }
-
-    if (targetTag.toLowerCase() === currentUser.toLowerCase()) {
-      alert("Kendinize istek atamazsınız!");
-      return;
-    }
-
-    const foundUser = allRegisteredUsers.find(u => u.username.toLowerCase() === targetTag.toLowerCase());
-    if (foundUser) {
-      sendDirectFriendRequest(foundUser.uid, foundUser.username);
-      input.value = "";
-    } else {
-      alert("Bu etiketle kayıtlı bir oyuncu bulunamadı!");
-    }
-  }
-
-  function sendDirectFriendRequest(targetUid, targetUsername) {
-    if (targetUid === currentUid) {
-      alert("Kendinize istek atamazsınız!");
-      return;
-    }
-
-    if (firebaseReady && db) {
-      db.ref(`friend_requests/${targetUid}/${currentUid}`).set({
-        sender: currentUser,
-        senderUid: currentUid,
-        timestamp: Date.now()
-      }).then(() => {
-        showToast(`İstek ${targetUsername} kullanıcısına gönderildi!`);
-      }).catch(err => {
-        alert("İstek hatası: " + err.message);
-      });
-    }
-  }
-
-  function renderFriendRequests(requests) {
-    const container = document.getElementById('friend-requests-container');
-    if (!container) return;
-    container.innerHTML = '';
-
-    if (!requests || Object.keys(requests).length === 0) {
-      container.innerHTML = `<div style="font-size:8px; color:#64748b; padding:2px;">Bekleyen yeni istek yok.</div>`;
-      return;
-    }
-
-    Object.keys(requests).forEach(senderUid => {
-      const req = requests[senderUid];
-      const box = document.createElement('div');
-      box.className = 'request-box';
-      box.innerHTML = `
-        <span>👤 <b>${req.sender}</b></span>
-        <div>
-          <button class="btn-accept" onclick="acceptFriend('${req.sender}', '${req.senderUid}')">Kabul Et</button>
-          <button class="btn-reject" onclick="rejectFriend('${req.senderUid}')">Reddet</button>
-        </div>
-      `;
-      container.appendChild(box);
-    });
-  }
-
-  function acceptFriend(friendName, friendUid) {
-    if (firebaseReady && db && currentUid) {
-      db.ref(`users/${currentUid}/friends/${friendUid}`).set({ username: friendName, uid: friendUid });
-      db.ref(`users/${friendUid}/friends/${currentUid}`).set({ username: currentUser, uid: currentUid });
-      db.ref(`friend_requests/${currentUid}/${friendUid}`).remove();
-    }
-    showToast(`${friendName} ile artık arkadaşsınız!`);
-  }
-
-  function rejectFriend(senderUid) {
-    if (firebaseReady && db && currentUid) {
-      db.ref(`friend_requests/${currentUid}/${senderUid}`).remove();
-    }
-  }
-
-  function removeFriend(friendUid, friendName) {
-    if (confirm(`${friendName} arkadaş listenden silinsin mi?`)) {
-      if (firebaseReady && db && currentUid) {
-        db.ref(`users/${currentUid}/friends/${friendUid}`).remove();
-        db.ref(`users/${friendUid}/friends/${currentUid}`).remove();
-      }
-    }
-  }
-
-  // --- CANLI SAVAŞ LOBİSİ (1v1: 5 Kutu, 1v1v1: 10 Kutu, 1v1v1v1: 20 Kutu - 15 SANİYE) ---
-  function openDuelRoomModal() {
-    document.getElementById('duel-room-modal').style.display = 'flex';
-  }
-
-  function closeDuelRoomModal() {
-    document.getElementById('duel-room-modal').style.display = 'none';
-  }
-
-  function createBattleRoom(maxPlayers, boxCount) {
-    if (!firebaseReady || !db || !currentUid) return;
-    const roomCode = Math.floor(10000 + Math.random() * 90000).toString();
-    currentBattleRoomCode = roomCode;
-    battleMaxPlayers = maxPlayers;
-    battleTotalBoxes = boxCount;
-
-    const roomData = {
-      code: roomCode,
-      maxPlayers: maxPlayers,
-      boxCount: boxCount,
-      players: {
-        [currentUid]: { uid: currentUid, name: currentUser, score: 0, drops: [] }
-      },
-      status: 'waiting',
-      createdAt: Date.now()
-    };
-
-    db.ref(`battle_rooms/${roomCode}`).set(roomData).then(() => {
-      closeDuelRoomModal();
-      listenBattleRoom(roomCode);
-    });
-  }
-
-  function joinBattleRoom() {
-    const input = document.getElementById('join-duel-room-input');
-    let code = input.value.trim().replace('#', '');
-    if (!code) { alert("Lütfen 5 haneli oda kodunu girin!"); return; }
-
-    if (firebaseReady && db && currentUid) {
-      db.ref(`battle_rooms/${code}`).once('value').then(snap => {
-        const rData = snap.val();
-        if (!rData) {
-          alert("Bu kodda bir savaş odası bulunamadı!");
-          return;
-        }
-
-        const currentPlayers = Object.keys(rData.players || {});
-        if (currentPlayers.length >= rData.maxPlayers && !rData.players[currentUid]) {
-          alert("Bu oda tamamen dolu!");
-          return;
-        }
-
-        currentBattleRoomCode = code;
-        battleMaxPlayers = rData.maxPlayers || 2;
-        battleTotalBoxes = rData.boxCount || 5;
-
-        db.ref(`battle_rooms/${code}/players/${currentUid}`).set({
-          uid: currentUid,
-          name: currentUser,
-          score: 0,
-          drops: []
-        });
-
-        // Oda dolduysa başlat
-        if (currentPlayers.length + 1 >= battleMaxPlayers) {
-          db.ref(`battle_rooms/${code}/status`).set('playing');
-        }
-
-        closeDuelRoomModal();
-        listenBattleRoom(code);
-      });
-    }
-  }
-
-  function listenBattleRoom(code) {
-    document.getElementById('duel-room-title').innerText = `Oda: #${code} (${battleMaxPlayers} Kişilik)`;
-    document.getElementById('duel-box-count-label').innerText = `📦 Sana Ait ${battleTotalBoxes} Kutu (Hepsini Aç):`;
-    battleMyDrops = [];
-    renderBattleMyBoxes();
-    showScreen('duel-game-screen');
-
-    battleListenerRef = db.ref(`battle_rooms/${code}`);
-    battleListenerRef.on('value', (snapshot) => {
-      const room = snapshot.val();
-      if (!room) return;
-
-      const players = Object.values(room.players || {});
-      renderBattlePlayersGrid(players);
-
-      if (room.status === 'playing' && !battleTimerInterval) {
-        startBattleTimer();
-      }
-
-      if (room.status === 'finished') {
-        showBattleSummaryScreen(players);
-      }
-    });
-  }
-
-  function startBattleTimer() {
-    battleTimeLeft = 15;
-    document.getElementById('duel-timer-txt').innerText = `${battleTimeLeft}s`;
-    clearInterval(battleTimerInterval);
-    battleTimerInterval = setInterval(() => {
-      battleTimeLeft--;
-      document.getElementById('duel-timer-txt').innerText = `${battleTimeLeft}s`;
-      if (battleTimeLeft <= 0) {
-        clearInterval(battleTimerInterval);
-        if (currentBattleRoomCode && db) {
-          db.ref(`battle_rooms/${currentBattleRoomCode}/status`).set('finished');
-        }
-      }
-    }, 1000);
-  }
-
-  function renderBattlePlayersGrid(players) {
-    const grid = document.getElementById('battle-players-grid');
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    players.forEach(p => {
-      const isMe = (p.uid === currentUid);
-      const card = document.createElement('div');
-      card.className = 'battle-player-card';
-      card.style.borderColor = isMe ? '#38bdf8' : '#f43f5e';
-      card.innerHTML = `
-        <div style="font-size:9px; font-weight:bold; color:${isMe ? '#38bdf8' : '#fff'};">${p.name} ${isMe ? '(Sen)' : ''}</div>
-        <div style="font-size:16px; font-weight:bold; color:#34d399; margin:2px 0;">${p.score || 0} P</div>
-        <div style="font-size:7px; color:#94a3b8;">${(p.drops || []).length} / ${battleTotalBoxes} Kutu</div>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  function renderBattleMyBoxes() {
-    const grid = document.getElementById('duel-my-boxes-grid');
-    grid.innerHTML = '';
-    for (let i = 0; i < battleTotalBoxes; i++) {
-      const card = document.createElement('div');
-      card.className = 'duel-card-mini';
-      card.id = `battle-box-${i}`;
-      card.innerHTML = `<span style="font-size:12px;">📦</span><span>${i+1}</span>`;
-      card.onclick = () => openSpecificBattleBox(i, card);
-      grid.appendChild(card);
-    }
-  }
-
-  function openSpecificBattleBox(index, cardEl) {
-    if (cardEl.classList.contains('opened') || !currentBattleRoomCode || !db) return;
-    cardEl.classList.add('opened');
-
-    AudioEngine.playTick();
-    const drop = getRandomDrop('standard');
-    battleMyDrops.push(drop);
-
-    cardEl.innerHTML = `<span style="color:${drop.color};font-size:7px;font-weight:bold;">${drop.item}</span><span style="color:#34d399;font-size:7px;">+${drop.points}P</span>`;
-
-    const newScore = battleMyDrops.reduce((sum, d) => sum + d.points, 0);
-
-    db.ref(`battle_rooms/${currentBattleRoomCode}/players/${currentUid}`).update({
-      score: newScore,
-      drops: battleMyDrops
-    });
-  }
-
-  function showBattleSummaryScreen(players) {
-    clearInterval(battleTimerInterval);
-    showScreen('duel-summary-screen');
-
-    const grid = document.getElementById('duel-summary-players-grid');
-    grid.innerHTML = '';
-
-    players.sort((a, b) => (b.score || 0) - (a.score || 0));
-
-    players.forEach((p, idx) => {
-      const isMe = (p.uid === currentUid);
-      const card = document.createElement('div');
-      card.className = 'battle-player-card';
-      card.style.borderColor = idx === 0 ? '#fbbf24' : '#6b21a8';
-      card.innerHTML = `
-        <div style="font-size:11px; font-weight:bold; color:${idx === 0 ? '#fbbf24' : '#fff'};">#${idx+1} ${p.name} ${isMe ? '(Sen)' : ''}</div>
-        <div style="font-size:18px; font-weight:bold; color:#34d399; margin:4px 0;">${p.score || 0} P</div>
-        <div class="scroll-list" style="font-size:7px; width:100%; text-align:left; max-height:80px;">
-          ${(p.drops || []).map(d => `<div style="color:${d.color}">[${d.tier}] ${d.item} (+${d.points}P)</div>`).join('')}
-        </div>
-      `;
-      grid.appendChild(card);
-    });
-
-    const isWinner = (players[0] && players[0].uid === currentUid);
-    const banner = document.getElementById('duel-winner-banner');
-
-    if (isWinner) {
-      banner.innerText = "🏆 SAVAŞI KAZANDIN!";
-      banner.style.color = "#34d399";
-      AudioEngine.playGodly();
-      triggerScreenShake();
-    } else {
-      banner.innerText = "💀 SAVAŞI KAYBETTİN!";
-      banner.style.color = "#ef4444";
-      AudioEngine.playExplosion();
-    }
-  }
-
-  function exitDuelSummary() {
-    exitDuelRoom();
-  }
-
-  function exitDuelRoom() {
-    clearInterval(battleTimerInterval);
-    if (battleListenerRef) {
-      battleListenerRef.off();
-      battleListenerRef = null;
-    }
-    currentBattleRoomCode = null;
-    exitToMenu();
-  }
-
-  // --- KANAL VE SOHBET SİSTEMİ ---
-  function openChatsHub() {
-    renderHubFriendsList();
-    renderHubGroupsList();
-    showScreen('chats-hub-screen');
-  }
-
-  function promptCreateGroup() {
-    const groupName = prompt("Oluşturmak istediğiniz kanal adını girin:");
-    if (!groupName || !groupName.trim()) return;
-
-    if (firebaseReady && db && currentUid) {
-      const channelId = Math.floor(10000 + Math.random() * 90000);
-      const fullChannelTag = `${groupName.trim()}#${channelId}`;
-      const newGroupId = db.ref('channels').push().key;
-
-      const groupData = {
-        id: newGroupId,
-        tag: fullChannelTag,
-        name: groupName.trim(),
-        createdBy: currentUser,
-        creatorUid: currentUid,
-        createdAt: Date.now(),
-        members: {
-          [currentUid]: { username: currentUser, uid: currentUid, role: 'owner' }
-        }
-      };
-
-      db.ref(`channels/${newGroupId}`).set(groupData);
-      db.ref(`channel_tags/${fullChannelTag.toLowerCase()}`).set(newGroupId);
-      db.ref(`users/${currentUid}/my_groups/${newGroupId}`).set(groupData);
-      showToast(`'${fullChannelTag}' kanalı kuruldu!`);
-    }
-  }
-
-  function promptJoinGroup() {
-    const channelTag = prompt("Katılmak istediğiniz kanalın tam adını girin (Örn: Sohbet#12345):");
-    if (!channelTag || !channelTag.trim()) return;
-
-    if (!channelTag.includes('#')) {
-      alert("Lütfen kanal adını etiketiyle birlikte girin! Örn: Kanal#12345");
-      return;
-    }
-
-    if (firebaseReady && db && currentUid) {
-      db.ref(`channel_tags/${channelTag.trim().toLowerCase()}`).once('value').then(snap => {
-        const groupId = snap.val();
-        if (!groupId) {
-          alert("HATA: Bu isim ve ID'ye sahip bir kanal bulunamadı!");
-          return;
-        }
-
-        db.ref(`channels/${groupId}`).once('value').then(gSnap => {
-          const gData = gSnap.val();
-          if (gData) {
-            db.ref(`channels/${groupId}/members/${currentUid}`).set({
-              username: currentUser,
-              uid: currentUid,
-              role: 'member'
-            });
-            db.ref(`users/${currentUid}/my_groups/${groupId}`).set(gData);
-            showToast(`'${gData.tag || gData.name}' kanalına katıldınız!`);
-            openChatsHub();
-          }
-        });
-      });
-    }
-  }
-
-  function renderHubGroupsList() {
-    const container = document.getElementById('hub-groups-chats');
-    if (!container) return;
-    container.innerHTML = '';
-
-    if (userGroups.length === 0) {
-      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:6px;">Henüz bir kanala katılmadın.</div>`;
-      return;
-    }
-
-    userGroups.forEach(g => {
-      const item = document.createElement('div');
-      item.className = 'chat-hub-item';
-      item.innerHTML = `
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:18px;">👥</span>
-          <div>
-            <div style="font-weight:bold; color:#d946ef; font-size:11px;">${g.tag || g.name}</div>
-            <div style="font-size:8px; color:#8696a0;">Kurucu: 👑 ${g.createdBy}</div>
-          </div>
-        </div>
-        <span style="font-size:12px; color:#d946ef;">›</span>
-      `;
-      item.onclick = () => openGroupChat(g.id, g.tag || g.name, g.creatorUid === currentUid);
-      container.appendChild(item);
-    });
-  }
-
-  function renderHubFriendsList() {
-    const container = document.getElementById('hub-friends-chats');
-    if (!container) return;
-    container.innerHTML = '';
-
-    if (userFriends.length === 0) {
-      container.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:9px; padding:8px;">Henüz özel sohbet edecek arkadaşın yok.</div>`;
-      return;
-    }
-
-    userFriends.forEach(f => {
-      const item = document.createElement('div');
-      item.className = 'chat-hub-item';
-      item.innerHTML = `
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="color:#25D366; font-size:16px;">👤</span>
-          <div>
-            <div style="font-weight:bold; color:#fff; font-size:11px;">${f.username}</div>
-            <div style="font-size:8px; color:#8696a0;">Özel mesaj gönder</div>
-          </div>
-        </div>
-        <span style="font-size:12px; color:#25D366;">›</span>
-      `;
-      item.onclick = () => openPrivateChat(f.username, f.uid);
-      container.appendChild(item);
-    });
-  }
-
-  function openGlobalChat() {
-    activeChatTarget = "global";
-    currentActiveGroupId = null;
-    document.getElementById('chat-header-title').innerText = "🌐 Genel Sohbet";
-    document.getElementById('group-manage-btn').style.display = 'none';
-    showScreen('chat-screen');
-
-    if (firebaseReady && db) {
-      db.ref('global_chat').limitToLast(30).on('value', (snapshot) => {
-        renderWhatsAppChat(snapshot.val(), 'global_chat');
-      });
-    }
-  }
-
-  function openGroupChat(groupId, groupName, isOwner) {
-    activeChatTarget = `group_${groupId}`;
-    currentActiveGroupId = groupId;
-    document.getElementById('chat-header-title').innerText = `👥 ${groupName}`;
-    document.getElementById('group-manage-btn').style.display = 'block';
-    showScreen('chat-screen');
-
-    if (firebaseReady && db) {
-      db.ref(`channel_messages/${groupId}`).limitToLast(30).on('value', (snapshot) => {
-        renderWhatsAppChat(snapshot.val(), `channel_messages/${groupId}`);
-      });
-    }
-  }
-
-  function openGroupManageScreen() {
-    if (!currentActiveGroupId || !db) return;
-
-    db.ref(`channels/${currentActiveGroupId}`).once('value').then(snap => {
-      const gData = snap.val();
-      if (!gData) return;
-
-      document.getElementById('manage-group-name-txt').innerText = gData.tag || gData.name;
-      const isOwner = (gData.creatorUid === currentUid);
-      document.getElementById('group-admin-tools').style.display = isOwner ? 'flex' : 'none';
-
-      const list = document.getElementById('group-members-list');
-      list.innerHTML = '';
-
-      const members = gData.members || {};
-      Object.values(members).forEach(m => {
-        const row = document.createElement('div');
-        row.className = 'item-row';
-        const isMOwner = (m.role === 'owner');
-        row.innerHTML = `
-          <div>
-            <span>${isMOwner ? '👑 ' : '👤 '}<b>${m.username}</b></span>
-          </div>
-          ${(isOwner && !isMOwner) ? `<button class="icon-btn exit-btn" onclick="removeMemberFromGroup('${m.uid}')">Çıkar</button>` : ''}
-        `;
-        list.appendChild(row);
-      });
-
-      showScreen('group-manage-screen');
-    });
-  }
-
-  function backToGroupChat() {
-    showScreen('chat-screen');
-  }
-
-  function renameCurrentGroup() {
-    const newName = prompt("Yeni kanal adını girin:");
-    if (!newName || !newName.trim()) return;
-
-    if (db && currentActiveGroupId) {
-      db.ref(`channels/${currentActiveGroupId}`).once('value').then(snap => {
-        const gData = snap.val() || {};
-        const oldTag = (gData.tag || "").toLowerCase();
-        const randId = Math.floor(10000 + Math.random() * 90000);
-        const newTag = `${newName.trim()}#${randId}`;
-
-        if (oldTag) db.ref(`channel_tags/${oldTag}`).remove();
-        db.ref(`channel_tags/${newTag.toLowerCase()}`).set(currentActiveGroupId);
-
-        db.ref(`channels/${currentActiveGroupId}/name`).set(newName.trim());
-        db.ref(`channels/${currentActiveGroupId}/tag`).set(newTag);
-        db.ref(`users/${currentUid}/my_groups/${currentActiveGroupId}/name`).set(newName.trim());
-        db.ref(`users/${currentUid}/my_groups/${currentActiveGroupId}/tag`).set(newTag);
-
-        document.getElementById('manage-group-name-txt').innerText = newTag;
-        document.getElementById('chat-header-title').innerText = `👥 ${newTag}`;
-        showToast("Kanal adı ve ID'si güncellendi!");
-      });
-    }
-  }
-
-  function deleteCurrentGroup() {
-    if (confirm("DİKKAT: Bu kanal ve tüm mesajları kalıcı olarak silinecek! Onaylıyor musunuz?")) {
-      if (db && currentActiveGroupId) {
-        db.ref(`channels/${currentActiveGroupId}`).once('value').then(snap => {
-          const gData = snap.val() || {};
-          const members = gData.members || {};
-          if (gData.tag) db.ref(`channel_tags/${gData.tag.toLowerCase()}`).remove();
-          Object.keys(members).forEach(mUid => {
-            db.ref(`users/${mUid}/my_groups/${currentActiveGroupId}`).remove();
-          });
-          db.ref(`channels/${currentActiveGroupId}`).remove();
-          db.ref(`channel_messages/${currentActiveGroupId}`).remove();
-          showToast("Kanal silindi!");
-          openChatsHub();
-        });
-      }
-    }
-  }
-
-  function openPrivateChat(friendName, friendUid) {
-    activeChatTarget = friendName;
-    currentActiveGroupId = null;
-    document.getElementById('chat-header-title').innerText = `💬 ${friendName}`;
-    document.getElementById('group-manage-btn').style.display = 'none';
-    showScreen('chat-screen');
-
-    const chatRoomId = [currentUid, friendUid].sort().join('_');
-    if (firebaseReady && db) {
-      db.ref(`private_chats/${chatRoomId}`).limitToLast(30).on('value', (snapshot) => {
-        renderWhatsAppChat(snapshot.val(), `private_chats/${chatRoomId}`);
-      });
-    }
-  }
-
-  function sendChatMessage() {
-    const input = document.getElementById('chat-message-input');
-    const msg = input.value.trim();
-    if (!msg) return;
-
-    const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-    const chatData = {
-      sender: currentUser,
-      senderUid: currentUid,
-      title: currentTitle,
-      isAdmin: isAdmin,
-      message: msg,
-      time: timeStr,
-      timestamp: Date.now()
-    };
-
-    totalMessagesSent++;
-    if (firebaseReady && db && currentUid) {
-      db.ref(`users/${currentUid}/messagesSent`).set(totalMessagesSent);
-    }
-
-    if (activeChatTarget === "global") {
-      if (firebaseReady && db) db.ref('global_chat').push(chatData);
-    } else if (activeChatTarget.startsWith('group_')) {
-      const gId = activeChatTarget.replace('group_', '');
-      if (firebaseReady && db) db.ref(`channel_messages/${gId}`).push(chatData);
-    } else {
-      const friendObj = userFriends.find(f => f.username === activeChatTarget) || allRegisteredUsers.find(u => u.username === activeChatTarget);
-      if (friendObj) {
-        const chatRoomId = [currentUid, friendObj.uid].sort().join('_');
-        if (firebaseReady && db) db.ref(`private_chats/${chatRoomId}`).push(chatData);
-      }
-    }
-
-    input.value = "";
-  }
-
-  function renderWhatsAppChat(data, dbPath) {
-    const box = document.getElementById('chat-messages-box');
-    if (!box) return;
-    box.innerHTML = '';
-
-    if (!data) {
-      box.innerHTML = `<div style="text-align:center; color:#8696a0; font-size:10px; margin-top:20px;">Mesajlaşmaya başlayın...</div>`;
-      return;
-    }
-
-    Object.keys(data).forEach(msgKey => {
-      const m = data[msgKey];
-      const isMe = (m.senderUid === currentUid || m.sender === currentUser);
-      const bubble = document.createElement('div');
-      bubble.className = `msg-bubble ${isMe ? 'msg-outgoing' : 'msg-incoming'}`;
-
-      bubble.innerHTML = `
-        ${!isMe ? `<div class="msg-sender">${m.isAdmin ? '👑 ' : ''}${m.sender} <span class="msg-title-tag">[${m.title || 'Çaylak'}]</span></div>` : ''}
-        <div>${escapeHtml(m.message)}</div>
-        <div class="msg-time">${m.time || ''}</div>
-      `;
-      box.appendChild(bubble);
-    });
-    box.scrollTop = box.scrollHeight;
-  }
-
-  function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-
-  // --- OYUN MEKANİKLERİ ---
-  function openProfileScreen() {
-    document.getElementById('prof-name-txt').innerText = currentUser || "Oyuncu";
-    document.getElementById('prof-title-txt').innerText = `Unvan: ${currentTitle}`;
-    document.getElementById('prof-boxes-txt').innerText = totalBoxesOpened;
-
-    let totalGames = 0;
-    let totalWins = 0;
-
-    const list = document.getElementById('prof-mode-stats-list');
-    list.innerHTML = '';
-
-    Object.keys(GAME_MODES).forEach(mKey => {
-      const st = userModeStats[mKey] || { played: 0, won: 0, best: 0 };
-      totalGames += st.played;
-      totalWins += st.won;
-
-      const wr = st.played > 0 ? Math.round((st.won / st.played) * 100) : 0;
-
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <div>
-          <b>${GAME_MODES[mKey].name}</b>
-          <div style="font-size:7px; color:#94a3b8;">Oynandı: ${st.played} | En İyi: ${st.best} P</div>
-        </div>
-        <b style="color:${wr >= 50 ? '#34d399' : '#fbbf24'}; font-size:10px;">%${wr} Kazanma</b>
-      `;
-      list.appendChild(row);
-    });
-
-    const overallWr = totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
-    document.getElementById('prof-winrate-txt').innerText = `%${overallWr}`;
-
-    showScreen('profile-screen');
-  }
-
-  function inspectPlayer(targetUserObj) {
-    currentlyInspectingUser = targetUserObj;
-    document.getElementById('inspect-name-txt').innerText = targetUserObj.name;
-    document.getElementById('inspect-title-txt').innerText = `Unvan: ${targetUserObj.title || 'Çaylak'}`;
-
-    if (db && targetUserObj.uid) {
-      db.ref(`users/${targetUserObj.uid}`).once('value').then(snap => {
-        const uData = snap.val() || {};
-        const mStats = uData.modeStats || {};
-        const totalPlayed = uData.boxesOpened || 0;
-
-        let tWins = 0;
-        let tPlays = 0;
-        const list = document.getElementById('inspect-mode-stats-list');
-        list.innerHTML = '';
-
-        Object.keys(GAME_MODES).forEach(mKey => {
-          const st = mStats[mKey] || { played: 0, won: 0, best: 0 };
-          tPlays += st.played;
-          tWins += st.won;
-          const wr = st.played > 0 ? Math.round((st.won / st.played) * 100) : 0;
-
-          const row = document.createElement('div');
-          row.className = 'item-row';
-          row.innerHTML = `
-            <div>
-              <b>${GAME_MODES[mKey].name}</b>
-              <div style="font-size:7px; color:#94a3b8;">Oynandı: ${st.played} | En İyi: ${st.best} P</div>
+    <!-- Sol Menü & Profil -->
+    <div id="sidebar">
+        <div class="profile-card">
+            <div class="avatar-box">🎮</div>
+            <div id="p-username" style="font-weight: bold;">Misafir</div>
+            <div class="level-badge" id="p-level">Lvl 1</div>
+            <div style="font-size: 11px; color: var(--text-dim);" id="p-xp-txt">XP: 0 / 100</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="p-xp-bar"></div>
             </div>
-            <b style="color:#34d399; font-size:9px;">%${wr}</b>
-          `;
-          list.appendChild(row);
-        });
-
-        const overallWr = tPlays > 0 ? Math.round((tWins / tPlays) * 100) : 0;
-        document.getElementById('inspect-boxes-txt').innerText = totalPlayed;
-        document.getElementById('inspect-winrate-txt').innerText = `%${overallWr}`;
-      });
-    }
-
-    document.getElementById('inspect-add-friend-btn').onclick = () => {
-      sendDirectFriendRequest(targetUserObj.uid, targetUserObj.name);
-    };
-
-    document.getElementById('user-inspect-screen').style.display = 'flex';
-  }
-
-  function closeInspectModal() {
-    document.getElementById('user-inspect-screen').style.display = 'none';
-  }
-
-  function inspectPlayerFromDetail() {
-    if (currentlyInspectingUser) {
-      inspectPlayer(currentlyInspectingUser);
-    }
-  }
-
-  function openSettings() {
-    const container = document.getElementById('titles-container');
-    container.innerHTML = '';
-
-    ALL_TITLES_POOL.forEach(t => {
-      const isCurrent = t === currentTitle;
-      const btn = document.createElement('button');
-      btn.className = 'btn-action';
-      btn.style.background = isCurrent ? '#10b981' : '#231038';
-      btn.innerText = `${t} ${isCurrent ? '(Seçili)' : ''}`;
-      btn.onclick = () => selectTitle(t);
-      container.appendChild(btn);
-    });
-
-    showScreen('settings-screen');
-  }
-
-  function selectTitle(titleName) {
-    currentTitle = titleName;
-    if (firebaseReady && db && currentUid) {
-      db.ref(`users/${currentUid}/title`).set(titleName);
-      db.ref(`public_users/${currentUid}/title`).set(titleName);
-    }
-    showToast(`Unvanın [${titleName}] olarak seçildi!`);
-    openSettings();
-  }
-
-  function updateMenuRatesPreview() {
-    const preview = document.getElementById('menu-rates-preview');
-    const currentTiers = GAME_MODES[selectedModeKey].tiers;
-    let html = `<div style="color:#fbbf24; font-weight:bold; margin-bottom:2px;">📊 ${GAME_MODES[selectedModeKey].name.toUpperCase()}</div>`;
-    currentTiers.forEach(t => {
-      html += `<div style="display:flex; justify-content:space-between; color:${t.color}; padding:1px 0;">
-        <span>${t.name} (%${t.rate})</span><span>${t.minP}-${t.maxP} P</span>
-      </div>`;
-    });
-    preview.innerHTML = html;
-  }
-
-  function selectMode(key, btn) {
-    selectedModeKey = key;
-    document.querySelectorAll('.mode-btn-box').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    updateMenuRatesPreview();
-  }
-
-  function renderGameRatesTable() {
-    const container = document.getElementById('rates-box-container');
-    const currentTiers = GAME_MODES[selectedModeKey].tiers;
-    let html = `<div style="color:#fbbf24; font-weight:bold; margin-bottom:2px;">${GAME_MODES[selectedModeKey].name.toUpperCase()}</div>`;
-    currentTiers.forEach(t => {
-      html += `<div class="rate-row" style="color:${t.color};">
-        <span>${t.name} (%${t.rate})</span><span>${t.minP}-${t.maxP} P</span>
-      </div>`;
-    });
-    container.innerHTML = html;
-  }
-
-  function startGame() {
-    if (!currentUser) { showScreen('auth-screen'); return; }
-    currentScore = 0;
-    currentSessionDrops = [];
-    isOpening = false;
-
-    if (selectedModeKey === 'standard') startStandardMode();
-    else if (selectedModeKey === 'ten_cases') startTenCasesMode();
-    else if (selectedModeKey === 'catch_open') startCatchModePhase1();
-    else if (selectedModeKey === 'upgrade_mode') startUpgradeMode();
-    else if (selectedModeKey === 'mines_mode') startMinesMode();
-  }
-
-  function startStandardMode() {
-    timeLeft = 30;
-    document.getElementById('game-mode-name-txt').innerText = "Normal Kasa";
-    document.getElementById('stat-timer-title').innerText = "SÜRE";
-    document.getElementById('timer-txt').innerText = timeLeft + "s";
-    document.getElementById('user-tag-txt').innerText = "@" + currentUser;
-    document.getElementById('score-txt').innerText = "0";
-    document.getElementById('mode-badge-txt').innerText = "Normal Kasa (30s)";
-    document.getElementById('drop-result-txt').innerHTML = 'Son Düşen: <span style="color:#64748b;">-</span>';
-
-    renderGameRatesTable();
-    resetStandardCaseUI();
-    showScreen('game-screen');
-
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      timeLeft--;
-      document.getElementById('timer-txt').innerText = timeLeft + "s";
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        document.getElementById('open-case-btn').disabled = true;
-        document.getElementById('open-case-btn').innerText = "SÜRE DOLDU!";
-        if (!isOpening) triggerDelayedGameOver();
-      }
-    }, 1000);
-  }
-
-  function startTenCasesMode() {
-    remainingBoxes = 10;
-    document.getElementById('game-mode-name-txt').innerText = "10 Kutu Modu";
-    document.getElementById('stat-timer-title').innerText = "KALAN HAK";
-    document.getElementById('timer-txt').innerText = remainingBoxes + " Kutu";
-    document.getElementById('user-tag-txt').innerText = "@" + currentUser;
-    document.getElementById('score-txt').innerText = "0";
-    document.getElementById('mode-badge-txt').innerText = "10 Kutu Modu";
-    document.getElementById('drop-result-txt').innerHTML = 'Son Düşen: <span style="color:#64748b;">-</span>';
-
-    renderGameRatesTable();
-    resetStandardCaseUI();
-    showScreen('game-screen');
-  }
-
-  function startUpgradeMode() {
-    remainingBoxes = 7;
-    upgradeStep = 1;
-    document.getElementById('game-mode-name-txt').innerText = "Şans Yükseltme";
-    document.getElementById('stat-timer-title').innerText = "KALAN HAK";
-    document.getElementById('timer-txt').innerText = `${remainingBoxes} Kutu (Kademe ${upgradeStep})`;
-    document.getElementById('user-tag-txt').innerText = "@" + currentUser;
-    document.getElementById('score-txt').innerText = "0";
-    document.getElementById('mode-badge-txt').innerText = `Kademe ${upgradeStep} - Katlanan Şans!`;
-    document.getElementById('drop-result-txt').innerHTML = 'Son Düşen: <span style="color:#64748b;">-</span>';
-
-    renderGameRatesTable();
-    resetStandardCaseUI();
-    showScreen('game-screen');
-  }
-
-  function resetStandardCaseUI() {
-    isOpening = false;
-    document.getElementById('open-case-btn').disabled = false;
-    document.getElementById('open-case-btn').innerText = "KASAYI AÇ";
-    document.getElementById('ready-view').style.display = 'block';
-    document.getElementById('ready-banner-txt').innerText = "HAZIR!";
-    document.getElementById('roulette-view').style.display = 'none';
-  }
-
-  function getRandomDrop(modeKey = selectedModeKey, forcedTierName = null) {
-    const tiers = GAME_MODES[modeKey].tiers;
-    let rand = Math.random() * 100;
-
-    if (modeKey === 'upgrade_mode') {
-      const bonusChance = (upgradeStep - 1) * 8;
-      rand = Math.max(0, rand - bonusChance);
-    }
-
-    let cumulative = 0;
-    if (forcedTierName) {
-      const tier = tiers.find(t => t.name === forcedTierName) || tiers[0];
-      const item = tier.items[Math.floor(Math.random() * tier.items.length)];
-      const pts = Math.floor(Math.random() * (tier.maxP - tier.minP + 1)) + tier.minP;
-      return { tier: tier.name, item: item, points: pts, color: tier.color };
-    }
-
-    for (let t of tiers) {
-      cumulative += t.rate;
-      if (rand <= cumulative) {
-        const item = t.items[Math.floor(Math.random() * t.items.length)];
-        const pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
-        return { tier: t.name, item: item, points: pts, color: t.color };
-      }
-    }
-    return { tier: tiers[0].name, item: tiers[0].items[0], points: tiers[0].minP, color: tiers[0].color };
-  }
-
-  function openCase() {
-    if (isOpening) return;
-    if (selectedModeKey === 'standard' && timeLeft <= 0) return;
-    if ((selectedModeKey === 'ten_cases' || selectedModeKey === 'upgrade_mode') && remainingBoxes <= 0) return;
-
-    isOpening = true;
-    document.getElementById('open-case-btn').disabled = true;
-
-    totalBoxesOpened++;
-    if (firebaseReady && db && currentUid) {
-      db.ref(`users/${currentUid}/boxesOpened`).set(totalBoxesOpened);
-    }
-
-    if (selectedModeKey === 'ten_cases') {
-      remainingBoxes--;
-      document.getElementById('timer-txt').innerText = remainingBoxes + " Kutu";
-    } else if (selectedModeKey === 'upgrade_mode') {
-      remainingBoxes--;
-      upgradeStep++;
-      document.getElementById('timer-txt').innerText = `${remainingBoxes} Kutu (Kademe ${upgradeStep})`;
-      document.getElementById('mode-badge-txt').innerText = `Kademe ${upgradeStep} Aktif!`;
-    }
-
-    document.getElementById('ready-view').style.display = 'none';
-    const rouletteView = document.getElementById('roulette-view');
-    const track = document.getElementById('roulette-track');
-    rouletteView.style.display = 'block';
-
-    track.style.transition = 'none';
-    track.style.transform = 'translateX(0px)';
-    track.innerHTML = '';
-
-    const totalItems = 30;
-    const winIdx = 24;
-    let winDrop = null;
-
-    for (let i = 0; i < totalItems; i++) {
-      const drop = getRandomDrop(selectedModeKey);
-      if (i === winIdx) winDrop = drop;
-
-      const card = document.createElement('div');
-      card.className = 'roulette-item';
-      card.style.borderBottom = `3px solid ${drop.color}`;
-      card.innerHTML = `
-        <span style="color:${drop.color};font-weight:bold;">${drop.tier}</span>
-        <span style="color:#cbd5e1;margin:1px 0;font-size:7px;">${drop.item}</span>
-        <span style="color:#94a3b8;">+${drop.points}P</span>
-      `;
-      track.appendChild(card);
-    }
-
-    const spinDuration = 3000;
-    let tickInterval = setInterval(() => AudioEngine.playTick(), 100);
-    setTimeout(() => clearInterval(tickInterval), spinDuration - 200);
-
-    setTimeout(() => {
-      track.style.transition = `transform ${spinDuration/1000}s cubic-bezier(0.12, 0.8, 0.2, 1)`;
-      const itemWidth = 65;
-      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 10 - 5);
-      track.style.transform = `translateX(${target}px)`;
-    }, 20);
-
-    setTimeout(() => {
-      currentScore += winDrop.points;
-      document.getElementById('score-txt').innerText = currentScore;
-      currentSessionDrops.push(winDrop);
-
-      if (winDrop.tier.includes('Godly') || winDrop.tier.includes('Kozmik') || winDrop.tier.includes('Uranus')) {
-        AudioEngine.playGodly();
-        triggerScreenShake();
-      }
-
-      document.getElementById('drop-result-txt').innerHTML = `
-        <span style="color:${winDrop.color}; font-weight:bold;">${winDrop.tier}</span> - 
-        <span>${winDrop.item}</span> - 
-        <span style="color:#34d399; font-weight:bold;">+${winDrop.points} P</span>
-      `;
-
-      isOpening = false;
-
-      if (selectedModeKey === 'standard' && timeLeft <= 0) {
-        document.getElementById('ready-view').style.display = 'block';
-        document.getElementById('ready-banner-txt').innerText = "SON KUTU AÇILDI!";
-        triggerDelayedGameOver();
-      } else if ((selectedModeKey === 'ten_cases' || selectedModeKey === 'upgrade_mode') && remainingBoxes <= 0) {
-        document.getElementById('ready-view').style.display = 'block';
-        document.getElementById('ready-banner-txt').innerText = "TÜM KUTULAR AÇILDI!";
-        triggerDelayedGameOver();
-      } else {
-        document.getElementById('open-case-btn').disabled = false;
-      }
-    }, spinDuration + 100);
-  }
-
-  function triggerScreenShake() {
-    const app = document.getElementById('app-container');
-    app.classList.add('shake-effect');
-    setTimeout(() => app.classList.remove('shake-effect'), 600);
-  }
-
-  function triggerDelayedGameOver() { setTimeout(() => endGame(), 1500); }
-
-  function startCatchModePhase1() {
-    caughtBoxes = [];
-    catchTimeLeft = 15;
-    document.getElementById('catch-user-tag').innerText = "@" + currentUser;
-    document.getElementById('catch-timer-txt').innerText = catchTimeLeft + "s";
-    document.getElementById('caught-count-txt').innerText = "0";
-    const arena = document.getElementById('catch-arena');
-    arena.innerHTML = '';
-
-    showScreen('catch-game-screen');
-
-    clearInterval(spawnInterval);
-    spawnInterval = setInterval(() => spawnFallingBox(), 1000);
-
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      catchTimeLeft--;
-      document.getElementById('catch-timer-txt').innerText = catchTimeLeft + "s";
-
-      if (catchTimeLeft <= 0) {
-        clearInterval(timerInterval);
-        clearInterval(spawnInterval);
-        catchAnimationFrames.forEach(cancelAnimationFrame);
-        catchAnimationFrames = [];
-
-        arena.innerHTML = `
-          <div style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fbbf24; font-weight:bold; font-size:14px;">
-            SÜRE DOLDU! ⏳<br>
-            <span style="font-size:9px; color:#94a3b8; margin-top:4px;">Kutular açılıyor...</span>
-          </div>
-        `;
-        setTimeout(() => startCatchModePhase2(), 1200);
-      }
-    }, 1000);
-  }
-
-  function spawnFallingBox() {
-    const arena = document.getElementById('catch-arena');
-    if (!arena || catchTimeLeft <= 0) return;
-
-    const dropTier = getRandomDrop('catch_open');
-    const box = document.createElement('div');
-    box.className = 'falling-box';
-    
-    const arenaWidth = arena.offsetWidth || 320;
-    const arenaHeight = arena.offsetHeight || 360;
-    const startX = Math.random() * (arenaWidth - 45);
-    let posY = -45;
-    const speed = 2.0;
-
-    box.style.left = `${startX}px`;
-    box.style.top = `${posY}px`;
-    box.style.borderColor = dropTier.color;
-    box.style.background = `radial-gradient(circle, ${dropTier.color}44 0%, #110521 90%)`;
-    box.innerHTML = `
-      <span style="font-size:12px;">📦</span>
-      <span style="color:${dropTier.color}; font-size:7px;">${dropTier.tier}</span>
-    `;
-
-    const handleBoxCatch = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      AudioEngine.playTick();
-      caughtBoxes.push({ id: Date.now() + Math.random(), tier: dropTier.tier, color: dropTier.color });
-      document.getElementById('caught-count-txt').innerText = caughtBoxes.length;
-      box.remove();
-    };
-
-    box.addEventListener('pointerdown', handleBoxCatch, { passive: false });
-    arena.appendChild(box);
-
-    function step() {
-      if (!box.parentNode) return;
-      posY += speed;
-      box.style.top = `${posY}px`;
-      if (posY > arenaHeight + 10) {
-        if (box.parentNode) box.remove();
-      } else {
-        const animId = requestAnimationFrame(step);
-        catchAnimationFrames.push(animId);
-      }
-    }
-    const animId = requestAnimationFrame(step);
-    catchAnimationFrames.push(animId);
-  }
-
-  function startCatchModePhase2() {
-    showScreen('inventory-screen');
-    currentScore = 0;
-    currentSessionDrops = [];
-    renderInventoryGrid();
-  }
-
-  function renderInventoryGrid() {
-    const grid = document.getElementById('inv-grid-container');
-    grid.innerHTML = '';
-
-    const remaining = caughtBoxes.filter(b => !b.opened).length;
-    document.getElementById('inv-remaining-txt').innerText = remaining;
-    document.getElementById('inv-score-txt').innerText = currentScore;
-
-    if (caughtBoxes.length === 0) {
-      grid.innerHTML = `<div style="grid-column: span 3; text-align:center; color:#64748b; padding:20px;">Hiç kutu yakalayamadın!</div>`;
-      setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ ÖZETİ"), 1000);
-      return;
-    }
-
-    caughtBoxes.forEach((box, index) => {
-      const card = document.createElement('div');
-      card.className = 'inv-card' + (box.opened ? ' opened' : '');
-      card.style.borderColor = box.color;
-      card.innerHTML = `
-        <span style="font-size:12px;">📦</span>
-        <span style="color:${box.color};">${box.tier}</span>
-      `;
-      if (!box.opened) card.onclick = () => openSpecificCaughtBox(index);
-      grid.appendChild(card);
-    });
-  }
-
-  function openSpecificCaughtBox(index) {
-    if (isOpening) return;
-    isOpening = true;
-
-    const targetBox = caughtBoxes[index];
-    document.getElementById('inv-ready-view').style.display = 'none';
-    const rouletteView = document.getElementById('inv-roulette-view');
-    const track = document.getElementById('inv-roulette-track');
-    rouletteView.style.display = 'block';
-
-    track.style.transition = 'none';
-    track.style.transform = 'translateX(0px)';
-    track.innerHTML = '';
-
-    let chosenTierName = targetBox.tier;
-    const isUranusLuck = Math.random() < 0.0001;
-    const isTierUpgrade = Math.random() < 0.01;
-
-    if (isUranusLuck) {
-      chosenTierName = 'Uranus (Gizemli)';
-    } else if (isTierUpgrade) {
-      const tiersOrder = ['Classic Kasa', 'Super Kasa', 'Ultra Kasa', 'Omega Kasa', 'Godly Kasa'];
-      const cIdx = tiersOrder.indexOf(targetBox.tier);
-      if (cIdx !== -1 && cIdx < tiersOrder.length - 1) {
-        chosenTierName = tiersOrder[cIdx + 1];
-        showToast("⚡ ŞANS! Bir üst kademe kasa açılıyor!");
-      }
-    }
-
-    const totalItems = 30;
-    const winIdx = 24;
-    let winDrop = null;
-
-    for (let i = 0; i < totalItems; i++) {
-      const drop = getRandomDrop('catch_open', i === winIdx ? chosenTierName : null);
-      if (i === winIdx) winDrop = drop;
-
-      const card = document.createElement('div');
-      card.className = 'roulette-item';
-      card.style.borderBottom = `3px solid ${drop.color}`;
-      card.innerHTML = `
-        <span style="color:${drop.color};font-weight:bold;">${drop.tier}</span>
-        <span style="color:#cbd5e1;margin:1px 0;font-size:7px;">${drop.item}</span>
-        <span style="color:#94a3b8;">+${drop.points}P</span>
-      `;
-      track.appendChild(card);
-    }
-
-    const spinDuration = 3000;
-    let tickInterval = setInterval(() => AudioEngine.playTick(), 100);
-    setTimeout(() => clearInterval(tickInterval), spinDuration - 200);
-
-    setTimeout(() => {
-      track.style.transition = `transform ${spinDuration/1000}s cubic-bezier(0.12, 0.8, 0.2, 1)`;
-      const itemWidth = 65;
-      const target = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 10 - 5);
-      track.style.transform = `translateX(${target}px)`;
-    }, 20);
-
-    setTimeout(() => {
-      targetBox.opened = true;
-      currentScore += winDrop.points;
-      currentSessionDrops.push(winDrop);
-      isOpening = false;
-
-      if (winDrop.tier.includes('Godly') || winDrop.tier.includes('Uranus')) {
-        AudioEngine.playGodly();
-        triggerScreenShake();
-      }
-
-      renderInventoryGrid();
-
-      const remaining = caughtBoxes.filter(b => !b.opened).length;
-      if (remaining === 0) {
-        setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ ÖZETİ"), 1000);
-      }
-    }, spinDuration + 100);
-  }
-
-  function openAllCaughtBoxes() {
-    const unOpened = caughtBoxes.filter(b => !b.opened);
-    if (unOpened.length === 0) return;
-
-    AudioEngine.playGodly();
-    triggerScreenShake();
-
-    unOpened.forEach(b => {
-      b.opened = true;
-      let chosenTierName = b.tier;
-      if (Math.random() < 0.0001) chosenTierName = 'Uranus (Gizemli)';
-      const drop = getRandomDrop('catch_open', chosenTierName);
-      currentScore += drop.points;
-      currentSessionDrops.push(drop);
-    });
-
-    renderInventoryGrid();
-    setTimeout(() => startSummaryScreen("🎯 YAKALA & AÇ: TOPLU AÇILIŞ"), 800);
-  }
-
-  function startMinesMode() {
-    currentScore = 0;
-    safePicksCount = 0;
-    currentSessionDrops = [];
-    document.getElementById('mine-user-tag').innerText = "@" + currentUser;
-    document.getElementById('mine-score-txt').innerText = "0";
-    document.getElementById('mine-status-txt').innerText = "9 Kutuda 1 Mayın!";
-    document.getElementById('cashout-btn').disabled = false;
-
-    const bombIndex = Math.floor(Math.random() * 9);
-    mineField = [];
-    for (let i = 0; i < 9; i++) mineField.push({ isBomb: i === bombIndex, opened: false });
-
-    renderMinesGrid();
-    showScreen('mines-game-screen');
-  }
-
-  function renderMinesGrid() {
-    const grid = document.getElementById('mines-grid');
-    grid.innerHTML = '';
-    mineField.forEach((tile, index) => {
-      const card = document.createElement('div');
-      card.className = 'mine-card';
-      card.innerHTML = `<span style="font-size:16px;">📦</span>`;
-      card.onclick = () => pickMineCard(index, card);
-      grid.appendChild(card);
-    });
-  }
-
-  function pickMineCard(index, cardEl) {
-    const tile = mineField[index];
-    if (tile.opened) return;
-    tile.opened = true;
-
-    if (tile.isBomb) {
-      AudioEngine.playExplosion();
-      triggerScreenShake();
-      cardEl.classList.add('bomb');
-      cardEl.innerHTML = `<span style="font-size:18px;">💣</span><span style="font-size:7px;color:#fca5a5;">PATLADIN!</span>`;
-      document.getElementById('cashout-btn').disabled = true;
-      document.getElementById('mine-status-txt').innerText = "BOMBA PATLADI!";
-      currentScore = 0;
-      currentSessionDrops = [{ tier: "Mayın", item: "Patlama (Puan Sıfırlandı)", points: 0, color: "#ef4444" }];
-      setTimeout(() => startSummaryScreen("💣 MAYIN PATLADI - 0 PUAN"), 1200);
-    } else {
-      AudioEngine.playTick();
-      safePicksCount++;
-      const drop = getRandomDrop('mines_mode');
-      currentScore += drop.points;
-      currentSessionDrops.push(drop);
-
-      cardEl.classList.add('safe');
-      cardEl.innerHTML = `
-        <span style="color:#a7f3d0; font-size:7px; font-weight:bold;">${drop.item}</span>
-        <span style="color:#34d399; font-weight:bold;">+${drop.points}P</span>
-      `;
-
-      document.getElementById('mine-score-txt').innerText = currentScore;
-      document.getElementById('mine-status-txt').innerText = `Güvenli: ${safePicksCount}/8`;
-
-      if (safePicksCount === 8) cashoutMines();
-    }
-  }
-
-  function cashoutMines() {
-    document.getElementById('cashout-btn').disabled = true;
-    startSummaryScreen("💰 KASADAN BAŞARIYLA ÇEKİLDİN!");
-  }
-
-  function startSummaryScreen(title) {
-    showScreen('catch-summary-screen');
-    document.getElementById('summary-title-txt').innerText = title;
-    document.getElementById('summary-final-score').innerText = currentScore;
-    document.getElementById('summary-final-count').innerText = currentSessionDrops.length;
-
-    const list = document.getElementById('summary-drops-list');
-    list.innerHTML = '';
-    currentSessionDrops.forEach(d => {
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.innerHTML = `
-        <div><span style="color:${d.color}; font-weight:bold;">[${d.tier}]</span> <span>${d.item}</span></div>
-        <div style="color:#34d399; font-weight:bold;">+${d.points} P</div>
-      `;
-      list.appendChild(row);
-    });
-
-    saveScoreToLeaderboard();
-  }
-
-  function endGame() {
-    document.getElementById('final-score-txt').innerText = currentScore;
-    document.getElementById('modal-mod-info').innerText = `Oynanan Mod: ${GAME_MODES[selectedModeKey].name}`;
-    document.getElementById('game-over-modal').style.display = 'flex';
-    saveScoreToLeaderboard();
-  }
-
-  function saveScoreToLeaderboard() {
-    if (!userModeStats[selectedModeKey]) {
-      userModeStats[selectedModeKey] = { played: 0, won: 0, best: 0 };
-    }
-    userModeStats[selectedModeKey].played++;
-    if (currentScore > 0) userModeStats[selectedModeKey].won++;
-    if (currentScore > (userModeStats[selectedModeKey].best || 0)) {
-      userModeStats[selectedModeKey].best = currentScore;
-    }
-
-    if (currentScore > userHighScore) {
-      userHighScore = currentScore;
-    }
-
-    if (firebaseReady && db && currentUid) {
-      db.ref(`users/${currentUid}/highScore`).set(userHighScore);
-      db.ref(`users/${currentUid}/modeStats`).set(userModeStats);
-    }
-
-    const now = new Date();
-    const dateStr = `${now.getDate()} Ağu 2026 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
-    const record = {
-      name: currentUser,
-      uid: currentUid,
-      title: currentTitle,
-      modeKey: selectedModeKey,
-      modeName: GAME_MODES[selectedModeKey].name,
-      score: currentScore,
-      date: dateStr,
-      drops: currentSessionDrops,
-      timestamp: Date.now()
-    };
-
-    if (firebaseReady && db) {
-      const userModRecordKey = `${currentUid}_${selectedModeKey}`;
-      db.ref(`leaderboard/${userModRecordKey}`).once('value').then(snap => {
-        const existing = snap.val();
-        if (!existing || currentScore > existing.score) {
-          db.ref(`leaderboard/${userModRecordKey}`).set(record);
+            <div style="margin-top: 8px; font-size: 12px; color: var(--gold);">🪙 Altın: <span id="p-gold">0</span></div>
+            <div style="font-size: 10px; color: var(--text-dim); margin-top: 5px;" id="p-uid">UID: -</div>
+        </div>
+
+        <button class="nav-btn active" onclick="showTab('tab-crates')">📦 Kutu Açma</button>
+        <button class="nav-btn" onclick="showTab('tab-pvp')">⚔️ 1v1 PvP Arena</button>
+        <button class="nav-btn" onclick="showTab('tab-channels')">💬 Kanallar & Sohbet</button>
+        <button class="nav-btn" onclick="showTab('tab-friends')">👥 Arkadaşlar</button>
+        <button class="nav-btn" onclick="showTab('tab-extras')">✨ Özellikler (Pass/Pazar)</button>
+    </div>
+
+    <!-- Ana İçerik -->
+    <div id="main-content">
+
+        <!-- 1. KUTU AÇMA (Pity & Şans Ekli) -->
+        <div id="tab-crates" class="tab-content active">
+            <h2>Kutu Açma Alanı</h2>
+            <p style="color: var(--text-dim); font-size: 13px;">Garantili Pity Sayacı: <span id="pity-count">0</span>/20</p>
+            <div class="grid-cards">
+                <div class="card">
+                    <h3>Standart Sandık</h3>
+                    <p style="margin: 10px 0; color: var(--text-dim);">Rastgele eşya veya altın kazandırır.</p>
+                    <button class="btn" onclick="openCrate('standart')">100 Altın İle Aç</button>
+                </div>
+                <div class="card">
+                    <h3>Mega Sandık</h3>
+                    <p style="margin: 10px 0; color: var(--text-dim);">Yüksek XP ve Efsanevi şansı.</p>
+                    <button class="btn" onclick="openCrate('mega')">500 Altın İle Aç</button>
+                </div>
+            </div>
+            <div id="crate-result" style="margin-top: 20px; font-weight: bold; font-size: 16px;"></div>
+        </div>
+
+        <!-- 2. 1v1 PVP (Rakip Kontrollü) -->
+        <div id="tab-pvp" class="tab-content">
+            <h2>1v1 PvP Düello</h2>
+            <div style="display:flex; gap: 10px; margin: 10px 0;">
+                <button class="btn" onclick="createPvPRoom()">Oda Kur</button>
+                <input type="text" id="pvp-room-code" placeholder="Oda Kodu Girin" style="width: 180px; margin:0;">
+                <button class="btn btn-success" onclick="joinPvPRoom()">Odaya Katıl</button>
+            </div>
+
+            <div class="pvp-stage">
+                <div class="pvp-box">
+                    <h3>Oyuncu 1</h3>
+                    <p id="pvp-p1-name">Bekleniyor...</p>
+                    <p id="pvp-p1-score" style="font-size:24px; color:var(--gold);">0</p>
+                </div>
+                <div class="pvp-status" id="pvp-match-status">Oda Bekleniyor</div>
+                <div class="pvp-box">
+                    <h3>Oyuncu 2</h3>
+                    <p id="pvp-p2-name">Bekleniyor...</p>
+                    <p id="pvp-p2-score" style="font-size:24px; color:var(--gold);">0</p>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <button id="pvp-action-btn" class="btn" onclick="pvpOpenBoxAction()" disabled>Rakip Gelmeden Kutu Açılamaz</button>
+            </div>
+        </div>
+
+        <!-- 3. KANAL OLUŞTURMA & MESAJ YÖNETİMLİ SOHBET -->
+        <div id="tab-channels" class="tab-content">
+            <h2>Kanal Yönetimi & Canlı Sohbet</h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="channel-name-input" placeholder="Yeni Kanal Adı" style="margin:0;">
+                <button class="btn" onclick="createChannel()">Kanal Oluştur</button>
+                <select id="channel-select" onchange="switchChannel(this.value)" style="margin:0; width: 200px;"></select>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-box"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Mesajınızı yazın..." style="margin:0;">
+                    <button class="btn" onclick="sendMessage()">Gönder</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. ARKADAŞLIK SİSTEMİ -->
+        <div id="tab-friends" class="tab-content">
+            <h2>Arkadaş Listesi</h2>
+            <div style="display:flex; gap: 10px; margin: 10px 0;">
+                <input type="text" id="friend-uid-input" placeholder="Arkadaş UID'si girin" style="margin:0;">
+                <button class="btn" onclick="addFriend()">Ekle</button>
+            </div>
+            <div id="friends-list" class="grid-cards"></div>
+        </div>
+
+        <!-- 5. +10 EK ÖZELLİK (Ekstra Paneller) -->
+        <div id="tab-extras" class="tab-content">
+            <h2>Ekstra Oyun Modülleri</h2>
+            <div class="grid-cards">
+                <div class="card">
+                    <h3>🎁 Günlük Ödül</h3>
+                    <button class="btn" onclick="claimDailyReward()">Giriş Ödülünü Al</button>
+                </div>
+                <div class="card">
+                    <h3>🎡 Şans Çarkı</h3>
+                    <button class="btn" onclick="spinWheel()">Çarkı Çevir (Ücretsiz)</button>
+                </div>
+                <div class="card">
+                    <h3>📜 Sezon Bileti</h3>
+                    <p style="font-size:12px; margin:5px 0;">Aşama: <span id="pass-tier">1</span></p>
+                    <button class="btn" onclick="claimPassReward()">Aşama Ödülü Al</button>
+                </div>
+                <div class="card">
+                    <h3>🔨 Kutu Dönüştür</h3>
+                    <button class="btn" onclick="craftBox()">3 Standart -> 1 Mega</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. FIREBASE BAĞLANTISI ---
+        const firebaseConfig = {
+            apiKey: "SENIN_API_KEY",
+            authDomain: "SENIN_AUTH_DOMAIN",
+            databaseURL: "SENIN_DATABASE_URL",
+            projectId: "SENIN_PROJECT_ID",
+            storageBucket: "SENIN_STORAGE_BUCKET",
+            messagingSenderId: "SENIN_SENDER_ID",
+            appId: "SENIN_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        // Yerel Profil Durumu
+        let currentUser = {
+            uid: "USER_" + Math.floor(1000 + Math.random() * 9000),
+            name: "MecagaTR",
+            level: 1,
+            xp: 0,
+            gold: 500,
+            pity: 0
+        };
+        let currentChannel = "genel";
+        let currentPvPRoom = null;
+
+        // --- 2. BAŞLATMA ---
+        window.onload = () => {
+            updateProfileUI();
+            initChannels();
+            listenChat(currentChannel);
+        };
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
-      });
-    }
-  }
 
-  function validateLeaderboard() {
-    leaderboardData = leaderboardData.filter(player => {
-      if (!player.drops || player.drops.length === 0) return false;
-      const calculatedSum = player.drops.reduce((sum, item) => sum + item.points, 0);
-      return calculatedSum === player.score;
-    });
-    leaderboardData.sort((a, b) => b.score - a.score);
-  }
+        // --- 3. LEVEL & XP MOTORU ---
+        function addXP(amount) {
+            currentUser.xp += amount;
+            let neededXP = currentUser.level * 100;
+            if (currentUser.xp >= neededXP) {
+                currentUser.xp -= neededXP;
+                currentUser.level++;
+                alert(`Tebrikler! Seviye Atladın: Lvl ${currentUser.level}`);
+            }
+            updateProfileUI();
+        }
 
-  function filterLeaderboard(modeKey, btn) {
-    selectedFilterMode = modeKey;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderLeaderboard();
-  }
+        function updateProfileUI() {
+            document.getElementById('p-username').innerText = currentUser.name;
+            document.getElementById('p-level').innerText = `Lvl ${currentUser.level}`;
+            document.getElementById('p-gold').innerText = currentUser.gold;
+            document.getElementById('p-uid').innerText = `UID: ${currentUser.uid}`;
+            let neededXP = currentUser.level * 100;
+            document.getElementById('p-xp-txt').innerText = `XP: ${currentUser.xp} / ${neededXP}`;
+            document.getElementById('p-xp-bar').style.width = `${(currentUser.xp / neededXP) * 100}%`;
+            document.getElementById('pity-count').innerText = currentUser.pity;
+        }
 
-  function openLeaderboard() {
-    renderLeaderboard();
-    document.getElementById('leaderboard-modal').style.display = 'flex';
-  }
+        // --- 4. KUTU VE PITY SİSTEMİ ---
+        function openCrate(type) {
+            let cost = type === 'mega' ? 500 : 100;
+            if (currentUser.gold < cost) return alert("Yetersiz altın!");
 
-  function closeLeaderboard() { document.getElementById('leaderboard-modal').style.display = 'none'; }
+            currentUser.gold -= cost;
+            currentUser.pity++;
+            let earnedXP = type === 'mega' ? 50 : 15;
+            let resultText = "";
 
-  function renderLeaderboard() {
-    const list = document.getElementById('lb-list-container');
-    list.innerHTML = '';
-    validateLeaderboard();
+            if (currentUser.pity >= 20 || Math.random() < 0.05) {
+                resultText = "🔥 EFSANEVİ ÖDÜL KAZANDIN! (+1000 Altın)";
+                currentUser.gold += 1000;
+                currentUser.pity = 0;
+            } else {
+                let win = Math.floor(Math.random() * cost * 1.5);
+                resultText = `Kutudan ${win} altın çıktı!`;
+                currentUser.gold += win;
+            }
 
-    let filtered = selectedFilterMode === 'all' 
-      ? [...leaderboardData] 
-      : leaderboardData.filter(d => d.modeKey === selectedFilterMode);
+            addXP(earnedXP);
+            document.getElementById('crate-result').innerText = resultText;
+            updateProfileUI();
+        }
 
-    filtered.sort((a, b) => b.score - a.score);
-    const top10 = filtered.slice(0, 10);
+        // --- 5. 1V1 PVP (RAKİP GELMEDEN BAŞLAMAZ) ---
+        function createPvPRoom() {
+            let roomId = "ODAPVP_" + Math.floor(1000 + Math.random() * 9000);
+            currentPvPRoom = roomId;
+            db.ref('pvp/' + roomId).set({
+                status: 'waiting',
+                p1: { uid: currentUser.uid, name: currentUser.name, score: 0 },
+                p2: null
+            });
+            listenPvPRoom(roomId);
+            alert("Oda oluşturuldu! Kod: " + roomId);
+        }
 
-    if (top10.length === 0) {
-      list.innerHTML = `<div style="text-align:center; color:#64748b; padding:15px;">Kayıt bulunamadı.</div>`;
-      return;
-    }
+        function joinPvPRoom() {
+            let roomId = document.getElementById('pvp-room-code').value.trim();
+            if (!roomId) return;
+            currentPvPRoom = roomId;
+            db.ref('pvp/' + roomId).transaction(room => {
+                if (room) {
+                    if (!room.p2 && room.p1.uid !== currentUser.uid) {
+                        room.p2 = { uid: currentUser.uid, name: currentUser.name, score: 0 };
+                        room.status = 'in_game';
+                    }
+                }
+                return room;
+            });
+            listenPvPRoom(roomId);
+        }
 
-    top10.forEach((item, index) => {
-      const rank = index + 1;
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      row.style.cursor = 'pointer';
+        function listenPvPRoom(roomId) {
+            db.ref('pvp/' + roomId).on('value', snap => {
+                let data = snap.val();
+                if (!data) return;
 
-      let rankBadge = `${rank}.`;
-      if (rank === 1) { row.classList.add('rank-1'); rankBadge = '🥇 1.'; }
-      else if (rank === 2) { row.classList.add('rank-2'); rankBadge = '🥈 2.'; }
-      else if (rank === 3) { row.classList.add('rank-3'); rankBadge = '🥉 3.'; }
-      else if (rank === 4 || rank === 5) row.classList.add('rank-green');
-      else row.classList.add('rank-rest');
+                document.getElementById('pvp-p1-name').innerText = data.p1 ? data.p1.name : "Bekleniyor...";
+                document.getElementById('pvp-p1-score').innerText = data.p1 ? data.p1.score : "0";
 
-      row.innerHTML = `
-        <div><span>${rankBadge} ${item.name}</span> <span style="font-size:7px; opacity:0.8;">[${item.title || 'Çaylak'}] (${item.modeName || 'Normal'})</span></div>
-        <b>${item.score} P ›</b>
-      `;
-      row.onclick = () => openPlayerDetails(item);
-      list.appendChild(row);
-    });
-  }
+                if (data.p2) {
+                    document.getElementById('pvp-p2-name').innerText = data.p2.name;
+                    document.getElementById('pvp-p2-score').innerText = data.p2.score;
+                }
 
-  function openPlayerDetails(item) {
-    currentlyInspectingUser = item;
-    document.getElementById('detail-player-title').innerText = `👤 ${item.name} (Profile Bak)`;
-    document.getElementById('detail-player-sub').innerText = `Oynanan Mod: ${item.modeName || 'Normal Kasa'} | Skor: ${item.score} P`;
+                const actionBtn = document.getElementById('pvp-action-btn');
+                const statusTxt = document.getElementById('pvp-match-status');
 
-    const list = document.getElementById('detail-drops-list');
-    list.innerHTML = '';
+                // PvP Kilidi: Sadece her iki oyuncu da varken açılır
+                if (data.status === 'in_game' && data.p2) {
+                    statusTxt.innerText = "⚔️ Düello Başladı!";
+                    statusTxt.style.color = "var(--success)";
+                    actionBtn.disabled = false;
+                    actionBtn.innerText = "Düello Kutusu Aç!";
+                } else {
+                    statusTxt.innerText = "⏳ Rakip Bekleniyor...";
+                    statusTxt.style.color = "var(--warning)";
+                    actionBtn.disabled = true;
+                    actionBtn.innerText = "Rakip Gelmeden Kutu Açılamaz";
+                }
+            });
+        }
 
-    if (!item.drops || item.drops.length === 0) {
-      list.innerHTML = `<div style="text-align:center; color:#64748b; padding:10px;">Düşen eşya kaydı yok.</div>`;
-    } else {
-      item.drops.forEach(d => {
-        const row = document.createElement('div');
-        row.className = 'item-row';
-        row.innerHTML = `
-          <div><span style="color:${d.color}; font-weight:bold;">[${d.tier}]</span> <span>${d.item}</span></div>
-          <div style="color:#34d399; font-weight:bold;">+${d.points} P</div>
-        `;
-        list.appendChild(row);
-      });
-    }
+        function pvpOpenBoxAction() {
+            if (!currentPvPRoom) return;
+            let scoreAdd = Math.floor(Math.random() * 50) + 10;
+            db.ref('pvp/' + currentPvPRoom).once('value', snap => {
+                let data = snap.val();
+                let isP1 = data.p1.uid === currentUser.uid;
+                let path = isP1 ? 'p1/score' : 'p2/score';
+                db.ref(`pvp/${currentPvPRoom}/${path}`).set((isP1 ? data.p1.score : data.p2.score) + scoreAdd);
+            });
+        }
 
-    document.getElementById('details-modal').style.display = 'flex';
-  }
+        // --- 6. KANAL AYARLARI & SOHBET SİSTEMİ (DÜZENLE/SİL/KOPYALA) ---
+        function createChannel() {
+            let name = document.getElementById('channel-name-input').value.trim();
+            if (!name) return;
+            let id = name.toLowerCase().replace(/\s+/g, '-');
+            db.ref('channels/' + id).set({ name: name, createdAt: Date.now() });
+            document.getElementById('channel-name-input').value = "";
+        }
 
-  function closeDetailsModal() {
-    document.getElementById('details-modal').style.display = 'none';
-  }
+        function initChannels() {
+            db.ref('channels').on('value', snap => {
+                let select = document.getElementById('channel-select');
+                select.innerHTML = '<option value="genel"># Genel</option>';
+                snap.forEach(child => {
+                    select.innerHTML += `<option value="${child.key}"># ${child.val().name}</option>`;
+                });
+            });
+        }
 
-  function confirmClearLeaderboard() {
-    if (!isAdmin) return;
-    if (confirm("Skor tablosundaki tüm veriler silinsin mi?")) {
-      if (firebaseReady && db) db.ref('leaderboard').remove();
-    }
-  }
+        function switchChannel(channelId) {
+            currentChannel = channelId;
+            listenChat(channelId);
+        }
 
-  updateMenuRatesPreview();
-</script>
+        function listenChat(channelId) {
+            db.ref('messages/' + channelId).limitToLast(30).on('value', snap => {
+                let chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = "";
+                snap.forEach(child => {
+                    let msg = child.val();
+                    let msgId = child.key;
+                    let isMe = msg.uid === currentUser.uid;
 
+                    let msgEl = document.createElement('div');
+                    msgEl.className = `chat-msg ${isMe ? 'self' : ''}`;
+                    msgEl.innerHTML = `
+                        <div class="author">${msg.name}</div>
+                        <div class="text" id="msg-text-${msgId}">${msg.text}</div>
+                        <div class="msg-actions">
+                            <span onclick="copyMsg('${encodeURIComponent(msg.text)}')">📋 Kopyala</span>
+                            ${isMe ? `<span onclick="editMsg('${channelId}', '${msgId}')">✏️ Düzenle</span>` : ''}
+                            ${isMe ? `<span onclick="deleteMsg('${channelId}', '${msgId}')" style="color:var(--danger)">🗑️ Sil</span>` : ''}
+                        </div>
+                    `;
+                    chatBox.appendChild(msgEl);
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        function sendMessage() {
+            let input = document.getElementById('chat-input');
+            if (!input.value.trim()) return;
+            db.ref('messages/' + currentChannel).push({
+                uid: currentUser.uid,
+                name: currentUser.name,
+                text: input.value.trim(),
+                timestamp: Date.now()
+            });
+            input.value = "";
+        }
+
+        function copyMsg(text) {
+            navigator.clipboard.writeText(decodeURIComponent(text));
+            alert("Mesaj kopyalandı!");
+        }
+
+        function editMsg(channelId, msgId) {
+            let currentText = document.getElementById(`msg-text-${msgId}`).innerText;
+            let newText = prompt("Mesajı düzenleyin:", currentText);
+            if (newText && newText !== currentText) {
+                db.ref(`messages/${channelId}/${msgId}/text`).set(newText + " (düzenlendi)");
+            }
+        }
+
+        function deleteMsg(channelId, msgId) {
+            if (confirm("Bu mesajı silmek istiyor musunuz?")) {
+                db.ref(`messages/${channelId}/${msgId}`).remove();
+            }
+        }
+
+        // --- 7. ARKADAŞLIK SİSTEMİ ---
+        function addFriend() {
+            let targetUID = document.getElementById('friend-uid-input').value.trim();
+            if (!targetUID) return alert("Geçerli UID girin.");
+            db.ref(`friends/${currentUser.uid}/${targetUID}`).set({ uid: targetUID, addedAt: Date.now() });
+            loadFriends();
+        }
+
+        function loadFriends() {
+            db.ref(`friends/${currentUser.uid}`).on('value', snap => {
+                let container = document.getElementById('friends-list');
+                container.innerHTML = "";
+                snap.forEach(f => {
+                    container.innerHTML += `<div class="card"><p>👤 <b>${f.val().uid}</b></p></div>`;
+                });
+            });
+        }
+
+        // --- 8. EKSTRA ÖZELLİK FONKSİYONLARI ---
+        function claimDailyReward() {
+            currentUser.gold += 250;
+            addXP(25);
+            alert("Günlük ödül alındı: +250 Altın, +25 XP!");
+            updateProfileUI();
+        }
+
+        function spinWheel() {
+            let prizes = [50, 100, 200, 500, 1000];
+            let win = prizes[Math.floor(Math.random() * prizes.length)];
+            currentUser.gold += win;
+            alert(`🎡 Çarktan ${win} Altın Kazandın!`);
+            updateProfileUI();
+        }
+
+        function claimPassReward() {
+            currentUser.gold += 300;
+            addXP(40);
+            alert("Sezon bileti ödülü alındı!");
+            updateProfileUI();
+        }
+
+        function craftBox() {
+            if (currentUser.gold < 150) return alert("Dönüştürme işlemi için 150 altın gerekli!");
+            currentUser.gold -= 150;
+            openCrate('mega');
+        }
+    </script>
 </body>
 </html>
-
