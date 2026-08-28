@@ -29,7 +29,7 @@
     <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
   </div>
 
-  <!-- Profil & Detay Modalı -->
+  <!-- Profil & Detay Modalı (Tüm Detaylı Veriler Eşitlendi) -->
   <div id="modal-lb-profile" class="modal-overlay">
     <div class="modal-card">
       <div style="text-align:center;">
@@ -45,8 +45,12 @@
         <div><b>Kazanma Oranı:</b> <span id="lb-prof-winrate">%100</span></div>
       </div>
 
+      <!-- Kullanıcının Tüm Modlardaki Rekorları -->
+      <div style="font-size:10px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Tüm Mod Rekorları:</div>
+      <div id="lb-prof-all-records" style="display:flex; flex-direction:column; gap:3px; max-height:100px; overflow-y:auto; margin-bottom:8px;"></div>
+
       <div style="font-size:10px; font-weight:bold; color:#fff; margin-bottom:4px;">📦 Çıkan Eşyalar:</div>
-      <div id="lb-prof-drops" style="max-height:120px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:10px;"></div>
+      <div id="lb-prof-drops" style="max-height:100px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:10px;"></div>
 
       <!-- Kendi Profilimizde Gizlenen Butonlar -->
       <div id="lb-prof-actions" style="display:flex; gap:4px;">
@@ -73,7 +77,7 @@
       }
       activeFilter = filter;
       const listContainer = document.getElementById("lb-records-list");
-      listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888; padding:15px;'>Yükleniyor...</div>";
+      listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888;'>Yükleniyor...</div>";
 
       db.ref("leaderboards").once("value", snap => {
         listContainer.innerHTML = "";
@@ -87,7 +91,6 @@
           }
         });
 
-        // En yüksek skora göre sıralama
         allScores.sort((a, b) => b.score - a.score);
 
         if (allScores.length === 0) {
@@ -124,10 +127,22 @@
         const fullUser = snap.val() || {};
         const stats = fullUser.stats || {};
         let totalGames = 0, totalWins = 0;
-        for (let k in stats) {
-          totalGames += stats[k].played || 0;
-          totalWins += stats[k].wins || 0;
+        const recBox = document.getElementById("lb-prof-all-records");
+        recBox.innerHTML = "";
+
+        const modLabels = { standard: "Normal", ten_cases: "10 Kutu", catch_open: "Yakala&Aç", upgrade_mode: "Yükselt", mines_mode: "Mayın" };
+        for (let k in modLabels) {
+          const s = stats[k] || { played: 0, wins: 0, best: 0 };
+          totalGames += s.played || 0;
+          totalWins += s.wins || 0;
+          recBox.innerHTML += `
+            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px;">
+              <span>${modLabels[k]}: ${s.played} Oyun</span>
+              <b style="color:var(--neon-green);">${s.best} P</b>
+            </div>
+          `;
         }
+
         document.getElementById("lb-prof-played").innerText = totalGames;
         document.getElementById("lb-prof-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
       });
@@ -158,7 +173,7 @@
         };
         document.getElementById("btn-lb-msg").onclick = () => {
           db.ref(`friends/${u.uid}/${rec.uid}`).set({ fullName: rec.fullName });
-          window.location.href = "chat.html";
+          window.location.href = "friends.html";
         };
       }
 
