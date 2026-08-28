@@ -16,7 +16,6 @@
       <div></div>
     </div>
 
-    <!-- Mod Filtre Sekmeleri -->
     <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:8px;">
       <button class="icon-btn" id="flt-all" style="background:var(--btn-blue);" onclick="loadLB('all', this)">Tümü</button>
       <button class="icon-btn" onclick="loadLB('standard', this)">Normal</button>
@@ -24,19 +23,19 @@
       <button class="icon-btn" onclick="loadLB('catch_open', this)">Yakala & Aç</button>
       <button class="icon-btn" onclick="loadLB('upgrade_mode', this)">Şans Yükseltme</button>
       <button class="icon-btn" onclick="loadLB('mines_mode', this)">Mayın</button>
+      <button class="icon-btn" onclick="loadLB('pvp_mode', this)">PvP</button>
     </div>
 
     <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
   </div>
 
-  <!-- 1. Aşama: Oyun Dökümü Modalı -->
+  <!-- 1. Oyun Bilgileri Modalı -->
   <div id="modal-lb-game-info" class="modal-overlay">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <span style="font-size:11px; color:var(--text-dim);">Oyuncu Adına Tıklayarak Profili Aç:</span>
+        <span style="font-size:10px; color:var(--text-dim);">Oyuncu İsmine Dokunarak Profili Açın:</span>
         <button class="icon-btn" style="border-color:var(--danger); padding:2px 6px;" onclick="closeGameInfoModal()">X</button>
       </div>
-      <!-- İsme Basınca Profil Açılır -->
       <h3 id="det-user-clickable" style="color:var(--neon-blue); font-size:14px; cursor:pointer; text-decoration:underline; margin-bottom:4px;">Oyuncu#12345</h3>
       <div id="det-mode-info" style="font-size:10px; color:var(--neon-gold); margin-bottom:2px;">Mod: Normal Kasa</div>
       <div id="det-date" style="font-size:9px; color:#94a3b8; margin-bottom:6px;">Tarih: -</div>
@@ -46,7 +45,7 @@
     </div>
   </div>
 
-  <!-- 2. Aşama: Tam Profil Modalı (Bizim Profilimiz Gibi Eşitlendi) -->
+  <!-- 2. Profil Modalı -->
   <div id="modal-full-profile" class="modal-overlay">
     <div class="modal-card panel-theme-profile">
       <div style="text-align:center;">
@@ -54,20 +53,12 @@
         <h3 id="prof-full-name" style="color:var(--neon-blue);">Oyuncu</h3>
         <div id="prof-full-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
       </div>
-
       <div style="background:#050a14; padding:8px; border-radius:6px; font-size:11px; margin-bottom:8px; line-height:1.8;">
-        <div><b>Toplam Oynanan Oyun:</b> <span id="prof-full-played" style="color:var(--neon-blue);">0</span></div>
-        <div><b>Kazanma Oranı:</b> <span id="prof-full-winrate" style="color:var(--neon-green);">%100</span></div>
+        <div><b>Toplam Oyun:</b> <span id="prof-full-played">0</span></div>
+        <div><b>Kazanma Oranı:</b> <span id="prof-full-winrate">%100</span></div>
       </div>
-
       <div style="font-size:10px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">🏆 Mod Rekorları:</div>
       <div id="prof-full-records" style="display:flex; flex-direction:column; gap:3px; max-height:110px; overflow-y:auto; margin-bottom:8px;"></div>
-
-      <div id="prof-actions-group" style="display:flex; gap:4px;">
-        <button id="btn-prof-action-add" class="btn-start" style="flex:1; background:var(--neon-green); font-size:11px; padding:8px;">➕ Arkadaş Ekle</button>
-        <button id="btn-prof-action-remove" class="btn-start" style="flex:1; background:var(--danger); font-size:11px; padding:8px; display:none;">❌ Arkadaşlıktan Çıkar</button>
-      </div>
-
       <button class="btn-close" onclick="closeFullProfileModal()">Kapat</button>
     </div>
   </div>
@@ -75,7 +66,6 @@
   <script src="app.js"></script>
   <script>
     let activeFilter = 'all';
-    let currentSelectedPlayer = null;
 
     window.onload = () => {
       loadLB('all', document.getElementById("flt-all"));
@@ -128,7 +118,6 @@
     }
 
     function openGameInfoModal(rec) {
-      currentSelectedPlayer = rec;
       document.getElementById("det-user-clickable").innerText = rec.fullName;
       document.getElementById("det-mode-info").innerText = `Mod: ${rec.modeName}`;
       document.getElementById("det-date").innerText = `Tarih: ${rec.date || 'Bilinmiyor'}`;
@@ -156,12 +145,9 @@
       document.getElementById("modal-lb-game-info").style.display = "flex";
     }
 
-    function closeGameInfoModal() {
-      document.getElementById("modal-lb-game-info").style.display = "none";
-    }
+    function closeGameInfoModal() { document.getElementById("modal-lb-game-info").style.display = "none"; }
 
     function openFullProfile(uid, name, title) {
-      const u = getActiveUser();
       document.getElementById("prof-full-name").innerText = name;
       document.getElementById("prof-full-title").innerText = `[${title || 'Çaylak'}]`;
 
@@ -178,8 +164,8 @@
           totalGames += s.played || 0;
           totalWins += s.wins || 0;
           recBox.innerHTML += `
-            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px; border:1px solid #3b1d6e;">
-              <span>${modLabels[k]}: ${s.played} Oyun (${s.wins} Galibiyet)</span>
+            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px;">
+              <span>${modLabels[k]}: ${s.played} Oyun</span>
               <b style="color:var(--neon-gold);">${s.best} P</b>
             </div>
           `;
@@ -189,40 +175,10 @@
         document.getElementById("prof-full-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
       });
 
-      const isMe = u && (uid === u.uid);
-      const isDeleted = name && name.startsWith("deleteUser");
-
-      const addBtn = document.getElementById("btn-prof-action-add");
-      const rmBtn = document.getElementById("btn-prof-action-remove");
-      const grp = document.getElementById("prof-actions-group");
-
-      if (isMe || isDeleted) {
-        grp.style.display = "none";
-      } else {
-        grp.style.display = "flex";
-        // Ekli mi kontrol et
-        db.ref(`friends/${u.uid}/${uid}`).once("value", fSnap => {
-          if (fSnap.exists()) {
-            addBtn.style.display = "none";
-            rmBtn.style.display = "block";
-            rmBtn.onclick = () => removeFriendBidirectional(uid, name, closeFullProfileModal);
-          } else {
-            rmBtn.style.display = "none";
-            addBtn.style.display = "block";
-            addBtn.onclick = () => {
-              db.ref(`friend_requests/${uid}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
-              alert(`${name} kullanıcısına istek gönderildi!`);
-            };
-          }
-        });
-      }
-
       document.getElementById("modal-full-profile").style.display = "flex";
     }
 
-    function closeFullProfileModal() {
-      document.getElementById("modal-full-profile").style.display = "none";
-    }
+    function closeFullProfileModal() { document.getElementById("modal-full-profile").style.display = "none"; }
   </script>
 </body>
 </html>
