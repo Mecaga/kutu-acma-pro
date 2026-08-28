@@ -37,7 +37,6 @@
     <div id="pvp-game-panel" style="display:none; flex-direction:column; flex:1;">
       <div style="display:grid; gap:4px; margin-bottom:8px;" id="pvp-players-row"></div>
       
-      <!-- Hızlı Emoji Çubuğu -->
       <div style="display:flex; justify-content:center; gap:6px; margin-bottom:6px;">
         <button class="icon-btn" onclick="sendQuickEmoji('🔥')">🔥</button>
         <button class="icon-btn" onclick="sendQuickEmoji('😎')">😎</button>
@@ -49,7 +48,7 @@
       <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; flex:1; align-content:start;" id="pvp-boxes-grid"></div>
     </div>
 
-    <!-- Podyum / Kazanan Paneli (Ortak Tekrar Oyna Butonlu) -->
+    <!-- Podyum / Kazanan Paneli -->
     <div id="pvp-podium-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:2px solid var(--neon-purple); box-shadow:0 0 20px var(--neon-purple-glow);">
       <div style="font-size:15px; font-weight:900; color:var(--neon-gold); text-align:center; margin-bottom:10px;">🏆 MAÇ BİTTİ - SIRALAMA</div>
       <div id="podium-list" style="display:flex; flex-direction:column; gap:6px; flex:1; overflow-y:auto;"></div>
@@ -92,11 +91,12 @@
       if (!u) return;
       const code = `pvp#${Math.floor(1000 + Math.random() * 9000)}`;
       currentRoomCode = code;
+      const chKey = code.replace(/[^a-zA-Z0-9]/g, '_');
 
       const pData = {};
       pData[u.uid] = { uid: u.uid, fullName: `${u.name}${u.tag}`, score: 0, opened: 0, lastDrop: "-", wantsReplay: false };
 
-      db.ref("pvp_rooms/" + code.replace('#', '_')).set({
+      db.ref("pvp_rooms/" + chKey).set({
         code: code,
         capacity: roomCapacity,
         status: "waiting",
@@ -107,25 +107,41 @@
     }
 
     function joinOnlineRoom() {
-      const code = document.getElementById("in-room-code").value.trim();
-      if (!code) return alert("Oda kodu giriniz!");
+      const inputCode = document.getElementById("in-room-code").value.trim();
+      if (!inputCode) return alert("Oda kodu giriniz!");
       const u = getActiveUser();
-      currentRoomCode = code;
 
-      db.ref("pvp_rooms/" + code.replace('#', '_')).transaction(room => {
-        if (room) {
-          if (!room.players) room.players = {};
-          if (Object.keys(room.players).length < room.capacity) {
-            room.players[u.uid] = { uid: u.uid, fullName: `${u.name}${u.tag}`, score: 0, opened: 0, lastDrop: "-", wantsReplay: false };
-            if (Object.keys(room.players).length === room.capacity) {
-              room.status = "starting";
-            }
+      db.ref("pvp_rooms").once("value", snap => {
+        let foundKey = null;
+        let foundRoom = null;
+
+        snap.forEach(c => {
+          if (c.val().code.toLowerCase() === inputCode.toLowerCase()) {
+            foundKey = c.key;
+            foundRoom = c.val();
           }
-        }
-        return room;
-      }, (err, committed) => {
-        if (committed) listenRoom(code);
-        else alert("Oda dolu veya bulunamadı!");
+        });
+
+        if (!foundRoom) return alert("Böyle bir oda bulunamadı!");
+
+        const currentCount = Object.keys(foundRoom.players || {}).length;
+        if (currentCount >= foundRoom.capacity) return alert("Bu oda tamamen dolmuş!");
+
+        currentRoomCode = foundRoom.code;
+
+        db.ref(`pvp_rooms/${foundKey}/players/${u.uid}`).set({
+          uid: u.uid,
+          fullName: `${u.name}${u.tag}`,
+          score: 0,
+          opened: 0,
+          lastDrop: "-",
+          wantsReplay: false
+        }).then(() => {
+          if (currentCount + 1 === foundRoom.capacity) {
+            db.ref(`pvp_rooms/${foundKey}`).update({ status: "starting" });
+          }
+          listenRoom(foundRoom.code);
+        });
       });
     }
 
@@ -135,8 +151,9 @@
       document.getElementById("pvp-room-tag").innerText = code;
 
       const u = getActiveUser();
+      const chKey = code.replace(/[^a-zA-Z0-9]/g, '_');
 
-      db.ref("pvp_rooms/" + code.replace('#', '_')).on("value", snap => {
+      db.ref("pvp_rooms/" + chKey).on("value", snap => {
         const room = snap.val();
         if (!room) return;
 
@@ -164,7 +181,7 @@
         const voteBadge = document.getElementById("replay-vote-count");
         if (voteBadge) voteBadge.innerText = `${replayVotes}/${room.capacity}`;
 
-        // Biri çıkarsa sayacı sıfırla ve tekrar oyna butonunu kilitle
+        // Sadece bir oyuncu gerçekten ayrılmışsa uyar ve tekrar oynamayı kilitle
         if (pList.length < room.capacity) {
           if (startTimeout) clearTimeout(startTimeout);
           document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${pList.length}/${room.capacity})`;
@@ -173,24 +190,23 @@
           document.getElementById("btn-leave-room").disabled = false;
 
           const replayBtn = document.getElementById("btn-replay-pvp");
-          if (replayBtn) {
+          if (replayBtn && room.status === "finished") {
             replayBtn.disabled = true;
             document.getElementById("replay-status-txt").innerText = "⚠️ Bir oyuncu ayrıldı, tekrar oynanamaz!";
           }
         } else if (room.status === "starting") {
           document.getElementById("pvp-status-badge").innerText = "⏳ 5sn Sonra Başlıyor...";
           startTimeout = setTimeout(() => {
-            db.ref("pvp_rooms/" + code.replace('#', '_')).update({ status: "playing" });
+            db.ref("pvp_rooms/" + chKey).update({ status: "playing" });
           }, 5000);
         } else if (room.status === "playing") {
           document.getElementById("pvp-status-badge").innerText = "⚔️ Maç Başladı!";
           document.getElementById("pvp-status-badge").style.color = "var(--neon-green)";
           document.getElementById("btn-leave-room").disabled = true;
           isLocked = false;
-          renderPvPBoxes(room.code);
+          renderPvPBoxes(chKey);
         }
 
-        // Herkes Tekrar Oyna Bastıysa Odayı Sıfırla
         if (replayVotes === room.capacity && room.status === "finished") {
           resetPvPRound();
         }
@@ -198,7 +214,7 @@
         const allDone = pList.length === room.capacity && pList.every(p => p.opened === 5);
         if (allDone && room.status === "playing") {
           document.getElementById("pvp-status-badge").innerText = "🏆 5sn Sonra Kazanan Açıklanıyor!";
-          db.ref("pvp_rooms/" + code.replace('#', '_')).update({ status: "finished" });
+          db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
           setTimeout(() => {
             showPodium(pList);
           }, 5000);
@@ -206,7 +222,7 @@
       });
     }
 
-    function renderPvPBoxes(roomKey) {
+    function renderPvPBoxes(chKey) {
       const grid = document.getElementById("pvp-boxes-grid");
       if (grid.children.length > 0) return;
 
@@ -220,6 +236,7 @@
 
         b.onclick = () => {
           if (isLocked || b.dataset.opened || myOpenedCount >= 5) return;
+
           b.dataset.opened = "1";
           b.style.background = "#070212";
 
@@ -229,7 +246,7 @@
 
           b.innerHTML = `<span style="color:${d.c}; font-size:7px;">${d.name}</span><b style="color:var(--neon-green); font-size:9px;">+${d.p}P</b>`;
 
-          db.ref(`pvp_rooms/${roomKey.replace('#', '_')}/players/${u.uid}`).update({
+          db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).update({
             score: myTotalScore,
             opened: myOpenedCount,
             lastDrop: `+${d.p}P (${d.name})`
@@ -242,7 +259,8 @@
     function sendQuickEmoji(emoji) {
       const u = getActiveUser();
       if (!currentRoomCode) return;
-      db.ref(`pvp_rooms/${currentRoomCode.replace('#', '_')}/players/${u.uid}`).update({
+      const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
+      db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).update({
         lastDrop: `${emoji} ${emoji}`
       });
     }
@@ -272,7 +290,8 @@
 
     function voteReplayPvP() {
       const u = getActiveUser();
-      db.ref(`pvp_rooms/${currentRoomCode.replace('#', '_')}/players/${u.uid}/wantsReplay`).set(true);
+      const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
+      db.ref(`pvp_rooms/${chKey}/players/${u.uid}/wantsReplay`).set(true);
       document.getElementById("btn-replay-pvp").disabled = true;
       document.getElementById("btn-replay-pvp").innerText = "Bekleniyor...";
     }
@@ -281,15 +300,16 @@
       myOpenedCount = 0;
       myTotalScore = 0;
       const u = getActiveUser();
+      const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
 
-      db.ref(`pvp_rooms/${currentRoomCode.replace('#', '_')}/players/${u.uid}`).update({
+      db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).update({
         score: 0,
         opened: 0,
         lastDrop: "-",
         wantsReplay: false
       });
 
-      db.ref(`pvp_rooms/${currentRoomCode.replace('#', '_')}`).update({ status: "starting" });
+      db.ref(`pvp_rooms/${chKey}`).update({ status: "starting" });
 
       document.getElementById("pvp-boxes-grid").innerHTML = "";
       document.getElementById("pvp-podium-panel").style.display = "none";
@@ -301,7 +321,8 @@
     function leavePvPRoom() {
       if (currentRoomCode) {
         const u = getActiveUser();
-        db.ref(`pvp_rooms/${currentRoomCode.replace('#', '_')}/players/${u.uid}`).remove();
+        const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
+        db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).remove();
       }
       window.location.href = "menu.html";
     }
