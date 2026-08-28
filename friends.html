@@ -31,7 +31,25 @@
     <div id="other-users-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
-  <!-- Sayfadan Ayrılmadan Açılan Anlık Özel Sohbet Pop-up'ı -->
+  <!-- Profil Paneli Modalı -->
+  <div id="modal-user-profile" class="modal-overlay">
+    <div class="modal-card panel-theme-profile">
+      <div style="text-align:center;">
+        <div style="font-size:36px;">👤</div>
+        <h3 id="prof-modal-name" style="color:var(--neon-blue);">Oyuncu</h3>
+        <div id="prof-modal-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
+      </div>
+      <div style="background:#050a14; padding:8px; border-radius:6px; font-size:11px; margin-bottom:8px; line-height:1.8;">
+        <div><b>Toplam Oyun:</b> <span id="prof-modal-played">0</span></div>
+        <div><b>Kazanma Oranı:</b> <span id="prof-modal-winrate">%100</span></div>
+      </div>
+      <div style="font-size:10px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Mod Rekorları:</div>
+      <div id="prof-modal-records" style="display:flex; flex-direction:column; gap:3px; max-height:100px; overflow-y:auto; margin-bottom:8px;"></div>
+      <button class="btn-close" onclick="document.getElementById('modal-user-profile').style.display='none'">Kapat</button>
+    </div>
+  </div>
+
+  <!-- Sayfada Pop-up Sohbet Paneli -->
   <div id="modal-popup-chat" class="modal-overlay">
     <div class="modal-card" style="height:80%;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #3b1d6e; padding-bottom:6px; margin-bottom:6px;">
@@ -58,6 +76,7 @@
   <script src="app.js"></script>
   <script>
     let myFriendUIDs = [];
+    let incomingRequests = {};
     let activeChatTargetUID = null;
 
     window.onload = () => {
@@ -68,26 +87,35 @@
       const u = getActiveUser();
       if (!u) return;
 
-      db.ref("friends/" + u.uid).on("value", snap => {
-        const myBox = document.getElementById("my-friends-list");
-        myBox.innerHTML = "";
-        myFriendUIDs = [];
+      // Gelen istekleri dinle
+      db.ref("friend_requests/" + u.uid).on("value", rSnap => {
+        incomingRequests = rSnap.val() || {};
 
-        if (!snap.exists()) {
-          myBox.innerHTML = "<div style='color:#666; font-size:10px; padding:6px;'>Henüz ekli arkadaşınız yok.</div>";
-        } else {
-          snap.forEach(c => {
-            const f = c.val();
-            myFriendUIDs.push(c.key);
-            myBox.innerHTML += `
-              <div class="rank-card">
-                <span style="font-size:11px;">⭐ <b>${f.fullName}</b></span>
-                <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openPopupChat('${c.key}', '${f.fullName}')">💬 Sohbet Et</button>
-              </div>
-            `;
-          });
-        }
-        loadOtherUsers(u);
+        // Arkadaşları dinle
+        db.ref("friends/" + u.uid).on("value", snap => {
+          const myBox = document.getElementById("my-friends-list");
+          myBox.innerHTML = "";
+          myFriendUIDs = [];
+
+          if (!snap.exists()) {
+            myBox.innerHTML = "<div style='color:#666; font-size:10px; padding:6px;'>Henüz ekli arkadaşınız yok.</div>";
+          } else {
+            snap.forEach(c => {
+              const f = c.val();
+              myFriendUIDs.push(c.key);
+              myBox.innerHTML += `
+                <div class="rank-card">
+                  <span style="font-size:11px; cursor:pointer;" onclick="openUserProfile('${c.key}', '${f.fullName}')">⭐ <b>${f.fullName}</b></span>
+                  <div style="display:flex; gap:4px;">
+                    <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openPopupChat('${c.key}', '${f.fullName}')">💬 Sohbet</button>
+                    <button class="icon-btn" style="border-color:var(--danger);" onclick="removeFriendBidirectional('${c.key}', '${f.fullName}', loadFriendsAndUsers)">❌</button>
+                  </div>
+                </div>
+              `;
+            });
+          }
+          loadOtherUsers(u);
+        });
       });
     }
 
@@ -102,12 +130,23 @@
           if (myFriendUIDs.includes(reg.uid)) return;
 
           const isDeleted = reg.fullName && reg.fullName.startsWith("deleteUser");
+          const hasSentMeRequest = !!incomingRequests[reg.uid];
+
+          let actionBtn = "";
+          if (isDeleted) {
+            actionBtn = '<span style="font-size:9px; color:#666;">Silinmiş</span>';
+          } else if (hasSentMeRequest) {
+            // O bana istek atmışsa sarı onay kutusu çıkar
+            actionBtn = `<button class="icon-btn" style="background:var(--neon-gold); color:#000;" onclick="acceptFriendRequestBidirectional('${reg.uid}', '${reg.fullName}', loadFriendsAndUsers)">⚡ Onayla</button>`;
+          } else {
+            actionBtn = `<button class="icon-btn" style="border-color:var(--neon-green);" onclick="requestUser('${reg.uid}', '${reg.fullName}')">➕ İstek</button>`;
+          }
 
           otherBox.innerHTML += `
             <div class="rank-card">
-              <span style="font-size:11px;">👤 ${reg.fullName}</span>
+              <span style="font-size:11px; cursor:pointer;" onclick="openUserProfile('${reg.uid}', '${reg.fullName}')">👤 ${reg.fullName}</span>
               <div style="display:flex; gap:4px;">
-                ${!isDeleted ? `<button class="icon-btn" style="border-color:var(--neon-green);" onclick="requestUser('${reg.uid}', '${reg.fullName}')">➕ İstek</button>` : '<span style="font-size:9px; color:#666;">Silinmiş</span>'}
+                ${actionBtn}
                 <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openPopupChat('${reg.uid}', '${reg.fullName}')">💬</button>
               </div>
             </div>
@@ -137,18 +176,51 @@
       if (targetUID === u.uid) return alert("Kendinize istek atamazsınız!");
       if (targetName.startsWith("deleteUser")) return alert("Silinmiş kullanıcıya istek atılamaz!");
 
+      // Eğer karşı taraf zaten istek atmışsa direkt onayla
+      if (incomingRequests[targetUID]) {
+        return acceptFriendRequestBidirectional(targetUID, targetName, loadFriendsAndUsers);
+      }
+
       db.ref(`friend_requests/${targetUID}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
       alert(`${targetName} kullanıcısına istek gönderildi!`);
     }
 
-    // Anlık Pop-up Sohbet Mantığı
+    function openUserProfile(uid, fullName) {
+      db.ref("users/" + uid).once("value", snap => {
+        const fullUser = snap.val() || {};
+        document.getElementById("prof-modal-name").innerText = fullName;
+        document.getElementById("prof-modal-title").innerText = `[${fullUser.title || 'Çaylak'}]`;
+
+        const stats = fullUser.stats || {};
+        let totalGames = 0, totalWins = 0;
+        const recBox = document.getElementById("prof-modal-records");
+        recBox.innerHTML = "";
+
+        const modLabels = { standard: "Normal", ten_cases: "10 Kutu", catch_open: "Yakala&Aç", upgrade_mode: "Yükselt", mines_mode: "Mayın" };
+        for (let k in modLabels) {
+          const s = stats[k] || { played: 0, wins: 0, best: 0 };
+          totalGames += s.played || 0;
+          totalWins += s.wins || 0;
+          recBox.innerHTML += `
+            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px;">
+              <span>${modLabels[k]}: ${s.played} Oyun</span>
+              <b style="color:var(--neon-green);">${s.best} P</b>
+            </div>
+          `;
+        }
+
+        document.getElementById("prof-modal-played").innerText = totalGames;
+        document.getElementById("prof-modal-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
+        document.getElementById("modal-user-profile").style.display = "flex";
+      });
+    }
+
     function openPopupChat(targetUID, targetName) {
       activeChatTargetUID = targetUID;
       document.getElementById("popup-chat-title").innerText = `💬 ${targetName}`;
       document.getElementById("modal-popup-chat").style.display = "flex";
 
       const u = getActiveUser();
-      // dm_chats altında senkronize oluştur
       const chatID = [u.uid, targetUID].sort().join("_");
       db.ref("friends/" + u.uid + "/" + targetUID).set({ fullName: targetName });
 
@@ -198,8 +270,8 @@
             <div class="rank-card">
               <span style="font-size:11px;">${r.fromName}</span>
               <div style="display:flex; gap:4px;">
-                <button class="icon-btn" style="border-color:var(--neon-green);" onclick="acceptReq('${r.fromUID}', '${r.fromName}')">Kabul</button>
-                <button class="icon-btn" style="border-color:var(--danger);" onclick="rejectReq('${r.fromUID}', '${r.fromName}')">Reddet</button>
+                <button class="icon-btn" style="border-color:var(--neon-green);" onclick="acceptFriendRequestBidirectional('${r.fromUID}', '${r.fromName}', loadFriendsAndUsers)">Kabul</button>
+                <button class="icon-btn" style="border-color:var(--danger);" onclick="rejectReq('${r.fromUID}')">Reddet</button>
               </div>
             </div>
           `;
@@ -208,19 +280,9 @@
       });
     }
 
-    function acceptReq(uid, name) {
-      const u = getActiveUser();
-      db.ref(`friends/${u.uid}/${uid}`).set({ fullName: name });
-      db.ref(`friends/${uid}/${u.uid}`).set({ fullName: `${u.name}${u.tag}` });
-      db.ref(`friend_requests/${u.uid}/${uid}`).remove();
-      alert(`${name} arkadaş olarak eklendi!`);
-      document.getElementById("modal-reqs").style.display = "none";
-    }
-
-    function rejectReq(uid, name) {
+    function rejectReq(uid) {
       const u = getActiveUser();
       db.ref(`friend_requests/${u.uid}/${uid}`).remove();
-      alert(`${name} kullanıcısına gönderdiğiniz istek kabul edilmedi.`);
       document.getElementById("modal-reqs").style.display = "none";
     }
   </script>
