@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mayınlı Kasa</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-mines_mode">
+  <div class="app-container">
+    <div class="top-header">
+      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+      <div style="font-weight:bold; font-size:12px;">Mayınlı Kasa (Risk)</div>
+      <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
+    </div>
+
+    <!-- Oyun Ekranı -->
+    <div id="game-panel" style="display:flex; flex-direction:column; flex:1; justify-content:space-between;">
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--neon-gold); margin-bottom:6px;">
+        <span id="lbl-status">9 Kutuda 1 Mayın Var!</span>
+        <span>Biriken: <b id="lbl-bank">0 P</b></span>
+      </div>
+      <div class="mines-grid-wrapper" id="mines-grid"></div>
+      <div style="display:flex; gap:6px; margin-top:10px;">
+        <a href="menu.html" class="icon-btn" style="flex:1; border-color:var(--danger); justify-content:center;">‹ Geri Dön</a>
+        <button id="btn-cashout" class="btn-start" style="flex:2;" onclick="cashout()">💰 Puanı Al ve Çık</button>
+      </div>
+    </div>
+
+    <!-- Özet Ekranı -->
+    <div id="summary-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:1px solid var(--neon-purple);">
+      <div id="summary-title" style="text-align:center; font-size:14px; font-weight:bold; color:var(--neon-gold); margin-bottom:8px;">OYUN BİTTİ</div>
+      <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
+        <div>Toplam Puan: <b id="sum-score" style="color:var(--neon-green);">0</b></div>
+        <div>Açılan: <b id="sum-count" style="color:var(--neon-blue);">0</b></div>
+      </div>
+      <div id="summary-drops" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+      <div style="display:flex; gap:6px;">
+        <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar Oyna</button>
+        <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Ana Menü</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const TIERS = [
+      { name: 'Güvenli Kasa', rate: 70.0, minP: 15, maxP: 45, c: '#10b981', items: ['Elmas Külçesi', 'Zümrüt Heykel'] },
+      { name: 'Büyük Hazine', rate: 30.0, minP: 60, maxP: 160, c: '#fbbf24', items: ['Kraliyet Tacı', 'Kutsal Kupa'] }
+    ];
+
+    let totalScore = 0;
+    let drops = [];
+    let safeCount = 0;
+
+    window.onload = () => {
+      startMines();
+    };
+
+    function getRandomItem() {
+      let rand = Math.random() * 100, cum = 0;
+      for (let t of TIERS) {
+        cum += t.rate;
+        if (rand <= cum) {
+          let it = t.items[Math.floor(Math.random() * t.items.length)];
+          let pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
+          return { tier: t.name, item: it, pts: pts, c: t.c };
+        }
+      }
+      return { tier: TIERS[0].name, item: TIERS[0].items[0], pts: TIERS[0].minP, c: TIERS[0].c };
+    }
+
+    function startMines() {
+      const grid = document.getElementById("mines-grid");
+      grid.innerHTML = "";
+      totalScore = 0;
+      safeCount = 0;
+      drops = [];
+
+      const bombIdx = Math.floor(Math.random() * 9);
+
+      for (let i = 0; i < 9; i++) {
+        const card = document.createElement("div");
+        card.className = "mine-card";
+        card.innerHTML = `<span style="font-size:24px;">📦</span>`;
+
+        card.onclick = () => {
+          if (card.dataset.opened) return;
+          card.dataset.opened = "1";
+
+          if (i === bombIdx) {
+            card.style.background = "#7f1d1d";
+            card.style.borderColor = "var(--danger)";
+            card.innerHTML = `💣<br><span style="font-size:9px; color:#fca5a5; font-weight:bold;">PATLADIN!</span>`;
+            document.getElementById("btn-cashout").disabled = true;
+            document.getElementById("lbl-status").innerText = "BOMBA PATLADI!";
+            totalScore = 0;
+            drops = [{ tier: "Mayın", item: "Bomba Patladı (Puan Sıfırlandı)", pts: 0, c: "#ef4444" }];
+            setTimeout(() => showSummary("💣 MAYINA BASTIN - 0 PUAN"), 1500);
+          } else {
+            safeCount++;
+            const d = getRandomItem();
+            totalScore += d.pts;
+            drops.push(d);
+
+            card.style.background = "#064e3b";
+            card.style.borderColor = "var(--neon-green)";
+            card.innerHTML = `💎<br><b style="font-size:9px; color:#34d399;">+${d.pts}P</b>`;
+
+            document.getElementById("lbl-bank").innerText = `${totalScore} P`;
+            document.getElementById("score-badge").innerText = `${totalScore} P`;
+            document.getElementById("lbl-status").innerText = `Güvenli: ${safeCount}/8`;
+
+            if (safeCount === 8) {
+              cashout();
+            }
+          }
+        };
+        grid.appendChild(card);
+      }
+    }
+
+    function cashout() {
+      document.getElementById("btn-cashout").disabled = true;
+      showSummary("💰 KASADAN BAŞARIYLA ÇEKİLDİN!");
+    }
+
+    function showSummary(title) {
+      document.getElementById("game-panel").style.display = "none";
+      document.getElementById("summary-panel").style.display = "flex";
+      document.getElementById("summary-title").innerText = title;
+      document.getElementById("sum-score").innerText = totalScore;
+      document.getElementById("sum-count").innerText = drops.length;
+
+      const dBox = document.getElementById("summary-drops");
+      dBox.innerHTML = "";
+      drops.forEach(d => {
+        dBox.innerHTML += `
+          <div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px; border:1px solid #3b1d6e;">
+            <span><b style="color:${d.c};">[${d.tier}]</b> ${d.item}</span>
+            <b style="color:var(--neon-green);">+${d.pts} P</b>
+          </div>
+        `;
+      });
+
+      const u = getActiveUser();
+      if (!u) return;
+      if (!u.stats) u.stats = {};
+      if (!u.stats.mines_mode) u.stats.mines_mode = { played: 0, wins: 0, best: 0 };
+
+      u.stats.mines_mode.played = (u.stats.mines_mode.played || 0) + 1;
+      if (totalScore > 0) u.stats.mines_mode.wins = (u.stats.mines_mode.wins || 0) + 1;
+      if (totalScore > (u.stats.mines_mode.best || 0)) u.stats.mines_mode.best = totalScore;
+      setActiveUser(u);
+
+      const recRef = db.ref(`leaderboards/mines_mode/${u.uid}`);
+      recRef.once("value", snap => {
+        const old = snap.val();
+        if (!old || totalScore > old.score) {
+          recRef.set({
+            uid: u.uid,
+            fullName: `${u.name}${u.tag}`,
+            title: u.title || "Çaylak",
+            modeKey: 'mines_mode',
+            modeName: "Mayınlı Kasa",
+            score: totalScore,
+            date: new Date().toLocaleString("tr-TR"),
+            drops: drops
+          });
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+
