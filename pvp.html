@@ -12,7 +12,7 @@
   <div class="app-container">
     <div class="top-header">
       <button id="btn-leave-room" class="icon-btn" style="border-color:var(--danger);" onclick="leavePvPRoom()">‹ Çıkış</button>
-      <div id="pvp-room-tag" style="font-weight:bold; font-size:12px;">PvP Arenası</div>
+      <div id="pvp-room-tag" style="font-weight:bold; font-size:12px;">⚔️ PvP Arenası</div>
       <div id="pvp-status-badge" style="color:var(--neon-gold); font-weight:bold; font-size:11px;">Oda Seç</div>
     </div>
 
@@ -25,10 +25,10 @@
         <button class="mode-btn" id="btn-p4" style="flex:1; text-align:center;" onclick="setRoomSize(4)">1v1v1v1</button>
       </div>
 
-      <button class="btn-start" style="background:var(--neon-purple);" onclick="createOnlineRoom()">Oda Kur</button>
+      <button class="btn-start" style="background:linear-gradient(90deg, #9333ea, #c084fc);" onclick="createOnlineRoom()">🔥 Oda Kur</button>
 
       <div style="display:flex; gap:4px; margin-top:10px;">
-        <input type="text" id="in-room-code" class="input-field" style="margin:0; font-size:11px;" placeholder="Oda Adı (Örn: arena#1234)">
+        <input type="text" id="in-room-code" class="input-field" style="margin:0; font-size:11px;" placeholder="Oda Adı (Örn: pvp#1234)">
         <button class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="joinOnlineRoom()">Katıl</button>
       </div>
     </div>
@@ -40,25 +40,14 @@
       <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; flex:1; align-content:start;" id="pvp-boxes-grid"></div>
     </div>
 
-    <!-- Podyum / Kazanan Paneli (Kullanıcıya Tıklayınca Profil Açar) -->
-    <div id="pvp-podium-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:1px solid var(--neon-purple);">
-      <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:10px;">🏆 MAÇ BİTTİ - SIRALAMA</div>
+    <!-- Podyum / Kazanan Paneli (Tekrar Oyna Butonlu) -->
+    <div id="pvp-podium-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:2px solid var(--neon-purple); box-shadow:0 0 20px var(--neon-purple-glow);">
+      <div style="font-size:15px; font-weight:900; color:var(--neon-gold); text-align:center; margin-bottom:10px;">🏆 MAÇ BİTTİ - SIRALAMA</div>
       <div id="podium-list" style="display:flex; flex-direction:column; gap:6px; flex:1; overflow-y:auto;"></div>
-      <button class="icon-btn" style="margin-top:10px; width:100%; justify-content:center; padding:10px;" onclick="location.href='menu.html'">Lobiye Dön</button>
-    </div>
-  </div>
-
-  <!-- Profil İnceleme Modalı -->
-  <div id="modal-pvp-profile" class="modal-overlay">
-    <div class="modal-card panel-theme-profile" style="text-align:center;">
-      <div style="font-size:36px;">👤</div>
-      <h3 id="pvp-prof-name" style="color:var(--neon-blue);">Oyuncu</h3>
-      <div id="pvp-prof-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:8px;">[Çaylak]</div>
-      <div style="background:#050a14; padding:8px; border-radius:6px; font-size:11px; text-align:left; line-height:1.8;">
-        <div><b>Oynanan Oyun:</b> <span id="pvp-prof-played">0</span></div>
-        <div><b>Kazanma Oranı:</b> <span id="pvp-prof-winrate">%100</span></div>
+      <div style="display:flex; gap:6px; margin-top:10px;">
+        <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center; padding:10px;" onclick="location.reload()">🔄 Tekrar Oyna</button>
+        <button class="icon-btn" style="flex:1; background:var(--danger); justify-content:center; padding:10px;" onclick="location.href='menu.html'">🚪 Lobiye Dön</button>
       </div>
-      <button class="btn-close" onclick="document.getElementById('modal-pvp-profile').style.display='none'">Geri Dön</button>
     </div>
   </div>
 
@@ -147,7 +136,7 @@
         pList.forEach(p => {
           const isMe = p.fullName === `${u.name}${u.tag}`;
           pRow.innerHTML += `
-            <div style="background:#070212; border:1px solid ${isMe ? 'var(--neon-gold)' : '#3b1d6e'}; border-radius:6px; padding:6px 2px; text-align:center; cursor:pointer;" onclick="inspectPvPPlayer('${p.uid}', '${p.fullName}')">
+            <div style="background:#070212; border:1px solid ${isMe ? 'var(--neon-gold)' : '#3b1d6e'}; border-radius:6px; padding:6px 2px; text-align:center;">
               <div style="font-size:9px; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:${isMe ? 'var(--neon-gold)' : '#fff'};">${p.fullName}</div>
               <div style="font-size:16px; font-weight:bold; color:var(--neon-green); margin:2px 0;">${p.score} P</div>
               <div style="font-size:8px; color:#38bdf8;">${p.lastDrop}</div>
@@ -156,7 +145,6 @@
           `;
         });
 
-        // Biri çıkarsa sayacı anında sıfırla
         if (pList.length < room.capacity) {
           if (startTimeout) clearTimeout(startTimeout);
           document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${pList.length}/${room.capacity})`;
@@ -171,7 +159,7 @@
         } else if (room.status === "playing") {
           document.getElementById("pvp-status-badge").innerText = "⚔️ Maç Başladı!";
           document.getElementById("pvp-status-badge").style.color = "var(--neon-green)";
-          document.getElementById("btn-leave-room").disabled = true; // Maç sırasında çıkılamaz
+          document.getElementById("btn-leave-room").disabled = true;
           isLocked = false;
           renderPvPBoxes(room.code);
         }
@@ -232,21 +220,14 @@
       pList.forEach((p, idx) => {
         const isMe = p.fullName === `${u.name}${u.tag}`;
         podBox.innerHTML += `
-          <div class="rank-card ${idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''))}" style="${isMe ? 'border:2px solid var(--neon-gold); color:var(--neon-gold);' : ''}" onclick="inspectPvPPlayer('${p.uid}', '${p.fullName}')">
+          <div class="rank-card ${idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''))}" style="${isMe ? 'border:2px solid var(--neon-gold); color:var(--neon-gold);' : ''}">
             <span><b>${idx+1}.</b> ${p.fullName} ${isMe ? '(SEN)' : ''}</span>
             <b style="color:var(--neon-green); font-size:13px;">${p.score} P</b>
           </div>
         `;
       });
-    }
 
-    function inspectPvPPlayer(uid, name) {
-      db.ref("users/" + uid).once("value", snap => {
-        const p = snap.val() || {};
-        document.getElementById("pvp-prof-name").innerText = name;
-        document.getElementById("pvp-prof-title").innerText = `[${p.title || 'Çaylak'}]`;
-        document.getElementById("modal-pvp-profile").style.display = "flex";
-      });
+      recordGameScore('pvp_mode', 'Online PvP', myTotalScore, []);
     }
 
     function leavePvPRoom() {
