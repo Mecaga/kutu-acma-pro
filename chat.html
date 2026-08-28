@@ -14,7 +14,9 @@
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
       <div style="font-weight:bold; font-size:12px;" id="lbl-chat-main-title">Sohbetler & Kanallar</div>
       <div style="display:flex; gap:4px;">
-        <button class="icon-btn" style="border-color:var(--neon-gold);" onclick="openInvitesModal()">📩 Davetler</button>
+        <button class="icon-btn" id="btn-open-invites" style="border-color:var(--neon-gold); position:relative;" onclick="openInvitesModal()">
+          📩 Davetler <span id="invite-badge" style="display:none; width:8px; height:8px; background:var(--danger); border-radius:50%; position:absolute; top:2px; right:2px;"></span>
+        </button>
         <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openJoinChannelModal()">Katıl</button>
         <button class="icon-btn" style="border-color:var(--neon-purple);" onclick="openCreateChannelModal()">+ Kanal Kur</button>
       </div>
@@ -51,7 +53,7 @@
       <div id="active-chat-messages" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:6px; background:#070212; border-radius:8px; margin-bottom:6px;"></div>
 
       <div style="display:flex; gap:4px;">
-        <input type="text" id="in-msg-text" class="input-field" style="margin:0; font-size:11px; flex:1;" placeholder="Mesaj yazın...">
+        <input type="text" id="in-msg-text" class="input-field" style="margin:0; font-size:11px; flex:1;" placeholder="Mesaj yaz veya /zar at...">
         <button class="icon-btn" style="background:var(--neon-green); border-radius:50%; width:34px; height:34px; justify-content:center;" onclick="sendMessage()">➤</button>
       </div>
     </div>
@@ -86,6 +88,12 @@
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">⚙️ Kanal Ayarları</div>
       
+      <!-- Kanal Türü Değiştirme (Açık <-> Özel) -->
+      <div id="sec-admin-toggle-type" style="margin-bottom:8px;">
+        <div style="font-size:10px; color:#94a3b8; margin-bottom:2px;">Kanal Gizliliği:</div>
+        <button id="btn-toggle-channel-privacy" class="mode-btn" style="text-align:center; color:#fff; font-weight:bold;" onclick="toggleChannelPrivacy()">Kanal Türünü Değiştir</button>
+      </div>
+
       <!-- İsim Değiştir (Sadece Yönetici) -->
       <div id="sec-admin-rename" style="margin-bottom:8px;">
         <div style="font-size:10px; color:#94a3b8;">Kanal İsmini Değiştir:</div>
@@ -95,20 +103,17 @@
         </div>
       </div>
 
-      <!-- SADECE ÖZEL KANALDA GÖRÜNEN YÖNETİM BLOKLARI -->
+      <!-- SADECE ÖZEL KANALDA GÖRÜNEN YÖNETİM ALANI -->
       <div id="sec-private-management" style="display:none;">
-        <!-- Davet Et -->
         <div style="font-size:10px; color:#94a3b8; margin-bottom:2px;">Kullanıcı Davet Et (KullanıcıAdı#12345):</div>
         <div style="display:flex; gap:4px; margin-bottom:8px;">
           <input type="text" id="in-ch-invite-tag" class="input-field" style="margin:0; font-size:11px;" placeholder="Etiket...">
           <button class="icon-btn" style="background:var(--neon-purple);" onclick="inviteUserToChannel()">Davet Et</button>
         </div>
 
-        <!-- Kanal Üyeleri & Yönetici Devretme / Atma -->
         <div style="font-size:10px; font-weight:bold; color:var(--neon-blue); margin-bottom:4px;">👥 Kanal Üyeleri:</div>
         <div id="ch-members-list" style="max-height:100px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
 
-        <!-- Davet Durumu / Logları -->
         <div style="font-size:10px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📋 Davet Durumu:</div>
         <div id="ch-invites-log" style="max-height:80px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
       </div>
@@ -137,7 +142,21 @@
     window.onload = () => {
       loadChannels();
       loadDMConversations();
+      listenIncomingInvitesBadge();
     };
+
+    function listenIncomingInvitesBadge() {
+      const u = getActiveUser();
+      if (!u) return;
+      db.ref("channel_invites/" + u.uid).on("value", snap => {
+        const badge = document.getElementById("invite-badge");
+        if (snap.exists()) {
+          badge.style.display = "block";
+        } else {
+          badge.style.display = "none";
+        }
+      });
+    }
 
     function loadChannels() {
       const u = getActiveUser();
@@ -202,9 +221,8 @@
       if (roomType === 'channel') {
         db.ref("channels/" + chKey).on("value", snap => {
           activeChannelData = snap.val();
-          // Kanal silinmişse kullanıcıyı hemen ana panele fırlat
           if (!activeChannelData) {
-            alert("Bu kanal silindi veya kapatıldı.");
+            alert("Bu kanal silindi.");
             return closeChatRoom();
           }
 
@@ -251,12 +269,20 @@
 
     function sendMessage() {
       const inp = document.getElementById("in-msg-text");
-      if (!inp.value.trim() || !currentChatPath) return;
+      let text = inp.value.trim();
+      if (!text || !currentChatPath) return;
       const u = getActiveUser();
+
+      // Mini Oyun: /zar komutu
+      if (text === "/zar") {
+        const roll = Math.floor(Math.random() * 100) + 1;
+        text = `🎲 Şans Zarı Attı: [ ${roll} / 100 ]`;
+      }
+
       db.ref(currentChatPath).push({
         uid: u.uid,
         sender: `${u.name}${u.tag}`,
-        text: inp.value.trim()
+        text: text
       });
       inp.value = "";
     }
@@ -277,6 +303,7 @@
       document.getElementById("btn-type-open").style.background = t === "Açık" ? "var(--btn-blue)" : "#13072b";
       document.getElementById("btn-type-priv").style.background = t === "Özel" ? "var(--btn-blue)" : "#13072b";
     }
+
     function confirmCreateChannel() {
       const name = document.getElementById("in-channel-name").value.trim();
       if (!name) return alert("Kanal adı giriniz!");
@@ -331,9 +358,14 @@
       const isPrivate = activeChannelData.type === "Özel";
 
       document.getElementById("sec-admin-rename").style.display = isOwner ? "block" : "none";
+      document.getElementById("sec-admin-toggle-type").style.display = isOwner ? "block" : "none";
       document.getElementById("btn-delete-channel").style.display = isOwner ? "block" : "none";
 
-      // SADECE ÖZEL KANALDA DAVET VE ÜYE ATMA BLOKLARI AÇILIR
+      const toggleBtn = document.getElementById("btn-toggle-channel-privacy");
+      toggleBtn.innerText = isPrivate ? "🔓 Kanalı Herkese Açık Yap" : "🔒 Kanalı Özel Yap";
+      toggleBtn.style.background = isPrivate ? "var(--neon-green)" : "var(--danger)";
+
+      // Yalnızca Özel Kanal İse Davet/Atma Panelini Göster
       const privSec = document.getElementById("sec-private-management");
       if (isPrivate) {
         privSec.style.display = "block";
@@ -370,6 +402,16 @@
       document.getElementById("modal-channel-settings").style.display = "flex";
     }
 
+    function toggleChannelPrivacy() {
+      const nextType = activeChannelData.type === "Özel" ? "Açık" : "Özel";
+      if (confirm(`Kanal gizliliğini '${nextType}' olarak değiştirmek istiyor musunuz?`)) {
+        db.ref(`channels/${activeChannelID}/type`).set(nextType).then(() => {
+          alert(`Kanal türü ${nextType} yapıldı!`);
+          document.getElementById("modal-channel-settings").style.display = "none";
+        });
+      }
+    }
+
     function renameChannel() {
       const newN = document.getElementById("in-ch-new-name").value.trim();
       if (!newN) return;
@@ -377,10 +419,11 @@
       alert("Kanal ismi güncellendi!");
     }
 
+    // Karşı Tarafa Garantili Davet Gönderme
     function inviteUserToChannel() {
       const tag = document.getElementById("in-ch-invite-tag").value.trim();
       const u = getActiveUser();
-      if (!tag) return;
+      if (!tag) return alert("Etiket giriniz!");
 
       db.ref("users").orderByChild("fullName").equalTo(tag).once("value", snap => {
         if (!snap.exists()) return alert("Kullanıcı bulunamadı!");
@@ -396,7 +439,7 @@
             invited: tag,
             date: new Date().toLocaleTimeString("tr-TR")
           });
-          alert(`${tag} kullanıcısına davet gönderildi!`);
+          alert(`${tag} kullanıcısına davet başarıyla gönderildi!`);
         });
       });
       document.getElementById("in-ch-invite-tag").value = "";
