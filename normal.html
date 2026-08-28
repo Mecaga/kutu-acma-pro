@@ -150,36 +150,7 @@
         `;
       });
 
-      saveGameRecord('standard', totalScore, drops);
-    }
-
-    function saveGameRecord(mode, score, dropsList) {
-      const u = getActiveUser();
-      if (!u) return;
-      if (!u.stats) u.stats = {};
-      if (!u.stats[mode]) u.stats[mode] = { played: 0, wins: 0, best: 0 };
-
-      u.stats[mode].played = (u.stats[mode].played || 0) + 1;
-      if (score > 0) u.stats[mode].wins = (u.stats[mode].wins || 0) + 1;
-      if (score > (u.stats[mode].best || 0)) u.stats[mode].best = score;
-      setActiveUser(u);
-
-      const recRef = db.ref(`leaderboards/${mode}/${u.uid}`);
-      recRef.once("value", snap => {
-        const old = snap.val();
-        if (!old || score > old.score) {
-          recRef.set({
-            uid: u.uid,
-            fullName: `${u.name}${u.tag}`,
-            title: u.title || "Çaylak",
-            modeKey: mode,
-            modeName: "Normal Kasa",
-            score: score,
-            date: new Date().toLocaleString("tr-TR"),
-            drops: dropsList
-          });
-        }
-      });
+      recordGameScore('standard', 'Normal Kasa', totalScore, drops);
     }
   </script>
 </body>
