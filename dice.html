@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zar & Kasa Modu</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-dice_mode">
+  <div class="app-container" style="justify-content:space-between;">
+    <div>
+      <div class="top-header">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+        <div style="font-weight:bold; font-size:12px;">🎲 Zar & Kasa (3 Hak)</div>
+        <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
+      </div>
+      <div class="game-stats-top" style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <div class="stat-card timer" style="border:1px solid #ef4444; background:#0d1527; padding:4px 8px; border-radius:8px;">
+          <div style="font-size:9px; color:#94a3b8;">KALAN HAK</div>
+          <div style="font-size:14px; font-weight:bold; color:#f87171;" id="lbl-dice-hak">3 Hak</div>
+          <div style="font-size:10px; color:#38bdf8;" id="lbl-user-tag">@User</div>
+        </div>
+        <div class="stat-card score" style="border:1px solid #10b981; background:#0d1527; padding:4px 8px; border-radius:8px; text-align:right;">
+          <div style="font-size:9px; color:#94a3b8;">ZAR ÇARPANI</div>
+          <div style="font-size:14px; font-weight:bold; color:#fbbf24;" id="lbl-multiplier">x1</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zar ve Rulet Alanı -->
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#060b17; border-radius:12px; border:1px solid #1e293b; margin:6px 0; position:relative; overflow:hidden;">
+      <div id="dice-stage" style="text-align:center;">
+        <div style="font-size:40px; margin-bottom:6px;" id="dice-anim">🎲 🎲</div>
+        <button id="btn-roll-dice" class="icon-btn" style="background:var(--neon-purple); padding:8px 16px; font-size:13px;" onclick="rollDice()">ZARLARI AT</button>
+      </div>
+
+      <div id="roulette-view" class="roulette-container" style="display:none; width:100%;">
+        <div class="roulette-needle"></div>
+        <div id="roulette-track" class="roulette-track"></div>
+      </div>
+    </div>
+
+    <button id="btn-open-dice-case" class="btn-start" style="background:#4338ca;" disabled onclick="spinDiceCase()">KASAYI AÇ</button>
+
+    <div id="summary-overlay" class="modal-overlay">
+      <div class="modal-card" style="background:#0b1329;">
+        <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">ZAR & KASA BİTTİ</div>
+        <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
+          <div>Toplam: <b id="sum-score" style="color:var(--neon-green);">0 P</b></div>
+          <div>Açılan: <b style="color:var(--neon-blue);">3</b></div>
+        </div>
+        <div id="summary-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+        <div style="display:flex; gap:6px;">
+          <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar</button>
+          <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Lobi</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let remHak = 3, currentMult = 1, totalScore = 0, drops = [];
+
+    window.onload = () => {
+      const u = getActiveUser();
+      document.getElementById("lbl-user-tag").innerText = u ? `@${u.name}${u.tag}` : "@Misafir";
+    };
+
+    function rollDice() {
+      document.getElementById("btn-roll-dice").disabled = true;
+      const d1 = Math.floor(Math.random() * 6) + 1;
+      const d2 = Math.floor(Math.random() * 6) + 1;
+      const sum = d1 + d2;
+
+      currentMult = sum >= 10 ? 5 : (sum >= 7 ? 3 : (sum >= 4 ? 2 : 1));
+      document.getElementById("dice-anim").innerText = `🎲 ${d1} + ${d2} = ${sum}`;
+      document.getElementById("lbl-multiplier").innerText = `x${currentMult}`;
+      document.getElementById("btn-open-dice-case").disabled = false;
+      document.getElementById("btn-open-dice-case").innerText = `KASAYI AÇ (x${currentMult} Çarpanlı)`;
+    }
+
+    function spinDiceCase() {
+      document.getElementById("btn-open-dice-case").disabled = true;
+      document.getElementById("dice-stage").style.display = "none";
+      const rView = document.getElementById("roulette-view");
+      const track = document.getElementById("roulette-track");
+      rView.style.display = "flex";
+      track.style.transition = "none";
+      track.style.transform = "translateX(0px)";
+      track.innerHTML = "";
+
+      const winIdx = 20;
+      let baseDrop = { name: "Zar Kılıcı", pts: Math.floor(Math.random()*100)+30, c: "#38bdf8" };
+
+      for(let i=0; i<25; i++) {
+        track.innerHTML += `<div class="roulette-item" style="border-bottom:3px solid #38bdf8;"><span>🎲 Kasa</span><span style="color:var(--neon-green);">+${Math.floor(Math.random()*100)+30}P</span></div>`;
+      }
+
+      setTimeout(() => {
+        track.style.transition = "transform 2.5s cubic-bezier(0.12, 0.8, 0.2, 1)";
+        track.style.transform = `translateX(${-(winIdx * 80) + (rView.offsetWidth / 2) - 40}px)`;
+      }, 20);
+
+      setTimeout(() => {
+        const finalPts = baseDrop.pts * currentMult;
+        totalScore += finalPts;
+        drops.push({ tier: `Zar (x${currentMult})`, item: baseDrop.name, pts: finalPts, c: "#fbbf24" });
+        document.getElementById("score-badge").innerText = `${totalScore} P`;
+
+        remHak--;
+        document.getElementById("lbl-dice-hak").innerText = `${remHak} Hak`;
+
+        if (remHak <= 0) {
+          triggerSummary();
+        } else {
+          document.getElementById("dice-stage").style.display = "block";
+          rView.style.display = "none";
+          document.getElementById("btn-roll-dice").disabled = false;
+          document.getElementById("dice-anim").innerText = "🎲 🎲";
+          document.getElementById("lbl-multiplier").innerText = "x1";
+        }
+      }, 2700);
+    }
+
+    function triggerSummary() {
+      document.getElementById("sum-score").innerText = `${totalScore} P`;
+      const dBox = document.getElementById("summary-drops-list");
+      dBox.innerHTML = "";
+      drops.forEach(d => {
+        dBox.innerHTML += `<div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px;"><span>[${d.tier}] ${d.item}</span><b style="color:var(--neon-green);">+${d.pts}P</b></div>`;
+      });
+      document.getElementById("summary-overlay").style.display = "flex";
+      recordGameScore('dice_mode', 'Zar & Kasa Modu', totalScore, drops, totalScore > 0);
+    }
+  </script>
+</body>
+</html>
