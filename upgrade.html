@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Şans Yükseltme</title>
+  <title>Şans Yükseltme Modu</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -16,20 +16,50 @@
       <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
     </div>
 
-    <div id="game-panel" style="display:flex; flex-direction:column; flex:1; justify-content:space-between;">
-      <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-        <div class="roulette-container" id="roulette-box">
-          <div class="roulette-needle"></div>
-          <div class="roulette-track" id="roulette-track"></div>
-        </div>
-        <div id="status-text" style="text-align:center; font-size:12px; font-weight:bold; color:var(--neon-blue); margin:8px 0;">
-          Kasayı açmak için butona bas!
-        </div>
-        <div id="rem-text" style="text-align:center; font-size:11px; color:#94a3b8;">Kalan: 7 (Kademe 1)</div>
+    <!-- Ortak Stat Bar -->
+    <div class="game-stats-top" style="margin-bottom:6px;">
+      <div class="stat-card timer">
+        <div class="stat-title">KALAN HAK</div>
+        <div class="stat-val timer-val" id="rem-boxes-txt">7 Kutu</div>
+        <div class="user-tag" id="upgrade-tier-txt">Kademe 1 (Şans x1)</div>
       </div>
-      <button id="btn-spin" class="btn-start" onclick="spinCase()">KASAYI AÇ (3s)</button>
+      <div class="stat-card score">
+        <div class="stat-title">PUAN</div>
+        <div class="stat-val score-val" id="stat-score-txt">0</div>
+      </div>
     </div>
 
+    <!-- Oranlar Tablosu -->
+    <div class="rates-box" id="rates-box">
+      <div class="rate-row" style="color:#ffffff;"><span>Kademe 1 (%60)</span><span>5-15 P</span></div>
+      <div class="rate-row" style="color:#38bdf8;"><span>Kademe 2 (%25)</span><span>20-60 P</span></div>
+      <div class="rate-row" style="color:#c084fc;"><span>Kademe 3 (%10)</span><span>70-180 P</span></div>
+      <div class="rate-row" style="color:#f43f5e;"><span>Kozmik Güç (%5)</span><span>250-800 P</span></div>
+    </div>
+
+    <!-- Kasa Alanı & CS Ruleti -->
+    <div id="game-panel" style="display:flex; flex-direction:column; flex:1; justify-content:space-between;">
+      <div class="case-container">
+        <div id="ready-view">
+          <div class="ready-banner">HAZIR!</div>
+          <div class="ready-sub">Şans Yükseltme Modu</div>
+        </div>
+        <div id="roulette-view" class="roulette-wrapper">
+          <div class="roulette-needle"></div>
+          <div id="roulette-track" class="roulette-track"></div>
+        </div>
+      </div>
+
+      <div class="drop-info-panel">
+        <div class="drop-result-badge" id="drop-result-txt">
+          Son Düşen: <span style="color:#64748b;">-</span>
+        </div>
+      </div>
+
+      <button id="btn-spin" class="btn-action" onclick="spinUpgradeCase()">KASAYI AÇ (3s)</button>
+    </div>
+
+    <!-- Özet Ekranı -->
     <div id="summary-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:1px solid var(--neon-purple);">
       <div style="text-align:center; font-size:14px; font-weight:bold; color:var(--neon-gold); margin-bottom:8px;">TÜM KUTULAR AÇILDI</div>
       <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
@@ -56,11 +86,12 @@
     let totalScore = 0;
     let drops = [];
     let remCount = 7;
-    let upgradeLvl = 1;
+    let upgradeStep = 1;
     let isSpinning = false;
 
     function getRandomItem() {
-      let rand = Math.max(0, (Math.random() * 100) - ((upgradeLvl - 1) * 8));
+      const bonusChance = (upgradeStep - 1) * 6;
+      let rand = Math.max(0, (Math.random() * 100) - bonusChance);
       let cum = 0;
       for (let t of TIERS) {
         cum += t.rate;
@@ -73,16 +104,21 @@
       return { tier: TIERS[0].name, item: TIERS[0].items[0], pts: TIERS[0].minP, c: TIERS[0].c };
     }
 
-    function spinCase() {
+    function spinUpgradeCase() {
       if (isSpinning || remCount <= 0) return;
       isSpinning = true;
       remCount--;
-      upgradeLvl++;
-      document.getElementById("rem-text").innerText = `Kalan: ${remCount} (Kademe ${upgradeLvl})`;
+      upgradeStep++;
+
+      document.getElementById("rem-boxes-txt").innerText = `${remCount} Kutu`;
+      document.getElementById("upgrade-tier-txt").innerText = `Kademe ${upgradeStep} (Şans x${upgradeStep})`;
       document.getElementById("btn-spin").disabled = true;
 
+      document.getElementById("ready-view").style.display = "none";
+      const rouletteView = document.getElementById("roulette-view");
       const track = document.getElementById("roulette-track");
-      const box = document.getElementById("roulette-box");
+      rouletteView.style.display = "block";
+
       track.style.transition = "none";
       track.style.transform = "translateX(0px)";
       track.innerHTML = "";
@@ -105,7 +141,7 @@
       setTimeout(() => {
         track.style.transition = "transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)";
         const itemWidth = 80;
-        const targetX = -(winIdx * itemWidth) + (box.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 20 - 10);
+        const targetX = -(winIdx * itemWidth) + (rouletteView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 20 - 10);
         track.style.transform = `translateX(${targetX}px)`;
       }, 20);
 
@@ -113,11 +149,16 @@
         totalScore += winDrop.pts;
         drops.push(winDrop);
         document.getElementById("score-badge").innerText = `${totalScore} P`;
-        document.getElementById("status-text").innerHTML = `🎉 <span style="color:${winDrop.c};">${winDrop.tier}</span> - ${winDrop.item} (+${winDrop.pts}P)`;
+        document.getElementById("stat-score-txt").innerText = totalScore;
+        document.getElementById("drop-result-txt").innerHTML = `
+          <span style="color:${winDrop.c}; font-weight:bold;">${winDrop.tier}</span> - 
+          <span>${winDrop.item}</span> - 
+          <span style="color:#34d399; font-weight:bold;">+${winDrop.pts} P</span>
+        `;
 
         isSpinning = false;
         if (remCount <= 0) {
-          showSummary();
+          setTimeout(showSummary, 1500);
         } else {
           document.getElementById("btn-spin").disabled = false;
         }
@@ -140,32 +181,7 @@
         `;
       });
 
-      const u = getActiveUser();
-      if (!u) return;
-      if (!u.stats) u.stats = {};
-      if (!u.stats.upgrade_mode) u.stats.upgrade_mode = { played: 0, wins: 0, best: 0 };
-
-      u.stats.upgrade_mode.played = (u.stats.upgrade_mode.played || 0) + 1;
-      if (totalScore > 0) u.stats.upgrade_mode.wins = (u.stats.upgrade_mode.wins || 0) + 1;
-      if (totalScore > (u.stats.upgrade_mode.best || 0)) u.stats.upgrade_mode.best = totalScore;
-      setActiveUser(u);
-
-      const recRef = db.ref(`leaderboards/upgrade_mode/${u.uid}`);
-      recRef.once("value", snap => {
-        const old = snap.val();
-        if (!old || totalScore > old.score) {
-          recRef.set({
-            uid: u.uid,
-            fullName: `${u.name}${u.tag}`,
-            title: u.title || "Çaylak",
-            modeKey: 'upgrade_mode',
-            modeName: "Şans Yükseltme Modu",
-            score: totalScore,
-            date: new Date().toLocaleString("tr-TR"),
-            drops: drops
-          });
-        }
-      });
+      recordGameScore('upgrade_mode', 'Şans Yükseltme Modu', totalScore, drops);
     }
   </script>
 </body>
