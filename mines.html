@@ -11,26 +11,34 @@
 <body class="bg-mines_mode">
   <div class="app-container" style="justify-content:space-between;">
     
-    <!-- Üst Stat Bar -->
-    <div class="game-stats-top" style="display:flex; justify-content:space-between; margin-bottom:6px;">
-      <div class="stat-card timer" style="border:1px solid #ef4444; background:#0d1527; padding:5px 10px; border-radius:8px;">
-        <div style="font-size:9px; color:#94a3b8;">DURUM</div>
-        <div style="font-size:15px; font-weight:bold; color:#f87171;" id="lbl-status">9 Kutuda 1 Mayın!</div>
-        <div style="font-size:10px; color:#38bdf8;" id="lbl-user-tag">@User</div>
+    <!-- Üst Stat Bar ve Tıklanabilir Çıkış Butonu -->
+    <div>
+      <div class="top-header">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+        <div style="font-weight:bold; font-size:12px;">Mayınlı Kasa Modu</div>
+        <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
       </div>
-      <div class="stat-card score" style="border:1px solid #10b981; background:#0d1527; padding:5px 10px; border-radius:8px; text-align:right;">
-        <div style="font-size:9px; color:#94a3b8;">BİRİKEN PUAN</div>
-        <div style="font-size:15px; font-weight:bold; color:#34d399;" id="lbl-score">0</div>
+
+      <div class="game-stats-top" style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <div class="stat-card timer" style="border:1px solid #ef4444; background:#0d1527; padding:4px 8px; border-radius:8px;">
+          <div style="font-size:9px; color:#94a3b8;">DURUM</div>
+          <div style="font-size:14px; font-weight:bold; color:#f87171;" id="lbl-status">9 Kutuda 1 Mayın!</div>
+          <div style="font-size:10px; color:#38bdf8;" id="lbl-user-tag">@User</div>
+        </div>
+        <div class="stat-card score" style="border:1px solid #10b981; background:#0d1527; padding:4px 8px; border-radius:8px; text-align:right;">
+          <div style="font-size:9px; color:#94a3b8;">BİRİKEN PUAN</div>
+          <div style="font-size:14px; font-weight:bold; color:#34d399;" id="lbl-bank">0</div>
+        </div>
       </div>
     </div>
 
     <!-- 3x3 Mayın Izgara Alanı -->
-    <div id="mines-container" style="flex:1; display:flex; justify-content:center; align-items:center; background:#060b17; border-radius:12px; border:1px solid #1e293b; margin:8px 0; padding:10px;">
+    <div style="flex:1; display:flex; justify-content:center; align-items:center; background:#060b17; border-radius:12px; border:1px solid #1e293b; margin:6px 0; padding:6px;">
       <div class="mines-grid-wrapper" id="mines-grid"></div>
     </div>
 
-    <!-- Alt Buton: Puanı Al ve Çık -->
-    <button id="btn-cashout" class="btn-start" style="background:#10b981; width:100%; padding:14px; font-weight:bold; border-radius:8px; font-size:15px;" onclick="cashout()">💰 Puanı Al ve Çık</button>
+    <!-- Puanı Al ve Çık Butonu -->
+    <button id="btn-cashout" class="btn-start" onclick="cashout()">💰 Puanı Al ve Çık</button>
 
     <!-- Özet Ekranı -->
     <div id="summary-overlay" class="modal-overlay">
@@ -40,7 +48,7 @@
           <div>Kazanılan: <b id="sum-score" style="color:var(--neon-green);">0 P</b></div>
           <div>Açılan: <b id="sum-count" style="color:var(--neon-blue);">0</b></div>
         </div>
-        <div id="summary-drops-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+        <div id="summary-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
         <div style="display:flex; gap:6px;">
           <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar Oyna</button>
           <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Ana Menü</a>
@@ -53,8 +61,8 @@
   <script src="app.js"></script>
   <script>
     const TIERS = [
-      { name: 'Güvenli Kasa', rate: 70.0, minP: 15, maxP: 45, c: '#10b981', items: ['Elmas Külçesi', 'Zümrüt Heykel'] },
-      { name: 'Büyük Hazine', rate: 30.0, minP: 60, maxP: 160, c: '#fbbf24', items: ['Kraliyet Tacı', 'Kutsal Kupa'] }
+      { name: 'Güvenli Kasa', minP: 15, maxP: 45, c: '#10b981', items: ['Elmas Külçesi', 'Zümrüt Heykel'] },
+      { name: 'Büyük Hazine', minP: 60, maxP: 160, c: '#fbbf24', items: ['Kraliyet Tacı', 'Kutsal Kupa'] }
     ];
 
     let totalScore = 0;
@@ -66,19 +74,6 @@
       document.getElementById("lbl-user-tag").innerText = u ? `@${u.name}${u.tag}` : "@Misafir";
       startMines();
     };
-
-    function getRandomItem() {
-      let rand = Math.random() * 100, cum = 0;
-      for (let t of TIERS) {
-        cum += t.rate;
-        if (rand <= cum) {
-          let it = t.items[Math.floor(Math.random() * t.items.length)];
-          let pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
-          return { tier: t.name, item: it, pts: pts, c: t.c };
-        }
-      }
-      return { tier: TIERS[0].name, item: TIERS[0].items[0], pts: TIERS[0].minP, c: TIERS[0].c };
-    }
 
     function startMines() {
       const grid = document.getElementById("mines-grid");
@@ -101,28 +96,31 @@
           if (i === bombIdx) {
             card.style.background = "#7f1d1d";
             card.style.borderColor = "var(--danger)";
-            card.innerHTML = `💣<br><span style="font-size:9px; color:#fca5a5; font-weight:bold;">PATLADIN!</span>`;
+            card.innerHTML = `💣<br><span style="font-size:8.5px; color:#fca5a5; font-weight:bold;">PATLADIN!</span>`;
             document.getElementById("btn-cashout").disabled = true;
             document.getElementById("lbl-status").innerText = "BOMBA PATLADI!";
             totalScore = 0;
             drops = [{ tier: "Mayın", item: "Bomba Patladı (Puan Sıfırlandı)", pts: 0, c: "#ef4444" }];
-            setTimeout(() => triggerSummary("💣 MAYINA BASTIN - 0 PUAN"), 1200);
+            setTimeout(() => triggerSummary("💣 MAYINA BASTIN (KAYBETTİN)", false), 1200);
           } else {
             safeCount++;
-            const d = getRandomItem();
-            totalScore += d.pts;
-            drops.push(d);
+            const t = Math.random() > 0.3 ? TIERS[0] : TIERS[1];
+            const it = t.items[Math.floor(Math.random() * t.items.length)];
+            const pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
+            const drop = { tier: t.name, item: it, pts: pts, c: t.c };
+
+            totalScore += pts;
+            drops.push(drop);
 
             card.style.background = "#064e3b";
             card.style.borderColor = "var(--neon-green)";
-            card.innerHTML = `💎<br><b style="font-size:9px; color:#34d399;">+${d.pts}P</b>`;
+            card.innerHTML = `💎<br><b style="font-size:9px; color:#34d399;">+${pts}P</b>`;
 
-            document.getElementById("lbl-score").innerText = totalScore;
+            document.getElementById("lbl-bank").innerText = `${totalScore} P`;
+            document.getElementById("score-badge").innerText = `${totalScore} P`;
             document.getElementById("lbl-status").innerText = `Güvenli: ${safeCount}/8`;
 
-            if (safeCount === 8) {
-              cashout();
-            }
+            if (safeCount === 8) cashout();
           }
         };
         grid.appendChild(card);
@@ -131,10 +129,10 @@
 
     function cashout() {
       document.getElementById("btn-cashout").disabled = true;
-      triggerSummary("💰 KASADAN BAŞARIYLA ÇEKİLDİN!");
+      triggerSummary("💰 KASADAN BAŞARIYLA ÇEKİLDİN!", true);
     }
 
-    function triggerSummary(title) {
+    function triggerSummary(title, isWin) {
       document.getElementById("summary-title").innerText = title;
       document.getElementById("sum-score").innerText = `${totalScore} P`;
       document.getElementById("sum-count").innerText = drops.length;
@@ -151,7 +149,7 @@
       });
 
       document.getElementById("summary-overlay").style.display = "flex";
-      recordGameScore('mines_mode', 'Mayınlı Kasa', totalScore, drops);
+      recordGameScore('mines_mode', 'Mayınlı Kasa', totalScore, drops, isWin);
     }
   </script>
 </body>
