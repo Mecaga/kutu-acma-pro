@@ -12,7 +12,7 @@
   <div class="app-container">
     <div class="top-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
-      <div style="font-weight:bold; font-size:12px;">10 Kutu Modu</div>
+      <div style="font-weight:bold; font-size:12px;">10 Kutu Modu (Süresiz)</div>
       <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
     </div>
 
@@ -138,32 +138,7 @@
         `;
       });
 
-      const u = getActiveUser();
-      if (!u) return;
-      if (!u.stats) u.stats = {};
-      if (!u.stats.ten_cases) u.stats.ten_cases = { played: 0, wins: 0, best: 0 };
-
-      u.stats.ten_cases.played = (u.stats.ten_cases.played || 0) + 1;
-      if (totalScore > 0) u.stats.ten_cases.wins = (u.stats.ten_cases.wins || 0) + 1;
-      if (totalScore > (u.stats.ten_cases.best || 0)) u.stats.ten_cases.best = totalScore;
-      setActiveUser(u);
-
-      const recRef = db.ref(`leaderboards/ten_cases/${u.uid}`);
-      recRef.once("value", snap => {
-        const old = snap.val();
-        if (!old || totalScore > old.score) {
-          recRef.set({
-            uid: u.uid,
-            fullName: `${u.name}${u.tag}`,
-            title: u.title || "Çaylak",
-            modeKey: 'ten_cases',
-            modeName: "10 Kutu Modu",
-            score: totalScore,
-            date: new Date().toLocaleString("tr-TR"),
-            drops: drops
-          });
-        }
-      });
+      recordGameScore('ten_cases', '10 Kutu Modu', totalScore, drops);
     }
   </script>
 </body>
