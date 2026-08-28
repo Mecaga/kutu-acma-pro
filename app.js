@@ -6,7 +6,6 @@ const firebaseConfig = {
   messagingSenderId: "483395048462",
   appId: "1:483395048462:web:450f18178e682a4a2f985f"
 };
-
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
@@ -40,40 +39,46 @@ function syncUserFromDB(uid, callback) {
   });
 }
 
-// Kesin Skor Kaydı: undefined P ve Karışık Mod Sorunu Çözüldü
-function recordGameScore(modeKey, modeName, score, dropsList) {
+// Kazanma / Kaybetme ve Skor Kaydı
+function recordGameScore(modeKey, modeName, score, dropsList, isWin = true) {
   const u = getActiveUser();
-  if (!u || score === undefined || score === null || score <= 0) return;
+  if (!u) return;
 
   if (!u.stats) u.stats = {};
-  if (!u.stats[modeKey]) u.stats[modeKey] = { played: 0, wins: 0, best: 0 };
+  if (!u.stats[modeKey]) u.stats[modeKey] = { played: 0, wins: 0, losses: 0, best: 0 };
 
   u.stats[modeKey].played = (u.stats[modeKey].played || 0) + 1;
-  u.stats[modeKey].wins = (u.stats[modeKey].wins || 0) + 1;
+  if (isWin && score > 0) {
+    u.stats[modeKey].wins = (u.stats[modeKey].wins || 0) + 1;
+  } else {
+    u.stats[modeKey].losses = (u.stats[modeKey].losses || 0) + 1;
+  }
+
   if (score > (u.stats[modeKey].best || 0)) {
     u.stats[modeKey].best = score;
   }
   setActiveUser(u);
 
-  const recRef = db.ref(`leaderboards/${modeKey}/${u.uid}`);
-  recRef.once("value", snap => {
-    const old = snap.val();
-    if (!old || score > old.score) {
-      recRef.set({
-        uid: u.uid,
-        fullName: `${u.name}${u.tag}`,
-        title: u.title || "Çaylak",
-        modeKey: modeKey,
-        modeName: modeName,
-        score: parseInt(score, 10),
-        date: new Date().toLocaleString("tr-TR"),
-        drops: dropsList || []
-      });
-    }
-  });
+  if (score > 0) {
+    const recRef = db.ref(`leaderboards/${modeKey}/${u.uid}`);
+    recRef.once("value", snap => {
+      const old = snap.val();
+      if (!old || score > old.score) {
+        recRef.set({
+          uid: u.uid,
+          fullName: `${u.name}${u.tag}`,
+          title: u.title || "Çaylak",
+          modeKey: modeKey,
+          modeName: modeName,
+          score: parseInt(score, 10),
+          date: new Date().toLocaleString("tr-TR"),
+          drops: dropsList || []
+        });
+      }
+    });
+  }
 }
 
-// İsim Değiştirme
 function updateUsernameGlobal(newName) {
   const u = getActiveUser();
   if (!u || !newName.trim()) return;
@@ -100,45 +105,37 @@ function updateUsernameGlobal(newName) {
       });
     });
 
-    const modes = ['standard', 'ten_cases', 'catch_open', 'upgrade_mode', 'mines_mode', 'pvp_mode'];
+    const modes = ['standard', 'ten_cases', 'catch_open', 'upgrade_mode', 'mines_mode', 'mega_mode', 'dice_mode', 'jackpot_mode', 'pvp_mode'];
     modes.forEach(m => {
       db.ref(`leaderboards/${m}/${u.uid}`).update({ fullName: `${u.name}${u.tag}` });
     });
 
-    alert("Kullanıcı adınız başarıyla güncellendi!");
+    alert("Kullanıcı adınız güncellendi!");
     location.reload();
   });
 }
 
-// İki Taraflı Arkadaş Silme
 function removeFriendBidirectional(friendUID, friendName, callback) {
   const u = getActiveUser();
   if (!u) return;
-
-  const conf = confirm(`${friendName} kullanıcısını arkadaşlıktan çıkarmak istediğinize emin misiniz?`);
-  if (!conf) return;
+  if (!confirm(`${friendName} arkadaşlıktan çıkarılsın mı?`)) return;
 
   db.ref(`friends/${u.uid}/${friendUID}`).remove();
   db.ref(`friends/${friendUID}/${u.uid}`).remove();
-
   alert(`${friendName} arkadaş listenizden çıkarıldı.`);
   if (callback) callback();
 }
 
-// Hesap Silme (Bütün Verileri Temizler)
 function deleteAccountPermanently() {
   const u = getActiveUser();
   if (!u) return;
-
-  const conf = confirm("Hesabınızı ve tüm oyun verilerinizi kalıcı olarak silmek istediğinize emin misiniz?");
-  if (!conf) return;
+  if (!confirm("Hesabınızı ve tüm verilerinizi kalıcı olarak silmek istediğinize emin misiniz?")) return;
 
   const safeKey = u.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
-
   db.ref("accounts/" + safeKey).remove();
   db.ref("users/" + u.uid).remove();
 
-  const modes = ['standard', 'ten_cases', 'catch_open', 'upgrade_mode', 'mines_mode', 'pvp_mode'];
+  const modes = ['standard', 'ten_cases', 'catch_open', 'upgrade_mode', 'mines_mode', 'mega_mode', 'dice_mode', 'jackpot_mode', 'pvp_mode'];
   modes.forEach(m => {
     db.ref(`leaderboards/${m}/${u.uid}`).remove();
   });
@@ -156,6 +153,6 @@ function deleteAccountPermanently() {
   db.ref("channel_invites/" + u.uid).remove();
 
   localStorage.removeItem("kutu_active_session");
-  alert("Hesabınız tamamen silindi.");
+  alert("Hesabınız silindi.");
   window.location.href = "index.html";
 }
