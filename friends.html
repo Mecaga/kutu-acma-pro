@@ -26,11 +26,27 @@
     <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">⭐ Arkadaşlarım:</div>
     <div id="my-friends-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:12px;"></div>
 
-    <!-- 2. KATEGORİ: KAYITLI DİĞER TÜM OYUNCULAR (Arkadaşlar Hariç) -->
+    <!-- 2. KATEGORİ: KAYITLI DİĞER TÜM OYUNCULAR -->
     <div style="font-size:11px; font-weight:bold; color:#38bdf8; margin-bottom:4px;">🌐 Kayıtlı Diğer Oyuncular:</div>
     <div id="other-users-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
+  <!-- Sayfadan Ayrılmadan Açılan Anlık Özel Sohbet Pop-up'ı -->
+  <div id="modal-popup-chat" class="modal-overlay">
+    <div class="modal-card" style="height:80%;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #3b1d6e; padding-bottom:6px; margin-bottom:6px;">
+        <span id="popup-chat-title" style="font-size:12px; font-weight:bold; color:var(--neon-blue);">💬 Sohbet</span>
+        <button class="icon-btn" style="border-color:var(--danger); padding:2px 6px;" onclick="closePopupChat()">X</button>
+      </div>
+      <div id="popup-chat-messages" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; background:#070212; padding:6px; border-radius:6px; margin-bottom:6px;"></div>
+      <div style="display:flex; gap:4px;">
+        <input type="text" id="popup-msg-input" class="input-field" style="margin:0; font-size:11px; flex:1;" placeholder="Mesaj yaz...">
+        <button class="icon-btn" style="background:var(--neon-green); border-radius:50%; width:32px; height:32px; justify-content:center;" onclick="sendPopupMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- İstekler Modalı -->
   <div id="modal-reqs" class="modal-overlay">
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">Gelen İstekler</div>
@@ -42,6 +58,7 @@
   <script src="app.js"></script>
   <script>
     let myFriendUIDs = [];
+    let activeChatTargetUID = null;
 
     window.onload = () => {
       loadFriendsAndUsers();
@@ -51,7 +68,6 @@
       const u = getActiveUser();
       if (!u) return;
 
-      // 1. Arkadaşlarımı Çek
       db.ref("friends/" + u.uid).on("value", snap => {
         const myBox = document.getElementById("my-friends-list");
         myBox.innerHTML = "";
@@ -66,13 +82,11 @@
             myBox.innerHTML += `
               <div class="rank-card">
                 <span style="font-size:11px;">⭐ <b>${f.fullName}</b></span>
-                <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="directMessageUser('${c.key}', '${f.fullName}')">💬 Mesaj</button>
+                <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openPopupChat('${c.key}', '${f.fullName}')">💬 Sohbet Et</button>
               </div>
             `;
           });
         }
-
-        // 2. Kayıtlı Diğer Kullanıcıları Çek (Ekli olanlar gizlenir)
         loadOtherUsers(u);
       });
     }
@@ -85,7 +99,7 @@
         snap.forEach(c => {
           const reg = c.val();
           if (!reg || reg.uid === u.uid) return;
-          if (myFriendUIDs.includes(reg.uid)) return; // Arkadaş ise diğerler listesinde gösterme
+          if (myFriendUIDs.includes(reg.uid)) return;
 
           const isDeleted = reg.fullName && reg.fullName.startsWith("deleteUser");
 
@@ -94,7 +108,7 @@
               <span style="font-size:11px;">👤 ${reg.fullName}</span>
               <div style="display:flex; gap:4px;">
                 ${!isDeleted ? `<button class="icon-btn" style="border-color:var(--neon-green);" onclick="requestUser('${reg.uid}', '${reg.fullName}')">➕ İstek</button>` : '<span style="font-size:9px; color:#666;">Silinmiş</span>'}
-                <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="directMessageUser('${reg.uid}', '${reg.fullName}')">💬</button>
+                <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openPopupChat('${reg.uid}', '${reg.fullName}')">💬</button>
               </div>
             </div>
           `;
@@ -127,10 +141,50 @@
       alert(`${targetName} kullanıcısına istek gönderildi!`);
     }
 
-    function directMessageUser(targetUID, targetName) {
+    // Anlık Pop-up Sohbet Mantığı
+    function openPopupChat(targetUID, targetName) {
+      activeChatTargetUID = targetUID;
+      document.getElementById("popup-chat-title").innerText = `💬 ${targetName}`;
+      document.getElementById("modal-popup-chat").style.display = "flex";
+
       const u = getActiveUser();
-      db.ref(`friends/${u.uid}/${targetUID}`).set({ fullName: targetName });
-      window.location.href = "chat.html";
+      // dm_chats altında senkronize oluştur
+      const chatID = [u.uid, targetUID].sort().join("_");
+      db.ref("friends/" + u.uid + "/" + targetUID).set({ fullName: targetName });
+
+      db.ref("dm_chats/" + chatID).limitToLast(35).on("value", snap => {
+        const box = document.getElementById("popup-chat-messages");
+        box.innerHTML = "";
+        snap.forEach(c => {
+          const m = c.val(), isMe = m.uid === u.uid;
+          box.innerHTML += `
+            <div class="msg-bubble ${isMe ? 'me' : 'other'}">
+              <div style="font-size:9px; color:#60a5fa; font-weight:bold;">${m.sender}</div>
+              <div>${m.text}</div>
+            </div>
+          `;
+        });
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+
+    function closePopupChat() {
+      document.getElementById("modal-popup-chat").style.display = "none";
+      activeChatTargetUID = null;
+    }
+
+    function sendPopupMessage() {
+      const inp = document.getElementById("popup-msg-input");
+      if (!inp.value.trim() || !activeChatTargetUID) return;
+      const u = getActiveUser();
+      const chatID = [u.uid, activeChatTargetUID].sort().join("_");
+
+      db.ref("dm_chats/" + chatID).push({
+        uid: u.uid,
+        sender: `${u.name}${u.tag}`,
+        text: inp.value.trim()
+      });
+      inp.value = "";
     }
 
     function openRequestsModal() {
