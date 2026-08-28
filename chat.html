@@ -15,6 +15,7 @@
       <div style="font-weight:bold; font-size:12px;" id="lbl-chat-main-title">Sohbetler & Kanallar</div>
       <div style="display:flex; gap:4px;">
         <button class="icon-btn" style="border-color:var(--neon-gold);" onclick="openInvitesModal()">📩 Davetler</button>
+        <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openJoinChannelModal()">Katıl</button>
         <button class="icon-btn" style="border-color:var(--neon-purple);" onclick="openCreateChannelModal()">+ Kanal Kur</button>
       </div>
     </div>
@@ -70,6 +71,16 @@
     </div>
   </div>
 
+  <!-- Kanala Katıl Modalı -->
+  <div id="modal-join-channel" class="modal-overlay">
+    <div class="modal-card">
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-blue); text-align:center; margin-bottom:8px;">Kanala Katıl</div>
+      <input type="text" id="in-join-channel-tag" class="input-field" placeholder="KanalAdı#1234...">
+      <button class="btn-start" onclick="confirmJoinChannel()">Katıl</button>
+      <button class="btn-close" onclick="document.getElementById('modal-join-channel').style.display='none'">İptal</button>
+    </div>
+  </div>
+
   <!-- Kanal Ayarları Modalı -->
   <div id="modal-channel-settings" class="modal-overlay">
     <div class="modal-card">
@@ -84,20 +95,23 @@
         </div>
       </div>
 
-      <!-- Davet Et -->
-      <div style="font-size:10px; color:#94a3b8; margin-bottom:2px;">Kullanıcı Davet Et (KullanıcıAdı#12345):</div>
-      <div style="display:flex; gap:4px; margin-bottom:8px;">
-        <input type="text" id="in-ch-invite-tag" class="input-field" style="margin:0; font-size:11px;" placeholder="Etiket...">
-        <button class="icon-btn" style="background:var(--neon-purple);" onclick="inviteUserToChannel()">Davet Et</button>
+      <!-- SADECE ÖZEL KANALDA GÖRÜNEN YÖNETİM BLOKLARI -->
+      <div id="sec-private-management" style="display:none;">
+        <!-- Davet Et -->
+        <div style="font-size:10px; color:#94a3b8; margin-bottom:2px;">Kullanıcı Davet Et (KullanıcıAdı#12345):</div>
+        <div style="display:flex; gap:4px; margin-bottom:8px;">
+          <input type="text" id="in-ch-invite-tag" class="input-field" style="margin:0; font-size:11px;" placeholder="Etiket...">
+          <button class="icon-btn" style="background:var(--neon-purple);" onclick="inviteUserToChannel()">Davet Et</button>
+        </div>
+
+        <!-- Kanal Üyeleri & Yönetici Devretme / Atma -->
+        <div style="font-size:10px; font-weight:bold; color:var(--neon-blue); margin-bottom:4px;">👥 Kanal Üyeleri:</div>
+        <div id="ch-members-list" style="max-height:100px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
+
+        <!-- Davet Durumu / Logları -->
+        <div style="font-size:10px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📋 Davet Durumu:</div>
+        <div id="ch-invites-log" style="max-height:80px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
       </div>
-
-      <!-- Kanal Üyeleri & Yönetici Devretme / Atma -->
-      <div style="font-size:10px; font-weight:bold; color:var(--neon-blue); margin-bottom:4px;">👥 Kanal Üyeleri:</div>
-      <div id="ch-members-list" style="max-height:100px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
-
-      <!-- Davet Durumu / Logları -->
-      <div style="font-size:10px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📋 Davet Durumu (Kim Kimi Ne Zaman Davet Etti):</div>
-      <div id="ch-invites-log" style="max-height:80px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
 
       <button id="btn-delete-channel" class="btn-start" style="background:var(--danger); font-size:11px; padding:8px; display:none;" onclick="deleteChannel()">🗑️ Kanalı Sil</button>
       <button class="btn-close" onclick="document.getElementById('modal-channel-settings').style.display='none'">Kapat</button>
@@ -139,7 +153,6 @@
         snap.forEach(c => {
           const ch = c.val();
           const isMember = ch.members && ch.members[u.uid];
-          // Açık kanal ise veya üyesi olduğumuz özel kanal ise göster
           if (ch.type === "Açık" || isMember || ch.ownerUID === u.uid) {
             box.innerHTML += `
               <div class="rank-card" onclick="openRoom('channel_${c.key}', '# ${ch.name}', 'channel', '${c.key}')">
@@ -189,11 +202,14 @@
       if (roomType === 'channel') {
         db.ref("channels/" + chKey).on("value", snap => {
           activeChannelData = snap.val();
-          if (!activeChannelData) return closeChatRoom();
+          // Kanal silinmişse kullanıcıyı hemen ana panele fırlat
+          if (!activeChannelData) {
+            alert("Bu kanal silindi veya kapatıldı.");
+            return closeChatRoom();
+          }
 
           const isOwner = activeChannelData.ownerUID === u.uid;
           setBtn.style.display = "inline-flex";
-          // Özel kanalda üye isek çıkış butonu görünür, yönetici isek görünmez
           lveBtn.style.display = (activeChannelData.type === "Özel" && !isOwner) ? "inline-flex" : "none";
         });
       } else {
@@ -255,7 +271,6 @@
       if (confirm("Mesaj silinsin mi?")) db.ref(`${currentChatPath}/${key}`).remove();
     }
 
-    // Kanal Kurma
     function openCreateChannelModal() { document.getElementById("modal-create-channel").style.display = "flex"; }
     function setChannelType(t) {
       newChannelType = t;
@@ -285,41 +300,71 @@
       });
     }
 
-    // Kanal Ayarları & Yönetim
+    function openJoinChannelModal() { document.getElementById("modal-join-channel").style.display = "flex"; }
+    function confirmJoinChannel() {
+      const tag = document.getElementById("in-join-channel-tag").value.trim();
+      if (!tag) return alert("KanalAdı#id giriniz!");
+      const u = getActiveUser();
+      const chKey = tag.replace('#', '_');
+
+      db.ref("channels/" + chKey).once("value", snap => {
+        if (!snap.exists()) return alert("Kanal bulunamadı!");
+        const ch = snap.val();
+        if (ch.type === "Özel" && (!ch.members || !ch.members[u.uid])) {
+          return alert("Bu özel bir kanaldır. Katılmak için davet almanız gerekir!");
+        }
+
+        db.ref(`channels/${chKey}/members/${u.uid}`).set({
+          fullName: `${u.name}${u.tag}`,
+          role: "member"
+        });
+        document.getElementById("modal-join-channel").style.display = "none";
+        alert(`${tag} kanalına bağlandınız!`);
+      });
+    }
+
     function openChannelSettingsModal() {
       const u = getActiveUser();
       if (!activeChannelData) return;
 
       const isOwner = activeChannelData.ownerUID === u.uid;
+      const isPrivate = activeChannelData.type === "Özel";
+
       document.getElementById("sec-admin-rename").style.display = isOwner ? "block" : "none";
       document.getElementById("btn-delete-channel").style.display = isOwner ? "block" : "none";
 
-      // Üye Listesi & Yönetici Devretme / Atma
-      const memBox = document.getElementById("ch-members-list");
-      memBox.innerHTML = "";
-      for (let mUID in activeChannelData.members) {
-        const m = activeChannelData.members[mUID];
-        const isThisOwner = mUID === activeChannelData.ownerUID;
-        memBox.innerHTML += `
-          <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; font-size:9px;">
-            <span>${m.fullName} ${isThisOwner ? '<b style="color:var(--neon-gold)">[Yönetici]</b>' : ''}</span>
-            <div style="display:flex; gap:3px;">
-              ${isOwner && !isThisOwner ? `<button class="icon-btn" style="padding:2px 4px; border-color:var(--neon-gold);" onclick="transferOwnership('${mUID}', '${m.fullName}')">Devret</button>` : ''}
-              ${isOwner && !isThisOwner ? `<button class="icon-btn" style="padding:2px 4px; border-color:var(--danger);" onclick="kickMember('${mUID}', '${m.fullName}')">At</button>` : ''}
-            </div>
-          </div>
-        `;
-      }
+      // SADECE ÖZEL KANALDA DAVET VE ÜYE ATMA BLOKLARI AÇILIR
+      const privSec = document.getElementById("sec-private-management");
+      if (isPrivate) {
+        privSec.style.display = "block";
 
-      // Davet Logları
-      const logBox = document.getElementById("ch-invites-log");
-      logBox.innerHTML = "";
-      if (activeChannelData.invitesLog) {
-        Object.values(activeChannelData.invitesLog).forEach(l => {
-          logBox.innerHTML += `<div style="background:#070212; padding:2px 4px; font-size:8px; color:#94a3b8;">${l.inviter} ➔ ${l.invited} (${l.date})</div>`;
-        });
+        const memBox = document.getElementById("ch-members-list");
+        memBox.innerHTML = "";
+        for (let mUID in activeChannelData.members) {
+          const m = activeChannelData.members[mUID];
+          const isThisOwner = mUID === activeChannelData.ownerUID;
+          memBox.innerHTML += `
+            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; font-size:9px;">
+              <span>${m.fullName} ${isThisOwner ? '<b style="color:var(--neon-gold)">[Yönetici]</b>' : ''}</span>
+              <div style="display:flex; gap:3px;">
+                ${isOwner && !isThisOwner ? `<button class="icon-btn" style="padding:2px 4px; border-color:var(--neon-gold);" onclick="transferOwnership('${mUID}', '${m.fullName}')">Devret</button>` : ''}
+                ${isOwner && !isThisOwner ? `<button class="icon-btn" style="padding:2px 4px; border-color:var(--danger);" onclick="kickMember('${mUID}', '${m.fullName}')">At</button>` : ''}
+              </div>
+            </div>
+          `;
+        }
+
+        const logBox = document.getElementById("ch-invites-log");
+        logBox.innerHTML = "";
+        if (activeChannelData.invitesLog) {
+          Object.values(activeChannelData.invitesLog).forEach(l => {
+            logBox.innerHTML += `<div style="background:#070212; padding:2px 4px; font-size:8px; color:#94a3b8;">${l.inviter} ➔ ${l.invited} (${l.date})</div>`;
+          });
+        } else {
+          logBox.innerHTML = "<div style='color:#666; font-size:8px;'>Davet kaydı yok.</div>";
+        }
       } else {
-        logBox.innerHTML = "<div style='color:#666; font-size:8px;'>Davet kaydı yok.</div>";
+        privSec.style.display = "none";
       }
 
       document.getElementById("modal-channel-settings").style.display = "flex";
@@ -341,13 +386,11 @@
         if (!snap.exists()) return alert("Kullanıcı bulunamadı!");
         snap.forEach(c => {
           const targetUID = c.val().uid;
-          // Kullanıcının bildirim kutusuna davet at
           db.ref(`channel_invites/${targetUID}/${activeChannelID}`).set({
             chKey: activeChannelID,
             chName: activeChannelData.name,
             fromName: `${u.name}${u.tag}`
           });
-          // Loglara yaz
           db.ref(`channels/${activeChannelID}/invitesLog`).push({
             inviter: `${u.name}${u.tag}`,
             invited: tag,
@@ -356,6 +399,7 @@
           alert(`${tag} kullanıcısına davet gönderildi!`);
         });
       });
+      document.getElementById("in-ch-invite-tag").value = "";
     }
 
     function transferOwnership(newOwnerUID, newOwnerName) {
@@ -387,16 +431,16 @@
 
     function deleteChannel() {
       if (confirm("Bu kanalı kalıcı olarak silmek istediğinize emin misiniz?")) {
-        db.ref(`channels/${activeChannelID}`).remove();
-        db.ref(`channel_msgs/${activeChannelID}`).remove();
+        const delID = activeChannelID;
         closeChatRoom();
+        db.ref(`channels/${delID}`).remove();
+        db.ref(`channel_msgs/${delID}`).remove();
       }
     }
 
-    // Davetler Bildirimi
     function openInvitesModal() {
       const u = getActiveUser();
-      db.ref("channel_invites/" + u.uid).once("value", snap => {
+      db.ref("channel_invites/" + u.uid).on("value", snap => {
         const box = document.getElementById("invites-list-box");
         box.innerHTML = "";
         if (!snap.exists()) {
