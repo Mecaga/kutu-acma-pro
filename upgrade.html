@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Şans Yükseltme</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-upgrade_mode">
+  <div class="app-container">
+    <div class="top-header">
+      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+      <div style="font-weight:bold; font-size:12px;">Şans Yükseltme (7 Kutu)</div>
+      <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
+    </div>
+
+    <div id="game-panel" style="display:flex; flex-direction:column; flex:1; justify-content:space-between;">
+      <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+        <div class="roulette-container" id="roulette-box">
+          <div class="roulette-needle"></div>
+          <div class="roulette-track" id="roulette-track"></div>
+        </div>
+        <div id="status-text" style="text-align:center; font-size:12px; font-weight:bold; color:var(--neon-blue); margin:8px 0;">
+          Kasayı açmak için butona bas!
+        </div>
+        <div id="rem-text" style="text-align:center; font-size:11px; color:#94a3b8;">Kalan: 7 (Kademe 1)</div>
+      </div>
+      <button id="btn-spin" class="btn-start" onclick="spinCase()">KASAYI AÇ (3s)</button>
+    </div>
+
+    <div id="summary-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:1px solid var(--neon-purple);">
+      <div style="text-align:center; font-size:14px; font-weight:bold; color:var(--neon-gold); margin-bottom:8px;">TÜM KUTULAR AÇILDI</div>
+      <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
+        <div>Toplam Puan: <b id="sum-score" style="color:var(--neon-green);">0</b></div>
+        <div>Açılan: <b id="sum-count" style="color:var(--neon-blue);">7</b></div>
+      </div>
+      <div id="summary-drops" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+      <div style="display:flex; gap:6px;">
+        <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar Oyna</button>
+        <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Ana Menü</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const TIERS = [
+      { name: 'Kademe 1', rate: 60.0, minP: 5, maxP: 15, c: '#ffffff', items: ['Gelişen Kılıç', 'Dinamik Zırh'] },
+      { name: 'Kademe 2', rate: 25.0, minP: 20, maxP: 60, c: '#38bdf8', items: ['Aura Yayı', 'Işık Kristali'] },
+      { name: 'Kademe 3', rate: 10.0, minP: 70, maxP: 180, c: '#c084fc', items: ['Yükseltilmiş Asa', 'Hiçlik Kalkanı'] },
+      { name: 'Kozmik Güç', rate: 5.0, minP: 250, maxP: 800, c: '#f43f5e', items: ['Sonsuzluk Matrisi', 'Tanrı Katili'] }
+    ];
+
+    let totalScore = 0;
+    let drops = [];
+    let remCount = 7;
+    let upgradeLvl = 1;
+    let isSpinning = false;
+
+    function getRandomItem() {
+      let rand = Math.max(0, (Math.random() * 100) - ((upgradeLvl - 1) * 8));
+      let cum = 0;
+      for (let t of TIERS) {
+        cum += t.rate;
+        if (rand <= cum) {
+          let it = t.items[Math.floor(Math.random() * t.items.length)];
+          let pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
+          return { tier: t.name, item: it, pts: pts, c: t.c };
+        }
+      }
+      return { tier: TIERS[0].name, item: TIERS[0].items[0], pts: TIERS[0].minP, c: TIERS[0].c };
+    }
+
+    function spinCase() {
+      if (isSpinning || remCount <= 0) return;
+      isSpinning = true;
+      remCount--;
+      upgradeLvl++;
+      document.getElementById("rem-text").innerText = `Kalan: ${remCount} (Kademe ${upgradeLvl})`;
+      document.getElementById("btn-spin").disabled = true;
+
+      const track = document.getElementById("roulette-track");
+      const box = document.getElementById("roulette-box");
+      track.style.transition = "none";
+      track.style.transform = "translateX(0px)";
+      track.innerHTML = "";
+
+      const totalItems = 30, winIdx = 24;
+      let winDrop = null;
+
+      for (let i = 0; i < totalItems; i++) {
+        let d = getRandomItem();
+        if (i === winIdx) winDrop = d;
+        track.innerHTML += `
+          <div class="roulette-item" style="border-bottom:3px solid ${d.c};">
+            <span style="color:${d.c}; font-weight:bold;">${d.tier}</span>
+            <span style="font-size:8px; margin:2px 0;">${d.item}</span>
+            <span style="color:var(--neon-green);">+${d.pts}P</span>
+          </div>
+        `;
+      }
+
+      setTimeout(() => {
+        track.style.transition = "transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)";
+        const itemWidth = 80;
+        const targetX = -(winIdx * itemWidth) + (box.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 20 - 10);
+        track.style.transform = `translateX(${targetX}px)`;
+      }, 20);
+
+      setTimeout(() => {
+        totalScore += winDrop.pts;
+        drops.push(winDrop);
+        document.getElementById("score-badge").innerText = `${totalScore} P`;
+        document.getElementById("status-text").innerHTML = `🎉 <span style="color:${winDrop.c};">${winDrop.tier}</span> - ${winDrop.item} (+${winDrop.pts}P)`;
+
+        isSpinning = false;
+        if (remCount <= 0) {
+          showSummary();
+        } else {
+          document.getElementById("btn-spin").disabled = false;
+        }
+      }, 3100);
+    }
+
+    function showSummary() {
+      document.getElementById("game-panel").style.display = "none";
+      document.getElementById("summary-panel").style.display = "flex";
+      document.getElementById("sum-score").innerText = totalScore;
+
+      const dBox = document.getElementById("summary-drops");
+      dBox.innerHTML = "";
+      drops.forEach(d => {
+        dBox.innerHTML += `
+          <div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px; border:1px solid #3b1d6e;">
+            <span><b style="color:${d.c};">[${d.tier}]</b> ${d.item}</span>
+            <b style="color:var(--neon-green);">+${d.pts} P</b>
+          </div>
+        `;
+      });
+
+      const u = getActiveUser();
+      if (!u) return;
+      if (!u.stats) u.stats = {};
+      if (!u.stats.upgrade_mode) u.stats.upgrade_mode = { played: 0, wins: 0, best: 0 };
+
+      u.stats.upgrade_mode.played = (u.stats.upgrade_mode.played || 0) + 1;
+      if (totalScore > 0) u.stats.upgrade_mode.wins = (u.stats.upgrade_mode.wins || 0) + 1;
+      if (totalScore > (u.stats.upgrade_mode.best || 0)) u.stats.upgrade_mode.best = totalScore;
+      setActiveUser(u);
+
+      const recRef = db.ref(`leaderboards/upgrade_mode/${u.uid}`);
+      recRef.once("value", snap => {
+        const old = snap.val();
+        if (!old || totalScore > old.score) {
+          recRef.set({
+            uid: u.uid,
+            fullName: `${u.name}${u.tag}`,
+            title: u.title || "Çaylak",
+            modeKey: 'upgrade_mode',
+            modeName: "Şans Yükseltme Modu",
+            score: totalScore,
+            date: new Date().toLocaleString("tr-TR"),
+            drops: drops
+          });
+        }
+      });
+    }
+  </script>
+</body>
+</html>
