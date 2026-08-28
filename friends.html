@@ -87,11 +87,9 @@
       const u = getActiveUser();
       if (!u) return;
 
-      // Gelen istekleri dinle
       db.ref("friend_requests/" + u.uid).on("value", rSnap => {
         incomingRequests = rSnap.val() || {};
 
-        // Arkadaşları dinle
         db.ref("friends/" + u.uid).on("value", snap => {
           const myBox = document.getElementById("my-friends-list");
           myBox.innerHTML = "";
@@ -136,7 +134,6 @@
           if (isDeleted) {
             actionBtn = '<span style="font-size:9px; color:#666;">Silinmiş</span>';
           } else if (hasSentMeRequest) {
-            // O bana istek atmışsa sarı onay kutusu çıkar
             actionBtn = `<button class="icon-btn" style="background:var(--neon-gold); color:#000;" onclick="acceptFriendRequestBidirectional('${reg.uid}', '${reg.fullName}', loadFriendsAndUsers)">⚡ Onayla</button>`;
           } else {
             actionBtn = `<button class="icon-btn" style="border-color:var(--neon-green);" onclick="requestUser('${reg.uid}', '${reg.fullName}')">➕ İstek</button>`;
@@ -176,7 +173,6 @@
       if (targetUID === u.uid) return alert("Kendinize istek atamazsınız!");
       if (targetName.startsWith("deleteUser")) return alert("Silinmiş kullanıcıya istek atılamaz!");
 
-      // Eğer karşı taraf zaten istek atmışsa direkt onayla
       if (incomingRequests[targetUID]) {
         return acceptFriendRequestBidirectional(targetUID, targetName, loadFriendsAndUsers);
       }
