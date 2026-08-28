@@ -6,6 +6,7 @@ const firebaseConfig = {
   messagingSenderId: "483395048462",
   appId: "1:483395048462:web:450f18178e682a4a2f985f"
 };
+
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
@@ -39,10 +40,10 @@ function syncUserFromDB(uid, callback) {
   });
 }
 
-// Güvenli Skor Kaydı (Oyun sırasında çıkış yapılırsa çağrılmaz, sadece oyun bittiğinde çalışır)
+// Kesin Skor Kaydı: undefined P ve Karışık Mod Sorunu Çözüldü
 function recordGameScore(modeKey, modeName, score, dropsList) {
   const u = getActiveUser();
-  if (!u || score <= 0) return;
+  if (!u || score === undefined || score === null || score <= 0) return;
 
   if (!u.stats) u.stats = {};
   if (!u.stats[modeKey]) u.stats[modeKey] = { played: 0, wins: 0, best: 0 };
@@ -64,7 +65,7 @@ function recordGameScore(modeKey, modeName, score, dropsList) {
         title: u.title || "Çaylak",
         modeKey: modeKey,
         modeName: modeName,
-        score: score,
+        score: parseInt(score, 10),
         date: new Date().toLocaleString("tr-TR"),
         drops: dropsList || []
       });
@@ -72,7 +73,7 @@ function recordGameScore(modeKey, modeName, score, dropsList) {
   });
 }
 
-// İsim Değiştirme (Tüm Sıralamalarda & Geçmiş Mesajlarda İsmi Günceller)
+// İsim Değiştirme
 function updateUsernameGlobal(newName) {
   const u = getActiveUser();
   if (!u || !newName.trim()) return;
@@ -91,23 +92,17 @@ function updateUsernameGlobal(newName) {
     u.name = newName.trim();
     setActiveUser(u);
 
-    // Global Mesajlardaki İsmini Güncelle
     db.ref("global_chat").once("value", mSnap => {
       mSnap.forEach(child => {
         if (child.val().uid === u.uid) {
-          db.ref(`global_chat/${child.key}`).update({
-            sender: `${u.name}${u.tag}`
-          });
+          db.ref(`global_chat/${child.key}`).update({ sender: `${u.name}${u.tag}` });
         }
       });
     });
 
-    // Sıralama Tablolarındaki İsmini Güncelle
     const modes = ['standard', 'ten_cases', 'catch_open', 'upgrade_mode', 'mines_mode', 'pvp_mode'];
     modes.forEach(m => {
-      db.ref(`leaderboards/${m}/${u.uid}`).update({
-        fullName: `${u.name}${u.tag}`
-      });
+      db.ref(`leaderboards/${m}/${u.uid}`).update({ fullName: `${u.name}${u.tag}` });
     });
 
     alert("Kullanıcı adınız başarıyla güncellendi!");
@@ -115,23 +110,7 @@ function updateUsernameGlobal(newName) {
   });
 }
 
-// Karşılıklı İstek Onaylama ve Çift Taraflı Temizleme
-function acceptFriendRequestBidirectional(targetUID, targetName, callback) {
-  const u = getActiveUser();
-  if (!u) return;
-
-  db.ref(`friends/${u.uid}/${targetUID}`).set({ fullName: targetName });
-  db.ref(`friends/${targetUID}/${u.uid}`).set({ fullName: `${u.name}${u.tag}` });
-
-  // İki tarafın da istek kutusundan sil
-  db.ref(`friend_requests/${u.uid}/${targetUID}`).remove();
-  db.ref(`friend_requests/${targetUID}/${u.uid}`).remove();
-
-  alert(`${targetName} ile arkadaş oldunuz!`);
-  if (callback) callback();
-}
-
-// Çift Taraflı Arkadaşlıktan Çıkarma
+// İki Taraflı Arkadaş Silme
 function removeFriendBidirectional(friendUID, friendName, callback) {
   const u = getActiveUser();
   if (!u) return;
@@ -140,19 +119,18 @@ function removeFriendBidirectional(friendUID, friendName, callback) {
   if (!conf) return;
 
   db.ref(`friends/${u.uid}/${friendUID}`).remove();
-  db.ref(`friends/${friendUID}/${friendUID}`).remove();
   db.ref(`friends/${friendUID}/${u.uid}`).remove();
 
   alert(`${friendName} arkadaş listenizden çıkarıldı.`);
   if (callback) callback();
 }
 
-// Kalıcı Hesap Silme (deleteUser#0000)
+// Hesap Silme (Bütün Verileri Temizler)
 function deleteAccountPermanently() {
   const u = getActiveUser();
   if (!u) return;
 
-  const conf = confirm("Hesabınızı ve tüm kayıtlarınızı kalıcı olarak silmek istediğinize emin misiniz?");
+  const conf = confirm("Hesabınızı ve tüm oyun verilerinizi kalıcı olarak silmek istediğinize emin misiniz?");
   if (!conf) return;
 
   const safeKey = u.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
@@ -168,17 +146,16 @@ function deleteAccountPermanently() {
   db.ref("global_chat").once("value", snap => {
     snap.forEach(child => {
       if (child.val().uid === u.uid) {
-        db.ref(`global_chat/${child.key}`).update({
-          sender: "deleteUser#0000"
-        });
+        db.ref(`global_chat/${child.key}`).update({ sender: "deleteUser#0000" });
       }
     });
   });
 
   db.ref("friends/" + u.uid).remove();
   db.ref("friend_requests/" + u.uid).remove();
+  db.ref("channel_invites/" + u.uid).remove();
 
   localStorage.removeItem("kutu_active_session");
-  alert("Hesabınız silindi.");
+  alert("Hesabınız tamamen silindi.");
   window.location.href = "index.html";
 }
