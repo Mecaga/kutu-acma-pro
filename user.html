@@ -3,27 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profilim & İstatistikler</title>
+  <title>Profilim</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <div class="app-container">
-    <div class="top-header">
-      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
-      <div style="font-weight:bold; font-size:12px;">👤 Oyuncu İstatistikleri</div>
-      <div></div>
+  <div class="app-container" style="justify-content:space-between;">
+    
+    <div>
+      <div class="top-header">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
+        <div style="font-weight:bold; font-size:12px;">👤 Oyuncu Profili</div>
+        <div></div>
+      </div>
+
+      <!-- Şekilli Profil Podyumu -->
+      <div class="profile-badge-card">
+        <div style="font-size:42px; margin-bottom:2px;">👑</div>
+        <h2 id="u-fullname" style="color:var(--neon-blue); font-size:16px;">...</h2>
+        <div id="u-title-badge" style="color:var(--neon-gold); font-size:11px;">[Çaylak]</div>
+
+        <div class="profile-stats-grid">
+          <div class="stat-mini-box">
+            <span class="stat-mini-val" id="u-total-played" style="color:var(--neon-blue);">0</span>
+            <span class="stat-mini-lbl">Oyun</span>
+          </div>
+          <div class="stat-mini-box">
+            <span class="stat-mini-val" id="u-total-wins" style="color:var(--neon-green);">0</span>
+            <span class="stat-mini-lbl">Kazanma</span>
+          </div>
+          <div class="stat-mini-box">
+            <span class="stat-mini-val" id="u-total-winrate" style="color:var(--neon-gold);">%0</span>
+            <span class="stat-mini-lbl">Oran</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Mod Rekorları:</div>
+      <div id="stats-table-box" style="display:flex; flex-direction:column; gap:4px; max-height:220px; overflow-y:auto;"></div>
     </div>
 
-    <div style="background:#120826; border:1px solid var(--neon-purple); border-radius:12px; padding:16px; text-align:center; margin-bottom:8px;">
-      <div style="font-size:45px; margin-bottom:4px;">👑</div>
-      <h2 id="u-fullname" style="color:var(--neon-blue); font-size:16px;">...</h2>
-      <div id="u-title-badge" style="color:var(--neon-gold); font-size:12px;">[Çaylak]</div>
-    </div>
-
-    <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Oyun Bazlı Detaylı İstatistikler:</div>
-    <div id="stats-table-box" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:5px;"></div>
   </div>
 
   <script src="app.js"></script>
@@ -35,37 +55,41 @@
       document.getElementById("u-fullname").innerText = `${u.name}${u.tag}`;
       document.getElementById("u-title-badge").innerText = `[${u.title || 'Çaylak'}]`;
 
-      const box = document.getElementById("stats-table-box");
-      box.innerHTML = "";
+      const stats = u.stats || {};
+      let totalGames = 0, totalWins = 0;
 
       const modNames = {
         standard: "Normal Kasa",
         ten_cases: "10 Kutu Modu",
         catch_open: "Yakala & Aç",
         upgrade_mode: "Şans Yükseltme",
-        mines_mode: "Mayınlı Kasa",
-        pvp_mode: "Online PvP"
+        mines_mode: "Mayınlı Kasa"
       };
 
-      const userStats = u.stats || {};
+      const box = document.getElementById("stats-table-box");
+      box.innerHTML = "";
 
       for (let k in modNames) {
-        const s = userStats[k] || { played: 0, wins: 0, best: 0 };
-        const rate = s.played > 0 ? Math.round((s.wins / s.played) * 100) : 0;
+        const s = stats[k] || { played: 0, wins: 0, best: 0 };
+        totalGames += s.played || 0;
+        totalWins += s.wins || 0;
 
         box.innerHTML += `
-          <div class="rank-card" style="font-size:10px; line-height:1.4;">
+          <div class="rank-card" style="font-size:10px; min-height:42px; padding:6px 10px;">
             <div>
               <b style="color:#fff;">${modNames[k]}</b><br>
-              <span style="color:#94a3b8;">Tur / Galibiyet: ${s.played} / ${s.wins}</span>
+              <span style="color:#94a3b8;">${s.played} Oyun (${s.wins} Galibiyet)</span>
             </div>
             <div style="text-align:right;">
-              <span style="color:var(--neon-gold);">Rekor: ${s.best} P</span><br>
-              <b style="color:var(--neon-green);">Oran: %${rate}</b>
+              <b style="color:var(--neon-gold);">${s.best} P</b>
             </div>
           </div>
         `;
       }
+
+      document.getElementById("u-total-played").innerText = totalGames;
+      document.getElementById("u-total-wins").innerText = totalWins;
+      document.getElementById("u-total-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
     };
   </script>
 </body>
