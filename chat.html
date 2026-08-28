@@ -73,7 +73,7 @@
     </div>
   </div>
 
-  <!-- Kanala Katıl Modalı -->
+  <!-- Kanala Katıl Modalı (Tam Eşleşmeli Algoritma) -->
   <div id="modal-join-channel" class="modal-overlay">
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-blue); text-align:center; margin-bottom:8px;">Kanala Katıl</div>
@@ -88,13 +88,11 @@
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">⚙️ Kanal Ayarları</div>
       
-      <!-- Kanal Türü Değiştirme (Açık <-> Özel) -->
       <div id="sec-admin-toggle-type" style="margin-bottom:8px;">
         <div style="font-size:10px; color:#94a3b8; margin-bottom:2px;">Kanal Gizliliği:</div>
         <button id="btn-toggle-channel-privacy" class="mode-btn" style="text-align:center; color:#fff; font-weight:bold;" onclick="toggleChannelPrivacy()">Kanal Türünü Değiştir</button>
       </div>
 
-      <!-- İsim Değiştir (Sadece Yönetici) -->
       <div id="sec-admin-rename" style="margin-bottom:8px;">
         <div style="font-size:10px; color:#94a3b8;">Kanal İsmini Değiştir:</div>
         <div style="display:flex; gap:4px;">
@@ -103,7 +101,6 @@
         </div>
       </div>
 
-      <!-- SADECE ÖZEL KANALDA GÖRÜNEN YÖNETİM ALANI -->
       <div id="sec-private-management" style="display:none;">
         <div style="font-size:10px; color:#94a3b8; margin-bottom:2px;">Kullanıcı Davet Et (KullanıcıAdı#12345):</div>
         <div style="display:flex; gap:4px; margin-bottom:8px;">
@@ -150,7 +147,7 @@
       if (!u) return;
       db.ref("channel_invites/" + u.uid).on("value", snap => {
         const badge = document.getElementById("invite-badge");
-        if (snap.exists()) {
+        if (snap.exists() && snap.hasChildren()) {
           badge.style.display = "block";
         } else {
           badge.style.display = "none";
@@ -273,7 +270,6 @@
       if (!text || !currentChatPath) return;
       const u = getActiveUser();
 
-      // Mini Oyun: /zar komutu
       if (text === "/zar") {
         const roll = Math.floor(Math.random() * 100) + 1;
         text = `🎲 Şans Zarı Attı: [ ${roll} / 100 ]`;
@@ -309,7 +305,7 @@
       if (!name) return alert("Kanal adı giriniz!");
       const u = getActiveUser();
       const chTag = `${name}#${Math.floor(1000 + Math.random() * 9000)}`;
-      const chKey = chTag.replace('#', '_');
+      const chKey = chTag.replace(/[^a-zA-Z0-9]/g, '_');
 
       const members = {};
       members[u.uid] = { fullName: `${u.name}${u.tag}`, role: "owner" };
@@ -329,24 +325,34 @@
 
     function openJoinChannelModal() { document.getElementById("modal-join-channel").style.display = "flex"; }
     function confirmJoinChannel() {
-      const tag = document.getElementById("in-join-channel-tag").value.trim();
-      if (!tag) return alert("KanalAdı#id giriniz!");
+      const inputTag = document.getElementById("in-join-channel-tag").value.trim();
+      if (!inputTag) return alert("KanalAdı#id giriniz!");
       const u = getActiveUser();
-      const chKey = tag.replace('#', '_');
 
-      db.ref("channels/" + chKey).once("value", snap => {
-        if (!snap.exists()) return alert("Kanal bulunamadı!");
-        const ch = snap.val();
-        if (ch.type === "Özel" && (!ch.members || !ch.members[u.uid])) {
+      db.ref("channels").once("value", snap => {
+        let foundKey = null;
+        let foundChannel = null;
+
+        snap.forEach(c => {
+          if (c.val().name.toLowerCase() === inputTag.toLowerCase()) {
+            foundKey = c.key;
+            foundChannel = c.val();
+          }
+        });
+
+        if (!foundChannel) return alert("Böyle bir kanal bulunamadı!");
+
+        if (foundChannel.type === "Özel" && (!foundChannel.members || !foundChannel.members[u.uid])) {
           return alert("Bu özel bir kanaldır. Katılmak için davet almanız gerekir!");
         }
 
-        db.ref(`channels/${chKey}/members/${u.uid}`).set({
+        db.ref(`channels/${foundKey}/members/${u.uid}`).set({
           fullName: `${u.name}${u.tag}`,
           role: "member"
+        }).then(() => {
+          document.getElementById("modal-join-channel").style.display = "none";
+          alert(`${foundChannel.name} kanalına katıldınız!`);
         });
-        document.getElementById("modal-join-channel").style.display = "none";
-        alert(`${tag} kanalına bağlandınız!`);
       });
     }
 
@@ -365,7 +371,6 @@
       toggleBtn.innerText = isPrivate ? "🔓 Kanalı Herkese Açık Yap" : "🔒 Kanalı Özel Yap";
       toggleBtn.style.background = isPrivate ? "var(--neon-green)" : "var(--danger)";
 
-      // Yalnızca Özel Kanal İse Davet/Atma Panelini Göster
       const privSec = document.getElementById("sec-private-management");
       if (isPrivate) {
         privSec.style.display = "block";
@@ -419,7 +424,6 @@
       alert("Kanal ismi güncellendi!");
     }
 
-    // Karşı Tarafa Garantili Davet Gönderme
     function inviteUserToChannel() {
       const tag = document.getElementById("in-ch-invite-tag").value.trim();
       const u = getActiveUser();
