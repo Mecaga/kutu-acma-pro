@@ -10,7 +10,6 @@
 </head>
 <body>
   <div class="app-container" style="justify-content:space-between;">
-    
     <div>
       <div class="top-header">
         <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
@@ -18,20 +17,24 @@
         <div></div>
       </div>
 
-      <!-- Şekilli Profil Podyumu -->
+      <!-- 4'lü Özet İstatistik Kartı -->
       <div class="profile-badge-card">
-        <div style="font-size:42px; margin-bottom:2px;">👑</div>
-        <h2 id="u-fullname" style="color:var(--neon-blue); font-size:16px;">...</h2>
-        <div id="u-title-badge" style="color:var(--neon-gold); font-size:11px;">[Çaylak]</div>
+        <div style="font-size:38px; margin-bottom:2px;">👑</div>
+        <h2 id="u-fullname" style="color:var(--neon-blue); font-size:15px;">...</h2>
+        <div id="u-title-badge" style="color:var(--neon-gold); font-size:10px;">[Çaylak]</div>
 
         <div class="profile-stats-grid">
           <div class="stat-mini-box">
             <span class="stat-mini-val" id="u-total-played" style="color:var(--neon-blue);">0</span>
-            <span class="stat-mini-lbl">Oyun</span>
+            <span class="stat-mini-lbl">Oynanan</span>
           </div>
           <div class="stat-mini-box">
             <span class="stat-mini-val" id="u-total-wins" style="color:var(--neon-green);">0</span>
             <span class="stat-mini-lbl">Kazanma</span>
+          </div>
+          <div class="stat-mini-box">
+            <span class="stat-mini-val" id="u-total-losses" style="color:var(--danger);">0</span>
+            <span class="stat-mini-lbl">Kaybetme</span>
           </div>
           <div class="stat-mini-box">
             <span class="stat-mini-val" id="u-total-winrate" style="color:var(--neon-gold);">%0</span>
@@ -40,10 +43,10 @@
         </div>
       </div>
 
-      <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Mod Rekorları:</div>
+      <!-- 8 Modun Detaylı Rekor Listesi -->
+      <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Tüm Mod Rekorları:</div>
       <div id="stats-table-box" style="display:flex; flex-direction:column; gap:4px; max-height:220px; overflow-y:auto;"></div>
     </div>
-
   </div>
 
   <script src="app.js"></script>
@@ -56,29 +59,33 @@
       document.getElementById("u-title-badge").innerText = `[${u.title || 'Çaylak'}]`;
 
       const stats = u.stats || {};
-      let totalGames = 0, totalWins = 0;
+      let totalGames = 0, totalWins = 0, totalLosses = 0;
 
       const modNames = {
         standard: "Normal Kasa",
         ten_cases: "10 Kutu Modu",
         catch_open: "Yakala & Aç",
         upgrade_mode: "Şans Yükseltme",
-        mines_mode: "Mayınlı Kasa"
+        mines_mode: "Mayınlı Kasa",
+        mega_mode: "Mega Kasa",
+        dice_mode: "Zar & Kasa",
+        jackpot_mode: "Çarkıfelek"
       };
 
       const box = document.getElementById("stats-table-box");
       box.innerHTML = "";
 
       for (let k in modNames) {
-        const s = stats[k] || { played: 0, wins: 0, best: 0 };
+        const s = stats[k] || { played: 0, wins: 0, losses: 0, best: 0 };
         totalGames += s.played || 0;
         totalWins += s.wins || 0;
+        totalLosses += s.losses || 0;
 
         box.innerHTML += `
-          <div class="rank-card" style="font-size:10px; min-height:42px; padding:6px 10px;">
+          <div class="rank-card" style="font-size:9.5px; min-height:38px; padding:4px 8px;">
             <div>
               <b style="color:#fff;">${modNames[k]}</b><br>
-              <span style="color:#94a3b8;">${s.played} Oyun (${s.wins} Galibiyet)</span>
+              <span style="color:#94a3b8;">${s.played} Tur (${s.wins} Galibiyet / ${s.losses || 0} Mağlubiyet)</span>
             </div>
             <div style="text-align:right;">
               <b style="color:var(--neon-gold);">${s.best} P</b>
@@ -89,6 +96,7 @@
 
       document.getElementById("u-total-played").innerText = totalGames;
       document.getElementById("u-total-wins").innerText = totalWins;
+      document.getElementById("u-total-losses").innerText = totalLosses;
       document.getElementById("u-total-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
     };
   </script>
