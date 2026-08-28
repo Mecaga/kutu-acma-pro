@@ -39,6 +39,39 @@ function syncUserFromDB(uid, callback) {
   });
 }
 
+// Güvenli Skor Kaydı (Oyun sırasında çıkış yapılırsa çağrılmaz, sadece oyun bittiğinde çalışır)
+function recordGameScore(modeKey, modeName, score, dropsList) {
+  const u = getActiveUser();
+  if (!u || score <= 0) return;
+
+  if (!u.stats) u.stats = {};
+  if (!u.stats[modeKey]) u.stats[modeKey] = { played: 0, wins: 0, best: 0 };
+
+  u.stats[modeKey].played = (u.stats[modeKey].played || 0) + 1;
+  u.stats[modeKey].wins = (u.stats[modeKey].wins || 0) + 1;
+  if (score > (u.stats[modeKey].best || 0)) {
+    u.stats[modeKey].best = score;
+  }
+  setActiveUser(u);
+
+  const recRef = db.ref(`leaderboards/${modeKey}/${u.uid}`);
+  recRef.once("value", snap => {
+    const old = snap.val();
+    if (!old || score > old.score) {
+      recRef.set({
+        uid: u.uid,
+        fullName: `${u.name}${u.tag}`,
+        title: u.title || "Çaylak",
+        modeKey: modeKey,
+        modeName: modeName,
+        score: score,
+        date: new Date().toLocaleString("tr-TR"),
+        drops: dropsList || []
+      });
+    }
+  });
+}
+
 // İsim Değiştirme (Tüm Sıralamalarda & Geçmiş Mesajlarda İsmi Günceller)
 function updateUsernameGlobal(newName) {
   const u = getActiveUser();
@@ -52,14 +85,13 @@ function updateUsernameGlobal(newName) {
       return alert("Bu kullanıcı adı zaten kullanımda!");
     }
 
-    // 1. Hesap Anahtarını Değiştir
     db.ref("accounts/" + oldSafeKey).remove();
     db.ref("accounts/" + newSafeKey).set({ uid: u.uid, password: u.password });
 
     u.name = newName.trim();
     setActiveUser(u);
 
-    // 2. Global Mesajlardaki İsmini Güncelle
+    // Global Mesajlardaki İsmini Güncelle
     db.ref("global_chat").once("value", mSnap => {
       mSnap.forEach(child => {
         if (child.val().uid === u.uid) {
@@ -70,7 +102,7 @@ function updateUsernameGlobal(newName) {
       });
     });
 
-    // 3. Sıralama Tablolarındaki İsmini Güncelle
+    // Sıralama Tablolarındaki İsmini Güncelle
     const modes = ['standard', 'ten_cases', 'catch_open', 'upgrade_mode', 'mines_mode', 'pvp_mode'];
     modes.forEach(m => {
       db.ref(`leaderboards/${m}/${u.uid}`).update({
@@ -83,6 +115,22 @@ function updateUsernameGlobal(newName) {
   });
 }
 
+// Karşılıklı İstek Onaylama ve Çift Taraflı Temizleme
+function acceptFriendRequestBidirectional(targetUID, targetName, callback) {
+  const u = getActiveUser();
+  if (!u) return;
+
+  db.ref(`friends/${u.uid}/${targetUID}`).set({ fullName: targetName });
+  db.ref(`friends/${targetUID}/${u.uid}`).set({ fullName: `${u.name}${u.tag}` });
+
+  // İki tarafın da istek kutusundan sil
+  db.ref(`friend_requests/${u.uid}/${targetUID}`).remove();
+  db.ref(`friend_requests/${targetUID}/${u.uid}`).remove();
+
+  alert(`${targetName} ile arkadaş oldunuz!`);
+  if (callback) callback();
+}
+
 // Çift Taraflı Arkadaşlıktan Çıkarma
 function removeFriendBidirectional(friendUID, friendName, callback) {
   const u = getActiveUser();
@@ -92,6 +140,7 @@ function removeFriendBidirectional(friendUID, friendName, callback) {
   if (!conf) return;
 
   db.ref(`friends/${u.uid}/${friendUID}`).remove();
+  db.ref(`friends/${friendUID}/${friendUID}`).remove();
   db.ref(`friends/${friendUID}/${u.uid}`).remove();
 
   alert(`${friendName} arkadaş listenizden çıkarıldı.`);
