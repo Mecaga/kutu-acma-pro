@@ -16,7 +16,8 @@
       <div></div>
     </div>
 
-    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:8px;">
+    <!-- Mod Filtre Sekmeleri -->
+    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:8px; flex-shrink:0;">
       <button class="icon-btn" id="flt-all" style="background:var(--btn-blue);" onclick="loadLB('all', this)">Tümü</button>
       <button class="icon-btn" onclick="loadLB('standard', this)">Normal</button>
       <button class="icon-btn" onclick="loadLB('ten_cases', this)">10 Kutu</button>
@@ -26,6 +27,7 @@
       <button class="icon-btn" onclick="loadLB('pvp_mode', this)">PvP</button>
     </div>
 
+    <!-- Sıralama Listesi (Kartlar Asla İç İçe Girmez) -->
     <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
   </div>
 
@@ -87,15 +89,19 @@
         snap.forEach(modeSnap => {
           if (filter === 'all' || modeSnap.key === filter) {
             modeSnap.forEach(userRecord => {
-              allScores.push(userRecord.val());
+              const r = userRecord.val();
+              if (r && r.score !== undefined) {
+                allScores.push(r);
+              }
             });
           }
         });
 
+        // En yüksek skora göre sıralama
         allScores.sort((a, b) => b.score - a.score);
 
         if (allScores.length === 0) {
-          listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888; padding:20px;'>Kayıt bulunamadı.</div>";
+          listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888; padding:20px;'>Bu modda kayıtlı skor bulunamadı.</div>";
           return;
         }
 
@@ -108,8 +114,8 @@
 
           itemRow.className = rankClass;
           itemRow.innerHTML = `
-            <span><b>${idx+1}.</b> ${rec.fullName} <small style="color:var(--neon-gold);">[${rec.modeName || 'Normal'}]</small></span>
-            <b style="color:var(--neon-green); font-size:13px;">${rec.score} P</b>
+            <span><b>${idx+1}.</b> ${rec.fullName || 'Oyuncu'} <small style="color:var(--neon-gold);">[${rec.modeName || 'Normal Kasa'}]</small></span>
+            <b style="color:var(--neon-green); font-size:13px;">${rec.score || 0} P</b>
           `;
           itemRow.onclick = () => openGameInfoModal(rec);
           listContainer.appendChild(itemRow);
