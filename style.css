@@ -13,9 +13,10 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-body { background: var(--bg-gradient); color: var(--text); height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+html, body { height: 100%; width: 100%; }
+body { background: var(--bg-gradient); color: var(--text); display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-/* Modlara Özel Dinamik Arka Plan Sınıfları */
+/* Mod Fon Renkleri */
 body.bg-standard { background: radial-gradient(circle at 50% 15%, #0f172a 0%, #020617 100%) !important; }
 body.bg-ten_cases { background: radial-gradient(circle at 50% 15%, #064e3b 0%, #022c22 100%) !important; }
 body.bg-catch_open { background: radial-gradient(circle at 50% 15%, #3b0764 0%, #0f051d 100%) !important; }
@@ -26,7 +27,7 @@ body.bg-pvp_mode { background: radial-gradient(circle at 50% 15%, #1e1035 0%, #0
 .app-container {
   width: 100%;
   max-width: 440px;
-  height: 100vh;
+  height: 96vh;
   background: rgba(10, 5, 20, 0.95);
   border: 2px solid var(--neon-purple);
   box-shadow: 0 0 25px var(--neon-purple-glow);
@@ -34,7 +35,7 @@ body.bg-pvp_mode { background: radial-gradient(circle at 50% 15%, #1e1035 0%, #0
   flex-direction: column;
   position: relative;
   padding: 12px;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 @media (min-width: 600px) {
@@ -43,7 +44,7 @@ body.bg-pvp_mode { background: radial-gradient(circle at 50% 15%, #1e1035 0%, #0
   .btn-start { padding: 14px; font-size: 16px; }
 }
 
-.top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; position: sticky; top: 0; z-index: 20; background: rgba(10, 5, 20, 0.95); padding: 4px 0; border-bottom: 1px solid rgba(168, 85, 247, 0.3); }
+.top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0; background: rgba(10, 5, 20, 0.95); padding: 4px 0; border-bottom: 1px solid rgba(168, 85, 247, 0.3); }
 .app-title { font-size: 16px; font-weight: 800; color: #fff; cursor: pointer; }
 .icon-btn { background: #1f0c3d; border: 1px solid var(--neon-purple); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
 
@@ -53,7 +54,23 @@ body.bg-pvp_mode { background: radial-gradient(circle at 50% 15%, #1e1035 0%, #0
 
 .menu-preview-box { width: 100%; background: #0c041d; border: 1px solid var(--neon-purple); border-radius: 8px; padding: 8px; font-size: 10px; line-height: 1.6; margin-bottom: 6px; }
 .input-field { width: 100%; padding: 10px; border-radius: 8px; border: 2px solid var(--neon-purple); background-color: #070212; color: #fff; font-size: 12px; text-align: center; outline: none; margin-bottom: 8px; }
-.btn-start { width: 100%; min-height: 44px; padding: 12px; border-radius: 8px; border: none; background: var(--neon-green); color: white; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); flex-shrink: 0; }
+
+/* Kasa Açma Butonu (Ekranda Kesin Sabitlenmiş) */
+.btn-start {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: var(--neon-green);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+  flex-shrink: 0;
+  display: block;
+}
 .btn-start:disabled { background: #4b5563; cursor: not-allowed; box-shadow: none; opacity: 0.6; }
 
 .roulette-container { width: 100%; height: 90px; background: rgba(2, 6, 23, 0.9); border: 2px solid #3b1d6e; border-radius: 8px; position: relative; overflow: hidden; margin: 8px 0; display: flex; align-items: center; flex-shrink: 0; }
@@ -61,10 +78,9 @@ body.bg-pvp_mode { background: radial-gradient(circle at 50% 15%, #1e1035 0%, #0
 .roulette-track { display: flex; position: absolute; left: 0; height: 80px; will-change: transform; }
 .roulette-item { width: 80px; height: 80px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid rgba(255,255,255,0.1); background: rgba(18, 8, 38, 0.9); font-size: 10px; text-align: center; padding: 4px; }
 
-.mines-grid-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 320px; margin: auto; aspect-ratio: 1; }
+.mines-grid-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 300px; margin: auto; aspect-ratio: 1; flex-shrink: 0; }
 .mine-card { background: #120826; border: 2px solid #3b1d6e; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; aspect-ratio: 1; }
 
-/* Sıralama Kartları (Kesin Taşma & Birbirine Girme Koruması) */
 .rank-card {
   background: #120826;
   border-radius: 8px;
