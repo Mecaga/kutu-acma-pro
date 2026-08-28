@@ -11,7 +11,7 @@
 <body class="bg-ten_cases">
   <div class="app-container" style="justify-content:space-between;">
     
-    <!-- Üst Stat Bar (Ekran Görüntüsü 1000168402 Düzeni) -->
+    <!-- Üst Stat Bar -->
     <div>
       <div class="game-stats-top" style="display:flex; justify-content:space-between; margin-bottom:6px;">
         <div class="stat-card timer" style="border:1px solid #ef4444; background:#0d1527; padding:5px 10px; border-radius:8px;">
@@ -95,6 +95,8 @@
     window.onload = () => {
       const u = getActiveUser();
       document.getElementById("lbl-user-tag").innerText = u ? `@${u.name}${u.tag}` : "@Misafir";
+      document.getElementById("lbl-rem-boxes").innerText = `${remCount} Kutu`;
+      document.getElementById("lbl-score").innerText = "0";
     };
 
     function getRandomItem() {
@@ -113,9 +115,11 @@
     function spinCase() {
       if (isSpinning || remCount <= 0) return;
       isSpinning = true;
+      document.getElementById("btn-spin").disabled = true;
+
+      // Hak düşüşü
       remCount--;
       document.getElementById("lbl-rem-boxes").innerText = `${remCount} Kutu`;
-      document.getElementById("btn-spin").disabled = true;
 
       document.getElementById("ready-view").style.display = "none";
       const rView = document.getElementById("roulette-view");
@@ -156,6 +160,8 @@
 
         isSpinning = false;
         if (remCount <= 0) {
+          document.getElementById("btn-spin").disabled = true;
+          document.getElementById("btn-spin").innerText = "TÜM KUTULAR AÇILDI!";
           triggerSummary();
         } else {
           document.getElementById("btn-spin").disabled = false;
