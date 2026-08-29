@@ -13,39 +13,39 @@
     <div class="top-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
       <div style="font-weight:bold; font-size:12px;" id="lbl-chat-main-title">Sohbetler & Kanallar</div>
-      <div style="display:flex; gap:4px;">
-        <button class="icon-btn" id="btn-open-invites" style="border-color:var(--neon-gold); position:relative;" onclick="openInvitesModal()">
-          📩 Davetler <span id="invite-badge" style="display:none; width:8px; height:8px; background:var(--danger); border-radius:50%; position:absolute; top:2px; right:2px;"></span>
-        </button>
+      <div style="display:flex; gap:3px;">
         <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openJoinChannelModal()">Katıl</button>
-        <button class="icon-btn" style="border-color:var(--neon-purple);" onclick="openCreateChannelModal()">+ Kanal Kur</button>
+        <button class="icon-btn" style="border-color:var(--neon-purple);" onclick="openCreateChannelModal()">+ Kur</button>
       </div>
     </div>
 
     <!-- Sohbet Seçim Paneli -->
     <div id="panel-chat-select" style="display:flex; flex-direction:column; flex:1; overflow-y:auto;">
-      <button class="mode-btn" style="padding:14px; font-weight:bold; font-size:13px; color:#fff; background:linear-gradient(90deg, #7e22ce, #a855f7); margin-bottom:8px;" onclick="openRoom('global', '🌐 Global Sohbet', 'global')">
+      <button class="mode-btn" style="padding:12px; font-weight:bold; font-size:12px; color:#fff; background:linear-gradient(90deg, #7e22ce, #a855f7); margin-bottom:6px;" onclick="openRoom('global', '🌐 Global Sohbet', 'global')">
         🌐 GLOBAL SOHBET (HERKESE AÇIK)
       </button>
 
-      <div style="font-size:11px; color:var(--neon-purple); font-weight:bold; margin:6px 0 4px 0;">📡 Kanallar Blokları:</div>
-      <div id="channels-list-box" style="display:flex; flex-direction:column; gap:4px; margin-bottom:10px;"></div>
+      <div style="font-size:11px; color:var(--neon-purple); font-weight:bold; margin:4px 0 2px 0;">📡 Kanallar:</div>
+      <div id="channels-list-box" style="display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
 
-      <div style="height:1px; background:#3b1d6e; margin:4px 0 8px 0;"></div>
-
-      <div style="font-size:11px; color:var(--neon-gold); font-weight:bold; margin-bottom:4px;">💬 Özel Sohbet Blokları (DM):</div>
+      <div style="font-size:11px; color:var(--neon-gold); font-weight:bold; margin-bottom:2px;">💬 Özel Sohbetler (DM):</div>
       <div id="dm-conversations-list" style="display:flex; flex-direction:column; gap:4px;"></div>
     </div>
 
-    <!-- Mesajlaşma Odası -->
+    <!-- Mesajlaşma Odası (WhatsApp Tarzı Saatli & Sistem Rozetli) -->
     <div id="panel-chat-room" style="display:none; flex-direction:column; flex:1;">
-      <div class="top-header" style="background:#120826; border-bottom:1px solid #3b1d6e; padding:6px 8px; margin-bottom:4px;">
+      <div class="top-header" style="background:#120826; border-bottom:1px solid #3b1d6e; padding:4px 6px; margin-bottom:4px;">
         <button class="icon-btn" onclick="closeChatRoom()">‹ Geri</button>
         <div id="room-active-title" style="font-size:11px; font-weight:bold; color:var(--neon-blue);">Oda</div>
         <div id="room-header-actions" style="display:flex; gap:4px;">
-          <button id="btn-channel-settings" class="icon-btn" style="display:none;" onclick="openChannelSettingsModal()">⚙️ Ayarlar</button>
+          <button id="btn-channel-settings" class="icon-btn" style="display:none;" onclick="openChannelSettingsModal()">⚙️</button>
           <button id="btn-channel-leave" class="icon-btn" style="border-color:var(--danger); display:none;" onclick="leaveCurrentChannel()">Çık</button>
         </div>
+      </div>
+
+      <!-- Tarih Ayracı -->
+      <div style="text-align:center; margin:2px 0;">
+        <span style="background:#1e0b3d; border:1px solid #3b1d6e; padding:2px 8px; border-radius:10px; font-size:8px; color:var(--text-dim);">📅 29 Ağustos 2026</span>
       </div>
 
       <div id="active-chat-messages" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:6px; background:#070212; border-radius:8px; margin-bottom:6px;"></div>
@@ -57,59 +57,9 @@
     </div>
   </div>
 
-  <!-- Kanal Kurma Modalı -->
-  <div id="modal-create-channel" class="modal-overlay">
-    <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:var(--neon-purple); text-align:center; margin-bottom:8px;">Yeni Kanal Oluştur</div>
-      <input type="text" id="in-channel-name" class="input-field" placeholder="Kanal Adı...">
-      <div style="display:flex; gap:6px; margin-bottom:10px;">
-        <button class="mode-btn" id="btn-type-open" style="flex:1; background:var(--btn-blue); color:#fff; text-align:center;" onclick="setChannelType('Açık')">Açık</button>
-        <button class="mode-btn" id="btn-type-priv" style="flex:1; text-align:center;" onclick="setChannelType('Özel')">Özel</button>
-      </div>
-      <button class="btn-start" onclick="confirmCreateChannel()">Kanalı Kur</button>
-      <button class="btn-close" onclick="document.getElementById('modal-create-channel').style.display='none'">İptal</button>
-    </div>
-  </div>
-
-  <!-- Kanala Katıl Modalı -->
-  <div id="modal-join-channel" class="modal-overlay">
-    <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:var(--neon-blue); text-align:center; margin-bottom:8px;">Kanala Katıl</div>
-      <input type="text" id="in-join-channel-tag" class="input-field" placeholder="KanalAdı#1234...">
-      <button class="btn-start" onclick="confirmJoinChannel()">Katıl</button>
-      <button class="btn-close" onclick="document.getElementById('modal-join-channel').style.display='none'">İptal</button>
-    </div>
-  </div>
-
-  <!-- Kanal Ayarları Modalı -->
-  <div id="modal-channel-settings" class="modal-overlay">
-    <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">⚙️ Kanal Ayarları</div>
-      <div id="sec-admin-toggle-type" style="margin-bottom:8px;">
-        <button id="btn-toggle-channel-privacy" class="mode-btn" style="text-align:center; color:#fff; font-weight:bold;" onclick="toggleChannelPrivacy()">Kanal Türünü Değiştir</button>
-      </div>
-      <div id="sec-admin-rename" style="margin-bottom:8px;">
-        <div style="display:flex; gap:4px;">
-          <input type="text" id="in-ch-new-name" class="input-field" style="margin:0; font-size:11px;" placeholder="Yeni isim...">
-          <button class="icon-btn" style="background:var(--neon-green);" onclick="renameChannel()">Kaydet</button>
-        </div>
-      </div>
-      <div id="sec-private-management" style="display:none;">
-        <div style="display:flex; gap:4px; margin-bottom:8px;">
-          <input type="text" id="in-ch-invite-tag" class="input-field" style="margin:0; font-size:11px;" placeholder="KullanıcıAdı#12345...">
-          <button class="icon-btn" style="background:var(--neon-purple);" onclick="inviteUserToChannel()">Davet Et</button>
-        </div>
-        <div style="font-size:10px; font-weight:bold; color:var(--neon-blue); margin-bottom:4px;">👥 Kanal Üyeleri:</div>
-        <div id="ch-members-list" style="max-height:100px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
-      </div>
-      <button id="btn-delete-channel" class="btn-start" style="background:var(--danger); font-size:11px; padding:8px; display:none;" onclick="deleteChannel()">🗑️ Kanalı Sil</button>
-      <button class="btn-close" onclick="document.getElementById('modal-channel-settings').style.display='none'">Kapat</button>
-    </div>
-  </div>
-
   <script src="app.js"></script>
   <script>
-    let currentChatPath = null, activeChannelID = null, activeChannelData = null, newChannelType = 'Açık';
+    let currentChatPath = null, activeChannelID = null, activeChannelData = null;
 
     window.onload = () => {
       loadChannels();
@@ -121,14 +71,10 @@
       db.ref("channels").on("value", snap => {
         const box = document.getElementById("channels-list-box");
         box.innerHTML = "";
-        if (!snap.exists()) {
-          box.innerHTML = "<div style='color:#666; font-size:10px; padding:4px;'>Kanal bulunmuyor.</div>";
-          return;
-        }
+        if (!snap.exists()) { box.innerHTML = "<div style='color:#666; font-size:10px;'>Kanal yok.</div>"; return; }
         snap.forEach(c => {
           const ch = c.val();
-          const isMember = ch.members && ch.members[u.uid];
-          if (ch.type === "Açık" || isMember || ch.ownerUID === u.uid) {
+          if (ch.type === "Açık" || (ch.members && ch.members[u.uid]) || ch.ownerUID === u.uid) {
             box.innerHTML += `
               <div class="rank-card" onclick="openRoom('channel_${c.key}', '# ${ch.name}', 'channel', '${c.key}')">
                 <span>📡 <b>${ch.name}</b> <small style="color:${ch.type==='Özel'?'var(--danger)':'var(--neon-green)'};">[${ch.type}]</small></span>
@@ -145,16 +91,12 @@
       db.ref("friends/" + u.uid).on("value", snap => {
         const list = document.getElementById("dm-conversations-list");
         list.innerHTML = "";
-        if (!snap.exists()) {
-          list.innerHTML = "<div style='color:#666; font-size:10px; padding:4px;'>Ekli arkadaşınız yok.</div>";
-          return;
-        }
+        if (!snap.exists()) { list.innerHTML = "<div style='color:#666; font-size:10px;'>Arkadaş yok.</div>"; return; }
         snap.forEach(c => {
-          const f = c.val();
           list.innerHTML += `
-            <div class="rank-card" onclick="openRoom('dm_${[u.uid, c.key].sort().join('_')}', '💬 ${f.fullName}', 'dm')">
-              <span>👤 <b>${f.fullName}</b></span>
-              <span style="font-size:10px; color:#38bdf8;">Sohbete Gir ›</span>
+            <div class="rank-card" onclick="openRoom('dm_${[u.uid, c.key].sort().join('_')}', '💬 ${c.val().fullName}', 'dm')">
+              <span>👤 <b>${c.val().fullName}</b></span>
+              <span style="font-size:10px; color:#38bdf8;">Sohbet ›</span>
             </div>
           `;
         });
@@ -170,25 +112,19 @@
       document.getElementById("panel-chat-room").style.display = "flex";
       document.getElementById("room-active-title").innerText = title;
 
-      const setBtn = document.getElementById("btn-channel-settings");
-      const lveBtn = document.getElementById("btn-channel-leave");
-
       if (roomType === 'channel') {
         db.ref("channels/" + chKey).on("value", snap => {
           activeChannelData = snap.val();
-          // Kanaldan atıldıysak veya kanal silindiyse anında dışarı at
           if (!activeChannelData || (activeChannelData.type === "Özel" && !activeChannelData.members[u.uid] && activeChannelData.ownerUID !== u.uid)) {
-            alert("Bu kanaldan çıkarıldınız veya kanal kapatıldı.");
+            alert("Bu kanaldan çıkarıldınız.");
             return closeChatRoom();
           }
-
-          const isOwner = activeChannelData.ownerUID === u.uid;
-          setBtn.style.display = "inline-flex";
-          lveBtn.style.display = (activeChannelData.type === "Özel" && !isOwner) ? "inline-flex" : "none";
+          document.getElementById("btn-channel-settings").style.display = "inline-flex";
+          document.getElementById("btn-channel-leave").style.display = (activeChannelData.type === "Özel" && activeChannelData.ownerUID !== u.uid) ? "inline-flex" : "none";
         });
       } else {
-        setBtn.style.display = "none";
-        lveBtn.style.display = "none";
+        document.getElementById("btn-channel-settings").style.display = "none";
+        document.getElementById("btn-channel-leave").style.display = "none";
       }
 
       listenRoomMessages();
@@ -198,22 +134,32 @@
       document.getElementById("panel-chat-room").style.display = "none";
       document.getElementById("panel-chat-select").style.display = "flex";
       currentChatPath = null;
-      activeChannelID = null;
     }
 
     function listenRoomMessages() {
       const u = getActiveUser();
-      db.ref(currentChatPath).limitToLast(35).on("value", snap => {
+      db.ref(currentChatPath).limitToLast(40).on("value", snap => {
         const box = document.getElementById("active-chat-messages");
         box.innerHTML = "";
         snap.forEach(c => {
-          const m = c.val(), k = c.key, isMe = m.uid === u.uid;
-          box.innerHTML += `
-            <div class="msg-bubble ${isMe ? 'me' : 'other'}">
-              <div style="font-size:9px; color:#60a5fa; font-weight:bold;">${m.sender}</div>
-              <div id="msg-${k}">${m.text}</div>
-            </div>
-          `;
+          const m = c.val(), isMe = m.uid === u.uid;
+          
+          // Sistem İşlem Mesajı (Kanalın tam ortasında gri rozet)
+          if (m.isSystem) {
+            box.innerHTML += `
+              <div style="text-align:center; margin:4px 0;">
+                <span style="background:rgba(30,41,59,0.9); padding:2px 8px; border-radius:6px; font-size:8.5px; color:#cbd5e1;">ℹ️ ${m.text}</span>
+              </div>
+            `;
+          } else {
+            box.innerHTML += `
+              <div class="msg-bubble ${isMe ? 'me' : 'other'}">
+                <div style="font-size:8.5px; color:#60a5fa; font-weight:bold;">${m.sender}</div>
+                <div style="font-size:11px;">${m.text}</div>
+                <div style="text-align:right; font-size:7.5px; color:#94a3b8; margin-top:2px;">${m.time || '16:28'}</div>
+              </div>
+            `;
+          }
         });
         box.scrollTop = box.scrollHeight;
       });
@@ -224,158 +170,16 @@
       let text = inp.value.trim();
       if (!text || !currentChatPath) return;
       const u = getActiveUser();
-      db.ref(currentChatPath).push({ uid: u.uid, sender: `${u.avatar || '👤'} ${u.name}${u.tag}`, text: text });
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+      db.ref(currentChatPath).push({
+        uid: u.uid,
+        sender: `${u.avatar || '👤'} ${u.name}${u.tag}`,
+        text: text,
+        time: timeStr
+      });
       inp.value = "";
-    }
-
-    function openCreateChannelModal() { document.getElementById("modal-create-channel").style.display = "flex"; }
-    function setChannelType(t) {
-      newChannelType = t;
-      document.getElementById("btn-type-open").style.background = t === "Açık" ? "var(--btn-blue)" : "#13072b";
-      document.getElementById("btn-type-priv").style.background = t === "Özel" ? "var(--btn-blue)" : "#13072b";
-    }
-
-    function confirmCreateChannel() {
-      const name = document.getElementById("in-channel-name").value.trim();
-      if (!name) return alert("Kanal adı giriniz!");
-      const u = getActiveUser();
-      const chTag = `${name}#${Math.floor(1000 + Math.random() * 9000)}`;
-      const chKey = chTag.replace(/[^a-zA-Z0-9]/g, '_');
-
-      const members = {};
-      members[u.uid] = { fullName: `${u.name}${u.tag}`, role: "owner" };
-
-      db.ref("channels/" + chKey).set({
-        name: chTag,
-        type: newChannelType,
-        ownerUID: u.uid,
-        ownerName: `${u.name}${u.tag}`,
-        members: members
-      }).then(() => {
-        document.getElementById("modal-create-channel").style.display = "none";
-        alert(`${chTag} kanalı kuruldu!`);
-      });
-    }
-
-    function openJoinChannelModal() { document.getElementById("modal-join-channel").style.display = "flex"; }
-    function confirmJoinChannel() {
-      const inputTag = document.getElementById("in-join-channel-tag").value.trim();
-      if (!inputTag) return alert("KanalAdı#id giriniz!");
-      const u = getActiveUser();
-
-      db.ref("channels").once("value", snap => {
-        let foundKey = null, foundChannel = null;
-        snap.forEach(c => {
-          if (c.val().name.toLowerCase() === inputTag.toLowerCase()) {
-            foundKey = c.key;
-            foundChannel = c.val();
-          }
-        });
-        if (!foundChannel) return alert("Böyle bir kanal bulunamadı!");
-        if (foundChannel.type === "Özel" && (!foundChannel.members || !foundChannel.members[u.uid])) {
-          return alert("Bu özel bir kanaldır. Davet almanız gerekir!");
-        }
-
-        db.ref(`channels/${foundKey}/members/${u.uid}`).set({ fullName: `${u.name}${u.tag}`, role: "member" }).then(() => {
-          document.getElementById("modal-join-channel").style.display = "none";
-          alert(`${foundChannel.name} kanalına katıldınız!`);
-        });
-      });
-    }
-
-    function openChannelSettingsModal() {
-      const u = getActiveUser();
-      if (!activeChannelData) return;
-
-      const isOwner = activeChannelData.ownerUID === u.uid;
-      const isPrivate = activeChannelData.type === "Özel";
-
-      document.getElementById("sec-admin-rename").style.display = isOwner ? "block" : "none";
-      document.getElementById("sec-admin-toggle-type").style.display = isOwner ? "block" : "none";
-      document.getElementById("btn-delete-channel").style.display = isOwner ? "block" : "none";
-
-      const toggleBtn = document.getElementById("btn-toggle-channel-privacy");
-      toggleBtn.innerText = isPrivate ? "🔓 Kanalı Herkese Açık Yap" : "🔒 Kanalı Özel Yap";
-      toggleBtn.style.background = isPrivate ? "var(--neon-green)" : "var(--danger)";
-
-      const privSec = document.getElementById("sec-private-management");
-      if (isPrivate) {
-        privSec.style.display = "block";
-        const memBox = document.getElementById("ch-members-list");
-        memBox.innerHTML = "";
-        for (let mUID in activeChannelData.members) {
-          const m = activeChannelData.members[mUID];
-          const isThisOwner = mUID === activeChannelData.ownerUID;
-          memBox.innerHTML += `
-            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; font-size:9px;">
-              <span>${m.fullName} ${isThisOwner ? '<b style="color:var(--neon-gold)">[Yönetici]</b>' : ''}</span>
-              ${isOwner && !isThisOwner ? `<button class="icon-btn" style="padding:2px 4px; border-color:var(--danger);" onclick="kickMember('${mUID}', '${m.fullName}')">At</button>` : ''}
-            </div>
-          `;
-        }
-      } else {
-        privSec.style.display = "none";
-      }
-
-      document.getElementById("modal-channel-settings").style.display = "flex";
-    }
-
-    function toggleChannelPrivacy() {
-      const nextType = activeChannelData.type === "Özel" ? "Açık" : "Özel";
-      db.ref(`channels/${activeChannelID}/type`).set(nextType).then(() => {
-        alert(`Kanal türü ${nextType} yapıldı!`);
-        document.getElementById("modal-channel-settings").style.display = "none";
-      });
-    }
-
-    function renameChannel() {
-      const newN = document.getElementById("in-ch-new-name").value.trim();
-      if (!newN) return;
-      db.ref(`channels/${activeChannelID}/name`).set(`${newN}#${activeChannelData.name.split('#')[1] || '0000'}`);
-      alert("Kanal ismi güncellendi!");
-    }
-
-    function inviteUserToChannel() {
-      const tag = document.getElementById("in-ch-invite-tag").value.trim();
-      const u = getActiveUser();
-      if (!tag) return;
-      db.ref("users").orderByChild("fullName").equalTo(tag).once("value", snap => {
-        if (!snap.exists()) return alert("Kullanıcı bulunamadı!");
-        snap.forEach(c => {
-          db.ref(`channel_invites/${c.val().uid}/${activeChannelID}`).set({
-            chKey: activeChannelID,
-            chName: activeChannelData.name,
-            fromName: `${u.name}${u.tag}`
-          });
-          alert("Davet gönderildi!");
-        });
-      });
-      document.getElementById("in-ch-invite-tag").value = "";
-    }
-
-    function kickMember(targetUID, targetName) {
-      if (confirm(`${targetName} kanaldan atılsın mı?`)) {
-        db.ref(`channels/${activeChannelID}/members/${targetUID}`).remove();
-        alert(`${targetName} atıldı.`);
-        openChannelSettingsModal();
-      }
-    }
-
-    function leaveCurrentChannel() {
-      const u = getActiveUser();
-      if (confirm("Bu özel kanaldan ayrılmak istiyor musunuz?")) {
-        db.ref(`channels/${activeChannelID}/members/${u.uid}`).remove();
-        closeChatRoom();
-      }
-    }
-
-    function deleteChannel() {
-      if (confirm("Kanal silinsin mi?")) {
-        const delID = activeChannelID;
-        closeChatRoom();
-        db.ref(`channels/${delID}`).remove();
-        db.ref(`channel_msgs/${delID}`).remove();
-      }
     }
   </script>
 </body>
