@@ -11,23 +11,27 @@
 <body class="bg-upgrade_mode">
   <div class="app-container" style="justify-content:space-between;">
     
-    <!-- Üst Stat Bar (Ekran Görüntüsü 1000168407 Düzeni) -->
     <div>
+      <div class="top-header">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger); z-index:999;">‹ Lobiye Çık</a>
+        <div style="font-weight:bold; font-size:12px; color:var(--neon-gold);">📈 Şans Yükseltme</div>
+        <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
+      </div>
+
       <div class="game-stats-top" style="display:flex; justify-content:space-between; margin-bottom:6px;">
-        <div class="stat-card timer" style="border:1px solid #ef4444; background:#0d1527; padding:5px 10px; border-radius:8px;">
+        <div class="stat-card timer" style="border:1px solid #ef4444; background:#0d1527; padding:4px 8px; border-radius:8px;">
           <div style="font-size:9px; color:#94a3b8;">KALAN HAK</div>
-          <div style="font-size:15px; font-weight:bold; color:#f87171;" id="lbl-rem-boxes">7 (Kademe 1)</div>
+          <div style="font-size:14px; font-weight:bold; color:#f87171;" id="lbl-rem-boxes">7 Hak (Kademe 1)</div>
           <div style="font-size:10px; color:#38bdf8;" id="lbl-user-tag">@User</div>
         </div>
-        <div class="stat-card score" style="border:1px solid #10b981; background:#0d1527; padding:5px 10px; border-radius:8px; text-align:right;">
-          <div style="font-size:9px; color:#94a3b8;">PUAN</div>
-          <div style="font-size:15px; font-weight:bold; color:#34d399;" id="lbl-score">0</div>
+        <div class="stat-card score" style="border:1px solid #10b981; background:#0d1527; padding:4px 8px; border-radius:8px; text-align:right;">
+          <div style="font-size:9px; color:#94a3b8;">TOPLAM PUAN</div>
+          <div style="font-size:14px; font-weight:bold; color:#34d399;" id="lbl-score">0</div>
         </div>
       </div>
 
-      <!-- Oranlar Tablosu -->
       <div class="rates-box" style="background:rgba(13,21,39,0.95); border:1px solid #334155; border-radius:8px; padding:6px 8px; font-size:10px;">
-        <div style="color:#ffffff; font-weight:bold; margin-bottom:2px;">ŞANS YÜKSELTME MODU</div>
+        <div style="color:var(--neon-gold); font-weight:bold; margin-bottom:2px;">KADEMELİ ŞANS ORANLARI</div>
         <div style="display:flex; justify-content:space-between; color:#ffffff;"><span>Kademe 1 (%60)</span><span>5-15 P</span></div>
         <div style="display:flex; justify-content:space-between; color:#38bdf8;"><span>Kademe 2 (%25)</span><span>20-60 P</span></div>
         <div style="display:flex; justify-content:space-between; color:#c084fc;"><span>Kademe 3 (%10)</span><span>70-180 P</span></div>
@@ -35,41 +39,39 @@
       </div>
     </div>
 
-    <!-- Orta Kasa & CS Rulet Alanı -->
-    <div id="case-box-area" style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#060b17; border-radius:12px; border:1px solid #1e293b; margin:8px 0; position:relative; overflow:hidden;">
+    <!-- Hizalanmış Orta Rulet Alanı -->
+    <div id="case-box-area" style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#060b17; border-radius:12px; border:1px solid #1e293b; margin:6px 0; position:relative; overflow:hidden;">
       <div id="ready-view" style="text-align:center;">
-        <div style="font-size:24px; font-weight:900; color:#fff;">HAZIR!</div>
-        <div style="font-size:12px; color:#fbbf24; margin-top:3px;">Şans Yükseltme Modu</div>
+        <div style="font-size:24px; font-weight:900; color:#fff;">KASA HAZIR!</div>
+        <div style="font-size:11px; color:#fbbf24; margin-top:3px;">Açtıkça Şansın Katlanır</div>
       </div>
 
-      <div id="roulette-view" class="roulette-container" style="display:none; width:100%; height:90px; border-top:2px solid #334155; border-bottom:2px solid #334155;">
+      <div id="roulette-view" class="roulette-container" style="display:none; width:100%; height:85px;">
         <div class="roulette-needle"></div>
         <div id="roulette-track" class="roulette-track"></div>
       </div>
     </div>
 
-    <!-- Alt Kısım: Son Düşen & Kasa Aç Butonu -->
     <div>
       <div style="display:flex; justify-content:flex-end; margin-bottom:6px;">
-        <div id="drop-badge" style="background:#0b1329; border:1px solid #334155; border-radius:6px; padding:4px 8px; font-size:11px; text-align:right;">
+        <div id="drop-badge" style="background:#0b1329; border:1px solid #334155; border-radius:6px; padding:4px 8px; font-size:11px;">
           Son Düşen: <span style="color:#64748b;">-</span>
         </div>
       </div>
-      <button id="btn-spin" class="btn-start" style="background:#0284c7; width:100%; padding:13px; font-weight:bold; border-radius:8px;" onclick="spinCase()">KASAYI AÇ (3s)</button>
+      <button id="btn-spin" class="btn-start" style="background:#0284c7;" onclick="spinUpgradeCase()">KASAYI AÇ (Kademe 1)</button>
     </div>
 
-    <!-- Özet Ekranı -->
     <div id="summary-overlay" class="modal-overlay">
-      <div class="modal-card" style="background:#0b1329; border:1px solid #1e293b;">
-        <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">TÜM KUTULAR AÇILDI</div>
+      <div class="modal-card">
+        <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">YÜKSELTME BİTTİ</div>
         <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
           <div>Toplam: <b id="sum-score" style="color:var(--neon-green);">0 P</b></div>
           <div>Açılan: <b style="color:var(--neon-blue);">7</b></div>
         </div>
-        <div id="summary-drops-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+        <div id="summary-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
         <div style="display:flex; gap:6px;">
-          <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar Oyna</button>
-          <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Ana Menü</a>
+          <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar</button>
+          <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Lobi</a>
         </div>
       </div>
     </div>
@@ -85,103 +87,94 @@
       { name: 'Kozmik Güç', rate: 5.0, minP: 250, maxP: 800, c: '#f43f5e', items: ['Sonsuzluk Matrisi', 'Tanrı Katili'] }
     ];
 
-    let totalScore = 0;
-    let drops = [];
-    let remCount = 7;
-    let upgradeStep = 1;
-    let isSpinning = false;
+    let totalScore = 0, drops = [], remCount = 7, step = 1, isSpinning = false;
 
     window.onload = () => {
       const u = getActiveUser();
       document.getElementById("lbl-user-tag").innerText = u ? `@${u.name}${u.tag}` : "@Misafir";
     };
 
-    function getRandomItem() {
-      const bonusChance = (upgradeStep - 1) * 6;
-      let rand = Math.max(0, (Math.random() * 100) - bonusChance);
-      let cum = 0;
-      for (let t of TIERS) {
-        cum += t.rate;
-        if (rand <= cum) {
-          let it = t.items[Math.floor(Math.random() * t.items.length)];
-          let pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
-          return { tier: t.name, item: it, pts: pts, c: t.c };
-        }
-      }
-      return { tier: TIERS[0].name, item: TIERS[0].items[0], pts: TIERS[0].minP, c: TIERS[0].c };
-    }
-
-    function spinCase() {
+    function spinUpgradeCase() {
       if (isSpinning || remCount <= 0) return;
       isSpinning = true;
       remCount--;
-      upgradeStep++;
-      document.getElementById("lbl-rem-boxes").innerText = `${remCount} (Kademe ${upgradeStep})`;
       document.getElementById("btn-spin").disabled = true;
 
       document.getElementById("ready-view").style.display = "none";
       const rView = document.getElementById("roulette-view");
       const track = document.getElementById("roulette-track");
       rView.style.display = "flex";
-
       track.style.transition = "none";
       track.style.transform = "translateX(0px)";
       track.innerHTML = "";
 
-      const totalItems = 30, winIdx = 24;
+      const totalItems = 30, winIdx = 22;
       let winDrop = null;
+      const itemW = 75;
 
       for (let i = 0; i < totalItems; i++) {
-        let d = getRandomItem();
+        // Her adımda yüksek ödül şansı katlanır
+        const boost = (step - 1) * 7;
+        let rand = Math.max(0, (Math.random() * 100) - boost);
+        let cum = 0, d = TIERS[0];
+        for (let t of TIERS) {
+          cum += t.rate;
+          if (rand <= cum) {
+            d = { tier: t.name, item: t.items[Math.floor(Math.random() * t.items.length)], pts: Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP, c: t.c };
+            break;
+          }
+        }
         if (i === winIdx) winDrop = d;
         track.innerHTML += `
           <div class="roulette-item" style="border-bottom:3px solid ${d.c};">
             <span style="color:${d.c}; font-weight:bold;">${d.tier}</span>
-            <span style="font-size:8px; margin:2px 0;">${d.item}</span>
+            <span style="font-size:7.5px;">${d.item}</span>
             <span style="color:var(--neon-green);">+${d.pts}P</span>
           </div>
         `;
       }
 
       setTimeout(() => {
-        track.style.transition = "transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)";
-        const itemWidth = 80;
-        const targetX = -(winIdx * itemWidth) + (rView.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 20 - 10);
+        track.style.transition = "transform 2.8s cubic-bezier(0.12, 0.8, 0.2, 1)";
+        const targetX = -(winIdx * itemW) + (rView.offsetWidth / 2) - (itemW / 2);
         track.style.transform = `translateX(${targetX}px)`;
       }, 20);
 
       setTimeout(() => {
         totalScore += winDrop.pts;
         drops.push(winDrop);
+        step++;
+
         document.getElementById("lbl-score").innerText = totalScore;
-        document.getElementById("drop-badge").innerHTML = `Son Düşen: <span style="color:${winDrop.c}; font-weight:bold;">${winDrop.tier}</span> - <span>${winDrop.item}</span> <b style="color:var(--neon-green);">+${winDrop.pts}P</b>`;
+        document.getElementById("score-badge").innerText = `${totalScore} P`;
+        document.getElementById("drop-badge").innerHTML = `Son: <span style="color:${winDrop.c};">${winDrop.tier}</span> +${winDrop.pts}P`;
+        document.getElementById("lbl-rem-boxes").innerText = `${remCount} Hak (Kademe ${step})`;
 
         isSpinning = false;
         if (remCount <= 0) {
+          document.getElementById("btn-spin").innerText = "BİTTİ!";
           triggerSummary();
         } else {
           document.getElementById("btn-spin").disabled = false;
+          document.getElementById("btn-spin").innerText = `KASAYI AÇ (Kademe ${step})`;
         }
-      }, 3100);
+      }, 2900);
     }
 
     function triggerSummary() {
-      setTimeout(() => {
-        document.getElementById("sum-score").innerText = `${totalScore} P`;
-        const dBox = document.getElementById("summary-drops-list");
-        dBox.innerHTML = "";
-        drops.forEach(d => {
-          dBox.innerHTML += `
-            <div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px; border:1px solid #3b1d6e;">
-              <span><b style="color:${d.c};">[${d.tier}]</b> ${d.item}</span>
-              <b style="color:var(--neon-green);">+${d.pts} P</b>
-            </div>
-          `;
-        });
-
-        document.getElementById("summary-overlay").style.display = "flex";
-        recordGameScore('upgrade_mode', 'Şans Yükseltme Modu', totalScore, drops);
-      }, 1000);
+      document.getElementById("sum-score").innerText = `${totalScore} P`;
+      const dBox = document.getElementById("summary-drops-list");
+      dBox.innerHTML = "";
+      drops.forEach(d => {
+        dBox.innerHTML += `
+          <div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px;">
+            <span>[${d.tier}] ${d.item}</span>
+            <b style="color:var(--neon-green);">+${d.pts}P</b>
+          </div>
+        `;
+      });
+      document.getElementById("summary-overlay").style.display = "flex";
+      recordGameScore('upgrade_mode', 'Şans Yükseltme', totalScore, drops, totalScore > 0);
     }
   </script>
 </body>
