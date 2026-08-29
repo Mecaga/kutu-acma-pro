@@ -7,29 +7,13 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <style>
-    #basket {
-      position: absolute;
-      bottom: 10px;
-      width: 60px;
-      height: 35px;
-      background: linear-gradient(180deg, #38bdf8, #0284c7);
-      border: 2px solid #fff;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      transition: left 0.08s ease-out;
-    }
-  </style>
 </head>
 <body class="bg-catch_open">
   <div class="app-container" style="justify-content:space-between;">
     <div>
       <div class="top-header">
         <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
-        <div style="font-weight:bold; font-size:12px;">🧺 Tut & Aç (20s)</div>
+        <div style="font-weight:bold; font-size:12px;">🧺 Tut & Aç Modu (20s)</div>
         <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
       </div>
       <div class="game-stats-top" style="display:flex; justify-content:space-between; margin-bottom:6px;">
@@ -38,34 +22,48 @@
           <div style="font-size:14px; font-weight:bold; color:#f87171;" id="lbl-timer">20s</div>
         </div>
         <div class="stat-card score" style="border:1px solid #10b981; background:#0d1527; padding:4px 8px; border-radius:8px; text-align:right;">
-          <div style="font-size:9px; color:#94a3b8;">YAKALANAN</div>
-          <div style="font-size:14px; font-weight:bold; color:#34d399;" id="lbl-caught">0 Adet</div>
+          <div style="font-size:9px; color:#94a3b8;">YAKALANAN KUTU</div>
+          <div style="font-size:14px; font-weight:bold; color:#34d399;" id="lbl-caught-count">0 Adet</div>
         </div>
       </div>
     </div>
 
-    <!-- Oyun Alanı -->
-    <div id="game-arena" style="flex:1; background:#050a14; border:2px dashed #3b1d6e; border-radius:8px; position:relative; overflow:hidden; margin-bottom:6px;">
-      <div id="basket" style="left:120px;">🛒</div>
+    <!-- 1. Oynanış Sahnesi -->
+    <div id="screen-game" style="flex:1; display:flex; flex-direction:column; position:relative;">
+      <div id="game-arena" style="flex:1; background:#060b17; border:2px solid var(--neon-purple); border-radius:10px; position:relative; overflow:hidden;">
+        <div id="player-basket" style="position:absolute; bottom:10px; left:120px; width:60px; height:24px; background:linear-gradient(90deg, #38bdf8, #a855f7); border-radius:12px; border:2px solid #fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold; color:#fff; box-shadow:0 0 10px #38bdf8; transition:left 0.06s linear;">
+          🧺 TUTUCU
+        </div>
+      </div>
+      
+      <!-- Dokunmatik Yön Butonları -->
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button class="btn-start" style="flex:1; background:#1e293b; font-size:18px;" id="btn-left">◀ SOL</button>
+        <button class="btn-start" style="flex:1; background:#1e293b; font-size:18px;" id="btn-right">SAĞ ▶</button>
+      </div>
     </div>
 
-    <!-- Kontrol Butonları -->
-    <div style="display:flex; gap:10px; margin-bottom:6px;">
-      <button class="btn-start" style="flex:1; background:#1e293b; border:1px solid #38bdf8; font-size:18px;" onclick="moveBasket(-25)">◀ SOL</button>
-      <button class="btn-start" style="flex:1; background:#1e293b; border:1px solid #38bdf8; font-size:18px;" onclick="moveBasket(25)">SAĞ ▶</button>
+    <!-- 2. Toplananları Açma & CS Ruleti -->
+    <div id="screen-open" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
+      <div class="roulette-container" id="roulette-box">
+        <div class="roulette-needle"></div>
+        <div id="roulette-track" class="roulette-track"></div>
+      </div>
+      <div id="caught-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; flex:1; overflow-y:auto; margin:6px 0;"></div>
+      <button id="btn-open-all" class="btn-start" onclick="openAllCaught()">⚡ Tüm Yakalananları Aç</button>
     </div>
 
     <!-- Özet Ekranı -->
     <div id="summary-overlay" class="modal-overlay">
       <div class="modal-card">
-        <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">SÜRE DOLDU!</div>
+        <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">TUR TAMAMLANDI</div>
         <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
-          <div>Toplam Skor: <b id="sum-score" style="color:var(--neon-green);">0 P</b></div>
-          <div>Kutu Sayısı: <b id="sum-count" style="color:var(--neon-blue);">0</b></div>
+          <div>Toplam Puan: <b id="sum-score" style="color:var(--neon-green);">0 P</b></div>
         </div>
+        <div id="summary-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
         <div style="display:flex; gap:6px;">
           <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar</button>
-          <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Lobi</a>
+          <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Menü</a>
         </div>
       </div>
     </div>
@@ -73,63 +71,129 @@
 
   <script src="app.js"></script>
   <script>
-    let timeLeft = 20, basketX = 120, caughtCount = 0, totalScore = 0, gameActive = true;
-    const arena = document.getElementById("game-arena");
-    const basket = document.getElementById("basket");
+    let timeLeft = 20, basketX = 120, caughtBoxes = [], gameRunning = true, totalScore = 0, drops = [];
+    const arenaWidth = 300;
 
-    function moveBasket(dir) {
-      if (!gameActive) return;
-      const maxRight = arena.offsetWidth - 65;
-      basketX = Math.max(0, Math.min(maxRight, basketX + dir));
-      basket.style.left = basketX + "px";
+    window.onload = () => {
+      initGame();
+      bindControls();
+    };
+
+    function bindControls() {
+      const moveLeft = () => { basketX = Math.max(0, basketX - 25); updateBasket(); };
+      const moveRight = () => { 
+        const maxLimit = (document.getElementById("game-arena").offsetWidth || arenaWidth) - 65;
+        basketX = Math.min(maxLimit, basketX + 25); 
+        updateBasket(); 
+      };
+
+      document.getElementById("btn-left").addEventListener("click", moveLeft);
+      document.getElementById("btn-right").addEventListener("click", moveRight);
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") moveLeft();
+        if (e.key === "ArrowRight") moveRight();
+      });
     }
 
-    // Kutuların düşüşü
-    const spawnTimer = setInterval(() => {
-      if (!gameActive) return;
-      const b = document.createElement("div");
-      const startX = Math.random() * (arena.offsetWidth - 40);
-      const pts = [10, 25, 50, 100][Math.floor(Math.random() * 4)];
+    function updateBasket() {
+      document.getElementById("player-basket").style.left = basketX + "px";
+    }
+
+    function initGame() {
+      const arena = document.getElementById("game-arena");
       
-      b.style.cssText = `position:absolute; width:34px; height:34px; background:#1e1b4b; border:2px solid #a855f7; border-radius:6px; font-size:10px; display:flex; align-items:center; justify-content:center; left:${startX}px; top:0px;`;
-      b.innerText = `+${pts}`;
-      arena.appendChild(b);
+      const spawnTimer = setInterval(() => {
+        if (!gameRunning) return clearInterval(spawnTimer);
+        spawnFallingBox(arena);
+      }, 600);
 
-      let topPos = 0;
-      const dropInt = setInterval(() => {
-        if (!gameActive) { clearInterval(dropInt); b.remove(); return; }
-        topPos += 4;
-        b.style.top = topPos + "px";
+      const timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("lbl-timer").innerText = `${timeLeft}s`;
+        if (timeLeft <= 0) {
+          gameRunning = false;
+          clearInterval(timer);
+          clearInterval(spawnTimer);
+          setTimeout(startOpenPhase, 600);
+        }
+      }, 1000);
+    }
 
-        // Çarpışma Testi
-        const arenaHeight = arena.offsetHeight;
-        if (topPos >= arenaHeight - 45 && topPos <= arenaHeight - 15) {
-          if (startX + 30 >= basketX && startX <= basketX + 60) {
-            caughtCount++;
-            totalScore += pts;
-            document.getElementById("lbl-caught").innerText = `${caughtCount} Adet`;
-            document.getElementById("score-badge").innerText = `${totalScore} P`;
-            clearInterval(dropInt);
-            b.remove();
+    function spawnFallingBox(arena) {
+      const box = document.createElement("div");
+      const arenaW = arena.offsetWidth || arenaWidth;
+      const xPos = Math.random() * (arenaW - 40);
+      box.style.cssText = `position:absolute; width:34px; height:34px; background:#38bdf8; border:2px solid #fff; border-radius:6px; top:0px; left:${xPos}px; display:flex; align-items:center; justify-content:center; font-size:16px; transition:top 1.8s linear; z-index:5;`;
+      box.innerText = "📦";
+      arena.appendChild(box);
+
+      setTimeout(() => { box.style.top = (arena.offsetHeight - 40) + "px"; }, 20);
+
+      const checkHit = setInterval(() => {
+        if (!box.parentNode) return clearInterval(checkHit);
+        const bTop = box.offsetTop;
+        const arenaH = arena.offsetHeight;
+
+        if (bTop >= arenaH - 55 && bTop <= arenaH - 20) {
+          if (xPos + 30 >= basketX && xPos <= basketX + 60) {
+            caughtBoxes.push({ tier: "Yakalanan Kutu", pts: Math.floor(Math.random() * 40) + 10 });
+            document.getElementById("lbl-caught-count").innerText = `${caughtBoxes.length} Adet`;
+            clearInterval(checkHit);
+            box.remove();
           }
         }
-        if (topPos > arenaHeight) { clearInterval(dropInt); b.remove(); }
-      }, 30);
-    }, 600);
+      }, 50);
 
-    const timer = setInterval(() => {
-      timeLeft--;
-      document.getElementById("lbl-timer").innerText = `${timeLeft}s`;
-      if (timeLeft <= 0) {
-        gameActive = false;
-        clearInterval(timer);
-        clearInterval(spawnTimer);
-        document.getElementById("sum-score").innerText = `${totalScore} P`;
-        document.getElementById("sum-count").innerText = caughtCount;
-        document.getElementById("summary-overlay").style.display = "flex";
-        recordGameScore('catch_basket', 'Tut & Aç Modu', totalScore, [], totalScore > 0);
+      setTimeout(() => {
+        clearInterval(checkHit);
+        if (box.parentNode) box.remove();
+      }, 1850);
+    }
+
+    function startOpenPhase() {
+      document.getElementById("screen-game").style.display = "none";
+      document.getElementById("screen-open").style.display = "flex";
+      renderCaughtGrid();
+    }
+
+    function renderCaughtGrid() {
+      const grid = document.getElementById("caught-grid");
+      grid.innerHTML = "";
+      if (caughtBoxes.length === 0) {
+        grid.innerHTML = "<div style='grid-column:span 3; text-align:center; color:#94a3b8; padding:20px;'>Hiç kutu yakalayamadın!</div>";
+        setTimeout(triggerSummary, 1200);
+        return;
       }
-    }, 1000);
+      caughtBoxes.forEach((b, i) => {
+        grid.innerHTML += `
+          <div class="roulette-item" style="border:1px solid #38bdf8; border-radius:6px;">
+            <span>📦</span>
+            <span style="color:#38bdf8; font-size:8px;">Kutu #${i+1}</span>
+          </div>
+        `;
+      });
+    }
+
+    function openAllCaught() {
+      document.getElementById("btn-open-all").disabled = true;
+      caughtBoxes.forEach(b => {
+        totalScore += b.pts;
+        drops.push({ tier: "Standart", item: "Tut & Aç Ödülü", pts: b.pts, c: "#38bdf8" });
+      });
+      document.getElementById("score-badge").innerText = `${totalScore} P`;
+      setTimeout(triggerSummary, 800);
+    }
+
+    function triggerSummary() {
+      document.getElementById("sum-score").innerText = `${totalScore} P`;
+      const dBox = document.getElementById("summary-drops-list");
+      dBox.innerHTML = "";
+      drops.forEach(d => {
+        dBox.innerHTML += `<div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px;"><span>${d.item}</span><b style="color:var(--neon-green);">+${d.pts}P</b></div>`;
+      });
+      document.getElementById("summary-overlay").style.display = "flex";
+      recordGameScore('tut_ac_mode', 'Tut & Aç Modu', totalScore, drops, totalScore > 0);
+    }
   </script>
 </body>
 </html>
