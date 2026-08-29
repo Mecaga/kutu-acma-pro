@@ -9,7 +9,7 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const AVATAR_LIST = ["👤", "😄", "😍", "😎", "🤓", "🥸", "🤠", "😈", "👽", "🎃", "💀", "👁", "🧠", "⛑️", "🎒", "🛜", "👑"];
+const AVATAR_LIST = ["👤", "😄", "😍", "😎", "🤓", "🤠", "😈", "👽", "🎃", "💀", "👁", "🧠", "🎒", "👑"];
 
 function getActiveUser() {
   const data = localStorage.getItem("kutu_active_session");
@@ -25,25 +25,13 @@ function setActiveUser(userData) {
       tag: userData.tag,
       avatar: userData.avatar || "👤",
       title: userData.title || "Çaylak",
-      sound: userData.sound !== undefined ? userData.sound : true,
-      createdAt: userData.createdAt || new Date().toLocaleString("tr-TR"),
-      stats: userData.stats || {},
+      isAdmin: userData.isAdmin || false,
       lastOnline: Date.now()
     });
   }
 }
 
-function syncUserFromDB(uid, callback) {
-  db.ref("users/" + uid).once("value", snap => {
-    const val = snap.val();
-    if (val) {
-      setActiveUser(val);
-      if (callback) callback(val);
-    }
-  });
-}
-
-// Skor Kayıt Fonksiyonu
+// Skor Kayıt Fonksiyonu (Speedrun süre odaklı)
 function recordGameScore(modeKey, modeName, score, dropsList, isWin = true, speedTime = null) {
   const u = getActiveUser();
   if (!u) return;
@@ -65,7 +53,6 @@ function recordGameScore(modeKey, modeName, score, dropsList, isWin = true, spee
   }
   setActiveUser(u);
 
-  // Zar & Kasa veya PvP puanları sıralamaya yazılmaz
   if (modeKey === 'dice_mode' || modeKey === 'pvp_mode') return;
 
   const recRef = db.ref(`leaderboards/${modeKey}/${u.uid}`);
@@ -104,67 +91,8 @@ function recordGameScore(modeKey, modeName, score, dropsList, isWin = true, spee
   });
 }
 
-function updateUsernameGlobal(newName) {
-  const u = getActiveUser();
-  if (!u || !newName.trim()) return;
-
-  const oldSafeKey = u.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
-  const newSafeKey = newName.toLowerCase().replace(/[^a-z0-9]/g, "_");
-
-  db.ref("accounts/" + newSafeKey).once("value", snap => {
-    if (snap.exists() && snap.val().uid !== u.uid) return alert("Bu kullanıcı adı zaten kullanımda!");
-
-    db.ref("accounts/" + oldSafeKey).remove();
-    db.ref("accounts/" + newSafeKey).set({ uid: u.uid, password: u.password });
-
-    u.name = newName.trim();
-    setActiveUser(u);
-    alert("Kullanıcı adınız güncellendi!");
-    location.reload();
-  });
-}
-
-function removeFriendBidirectional(friendUID, friendName, callback) {
-  const u = getActiveUser();
-  if (!u || !confirm(`${friendName} arkadaşlıktan çıkarılsın mı?`)) return;
-
-  db.ref(`friends/${u.uid}/${friendUID}`).remove();
-  db.ref(`friends/${friendUID}/${u.uid}`).remove();
-  alert(`${friendName} arkadaş listenizden çıkarıldı.`);
-  if (callback) callback();
-}
-
-function deleteAccountPermanently() {
-  const u = getActiveUser();
-  if (!u || !confirm("Hesabınızı ve tüm verilerinizi kalıcı olarak silmek istediğinize emin misiniz?")) return;
-
-  const safeKey = u.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
-  db.ref("accounts/" + safeKey).remove();
-  db.ref("users/" + u.uid).remove();
-
-  const modes = ['standard', 'ten_cases', 'catch_open', 'upgrade_mode', 'mines_mode', 'mega_mode', 'dice_mode', 'speedrun_mode', 'bomb_mode', 'double_mode'];
-  modes.forEach(m => db.ref(`leaderboards/${m}/${u.uid}`).remove());
-
-  db.ref("friends/" + u.uid).remove();
-  db.ref("friend_requests/" + u.uid).remove();
-  db.ref("channel_invites/" + u.uid).remove();
-
+// Güvenli Çıkış (Admin hesabı silinmez)
+function safeLogout() {
   localStorage.removeItem("kutu_active_session");
-  alert("Hesabınız silindi.");
   window.location.href = "index.html";
-}
-
-function adminClearAllUsers() {
-  if (confirm("Tüm kayıtlı kullanıcılar silinsin mi?")) { db.ref("accounts").remove(); db.ref("users").remove(); alert("Silindi!"); }
-}
-function adminClearAllScores() {
-  if (confirm("Tüm sıralama skorları silinsin mi?")) { db.ref("leaderboards").remove(); alert("Silindi!"); }
-}
-function adminClearAllChannels() {
-  if (confirm("Tüm kanallar silinsin mi?")) { db.ref("channels").remove(); db.ref("channel_msgs").remove(); alert("Silindi!"); }
-}
-function adminWipeEverything() {
-  if (confirm("HER ŞEY silinecektir! Onaylıyor musunuz?")) {
-    db.ref().remove().then(() => { localStorage.clear(); window.location.href = "index.html"; });
-  }
 }
