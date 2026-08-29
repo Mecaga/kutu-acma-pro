@@ -31,11 +31,12 @@
       </div>
     </div>
 
-    <!-- 14 MODLU ORİJİNAL KOMPAKT GRID -->
+    <!-- 14 MODLU ÇALIŞAN IZGARA -->
     <div class="mode-grid-8" style="grid-template-rows: repeat(7, 1fr); max-height:270px; overflow-y:auto;">
       <div class="mode-card-8 active" onclick="selectGameMode('standard', this, 'normal.html')"><b>⚔️ Normal Kasa</b><span>30s Klasik</span></div>
       <div class="mode-card-8" onclick="selectGameMode('ten_cases', this, 'ten_cases.html')"><b>📦 10 Kutu Modu</b><span>10 Hak</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('catch_open', this, 'catch.html')"><b>🎯 Yakala & Aç</b><span>Kutuları Topla</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('catch_basket', this, 'catch_basket.html')"><b>🧺 Tut & Aç</b><span>Sepetle Topla</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('catch_open', this, 'catch.html')"><b>🎯 Yakala & Aç</b><span>Kutuları Yakala</span></div>
       <div class="mode-card-8" onclick="selectGameMode('upgrade_mode', this, 'upgrade.html')"><b>📈 Şans Yükseltme</b><span>Katlanan Şans</span></div>
       <div class="mode-card-8" onclick="selectGameMode('mines_mode', this, 'mines.html')"><b>💣 Mayınlı Kasa</b><span>Risk & Çıkış</span></div>
       <div class="mode-card-8" onclick="selectGameMode('mega_mode', this, 'mega.html')"><b>💎 Mega Kasa</b><span>45s Dengeli</span></div>
@@ -43,10 +44,9 @@
       <div class="mode-card-8" onclick="selectGameMode('speedrun_mode', this, 'speedrun.html')"><b>⚡ Speedrun</b><span>1000P Yarışı</span></div>
       <div class="mode-card-8" onclick="selectGameMode('bomb_mode', this, 'bomba.html')"><b>⏳ Zaman Bombası</b><span>10s Kablo Kes</span></div>
       <div class="mode-card-8" onclick="selectGameMode('double_mode', this, 'double.html')"><b>🎰 Çift Rulet</b><span>Eşya + Çarpan</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('jackpot_mode', this, 'jackpot.html')"><b>🎡 Çarkıfelek</b><span>Büyük İkramiye</span></div>
       <div class="mode-card-8" onclick="selectGameMode('standard', this, 'normal.html')"><b>🛡️ Hazır Sandık</b><span>Defans Kasası</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('mega_mode', this, 'mega.html')"><b>⛏️ Altın Madeni</b><span>Cevher Kasası</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('upgrade_mode', this, 'upgrade.html')"><b>🎡 Şans Çarkı</b><span>Dinamik Kasa</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('mines_mode', this, 'mines.html')"><b>🏛️ Gizli Tapınak</b><span>Antik Kasa</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('temple_mode', this, 'temple.html')"><b>🏛️ Gizli Tapınak</b><span>5 Katlı Zindan</span></div>
     </div>
 
     <div>
@@ -115,6 +115,7 @@
       <div style="font-size:10px; color:#cbd5e1; line-height:1.6; max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
         <div><b>⚔️ Normal Kasa:</b> 30s klasik kasa açma yarışı.</div>
         <div><b>📦 10 Kutu:</b> Süresiz tam 10 kutu açma hakkı.</div>
+        <div><b>🧺 Tut & Aç:</b> Sepetle düşen kutuları tam ortada yakala ve rulette aç!</div>
         <div><b>🎯 Yakala & Aç:</b> 20s düşen kutuları toplayıp CS ruletinde aç.</div>
         <div><b>📈 Şans Yükseltme:</b> Her adımda katlanan Godly şansı.</div>
         <div><b>💣 Mayınlı Kasa:</b> 9 kutuda 1 mayın; bombaya basarsan puanlar sıfırlanır.</div>
@@ -123,6 +124,8 @@
         <div><b>⚡ Speedrun:</b> En hızlı sürede 1000 puana ulaş!</div>
         <div><b>⏳ Zaman Bombası:</b> 10s içinde 3 doğru kabloyu keserek bombayı imha et.</div>
         <div><b>🎰 Çift Rulet:</b> Aynı anda eşya ve x1-x10 çarpan kazan.</div>
+        <div><b>🎡 Çarkıfelek:</b> Çarkı çevirip 2500P büyük ödülü hedefle.</div>
+        <div><b>🏛️ Gizli Tapınak:</b> 5 katlı kapı bulmacası; doğru kapıları bul ve 1000P'yi kap.</div>
         <div><b>⚔️ 1v1 PvP:</b> Canlı rakiple hazır verip sandık düellosu yap.</div>
       </div>
       <button class="btn-close" onclick="document.getElementById('modal-guide').style.display='none'">Kapat</button>
@@ -137,6 +140,7 @@
     const MODE_RATES = {
       standard: { bg: "bg-standard", title: "NORMAL KASA", tiers: [{name:"Classic (%58)",pts:"1-3P",c:"#fff"},{name:"Super (%29)",pts:"4-10P",c:"#38bdf8"},{name:"Ultra (%10)",pts:"12-30P",c:"#c084fc"},{name:"Omega (%2.8)",pts:"35-120P",c:"#fb923c"},{name:"Godly (%0.2)",pts:"500-1000P",c:"#f43f5e"}] },
       ten_cases: { bg: "bg-ten_cases", title: "10 KUTU MODU", tiers: [{name:"Classic (%35)",pts:"2-5P",c:"#fff"},{name:"Super (%35)",pts:"6-15P",c:"#38bdf8"},{name:"Ultra (%20)",pts:"20-50P",c:"#c084fc"},{name:"Omega (%8.5)",pts:"60-200P",c:"#fb923c"},{name:"Godly (%1.5)",pts:"600-1200P",c:"#f43f5e"}] },
+      catch_basket: { bg: "bg-catch_open", title: "TUT & AÇ (SEPET)", tiers: [{name:"Tahta Kutu (%45)",pts:"3-8P",c:"#fff"},{name:"Çelik Kutu (%30)",pts:"10-25P",c:"#38bdf8"},{name:"Mistik Kutu (%16)",pts:"30-80P",c:"#c084fc"},{name:"Kozmik Sandık (%7)",pts:"100-300P",c:"#fb923c"},{name:"Tanrısal Kasa (%2)",pts:"800-1600P",c:"#f43f5e"}] },
       catch_open: { bg: "bg-catch_open", title: "YAKALA & AÇ", tiers: [{name:"Classic Kasa (%45)",pts:"2-5P",c:"#fff"},{name:"Super Kasa (%30)",pts:"6-18P",c:"#38bdf8"},{name:"Ultra Kasa (%15)",pts:"25-60P",c:"#c084fc"},{name:"Omega Kasa (%8)",pts:"80-250P",c:"#fb923c"},{name:"Godly Kasa (%2)",pts:"750-1500P",c:"#f43f5e"}] },
       upgrade_mode: { bg: "bg-upgrade_mode", title: "ŞANS YÜKSELTME", tiers: [{name:"Kademe 1 (%60)",pts:"5-15P",c:"#fff"},{name:"Kademe 2 (%25)",pts:"20-60P",c:"#38bdf8"},{name:"Kademe 3 (%10)",pts:"70-180P",c:"#c084fc"},{name:"Kozmik (%5)",pts:"250-800P",c:"#f43f5e"}] },
       mines_mode: { bg: "bg-mines_mode", title: "MAYINLI KASA", tiers: [{name:"Güvenli Kasa (%70)",pts:"15-45P",c:"#10b981"},{name:"Büyük Hazine (%30)",pts:"60-160P",c:"#fbbf24"},{name:"Bomba",pts:"0P",c:"#ef4444"}] },
@@ -144,7 +148,9 @@
       dice_mode: { bg: "bg-dice_mode", title: "ZAR & KASA", tiers: [{name:"Zar Çarpanı",pts:"x1, x2, x3, x5",c:"#fbbf24"},{name:"Taban Puan",pts:"20-100P",c:"#38bdf8"}] },
       speedrun_mode: { bg: "bg-speedrun_mode", title: "SPEEDRUN YARIŞI", tiers: [{name:"Hızlı Kasa",pts:"20-60P",c:"#38bdf8"},{name:"Hedef",pts:"En Hızlı 1000P!",c:"#f43f5e"}] },
       bomb_mode: { bg: "bg-standard", title: "ZAMAN BOMBASI", tiers: [{name:"Doğru Kablo",pts:"x5 Çarpan",c:"#10b981"},{name:"Yanlış Kablo",pts:"0P Patlama",c:"#ef4444"}] },
-      double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] }
+      double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] },
+      jackpot_mode: { bg: "bg-standard", title: "ÇARKIFELEK", tiers: [{name:"Büyük Jackpot",pts:"2500P",c:"#fbbf24"},{name:"Küçük Ödüller",pts:"100-500P",c:"#38bdf8"}] },
+      temple_mode: { bg: "bg-upgrade_mode", title: "GİZLİ TAPINAK", tiers: [{name:"5. Kat Büyük Ödül",pts:"1000P",c:"#fbbf24"},{name:"Ara Katlar",pts:"50-500P",c:"#10b981"}] }
     };
 
     window.onload = () => {
@@ -189,12 +195,12 @@
       targetPage = page;
       document.querySelectorAll(".mode-card-8").forEach(b => b.classList.remove("active"));
       cardEl.classList.add("active");
-      document.body.className = MODE_RATES[key].bg;
+      document.body.className = MODE_RATES[key] ? MODE_RATES[key].bg : "bg-standard";
       renderRates(key);
     }
 
     function renderRates(key) {
-      const info = MODE_RATES[key];
+      const info = MODE_RATES[key] || MODE_RATES['standard'];
       let html = `<div style="color:var(--neon-gold); font-weight:bold; font-size:11px; margin-bottom:2px;">📊 ${info.title}</div>`;
       info.tiers.forEach(t => {
         html += `<div style="display:flex; justify-content:space-between; color:${t.c}; font-weight:600; font-size:10px;">
