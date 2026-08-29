@@ -68,7 +68,7 @@
   <div class="app-container" style="justify-content:space-between;">
     <div>
       <div class="top-header">
-        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger); z-index:999;">‹ Çıkış</a>
         <div style="font-weight:bold; font-size:12px;">🧺 Tut & Aç (20s)</div>
         <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
       </div>
@@ -108,10 +108,10 @@
         <span style="font-size:11px; color:#38bdf8;">📦 Kalan Sepet: <b id="lbl-rem-basket">0</b></span>
         <button id="btn-open-all-basket" class="icon-btn" style="background:var(--neon-purple);" onclick="openAllBasketBoxes()">⚡ Tümünü Aç</button>
       </div>
-      <div id="basket-inv-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; flex:1; overflow-y:auto;"></div>
+      <div id="basket-inv-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; flex:1; overflow-y:auto; max-height:180px;"></div>
     </div>
 
-    <!-- Özet Ekranı -->
+    <!-- Özet Ekranı (Kaydırma Çubuklu) -->
     <div id="summary-overlay" class="modal-overlay">
       <div class="modal-card">
         <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">TUT & AÇ TAMAMLANDI</div>
@@ -119,7 +119,7 @@
           <div>Toplam: <b id="sum-score" style="color:var(--neon-green);">0 P</b></div>
           <div>Toplanan: <b id="sum-count" style="color:var(--neon-blue);">0</b></div>
         </div>
-        <div id="summary-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+        <div id="summary-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px; border:1px solid #1e293b; padding:4px; border-radius:6px;"></div>
         <div style="display:flex; gap:6px;">
           <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar</button>
           <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Lobi</a>
@@ -139,7 +139,7 @@
     ];
 
     let timeLeft = 20, collected = [], totalScore = 0, drops = [];
-    let basketX = 150, moveDir = 0, moveInt = null, gameLoopInt = null, spawnInt = null, isOpening = false;
+    let basketX = 150, moveDir = 0, moveInt = null, spawnInt = null, isOpening = false;
 
     window.onload = () => {
       const u = getActiveUser();
@@ -172,7 +172,6 @@
       basketX = ((arena.offsetWidth || 300) / 2) - 30;
       document.getElementById("player-basket").style.left = `${basketX}px`;
 
-      // Sandık Düşürme Döngüsü
       spawnInt = setInterval(() => {
         if (timeLeft <= 0) return;
         let rand = Math.random() * 100, cum = 0, d = TIERS[0];
@@ -206,7 +205,6 @@
           curY += fallSpeed;
           box.style.top = `${curY}px`;
 
-          // Sepet ile Çarpışma Mantığı
           const bRect = document.getElementById("player-basket").getBoundingClientRect();
           const boxRect = box.getBoundingClientRect();
 
@@ -227,7 +225,6 @@
         }, 20);
       }, 500);
 
-      // Süre Sayacı
       const timer = setInterval(() => {
         timeLeft--;
         document.getElementById("lbl-timer").innerText = `${timeLeft}s`;
@@ -261,8 +258,8 @@
       collected.forEach((b, idx) => {
         const itemBox = document.createElement("div");
         itemBox.className = "roulette-item";
-        itemBox.style.cssText = `width:100%; height:70px; border:1px solid ${b.opened ? '#334155' : b.c}; opacity:${b.opened ? '0.4' : '1'}; cursor:${b.opened ? 'default' : 'pointer'};`;
-        itemBox.innerHTML = `<span>🧺</span><span style="color:${b.c}; font-size:8px;">${b.tier}</span><span style="font-size:7px;">${b.opened ? 'AÇILDI' : 'DOKUN AÇ'}</span>`;
+        itemBox.style.cssText = `width:100%; height:60px; border:1px solid ${b.opened ? '#334155' : b.c}; opacity:${b.opened ? '0.4' : '1'}; cursor:${b.opened ? 'default' : 'pointer'};`;
+        itemBox.innerHTML = `<span>🧺</span><span style="color:${b.c}; font-size:7.5px;">${b.tier}</span><span style="font-size:7px;">${b.opened ? 'AÇILDI' : 'DOKUN AÇ'}</span>`;
         if (!b.opened) itemBox.onclick = () => openSingleBasketBox(idx);
         grid.appendChild(itemBox);
       });
@@ -280,6 +277,7 @@
 
       const totalItems = 28, winIdx = 22;
       let winDrop = null;
+      const itemWidth = 80;
 
       for (let i = 0; i < totalItems; i++) {
         const t = TIERS.find(x => x.name === (i === winIdx ? collected[idx].tier : TIERS[Math.floor(Math.random()*TIERS.length)].name)) || TIERS[0];
@@ -293,7 +291,8 @@
 
       setTimeout(() => {
         track.style.transition = "transform 2.6s cubic-bezier(0.12, 0.8, 0.2, 1)";
-        track.style.transform = `translateX(${-(winIdx * 75) + (box.offsetWidth / 2) - 37.5}px)`;
+        const targetX = -(winIdx * itemWidth) + (box.offsetWidth / 2) - (itemWidth / 2);
+        track.style.transform = `translateX(${targetX}px)`;
       }, 20);
 
       setTimeout(() => {
@@ -338,4 +337,3 @@
   </script>
 </body>
 </html>
-
