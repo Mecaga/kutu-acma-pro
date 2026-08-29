@@ -6,6 +6,7 @@
   --neon-green: #10b981;
   --neon-gold: #fbbf24;
   --danger: #ef4444;
+  --btn-blue: #0284c7;
   --text: #ffffff;
   --text-dim: #94a3b8;
 }
@@ -22,6 +23,8 @@ body.bg-mines_mode { background: radial-gradient(circle at 50% 15%, #450a0a 0%, 
 body.bg-mega_mode { background: radial-gradient(circle at 50% 15%, #1e1b4b 0%, #050515 100%) !important; }
 body.bg-dice_mode { background: radial-gradient(circle at 50% 15%, #312e81 0%, #0f0a2a 100%) !important; }
 body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0%, #1a0510 100%) !important; }
+body.bg-jackpot_mode { background: radial-gradient(circle at 50% 15%, #581c87 0%, #170326 100%) !important; }
+body.bg-pvp_mode { background: radial-gradient(circle at 50% 15%, #2e1065 0%, #080214 100%) !important; }
 
 .app-container {
   width: 100%;
@@ -55,6 +58,17 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
   z-index: 100;
 }
 .app-title { font-size: 15px; font-weight: 800; color: #fff; cursor: pointer; }
+
+.mode-btn {
+  background: #1e1b4b;
+  border: 1px solid var(--neon-purple);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
 .icon-btn {
   background: #1f0c3d;
   border: 1px solid var(--neon-purple);
@@ -74,7 +88,6 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
 .mode-grid-8 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(4, 1fr);
   gap: 4px;
   margin-bottom: 4px;
 }
@@ -90,11 +103,12 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
   cursor: pointer;
   text-align: left;
   height: 38px;
+  transition: all 0.2s ease;
 }
 .mode-card-8.active {
   background: linear-gradient(135deg, #7e22ce, #a855f7);
   border-color: #fff;
-  box-shadow: 0 0 8px var(--neon-purple-glow);
+  box-shadow: 0 0 10px var(--neon-purple-glow);
 }
 .mode-card-8 b { font-size: 10px; color: #fff; display: block; }
 .mode-card-8 span { font-size: 8px; color: var(--text-dim); }
@@ -175,12 +189,48 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
 .stat-mini-val { font-size: 13px; font-weight: 900; }
 .stat-mini-lbl { font-size: 8px; color: var(--text-dim); }
 
-.rank-card { background: #120826; border-radius: 8px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; cursor: pointer; border: 1px solid #3b1d6e; flex-shrink: 0; min-height: 44px; }
-.rank-1 { border-color: #fbbf24; background: linear-gradient(90deg, #3d2c00, #120826); }
-.rank-2 { border-color: #94a3b8; background: linear-gradient(90deg, #1e293b, #120826); }
-.rank-3 { border-color: #f97316; background: linear-gradient(90deg, #381500, #120826); }
+.pvp-grid-boxes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-height: 120px; overflow-y: auto; }
 
-/* Ortalanmış Modal Katmanı */
+/* ŞEKİLLİ DİNAMİK RANK AKIŞI */
+@keyframes rankGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.rank-card {
+  background: #120826;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  cursor: pointer;
+  border: 1px solid #3b1d6e;
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.rank-1 {
+  border-color: #fbbf24;
+  background: linear-gradient(90deg, #4d3600, #120826, #4d3600);
+  background-size: 200% 200%;
+  animation: rankGlow 3s ease infinite;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+}
+.rank-2 {
+  border-color: #94a3b8;
+  background: linear-gradient(90deg, #253347, #120826, #253347);
+  background-size: 200% 200%;
+  animation: rankGlow 4s ease infinite;
+}
+.rank-3 {
+  border-color: #f97316;
+  background: linear-gradient(90deg, #471b00, #120826, #471b00);
+  background-size: 200% 200%;
+  animation: rankGlow 5s ease infinite;
+}
+
 .modal-overlay {
   display: none;
   position: absolute;
