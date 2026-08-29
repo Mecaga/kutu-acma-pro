@@ -13,7 +13,7 @@
     <div>
       <div class="top-header">
         <div class="app-title" onclick="location.href='user.html'">
-          👤 <span id="lbl-username">...</span>
+          <span id="lbl-avatar">👤</span> <span id="lbl-username">...</span>
         </div>
         <div style="display:flex; gap:4px;">
           <a href="leaderboard.html" class="icon-btn">🏆 Sıralama</a>
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <!-- KÜÇÜLTÜLMÜŞ 2x4 MOD GRID -->
+    <!-- 2x4 MOD GRID -->
     <div class="mode-grid-8">
       <div class="mode-card-8 active" onclick="selectGameMode('standard', this, 'normal.html')">
         <b>⚔️ Normal Kasa</b>
@@ -65,24 +65,51 @@
       </div>
     </div>
 
-    <!-- OKUNAKLI & RENKLİ ORANLAR TABLOSU -->
     <div>
       <div class="menu-preview-box" id="rates-preview-box"></div>
       <button class="btn-start" onclick="launchGame()">OYUNA BAŞLA</button>
     </div>
   </div>
 
-  <!-- Ayarlar Modalı -->
+  <!-- Ayarlar Modalı (Avatar & Admin Paneli Ekli) -->
   <div id="modal-settings" class="modal-overlay">
     <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">⚙️ Oyun Ayarları</div>
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">⚙️ Profil & Oyun Ayarları</div>
+      
+      <!-- 16 Avatar Seçim Izgarası -->
+      <div style="font-size:10px; color:var(--text-dim); margin-bottom:2px;">Avatarını Seç:</div>
+      <div class="avatar-grid" id="avatar-picker-box"></div>
+
+      <!-- Unvan Seçimi -->
+      <div style="font-size:10px; color:var(--text-dim); margin-bottom:2px;">Unvan Seç:</div>
+      <select id="sel-title" class="input-field" onchange="changeTitle(this.value)">
+        <option value="Çaylak">Çaylak</option>
+        <option value="Usta">Usta</option>
+        <option value="Efsane">Efsane</option>
+        <option value="Kral">Kral</option>
+        <option value="Hükümdar">Hükümdar</option>
+      </select>
+
+      <!-- İsim Değiştir -->
       <div style="font-size:10px; color:var(--text-dim); margin-bottom:2px;">Kullanıcı Adı:</div>
-      <div style="display:flex; gap:4px; margin-bottom:8px;">
+      <div style="display:flex; gap:4px; margin-bottom:6px;">
         <input type="text" id="in-new-name" class="input-field" style="margin:0; font-size:11px;" placeholder="Yeni isim...">
         <button class="icon-btn" style="background:var(--neon-green);" onclick="submitNewName()">Kaydet</button>
       </div>
+
+      <!-- Admin Paneli (Sadece admin kullanıcısında görünür) -->
+      <div id="admin-panel-section" style="display:none; border:2px solid var(--danger); border-radius:8px; padding:6px; margin:6px 0; background:rgba(239, 68, 68, 0.1);">
+        <div style="font-size:11px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:4px;">🛑 ADMIN YÖNETİM PANELİ</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:4px;">
+          <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllUsers()">Kullanıcıları Sil</button>
+          <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllScores()">Skorları Sil</button>
+          <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllChannels()">Kanalları Sil</button>
+          <button class="icon-btn" style="background:#7f1d1d; border-color:var(--danger); justify-content:center;" onclick="adminWipeEverything()">🔥 TÜMÜNÜ SİL</button>
+        </div>
+      </div>
+
       <button id="btn-sound-toggle" class="mode-btn" style="margin-bottom:6px; text-align:center; color:#fff;" onclick="toggleSound()">🔊 Ses: Açık</button>
-      <button class="btn-start" style="background:var(--danger); font-size:11px; padding:8px;" onclick="deleteAccountPermanently()">🗑️ Hesabı Kalıcı Olarak Sil</button>
+      <button class="btn-start" style="background:var(--danger); font-size:11px; padding:6px;" onclick="deleteAccountPermanently()">🗑️ Hesabı Sil</button>
       <button class="btn-close" onclick="closeSettingsModal()">Kapat</button>
     </div>
   </div>
@@ -90,95 +117,55 @@
   <script src="app.js"></script>
   <script>
     let targetPage = 'normal.html';
+    let selectedAvatar = "👤";
+
     const MODE_RATES = {
-      standard: {
-        bg: "bg-standard",
-        title: "NORMAL KASA ORANLARI",
-        tiers: [
-          { name: "Classic (%58)", pts: "1-3 P", c: "#ffffff" },
-          { name: "Super (%29)", pts: "4-10 P", c: "#38bdf8" },
-          { name: "Ultra (%10)", pts: "12-30 P", c: "#c084fc" },
-          { name: "Omega (%2.8)", pts: "35-120 P", c: "#fb923c" },
-          { name: "Godly (%0.2)", pts: "500-1000 P", c: "#f43f5e" }
-        ]
-      },
-      ten_cases: {
-        bg: "bg-ten_cases",
-        title: "10 KUTU MODU ORANLARI",
-        tiers: [
-          { name: "Classic (%35)", pts: "2-5 P", c: "#ffffff" },
-          { name: "Super (%35)", pts: "6-15 P", c: "#38bdf8" },
-          { name: "Ultra (%20)", pts: "20-50 P", c: "#c084fc" },
-          { name: "Omega (%8.5)", pts: "60-200 P", c: "#fb923c" },
-          { name: "Godly (%1.5)", pts: "600-1200 P", c: "#f43f5e" }
-        ]
-      },
-      catch_open: {
-        bg: "bg-catch_open",
-        title: "YAKALA & AÇ ORANLARI",
-        tiers: [
-          { name: "Classic Kasa (%45)", pts: "2-5 P", c: "#ffffff" },
-          { name: "Super Kasa (%30)", pts: "6-18 P", c: "#38bdf8" },
-          { name: "Ultra Kasa (%15)", pts: "25-60 P", c: "#c084fc" },
-          { name: "Omega Kasa (%8)", pts: "80-250 P", c: "#fb923c" },
-          { name: "Godly Kasa (%2)", pts: "750-1500 P", c: "#f43f5e" }
-        ]
-      },
-      upgrade_mode: {
-        bg: "bg-upgrade_mode",
-        title: "ŞANS YÜKSELTME ORANLARI",
-        tiers: [
-          { name: "Kademe 1 (%60)", pts: "5-15 P", c: "#ffffff" },
-          { name: "Kademe 2 (%25)", pts: "20-60 P", c: "#38bdf8" },
-          { name: "Kademe 3 (%10)", pts: "70-180 P", c: "#c084fc" },
-          { name: "Kozmik Güç (%5)", pts: "250-800 P", c: "#f43f5e" }
-        ]
-      },
-      mines_mode: {
-        bg: "bg-mines_mode",
-        title: "MAYINLI KASA ORANLARI",
-        tiers: [
-          { name: "Güvenli Kasa (%70)", pts: "15-45 P", c: "#10b981" },
-          { name: "Büyük Hazine (%30)", pts: "60-160 P", c: "#fbbf24" },
-          { name: "Bomba (%11)", pts: "0 P (Patlar)", c: "#ef4444" }
-        ]
-      },
-      mega_mode: {
-        bg: "bg-mega_mode",
-        title: "MEGA KASA ORANLARI (DENGELİ)",
-        tiers: [
-          { name: "Mega Classic (%60)", pts: "10-30 P", c: "#ffffff" },
-          { name: "Mega Super (%28)", pts: "40-90 P", c: "#38bdf8" },
-          { name: "Mega Ultra (%10)", pts: "120-280 P", c: "#c084fc" },
-          { name: "Efsanevi (%2)", pts: "500-1500 P", c: "#f43f5e" }
-        ]
-      },
-      dice_mode: {
-        bg: "bg-dice_mode",
-        title: "ZAR & KASA ORANLARI",
-        tiers: [
-          { name: "Zar Çarpanı (x1, x2, x3, x5)", pts: "Zar Toplamına Göre", c: "#fbbf24" },
-          { name: "Kasa Taban Puanı", pts: "20-100 P", c: "#38bdf8" }
-        ]
-      },
-      speedrun_mode: {
-        bg: "bg-speedrun_mode",
-        title: "SPEEDRUN (1000 PUAN YARIŞI)",
-        tiers: [
-          { name: "Hızlı Kasa", pts: "15-60 P", c: "#38bdf8" },
-          { name: "Süper Destek", pts: "100-250 P", c: "#fbbf24" },
-          { name: "Hedef", pts: "En Hızlı 1000 Puan!", c: "#f43f5e" }
-        ]
-      }
+      standard: { bg: "bg-standard", title: "NORMAL KASA", tiers: [{name:"Classic (%58)",pts:"1-3P",c:"#fff"},{name:"Super (%29)",pts:"4-10P",c:"#38bdf8"},{name:"Ultra (%10)",pts:"12-30P",c:"#c084fc"},{name:"Omega (%2.8)",pts:"35-120P",c:"#fb923c"},{name:"Godly (%0.2)",pts:"500-1000P",c:"#f43f5e"}] },
+      ten_cases: { bg: "bg-ten_cases", title: "10 KUTU MODU", tiers: [{name:"Classic (%35)",pts:"2-5P",c:"#fff"},{name:"Super (%35)",pts:"6-15P",c:"#38bdf8"},{name:"Ultra (%20)",pts:"20-50P",c:"#c084fc"},{name:"Omega (%8.5)",pts:"60-200P",c:"#fb923c"},{name:"Godly (%1.5)",pts:"600-1200P",c:"#f43f5e"}] },
+      catch_open: { bg: "bg-catch_open", title: "YAKALA & AÇ", tiers: [{name:"Classic Kasa (%45)",pts:"2-5P",c:"#fff"},{name:"Super Kasa (%30)",pts:"6-18P",c:"#38bdf8"},{name:"Ultra Kasa (%15)",pts:"25-60P",c:"#c084fc"},{name:"Omega Kasa (%8)",pts:"80-250P",c:"#fb923c"},{name:"Godly Kasa (%2)",pts:"750-1500P",c:"#f43f5e"}] },
+      upgrade_mode: { bg: "bg-upgrade_mode", title: "ŞANS YÜKSELTME", tiers: [{name:"Kademe 1 (%60)",pts:"5-15P",c:"#fff"},{name:"Kademe 2 (%25)",pts:"20-60P",c:"#38bdf8"},{name:"Kademe 3 (%10)",pts:"70-180P",c:"#c084fc"},{name:"Kozmik (%5)",pts:"250-800P",c:"#f43f5e"}] },
+      mines_mode: { bg: "bg-mines_mode", title: "MAYINLI KASA", tiers: [{name:"Güvenli Kasa (%70)",pts:"15-45P",c:"#10b981"},{name:"Büyük Hazine (%30)",pts:"60-160P",c:"#fbbf24"},{name:"Bomba",pts:"0P",c:"#ef4444"}] },
+      mega_mode: { bg: "bg-mega_mode", title: "MEGA KASA", tiers: [{name:"Mega Classic (%60)",pts:"10-30P",c:"#fff"},{name:"Mega Super (%28)",pts:"40-90P",c:"#38bdf8"},{name:"Mega Ultra (%10)",pts:"120-280P",c:"#c084fc"},{name:"Efsanevi (%2)",pts:"500-1500P",c:"#f43f5e"}] },
+      dice_mode: { bg: "bg-dice_mode", title: "ZAR & KASA", tiers: [{name:"Zar Çarpanı",pts:"x1, x2, x3, x5",c:"#fbbf24"},{name:"Taban Puan",pts:"20-100P",c:"#38bdf8"}] },
+      speedrun_mode: { bg: "bg-speedrun_mode", title: "SPEEDRUN YARIŞI", tiers: [{name:"Hızlı Kasa",pts:"20-60P",c:"#38bdf8"},{name:"Hedef",pts:"En Hızlı 1000P!",c:"#f43f5e"}] }
     };
 
     window.onload = () => {
       const u = getActiveUser();
       if (!u) return window.location.href = "index.html";
+      selectedAvatar = u.avatar || "👤";
+      document.getElementById("lbl-avatar").innerText = selectedAvatar;
       document.getElementById("lbl-username").innerText = `${u.name}${u.tag}`;
       document.getElementById("in-new-name").value = u.name;
+      document.getElementById("sel-title").value = u.title || "Çaylak";
+
+      // Admin Kontrolü
+      if (u.name.toLowerCase() === "admin") {
+        document.getElementById("admin-panel-section").style.display = "block";
+      }
+
+      renderAvatarPicker();
       renderRates('standard');
     };
+
+    function renderAvatarPicker() {
+      const box = document.getElementById("avatar-picker-box");
+      box.innerHTML = "";
+      AVATAR_LIST.forEach(av => {
+        const div = document.createElement("div");
+        div.className = "avatar-option" + (av === selectedAvatar ? " selected" : "");
+        div.innerText = av;
+        div.onclick = () => {
+          selectedAvatar = av;
+          const u = getActiveUser();
+          u.avatar = av;
+          setActiveUser(u);
+          document.getElementById("lbl-avatar").innerText = av;
+          renderAvatarPicker();
+        };
+        box.appendChild(div);
+      });
+    }
 
     function selectGameMode(key, cardEl, page) {
       targetPage = page;
@@ -202,7 +189,14 @@
     function launchGame() { window.location.href = targetPage; }
     function openSettingsModal() { document.getElementById("modal-settings").style.display = "flex"; }
     function closeSettingsModal() { document.getElementById("modal-settings").style.display = "none"; }
-    function submitNewName() { updateUsernameGlobal(document.getElementById("in-new-name").value.trim()); }
+    function changeTitle(val) {
+      let u = getActiveUser();
+      u.title = val;
+      setActiveUser(u);
+    }
+    function submitNewName() {
+      updateUsernameGlobal(document.getElementById("in-new-name").value.trim());
+    }
     function toggleSound() {
       let u = getActiveUser();
       u.sound = !u.sound;
