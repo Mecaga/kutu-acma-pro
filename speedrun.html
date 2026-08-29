@@ -12,7 +12,7 @@
   <div class="app-container" style="justify-content:space-between;">
     <div>
       <div class="top-header">
-        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger); z-index:999;">‹ Çıkış</a>
         <div style="font-weight:bold; font-size:12px;">⚡ 1000P Speedrun Yarışı</div>
         <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 / 1000 P</div>
       </div>
@@ -35,7 +35,7 @@
         <div style="font-size:22px; font-weight:900; color:#f472b6;">1000 PUANA ULAŞ!</div>
         <div style="font-size:11px; color:#fbbf24; margin-top:3px;">En hızlı sürede bitir!</div>
       </div>
-      <div id="roulette-view" class="roulette-container" style="display:none; width:100%;">
+      <div id="roulette-view" class="roulette-container" style="display:none; width:100%; height:85px;">
         <div class="roulette-needle"></div>
         <div id="roulette-track" class="roulette-track"></div>
       </div>
@@ -100,6 +100,7 @@
 
       const totalItems = 25, winIdx = 20;
       let winDrop = null;
+      const itemWidth = 80;
 
       for (let i = 0; i < totalItems; i++) {
         let rand = Math.random() * 100, cum = 0, d = TIERS[0];
@@ -116,7 +117,7 @@
 
       setTimeout(() => {
         track.style.transition = "transform 1.5s cubic-bezier(0.12, 0.8, 0.2, 1)";
-        const targetX = -(winIdx * 75) + (rView.offsetWidth / 2) - 37.5;
+        const targetX = -(winIdx * itemWidth) + (rView.offsetWidth / 2) - (itemWidth / 2);
         track.style.transform = `translateX(${targetX}px)`;
       }, 20);
 
@@ -148,7 +149,6 @@
       });
       document.getElementById("summary-overlay").style.display = "flex";
 
-      // Speedrun skoru süre bazlı olarak kaydedilir
       recordGameScore('speedrun_mode', 'Speedrun Modu', currentScore, drops, true, finalTime);
     }
   </script>
