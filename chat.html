@@ -7,51 +7,20 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <style>
-    .chat-bubble {
-      max-width: 78%;
-      padding: 6px 10px;
-      border-radius: 10px;
-      font-size: 11px;
-      margin-bottom: 4px;
-      display: flex;
-      flex-direction: column;
-      word-break: break-word;
-    }
-    .chat-me {
-      align-self: flex-end;
-      background: linear-gradient(135deg, #059669, #10b981);
-      color: #fff;
-      border-bottom-right-radius: 2px;
-    }
-    .chat-other {
-      align-self: flex-start;
-      background: #1e1b4b;
-      border: 1px solid #3b1d6e;
-      color: #fff;
-      border-bottom-left-radius: 2px;
-    }
-    .chat-time {
-      font-size: 7.5px;
-      color: rgba(255, 255, 255, 0.7);
-      align-self: flex-end;
-      margin-top: 2px;
-    }
-  </style>
 </head>
 <body>
   <div class="app-container" style="justify-content:space-between;">
     <div>
       <div class="top-header">
         <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
-        <div id="active-channel-lbl" style="font-weight:bold; font-size:12px; color:var(--neon-gold);">💬 Genel Sohbet</div>
+        <div id="active-channel-lbl" style="font-weight:bold; font-size:12px; color:var(--neon-gold);">💬 #genel</div>
         <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="toggleChannelPanel()">📡 Kanallar</button>
       </div>
 
-      <!-- Kanal Oluşturma & Katılma Bölümü -->
+      <!-- Kanal Değiştirme ve Kurma Bölümü -->
       <div id="channel-drawer" style="display:none; background:#070212; border:1px solid var(--neon-purple); border-radius:8px; padding:6px; margin-bottom:6px;">
         <div style="display:flex; gap:4px; margin-bottom:4px;">
-          <input type="text" id="in-chan-name" class="input-field" style="margin:0; font-size:10px;" placeholder="Kanal İsmi (#klan)">
+          <input type="text" id="in-chan-name" class="input-field" style="margin:0; font-size:11px;" placeholder="Kanal Adı (Örn: klan)">
           <button class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="joinOrCreateChannel()">Katıl/Kur</button>
         </div>
         <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">Mevcut Kanallar:</div>
@@ -59,13 +28,13 @@
       </div>
     </div>
 
-    <!-- Mesaj Akış Alanı -->
+    <!-- Mesaj Listesi -->
     <div id="chat-messages-box" style="flex:1; background:#040814; border:1px solid #1e293b; border-radius:8px; padding:8px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin:4px 0;"></div>
 
-    <!-- Mesaj Gönderme Paneli -->
+    <!-- Mesaj Yazma Barı -->
     <div style="display:flex; gap:4px;">
-      <input type="text" id="in-msg-txt" class="input-field" style="margin:0; text-align:left; font-size:11px;" placeholder="Mesaj yaz..." onkeydown="if(event.key==='Enter') sendMessage()">
-      <button class="icon-btn" style="background:var(--neon-purple); padding:0 14px;" onclick="sendMessage()">➤</button>
+      <input type="text" id="in-msg-txt" class="input-field" style="margin:0; text-align:left; font-size:11px;" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') sendMessage()">
+      <button class="icon-btn" style="background:var(--neon-purple); padding:0 14px;" onclick="sendMessage()">Gönder</button>
     </div>
   </div>
 
@@ -116,7 +85,7 @@
         const box = document.getElementById("chat-messages-box");
         box.innerHTML = "";
         if (!snap.exists()) {
-          box.innerHTML = "<div style='text-align:center; color:#666; font-size:10px; margin:auto;'>Henüz mesaj yok. İlk mesajı sen gönder!</div>";
+          box.innerHTML = "<div style='text-align:center; color:#666; font-size:10px; margin:auto;'>Henüz mesaj yok. İlk mesajı yazın!</div>";
           return;
         }
 
@@ -124,10 +93,12 @@
           const m = c.val();
           const isMe = u && m.senderUid === u.uid;
           box.innerHTML += `
-            <div class="chat-bubble ${isMe ? 'chat-me' : 'chat-other'}">
-              <span style="font-size:8.5px; font-weight:bold; color:${isMe ? '#fef08a' : '#38bdf8'};">${m.senderName}</span>
-              <span>${m.text}</span>
-              <span class="chat-time">${m.time || ''}</span>
+            <div style="background:${isMe ? '#1e1b4b' : '#070212'}; border:1px solid ${isMe ? 'var(--neon-purple)' : '#3b1d6e'}; border-radius:6px; padding:4px 8px; font-size:10px; align-self:${isMe ? 'flex-end' : 'flex-start'}; max-width:85%;">
+              <div style="display:flex; justify-content:space-between; gap:6px; font-size:8px; margin-bottom:2px;">
+                <b style="color:${isMe ? 'var(--neon-gold)' : '#38bdf8'};">${m.senderName}</b>
+                <span style="color:#64748b;">${m.time || ''}</span>
+              </div>
+              <div style="color:#fff;">${m.text}</div>
             </div>
           `;
         });
