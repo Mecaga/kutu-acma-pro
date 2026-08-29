@@ -23,12 +23,13 @@
         <button class="icon-btn" onclick="loadLB('standard', this)">Normal</button>
         <button class="icon-btn" onclick="loadLB('ten_cases', this)">10 Kutu</button>
         <button class="icon-btn" onclick="loadLB('catch_basket', this)">🧺 Tut & Aç</button>
-        <button class="icon-btn" onclick="loadLB('catch_open', this)">Yakala & Aç</button>
-        <button class="icon-btn" onclick="loadLB('mines_mode', this)">Mayın</button>
-        <button class="icon-btn" onclick="loadLB('mega_mode', this)">Mega</button>
+        <button class="icon-btn" onclick="loadLB('catch_open', this)">🎯 Yakala & Aç</button>
+        <button class="icon-btn" onclick="loadLB('mines_mode', this)">💣 Mayınlı</button>
+        <button class="icon-btn" onclick="loadLB('mega_mode', this)">💎 Mega</button>
         <button class="icon-btn" style="border-color:var(--danger);" onclick="loadLB('speedrun_mode', this)">⚡ Speedrun</button>
-        <button class="icon-btn" onclick="loadLB('bomb_mode', this)">Bomba</button>
-        <button class="icon-btn" onclick="loadLB('double_mode', this)">Çift Rulet</button>
+        <button class="icon-btn" onclick="loadLB('bomb_mode', this)">⏳ Bomba</button>
+        <button class="icon-btn" onclick="loadLB('double_mode', this)">🎰 Çift Rulet</button>
+        <button class="icon-btn" onclick="loadLB('temple_mode', this)">🏛️ Tapınak</button>
       </div>
     </div>
 
@@ -36,7 +37,7 @@
     <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
-  <!-- 1. Aşama: Oyun Detay Modalı -->
+  <!-- Oyun Detay Modalı -->
   <div id="modal-lb-game-info" class="modal-overlay">
     <div class="modal-card">
       <div style="font-size:10px; color:var(--text-dim); margin-bottom:4px;">Oyuncunun profiline gitmek için dokunun:</div>
@@ -50,7 +51,7 @@
     </div>
   </div>
 
-  <!-- 2. Aşama: Tam Profil Modalı (user.html ile birebir aynı) -->
+  <!-- Tam Profil Modalı (Mod Bazlı Kazanma Oranlı) -->
   <div id="modal-full-profile" class="modal-overlay">
     <div class="modal-card panel-theme-profile" style="max-height:90vh;">
       <div class="profile-badge-card" style="margin-bottom:6px;">
@@ -63,12 +64,12 @@
           <div class="stat-mini-box"><span class="stat-mini-val" id="prof-modal-played" style="color:var(--neon-blue);">0</span><span class="stat-mini-lbl">Oynanan</span></div>
           <div class="stat-mini-box"><span class="stat-mini-val" id="prof-modal-wins" style="color:var(--neon-green);">0</span><span class="stat-mini-lbl">Kazanma</span></div>
           <div class="stat-mini-box"><span class="stat-mini-val" id="prof-modal-losses" style="color:var(--danger);">0</span><span class="stat-mini-lbl">Kaybetme</span></div>
-          <div class="stat-mini-box"><span class="stat-mini-val" id="prof-modal-winrate" style="color:var(--neon-gold);">%0</span><span class="stat-mini-lbl">Oran</span></div>
+          <div class="stat-mini-box"><span class="stat-mini-val" id="prof-modal-winrate" style="color:var(--neon-gold);">%0</span><span class="stat-mini-lbl">Genel Oran</span></div>
         </div>
       </div>
 
-      <div style="font-size:10px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Mod Rekorları:</div>
-      <div id="prof-modal-stats-list" style="display:flex; flex-direction:column; gap:3px; max-height:150px; overflow-y:auto; margin-bottom:6px;"></div>
+      <div style="font-size:10px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Mod Bazlı İstatistikler & Oranlar:</div>
+      <div id="prof-modal-stats-list" style="display:flex; flex-direction:column; gap:3px; max-height:160px; overflow-y:auto; margin-bottom:6px;"></div>
 
       <button class="btn-close" onclick="document.getElementById('modal-full-profile').style.display='none'">Geri Dön</button>
     </div>
@@ -77,6 +78,9 @@
   <script src="app.js"></script>
   <script>
     let activeFilter = 'all';
+
+    // "Tümü" filtresinde genel sıralamayı bozan yüksek puanlı veya farklı mekanikli modlar gizlenir
+    const EXCLUDED_FROM_ALL = ['speedrun_mode', 'bomb_mode', 'temple_mode'];
 
     window.onload = () => {
       loadLB('all', document.getElementById("flt-all"));
@@ -96,7 +100,7 @@
         let allScores = [];
 
         snap.forEach(modeSnap => {
-          if (filter === 'all' && modeSnap.key === 'speedrun_mode') return;
+          if (filter === 'all' && EXCLUDED_FROM_ALL.includes(modeSnap.key)) return;
 
           if (filter === 'all' || modeSnap.key === filter) {
             modeSnap.forEach(userRecord => {
@@ -182,7 +186,8 @@
           mega_mode: "Mega Kasa",
           speedrun_mode: "Speedrun",
           bomb_mode: "Zaman Bombası",
-          double_mode: "Çift Rulet"
+          double_mode: "Çift Rulet",
+          temple_mode: "Gizli Tapınak"
         };
 
         const box = document.getElementById("prof-modal-stats-list");
@@ -194,13 +199,17 @@
           totalWins += s.wins || 0;
           totalLosses += s.losses || 0;
 
+          const modeWinRate = s.played > 0 ? Math.round((s.wins / s.played) * 100) : 0;
           const recVal = k === 'speedrun_mode' 
             ? (s.bestTime ? `${s.bestTime}s` : "-") 
             : `${s.best || 0} P`;
 
           box.innerHTML += `
-            <div class="rank-card" style="font-size:9px; min-height:30px; padding:3px 6px; margin-bottom:2px;">
-              <div><b>${modNames[k]}</b> (${s.played} Tur)</div>
+            <div class="rank-card" style="font-size:9px; min-height:36px; padding:4px 8px; margin-bottom:3px;">
+              <div>
+                <b>${modNames[k]}</b> <span style="color:#94a3b8;">(${s.played} Maç)</span><br>
+                <small style="color:var(--neon-green);">Oran: %${modeWinRate}</small> <small style="color:#94a3b8;">(${s.wins}G / ${s.losses || 0}M)</small>
+              </div>
               <b style="color:var(--neon-gold);">${recVal}</b>
             </div>
           `;
