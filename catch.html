@@ -10,8 +10,6 @@
 </head>
 <body class="bg-catch_open">
   <div class="app-container" style="justify-content:space-between;">
-    
-    <!-- Üst Stat Bar & Geri Dönme Butonu -->
     <div>
       <div class="top-header">
         <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
@@ -20,70 +18,65 @@
       </div>
 
       <div class="game-stats-top" style="display:flex; justify-content:space-between; margin-bottom:6px;">
-        <div class="stat-card timer" style="border:1px solid #ef4444; background:#0d1527; padding:5px 10px; border-radius:8px;">
+        <div class="stat-card timer" style="border:1px solid #ef4444; background:#0d1527; padding:4px 8px; border-radius:8px;">
           <div style="font-size:9px; color:#94a3b8;">TOPLAMA SÜRESİ</div>
-          <div style="font-size:15px; font-weight:bold; color:#f87171;" id="lbl-timer">15s</div>
+          <div style="font-size:14px; font-weight:bold; color:#f87171;" id="lbl-timer">20s</div>
           <div style="font-size:10px; color:#38bdf8;" id="lbl-user-tag">@User</div>
         </div>
-        <div class="stat-card score" style="border:1px solid #10b981; background:#0d1527; padding:5px 10px; border-radius:8px; text-align:right;">
+        <div class="stat-card score" style="border:1px solid #10b981; background:#0d1527; padding:4px 8px; border-radius:8px; text-align:right;">
           <div style="font-size:9px; color:#94a3b8;">YAKALANAN (MAX 15)</div>
-          <div style="font-size:15px; font-weight:bold; color:#34d399;" id="lbl-caught-count">0 / 15</div>
+          <div style="font-size:14px; font-weight:bold; color:#34d399;" id="lbl-caught-count">0 / 15</div>
         </div>
       </div>
     </div>
 
-    <!-- 1. AŞAMA: KUTULARI YAKALAMA ARENASI -->
+    <!-- 1. AŞAMA: KUTULARI YAKALAMA -->
     <div id="screen-phase1" style="flex:1; display:flex; flex-direction:column; justify-content:space-between;">
-      <div id="catch-arena" style="flex:1; min-height:280px; background:#050a14; border:2px dashed #3b1d6e; border-radius:8px; position:relative; overflow:hidden; margin-bottom:6px;"></div>
-      <div style="text-align:center; font-size:11px; color:#fbbf24; font-weight:bold;">⚡ Yavaşça düşen kutulara dokunarak topla!</div>
+      <div id="catch-arena" style="flex:1; min-height:280px; background:#050a14; border:2px dashed #3b1d6e; border-radius:8px; position:relative; overflow:hidden; margin-bottom:4px;"></div>
+      <div style="text-align:center; font-size:10px; color:#fbbf24; font-weight:bold;">⚡ Düşen kutulara dokunarak topla! (Hedef: 15 Kutu)</div>
     </div>
 
-    <!-- 2. AŞAMA: KUTULARI CS RULETİYLE AÇMA -->
+    <!-- 2. AŞAMA: CS RULETİYLE AÇMA -->
     <div id="screen-phase2" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
-      <div class="roulette-container" id="roulette-box" style="height:90px;">
+      <div class="roulette-container" id="roulette-box" style="height:85px;">
         <div class="roulette-needle"></div>
-        <div class="roulette-track" id="roulette-track"></div>
+        <div id="roulette-track" class="roulette-track"></div>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; margin:4px 0;">
-        <span style="font-size:11px; color:#38bdf8;">📦 Kalan Kutu: <b id="lbl-rem-count">0</b></span>
+        <span style="font-size:11px; color:#38bdf8;">📦 Kalan: <b id="lbl-rem-count">0</b></span>
         <button id="btn-open-all" class="icon-btn" style="background:var(--neon-purple);" onclick="openAllCaughtBoxes()">⚡ Tümünü Aç</button>
       </div>
       <div id="inv-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; flex:1; overflow-y:auto;"></div>
     </div>
 
-    <!-- 3. ÖZET EKRANI -->
+    <!-- Özet Ekranı -->
     <div id="summary-overlay" class="modal-overlay">
-      <div class="modal-card" style="background:#0b1329; border:1px solid #1e293b;">
+      <div class="modal-card">
         <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">OYUN BİTTİ</div>
         <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
           <div>Toplam: <b id="sum-score" style="color:var(--neon-green);">0 P</b></div>
           <div>Açılan: <b id="sum-count" style="color:var(--neon-blue);">0</b></div>
         </div>
-        <div id="summary-drops-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+        <div id="summary-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
         <div style="display:flex; gap:6px;">
           <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar Oyna</button>
           <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Ana Menü</a>
         </div>
       </div>
     </div>
-
   </div>
 
   <script src="app.js"></script>
   <script>
     const TIERS = [
-      { name: 'Classic Kasa', rate: 45.0, minP: 2, maxP: 5, c: '#ffffff', items: ['Deri Çanta', 'Taş Kolye', 'Bakır Hançer'] },
-      { name: 'Super Kasa',   rate: 30.0, minP: 6, maxP: 18, c: '#38bdf8', items: ['Buz Asası', 'Rüzgar Pelerini', 'Platin Kalkan'] },
-      { name: 'Ultra Kasa',   rate: 15.0, minP: 25, maxP: 60, c: '#c084fc', items: ['Gök Gürültüsü Baltası', 'Anka Tüyü'] },
-      { name: 'Omega Kasa',   rate: 8.0,  minP: 80, maxP: 250, c: '#fb923c', items: ['Ejderha Kalbi', 'Gölge Tacı'] },
-      { name: 'Godly Kasa',   rate: 2.0,  minP: 750, maxP: 1500, c: '#f43f5e', items: ['Kainatın Asası', 'Ebedi Yıldız Taşı'] }
+      { name: 'Classic Kasa', rate: 45.0, minP: 2, maxP: 5, c: '#ffffff', items: ['Deri Çanta', 'Taş Kolye'] },
+      { name: 'Super Kasa', rate: 30.0, minP: 6, maxP: 18, c: '#38bdf8', items: ['Buz Asası', 'Platin Kalkan'] },
+      { name: 'Ultra Kasa', rate: 15.0, minP: 25, maxP: 60, c: '#c084fc', items: ['Yıldırım Baltası', 'Anka Tüyü'] },
+      { name: 'Omega Kasa', rate: 8.0, minP: 80, maxP: 250, c: '#fb923c', items: ['Ejderha Kalbi', 'Gölge Tacı'] },
+      { name: 'Godly Kasa', rate: 2.0, minP: 750, maxP: 1500, c: '#f43f5e', items: ['Kainatın Asası'] }
     ];
 
-    let totalScore = 0;
-    let drops = [];
-    let caught = [];
-    let isOpening = false;
-    let timeLeft = 15;
+    let totalScore = 0, drops = [], caught = [], isOpening = false, timeLeft = 20;
     const MAX_BOXES = 15;
 
     window.onload = () => {
@@ -92,55 +85,39 @@
       startPhase1();
     };
 
-    function getRandomItem(forcedTier = null) {
-      if (forcedTier) {
-        const t = TIERS.find(x => x.name === forcedTier) || TIERS[0];
-        const it = t.items[Math.floor(Math.random() * t.items.length)];
-        const pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
-        return { tier: t.name, item: it, pts: pts, c: t.c };
-      }
-      let rand = Math.random() * 100, cum = 0;
-      for (let t of TIERS) {
-        cum += t.rate;
-        if (rand <= cum) {
-          let it = t.items[Math.floor(Math.random() * t.items.length)];
-          let pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
-          return { tier: t.name, item: it, pts: pts, c: t.c };
-        }
-      }
-      return { tier: TIERS[0].name, item: TIERS[0].items[0], pts: TIERS[0].minP, c: TIERS[0].c };
-    }
-
     function startPhase1() {
       const arena = document.getElementById("catch-arena");
       
-      // Kutu yağışı: 1200ms aralıkla yavaş akış (3.5s süreyle düşüş)
+      // Genişletilmiş ve 15 kutuya ulaşmayı kolaylaştıran düşüş sıklığı (700ms)
       const spawnInt = setInterval(() => {
         if (timeLeft <= 0 || caught.length >= MAX_BOXES) return;
-        const d = getRandomItem();
-        const box = document.createElement("div");
-        const maxW = Math.max(160, (arena.offsetWidth || 300) - 55);
         
-        box.style.cssText = `position:absolute; width:48px; height:48px; border-radius:8px; border:2px solid ${d.c}; background:#0d1b2a; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; cursor:pointer; left:${Math.random() * maxW}px; top:-60px; transition:top 3.5s linear;`;
-        box.innerHTML = `<span>📦</span><span style="color:${d.c}; font-size:7px; font-weight:bold;">${d.tier}</span>`;
+        let rand = Math.random() * 100, cum = 0, d = TIERS[0];
+        for (let t of TIERS) {
+          cum += t.rate;
+          if (rand <= cum) { d = t; break; }
+        }
+
+        const box = document.createElement("div");
+        const maxW = Math.max(160, (arena.offsetWidth || 300) - 60);
+        
+        box.style.cssText = `position:absolute; width:52px; height:52px; border-radius:8px; border:2px solid ${d.c}; background:#0d1b2a; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; cursor:pointer; left:${Math.random() * maxW}px; top:-60px; transition:top 3.2s linear;`;
+        box.innerHTML = `<span>📦</span><span style="color:${d.c}; font-size:7.5px; font-weight:bold;">${d.name.split(' ')[0]}</span>`;
         
         box.onclick = (e) => {
           e.stopPropagation();
           if (caught.length < MAX_BOXES) {
-            caught.push({ tier: d.tier, c: d.c, opened: false });
+            caught.push({ tier: d.name, c: d.c, opened: false });
             document.getElementById("lbl-caught-count").innerText = `${caught.length} / ${MAX_BOXES}`;
             box.remove();
-
-            if (caught.length >= MAX_BOXES) {
-              clearInterval(spawnInt);
-            }
+            if (caught.length >= MAX_BOXES) clearInterval(spawnInt);
           }
         };
 
         arena.appendChild(box);
-        setTimeout(() => box.style.top = "320px", 20);
-        setTimeout(() => { if (box.parentNode) box.remove(); }, 3600);
-      }, 1200);
+        setTimeout(() => box.style.top = "310px", 20);
+        setTimeout(() => { if (box.parentNode) box.remove(); }, 3300);
+      }, 700);
 
       const timer = setInterval(() => {
         timeLeft--;
@@ -148,7 +125,7 @@
         if (timeLeft <= 0 || caught.length >= MAX_BOXES) {
           clearInterval(timer);
           clearInterval(spawnInt);
-          setTimeout(startPhase2, 1000);
+          setTimeout(startPhase2, 800);
         }
       }, 1000);
     }
@@ -175,14 +152,8 @@
         const itemBox = document.createElement("div");
         itemBox.className = "roulette-item";
         itemBox.style.cssText = `width:100%; height:70px; border:1px solid ${b.opened ? '#334155' : b.c}; opacity:${b.opened ? '0.4' : '1'}; cursor:${b.opened ? 'default' : 'pointer'};`;
-        itemBox.innerHTML = `
-          <span>📦</span>
-          <span style="color:${b.c}; font-size:8px;">${b.tier}</span>
-          <span style="font-size:7px;">${b.opened ? 'AÇILDI' : 'DOKUN AÇ'}</span>
-        `;
-        if (!b.opened) {
-          itemBox.onclick = () => openSingleWithRoulette(idx);
-        }
+        itemBox.innerHTML = `<span>📦</span><span style="color:${b.c}; font-size:8px;">${b.tier}</span><span style="font-size:7px;">${b.opened ? 'AÇILDI' : 'DOKUN AÇ'}</span>`;
+        if (!b.opened) itemBox.onclick = () => openSingleWithRoulette(idx);
         grid.appendChild(itemBox);
       });
     }
@@ -201,22 +172,18 @@
       let winDrop = null;
 
       for (let i = 0; i < totalItems; i++) {
-        let d = getRandomItem(i === winIdx ? caught[idx].tier : null);
+        const t = TIERS.find(x => x.name === (i === winIdx ? caught[idx].tier : TIERS[Math.floor(Math.random()*TIERS.length)].name));
+        const pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
+        const it = t.items[Math.floor(Math.random() * t.items.length)];
+        const d = { tier: t.name, item: it, pts: pts, c: t.c };
         if (i === winIdx) winDrop = d;
-        track.innerHTML += `
-          <div class="roulette-item" style="border-bottom:3px solid ${d.c};">
-            <span style="color:${d.c}; font-weight:bold;">${d.tier}</span>
-            <span style="font-size:8px; margin:2px 0;">${d.item}</span>
-            <span style="color:var(--neon-green);">+${d.pts}P</span>
-          </div>
-        `;
+
+        track.innerHTML += `<div class="roulette-item" style="border-bottom:3px solid ${d.c};"><span style="color:${d.c}; font-weight:bold;">${d.tier}</span><span style="color:var(--neon-green);">+${d.pts}P</span></div>`;
       }
 
       setTimeout(() => {
         track.style.transition = "transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)";
-        const itemWidth = 80;
-        const targetX = -(winIdx * itemWidth) + (box.offsetWidth / 2) - (itemWidth / 2) + (Math.random() * 20 - 10);
-        track.style.transform = `translateX(${targetX}px)`;
+        track.style.transform = `translateX(${-(winIdx * 75) + (box.offsetWidth / 2) - 37.5}px)`;
       }, 20);
 
       setTimeout(() => {
@@ -226,10 +193,7 @@
         document.getElementById("score-badge").innerText = `${totalScore} P`;
         isOpening = false;
         renderGrid();
-
-        if (caught.every(b => b.opened)) {
-          setTimeout(triggerSummary, 1500);
-        }
+        if (caught.every(b => b.opened)) setTimeout(triggerSummary, 1200);
       }, 3100);
     }
 
@@ -239,33 +203,27 @@
       caught.forEach(b => {
         if (!b.opened) {
           b.opened = true;
-          const drop = getRandomItem(b.tier);
-          totalScore += drop.pts;
-          drops.push(drop);
+          const t = TIERS.find(x => x.name === b.tier) || TIERS[0];
+          const pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
+          totalScore += pts;
+          drops.push({ tier: t.name, item: t.items[0], pts: pts, c: t.c });
         }
       });
       document.getElementById("score-badge").innerText = `${totalScore} P`;
       renderGrid();
-      setTimeout(triggerSummary, 1500);
+      setTimeout(triggerSummary, 1200);
     }
 
     function triggerSummary() {
       document.getElementById("sum-score").innerText = `${totalScore} P`;
       document.getElementById("sum-count").innerText = drops.length;
-
       const dBox = document.getElementById("summary-drops-list");
       dBox.innerHTML = "";
       drops.forEach(d => {
-        dBox.innerHTML += `
-          <div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px; border:1px solid #3b1d6e;">
-            <span><b style="color:${d.c};">[${d.tier}]</b> ${d.item}</span>
-            <b style="color:var(--neon-green);">+${d.pts} P</b>
-          </div>
-        `;
+        dBox.innerHTML += `<div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px;"><span>[${d.tier}] ${d.item}</span><b style="color:var(--neon-green);">+${d.pts}P</b></div>`;
       });
-
       document.getElementById("summary-overlay").style.display = "flex";
-      recordGameScore('catch_open', 'Yakala & Aç Modu', totalScore, drops);
+      recordGameScore('catch_open', 'Yakala & Aç Modu', totalScore, drops, totalScore > 0);
     }
   </script>
 </body>
