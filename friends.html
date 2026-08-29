@@ -22,17 +22,14 @@
         <button class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="sendFriendRequest()">Ekle</button>
       </div>
 
-      <!-- 1. Arkadaşlarım -->
       <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">⭐ Arkadaşlarım:</div>
       <div id="my-friends-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:10px;"></div>
 
-      <!-- 2. Kayıtlı Diğer Kullanıcılar -->
       <div style="font-size:11px; font-weight:bold; color:#38bdf8; margin-bottom:4px;">🌐 Kayıtlı Diğer Oyuncular:</div>
       <div id="other-users-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
     </div>
   </div>
 
-  <!-- İstekler Modalı (Kabul / Red Butonları) -->
   <div id="modal-reqs" class="modal-overlay">
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">Gelen Arkadaşlık İstekleri</div>
@@ -83,7 +80,7 @@
 
         snap.forEach(c => {
           const reg = c.val();
-          if (!reg || reg.uid === u.uid) return;
+          if (!reg || reg.uid === u.uid) return; // Kendini asla gösterme
           if (myFriendUIDs.includes(reg.uid)) return;
 
           otherBox.innerHTML += `
