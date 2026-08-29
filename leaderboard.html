@@ -9,59 +9,47 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <div class="app-container">
-    <div class="top-header">
-      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
-      <div style="font-weight:bold; font-size:12px;">🏆 Sıralama Tablosu</div>
-      <div></div>
-    </div>
-
-    <!-- Mod Filtre Sekmeleri -->
-    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:8px; flex-shrink:0;">
-      <button class="icon-btn" id="flt-all" style="background:var(--btn-blue);" onclick="loadLB('all', this)">Tümü</button>
-      <button class="icon-btn" onclick="loadLB('standard', this)">Normal</button>
-      <button class="icon-btn" onclick="loadLB('ten_cases', this)">10 Kutu</button>
-      <button class="icon-btn" onclick="loadLB('catch_open', this)">Yakala & Aç</button>
-      <button class="icon-btn" onclick="loadLB('upgrade_mode', this)">Şans Yükseltme</button>
-      <button class="icon-btn" onclick="loadLB('mines_mode', this)">Mayın</button>
-      <button class="icon-btn" onclick="loadLB('pvp_mode', this)">PvP</button>
-    </div>
-
-    <!-- Sıralama Listesi (Kartlar Asla İç İçe Girmez) -->
-    <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
-  </div>
-
-  <!-- 1. Oyun Bilgileri Modalı -->
-  <div id="modal-lb-game-info" class="modal-overlay">
-    <div class="modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <span style="font-size:10px; color:var(--text-dim);">Oyuncu İsmine Dokunarak Profili Açın:</span>
-        <button class="icon-btn" style="border-color:var(--danger); padding:2px 6px;" onclick="closeGameInfoModal()">X</button>
+  <div class="app-container" style="justify-content:space-between;">
+    <div>
+      <div class="top-header">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
+        <div style="font-weight:bold; font-size:12px;">🏆 Sıralama Tablosu</div>
+        <div></div>
       </div>
-      <h3 id="det-user-clickable" style="color:var(--neon-blue); font-size:14px; cursor:pointer; text-decoration:underline; margin-bottom:4px;">Oyuncu#12345</h3>
-      <div id="det-mode-info" style="font-size:10px; color:var(--neon-gold); margin-bottom:2px;">Mod: Normal Kasa</div>
-      <div id="det-date" style="font-size:9px; color:#94a3b8; margin-bottom:6px;">Tarih: -</div>
 
-      <div style="font-size:10px; font-weight:bold; color:#fff; margin-bottom:4px;">📦 Çıkan Eşyalar:</div>
-      <div id="det-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
+      <!-- Filtre Sekmeleri -->
+      <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px; margin-bottom:6px;">
+        <button class="icon-btn" id="flt-all" style="background:var(--btn-blue);" onclick="loadLB('all', this)">Tümü</button>
+        <button class="icon-btn" onclick="loadLB('standard', this)">Normal</button>
+        <button class="icon-btn" onclick="loadLB('ten_cases', this)">10 Kutu</button>
+        <button class="icon-btn" onclick="loadLB('catch_open', this)">Yakala & Aç</button>
+        <button class="icon-btn" onclick="loadLB('upgrade_mode', this)">Yükseltme</button>
+        <button class="icon-btn" onclick="loadLB('mines_mode', this)">Mayın</button>
+        <button class="icon-btn" onclick="loadLB('mega_mode', this)">Mega</button>
+        <button class="icon-btn" onclick="loadLB('dice_mode', this)">Zar</button>
+        <button class="icon-btn" style="border-color:var(--danger);" onclick="loadLB('speedrun_mode', this)">⚡ Speedrun</button>
+      </div>
     </div>
+
+    <!-- Sıralama Listesi -->
+    <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
-  <!-- 2. Profil Modalı -->
-  <div id="modal-full-profile" class="modal-overlay">
+  <!-- Detay Modalı -->
+  <div id="modal-lb-details" class="modal-overlay">
     <div class="modal-card panel-theme-profile">
       <div style="text-align:center;">
-        <div style="font-size:36px;">👤</div>
-        <h3 id="prof-full-name" style="color:var(--neon-blue);">Oyuncu</h3>
-        <div id="prof-full-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
+        <div style="font-size:36px;" id="det-prof-avatar">👤</div>
+        <h3 id="det-prof-name" style="color:var(--neon-blue);">Oyuncu</h3>
+        <div id="det-prof-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
       </div>
-      <div style="background:#050a14; padding:8px; border-radius:6px; font-size:11px; margin-bottom:8px; line-height:1.8;">
-        <div><b>Toplam Oyun:</b> <span id="prof-full-played">0</span></div>
-        <div><b>Kazanma Oranı:</b> <span id="prof-full-winrate">%100</span></div>
+      <div class="profile-stats-grid">
+        <div class="stat-mini-box"><span class="stat-mini-val" id="det-played" style="color:var(--neon-blue);">0</span><span class="stat-mini-lbl">Oyun</span></div>
+        <div class="stat-mini-box"><span class="stat-mini-val" id="det-wins" style="color:var(--neon-green);">0</span><span class="stat-mini-lbl">Kazanma</span></div>
+        <div class="stat-mini-box"><span class="stat-mini-val" id="det-losses" style="color:var(--danger);">0</span><span class="stat-mini-lbl">Kaybetme</span></div>
+        <div class="stat-mini-box"><span class="stat-mini-val" id="det-winrate" style="color:var(--neon-gold);">%0</span><span class="stat-mini-lbl">Oran</span></div>
       </div>
-      <div style="font-size:10px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">🏆 Mod Rekorları:</div>
-      <div id="prof-full-records" style="display:flex; flex-direction:column; gap:3px; max-height:110px; overflow-y:auto; margin-bottom:8px;"></div>
-      <button class="btn-close" onclick="closeFullProfileModal()">Kapat</button>
+      <button class="btn-close" onclick="document.getElementById('modal-lb-details').style.display='none'">Kapat</button>
     </div>
   </div>
 
@@ -87,21 +75,26 @@
         let allScores = [];
 
         snap.forEach(modeSnap => {
+          // Speedrun modu genel tümü sekmesinde görünmez, sadece kendi sekmesinde görünür
+          if (filter === 'all' && modeSnap.key === 'speedrun_mode') return;
+
           if (filter === 'all' || modeSnap.key === filter) {
             modeSnap.forEach(userRecord => {
               const r = userRecord.val();
-              if (r && r.score !== undefined) {
-                allScores.push(r);
-              }
+              if (r) allScores.push(r);
             });
           }
         });
 
-        // En yüksek skora göre sıralama
-        allScores.sort((a, b) => b.score - a.score);
+        // Speedrun modunda en düşük süre üstte, diğerlerinde en yüksek puan üstte
+        if (filter === 'speedrun_mode') {
+          allScores.sort((a, b) => (a.time || 999) - (b.time || 999));
+        } else {
+          allScores.sort((a, b) => (b.score || 0) - (a.score || 0));
+        }
 
         if (allScores.length === 0) {
-          listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888; padding:20px;'>Bu modda kayıtlı skor bulunamadı.</div>";
+          listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888; padding:20px;'>Kayıt bulunamadı.</div>";
           return;
         }
 
@@ -112,79 +105,42 @@
           else if (idx === 1) rankClass += " rank-2";
           else if (idx === 2) rankClass += " rank-3";
 
+          const valDisplay = filter === 'speedrun_mode' 
+            ? `<b style="color:var(--neon-green); font-size:13px;">${parseFloat(rec.time).toFixed(1)} sn</b>` 
+            : `<b style="color:var(--neon-green); font-size:13px;">${rec.score} P</b>`;
+
           itemRow.className = rankClass;
           itemRow.innerHTML = `
-            <span><b>${idx+1}.</b> ${rec.fullName || 'Oyuncu'} <small style="color:var(--neon-gold);">[${rec.modeName || 'Normal Kasa'}]</small></span>
-            <b style="color:var(--neon-green); font-size:13px;">${rec.score || 0} P</b>
+            <span><b>${idx+1}.</b> ${rec.avatar || '👤'} ${rec.fullName} <small style="color:var(--neon-gold);">[${rec.modeName}]</small></span>
+            ${valDisplay}
           `;
-          itemRow.onclick = () => openGameInfoModal(rec);
+          itemRow.onclick = () => openPlayerProfile(rec);
           listContainer.appendChild(itemRow);
         });
       });
     }
 
-    function openGameInfoModal(rec) {
-      document.getElementById("det-user-clickable").innerText = rec.fullName;
-      document.getElementById("det-mode-info").innerText = `Mod: ${rec.modeName}`;
-      document.getElementById("det-date").innerText = `Tarih: ${rec.date || 'Bilinmiyor'}`;
-
-      document.getElementById("det-user-clickable").onclick = () => {
-        closeGameInfoModal();
-        openFullProfile(rec.uid, rec.fullName, rec.title);
-      };
-
-      const dropsBox = document.getElementById("det-drops-list");
-      dropsBox.innerHTML = "";
-      if (rec.drops && rec.drops.length > 0) {
-        rec.drops.forEach(d => {
-          dropsBox.innerHTML += `
-            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px; border:1px solid #3b1d6e;">
-              <span><b style="color:${d.c || '#fff'};">[${d.tier}]</b> ${d.item}</span>
-              <b style="color:var(--neon-green);">+${d.pts}P</b>
-            </div>
-          `;
-        });
-      } else {
-        dropsBox.innerHTML = "<div style='color:#666; font-size:9px;'>Kasa dökümü yok.</div>";
-      }
-
-      document.getElementById("modal-lb-game-info").style.display = "flex";
-    }
-
-    function closeGameInfoModal() { document.getElementById("modal-lb-game-info").style.display = "none"; }
-
-    function openFullProfile(uid, name, title) {
-      document.getElementById("prof-full-name").innerText = name;
-      document.getElementById("prof-full-title").innerText = `[${title || 'Çaylak'}]`;
-
-      db.ref("users/" + uid).once("value", snap => {
+    function openPlayerProfile(rec) {
+      db.ref("users/" + rec.uid).once("value", snap => {
         const fullUser = snap.val() || {};
         const stats = fullUser.stats || {};
-        let totalGames = 0, totalWins = 0;
-        const recBox = document.getElementById("prof-full-records");
-        recBox.innerHTML = "";
-
-        const modLabels = { standard: "Normal", ten_cases: "10 Kutu", catch_open: "Yakala&Aç", upgrade_mode: "Yükselt", mines_mode: "Mayın", pvp_mode: "PvP" };
-        for (let k in modLabels) {
-          const s = stats[k] || { played: 0, wins: 0, best: 0 };
-          totalGames += s.played || 0;
-          totalWins += s.wins || 0;
-          recBox.innerHTML += `
-            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px;">
-              <span>${modLabels[k]}: ${s.played} Oyun</span>
-              <b style="color:var(--neon-gold);">${s.best} P</b>
-            </div>
-          `;
+        let totalGames = 0, totalWins = 0, totalLosses = 0;
+        for (let k in stats) {
+          totalGames += stats[k].played || 0;
+          totalWins += stats[k].wins || 0;
+          totalLosses += stats[k].losses || 0;
         }
 
-        document.getElementById("prof-full-played").innerText = totalGames;
-        document.getElementById("prof-full-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
+        document.getElementById("det-prof-avatar").innerText = fullUser.avatar || "👤";
+        document.getElementById("det-prof-name").innerText = rec.fullName;
+        document.getElementById("det-prof-title").innerText = `[${fullUser.title || 'Çaylak'}]`;
+        document.getElementById("det-played").innerText = totalGames;
+        document.getElementById("det-wins").innerText = totalWins;
+        document.getElementById("det-losses").innerText = totalLosses;
+        document.getElementById("det-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
+        document.getElementById("modal-lb-details").style.display = "flex";
       });
-
-      document.getElementById("modal-full-profile").style.display = "flex";
     }
-
-    function closeFullProfileModal() { document.getElementById("modal-full-profile").style.display = "none"; }
   </script>
 </body>
 </html>
