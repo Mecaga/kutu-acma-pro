@@ -29,11 +29,12 @@
       </div>
     </div>
 
-    <!-- Zar ve Rulet Alanı -->
+    <!-- Zar Alanı & Rulet -->
     <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#060b17; border-radius:12px; border:1px solid #1e293b; margin:6px 0; position:relative; overflow:hidden;">
       <div id="dice-stage" style="text-align:center;">
-        <div style="font-size:40px; margin-bottom:6px;" id="dice-anim">🎲 🎲</div>
-        <button id="btn-roll-dice" class="icon-btn" style="background:var(--neon-purple); padding:8px 16px; font-size:13px;" onclick="rollDice()">ZARLARI AT</button>
+        <div style="font-size:38px; margin-bottom:6px;" id="dice-anim">🎲 🎲</div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:8px;">1. Adım: Zarları atarak çarpanını belirle!</div>
+        <button id="btn-roll-dice" class="icon-btn" style="background:var(--neon-purple); padding:8px 16px; font-size:12px;" onclick="rollDice()">🎲 ZARLARI AT</button>
       </div>
 
       <div id="roulette-view" class="roulette-container" style="display:none; width:100%;">
@@ -42,11 +43,19 @@
       </div>
     </div>
 
-    <button id="btn-open-dice-case" class="btn-start" style="background:#4338ca;" disabled onclick="spinDiceCase()">KASAYI AÇ</button>
+    <div>
+      <div style="display:flex; justify-content:flex-end; margin-bottom:6px;">
+        <div id="drop-badge" style="background:#0b1329; border:1px solid #334155; border-radius:6px; padding:4px 8px; font-size:11px;">
+          Son Düşen: <span style="color:#64748b;">-</span>
+        </div>
+      </div>
+      <button id="btn-open-dice-case" class="btn-start" style="background:#4338ca;" disabled onclick="spinDiceCase()">2. ADIM: KASAYI AÇ</button>
+    </div>
 
+    <!-- Özet Ekranı -->
     <div id="summary-overlay" class="modal-overlay">
-      <div class="modal-card" style="background:#0b1329;">
-        <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">ZAR & KASA BİTTİ</div>
+      <div class="modal-card">
+        <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">ZAR & KASA TAMAMLANDI</div>
         <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
           <div>Toplam: <b id="sum-score" style="color:var(--neon-green);">0 P</b></div>
           <div>Açılan: <b style="color:var(--neon-blue);">3</b></div>
@@ -75,11 +84,12 @@
       const d2 = Math.floor(Math.random() * 6) + 1;
       const sum = d1 + d2;
 
+      // Çarpan kuralı: 10+ ise x5, 7+ ise x3, 4+ ise x2, altı x1
       currentMult = sum >= 10 ? 5 : (sum >= 7 ? 3 : (sum >= 4 ? 2 : 1));
       document.getElementById("dice-anim").innerText = `🎲 ${d1} + ${d2} = ${sum}`;
       document.getElementById("lbl-multiplier").innerText = `x${currentMult}`;
       document.getElementById("btn-open-dice-case").disabled = false;
-      document.getElementById("btn-open-dice-case").innerText = `KASAYI AÇ (x${currentMult} Çarpanlı)`;
+      document.getElementById("btn-open-dice-case").innerText = `2. ADIM: KASAYI AÇ (x${currentMult} Çarpan)`;
     }
 
     function spinDiceCase() {
@@ -92,23 +102,32 @@
       track.style.transform = "translateX(0px)";
       track.innerHTML = "";
 
-      const winIdx = 20;
-      let baseDrop = { name: "Zar Kılıcı", pts: Math.floor(Math.random()*100)+30, c: "#38bdf8" };
+      const totalItems = 25, winIdx = 20;
+      let winBasePts = 0;
 
-      for(let i=0; i<25; i++) {
-        track.innerHTML += `<div class="roulette-item" style="border-bottom:3px solid #38bdf8;"><span>🎲 Kasa</span><span style="color:var(--neon-green);">+${Math.floor(Math.random()*100)+30}P</span></div>`;
+      for (let i = 0; i < totalItems; i++) {
+        const base = Math.floor(Math.random() * 80) + 20;
+        if (i === winIdx) winBasePts = base;
+        track.innerHTML += `
+          <div class="roulette-item" style="border-bottom:3px solid #38bdf8;">
+            <span style="font-size:8px;">🎲 Kasa</span>
+            <b style="color:var(--neon-green);">+${base}P</b>
+          </div>
+        `;
       }
 
       setTimeout(() => {
         track.style.transition = "transform 2.5s cubic-bezier(0.12, 0.8, 0.2, 1)";
-        track.style.transform = `translateX(${-(winIdx * 80) + (rView.offsetWidth / 2) - 40}px)`;
+        track.style.transform = `translateX(${-(winIdx * 75) + (rView.offsetWidth / 2) - 37.5}px)`;
       }, 20);
 
       setTimeout(() => {
-        const finalPts = baseDrop.pts * currentMult;
+        const finalPts = winBasePts * currentMult;
         totalScore += finalPts;
-        drops.push({ tier: `Zar (x${currentMult})`, item: baseDrop.name, pts: finalPts, c: "#fbbf24" });
+        drops.push({ tier: `Zar (x${currentMult})`, item: `Kasa Taban: ${winBasePts}P`, pts: finalPts, c: "#fbbf24" });
+
         document.getElementById("score-badge").innerText = `${totalScore} P`;
+        document.getElementById("drop-badge").innerHTML = `Son: <span>Taban ${winBasePts}P x ${currentMult}</span> = <b style="color:var(--neon-green);">+${finalPts}P</b>`;
 
         remHak--;
         document.getElementById("lbl-dice-hak").innerText = `${remHak} Hak`;
@@ -130,7 +149,12 @@
       const dBox = document.getElementById("summary-drops-list");
       dBox.innerHTML = "";
       drops.forEach(d => {
-        dBox.innerHTML += `<div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px;"><span>[${d.tier}] ${d.item}</span><b style="color:var(--neon-green);">+${d.pts}P</b></div>`;
+        dBox.innerHTML += `
+          <div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px;">
+            <span>[${d.tier}] ${d.item}</span>
+            <b style="color:var(--neon-green);">+${d.pts}P</b>
+          </div>
+        `;
       });
       document.getElementById("summary-overlay").style.display = "flex";
       recordGameScore('dice_mode', 'Zar & Kasa Modu', totalScore, drops, totalScore > 0);
