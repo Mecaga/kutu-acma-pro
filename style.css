@@ -14,7 +14,6 @@
 html, body { height: 100%; width: 100%; }
 body { background: var(--bg-gradient); color: var(--text); display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-/* Mod Fon Renkleri */
 body.bg-standard { background: radial-gradient(circle at 50% 15%, #0f172a 0%, #020617 100%) !important; }
 body.bg-ten_cases { background: radial-gradient(circle at 50% 15%, #064e3b 0%, #022c22 100%) !important; }
 body.bg-catch_open { background: radial-gradient(circle at 50% 15%, #3b0764 0%, #0f051d 100%) !important; }
@@ -27,41 +26,40 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
 .app-container {
   width: 100%;
   max-width: 440px;
-  height: 98vh;
+  height: 96vh;
   background: rgba(10, 5, 20, 0.96);
   border: 2px solid var(--neon-purple);
   box-shadow: 0 0 25px var(--neon-purple-glow);
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 10px 8px 8px 8px; /* Üstten boşluk artırıldı */
+  padding: 12px 10px 10px 10px;
   overflow: hidden;
+  border-radius: 14px;
 }
 
 @media (min-width: 600px) {
-  .app-container { max-width: 720px; padding: 14px; }
+  .app-container { max-width: 720px; padding: 16px; }
 }
 
-/* Üst Header - Güvenli Çentik Boşluğu */
 .top-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
-  margin-top: 2px;
   flex-shrink: 0;
   background: rgba(10, 5, 20, 0.98);
   padding: 6px 4px;
   border-bottom: 1px solid rgba(168, 85, 247, 0.3);
   position: relative;
-  z-index: 999;
+  z-index: 100;
 }
 .app-title { font-size: 15px; font-weight: 800; color: #fff; cursor: pointer; }
 .icon-btn {
   background: #1f0c3d;
   border: 1px solid var(--neon-purple);
   color: #fff;
-  padding: 5px 8px;
+  padding: 6px 10px;
   border-radius: 6px;
   font-size: 10px;
   font-weight: bold;
@@ -70,11 +68,9 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  z-index: 1000;
-  pointer-events: auto !important;
+  z-index: 101;
 }
 
-/* 2x4 Mod Izgarası */
 .mode-grid-8 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -100,7 +96,7 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
   border-color: #fff;
   box-shadow: 0 0 8px var(--neon-purple-glow);
 }
-.mode-card-8 b { font-size: 10px; color: #fff; display: block; margin-bottom: 0px; }
+.mode-card-8 b { font-size: 10px; color: #fff; display: block; }
 .mode-card-8 span { font-size: 8px; color: var(--text-dim); }
 .mode-card-8.active span { color: #f3e8ff; }
 
@@ -130,7 +126,7 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
 
 .btn-start {
   width: 100%;
-  min-height: 40px;
+  min-height: 42px;
   padding: 10px;
   border-radius: 8px;
   border: none;
@@ -144,7 +140,6 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
 }
 .btn-start:disabled { background: #4b5563; cursor: not-allowed; opacity: 0.6; }
 
-/* 16 İkonlu Avatar Seçim Izgarası */
 .avatar-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -166,17 +161,14 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
   box-shadow: 0 0 8px var(--neon-gold);
 }
 
-/* Rulet & Slot */
 .roulette-container { width: 100%; height: 85px; background: rgba(2, 6, 23, 0.9); border: 2px solid #3b1d6e; border-radius: 8px; position: relative; overflow: hidden; margin: 6px 0; display: flex; align-items: center; flex-shrink: 0; }
 .roulette-needle { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: var(--danger); transform: translateX(-50%); z-index: 10; box-shadow: 0 0 12px var(--danger); }
 .roulette-track { display: flex; position: absolute; left: 0; height: 75px; will-change: transform; }
 .roulette-item { width: 75px; height: 75px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid rgba(255,255,255,0.1); background: rgba(18, 8, 38, 0.9); font-size: 10px; text-align: center; padding: 4px; }
 
-/* Mayın Tarlası */
 .mines-grid-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 290px; margin: auto; aspect-ratio: 1; flex-shrink: 0; }
 .mine-card { background: #120826; border: 2px solid #3b1d6e; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; aspect-ratio: 1; }
 
-/* Şekilli Profil Podyumu */
 .profile-badge-card { background: linear-gradient(135deg, #1e0b3d 0%, #0d041a 100%); border: 2px solid var(--neon-purple); border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 6px; }
 .profile-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: rgba(5, 2, 10, 0.8); border-radius: 8px; padding: 6px 2px; margin-top: 6px; border: 1px solid #3b1d6e; }
 .stat-mini-box { display: flex; flex-direction: column; align-items: center; }
@@ -188,6 +180,29 @@ body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0
 .rank-2 { border-color: #94a3b8; background: linear-gradient(90deg, #1e293b, #120826); }
 .rank-3 { border-color: #f97316; background: linear-gradient(90deg, #381500, #120826); }
 
-.modal-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.88); z-index: 2000; padding: 8px; flex-direction: column; justify-content: center; }
-.modal-card { background: #120826; border: 1px solid var(--neon-purple); border-radius: 12px; padding: 12px; max-height: 92%; overflow-y: auto; display: flex; flex-direction: column; }
-.btn-close { background: var(--danger); color: #fff; padding: 8px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; margin-top: 6px; }
+/* Ortalanmış Modal Katmanı */
+.modal-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 2000;
+  padding: 16px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.modal-card {
+  width: 100%;
+  max-width: 380px;
+  background: #120826;
+  border: 2px solid var(--neon-purple);
+  border-radius: 14px;
+  padding: 14px;
+  max-height: 85vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+}
+.btn-close { background: var(--danger); color: #fff; padding: 8px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; margin-top: 8px; }
