@@ -60,7 +60,8 @@
         return window.location.href = "menu.html";
       }
 
-      const safeKey = uName.toLowerCase().replace(/[^a-z0-9]/g, "_");
+      const lowerName = uName.toLowerCase();
+      const safeKey = lowerName.replace(/[^a-z0-9]/g, "_");
 
       if (isLogin) {
         db.ref("accounts/" + safeKey).once("value", snap => {
@@ -73,6 +74,11 @@
           });
         });
       } else {
+        // Yasaklı İsim Kontrolü
+        if (typeof FORBIDDEN_NAMES !== "undefined" && FORBIDDEN_NAMES.some(f => lowerName.includes(f))) {
+          return alert("Bu kullanıcı adı kullanılamaz! (Yasaklı Kelime)");
+        }
+
         db.ref("accounts/" + safeKey).once("value", snap => {
           if (snap.exists()) return alert("Bu kullanıcı adı zaten alınmış!");
 
