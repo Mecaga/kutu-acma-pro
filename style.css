@@ -1,5 +1,5 @@
 :root {
-  --bg-gradient: radial-gradient(circle at 50% 15%, #2e0854 0%, #11052c 50%, #030108 100%);
+  --bg-gradient: radial-gradient(circle at 50% 15%, #2a0845 0%, #0c051f 50%, #030108 100%);
   --neon-purple: #a855f7;
   --neon-purple-glow: rgba(168, 85, 247, 0.4);
   --neon-blue: #38bdf8;
@@ -23,24 +23,20 @@
 html, body { height: 100%; width: 100%; }
 body { background: var(--bg-gradient); color: var(--text); display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-/* Renkli ve Canlı Mod Arka Planları */
-body.bg-standard { background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #090d16 100%) !important; }
-body.bg-ten_cases { background: radial-gradient(circle at 50% 20%, #065f46 0%, #022c22 100%) !important; }
-body.bg-catch_open { background: radial-gradient(circle at 50% 20%, #581c87 0%, #150524 100%) !important; }
-body.bg-upgrade_mode { background: radial-gradient(circle at 50% 20%, #7c2d12 0%, #200700 100%) !important; }
-body.bg-mines_mode { background: radial-gradient(circle at 50% 20%, #881337 0%, #230209 100%) !important; }
-body.bg-mega_mode { background: radial-gradient(circle at 50% 20%, #1d4ed8 0%, #04091a 100%) !important; }
-body.bg-dice_mode { background: radial-gradient(circle at 50% 20%, #4338ca 0%, #0b0726 100%) !important; }
-body.bg-speedrun_mode { background: radial-gradient(circle at 50% 20%, #9d174d 0%, #220311 100%) !important; }
-body.bg-temple { background: radial-gradient(circle at 50% 20%, #b45309 0%, #291002 100%) !important; }
-body.bg-jackpot_mode { background: radial-gradient(circle at 50% 20%, #701a75 0%, #1b031d 100%) !important; }
-body.bg-pvp_mode { background: radial-gradient(circle at 50% 20%, #3b0764 0%, #0d0118 100%) !important; }
+body.bg-standard { background: radial-gradient(circle at 50% 15%, #0f172a 0%, #020617 100%) !important; }
+body.bg-ten_cases { background: radial-gradient(circle at 50% 15%, #064e3b 0%, #022c22 100%) !important; }
+body.bg-catch_open { background: radial-gradient(circle at 50% 15%, #3b0764 0%, #0f051d 100%) !important; }
+body.bg-upgrade_mode { background: radial-gradient(circle at 50% 15%, #451a03 0%, #1c0a00 100%) !important; }
+body.bg-mines_mode { background: radial-gradient(circle at 50% 15%, #450a0a 0%, #1c0202 100%) !important; }
+body.bg-mega_mode { background: radial-gradient(circle at 50% 15%, #1e1b4b 0%, #050515 100%) !important; }
+body.bg-dice_mode { background: radial-gradient(circle at 50% 15%, #312e81 0%, #0f0a2a 100%) !important; }
+body.bg-speedrun_mode { background: radial-gradient(circle at 50% 15%, #831843 0%, #1a0510 100%) !important; }
 
 .app-container {
   width: 100%;
   max-width: 440px;
   height: 96vh;
-  background: rgba(14, 8, 30, 0.95);
+  background: rgba(10, 5, 20, 0.96);
   border: 2px solid var(--neon-purple);
   box-shadow: 0 0 25px var(--neon-purple-glow);
   display: flex;
@@ -61,17 +57,16 @@ body.bg-pvp_mode { background: radial-gradient(circle at 50% 20%, #3b0764 0%, #0
   align-items: center;
   margin-bottom: 6px;
   flex-shrink: 0;
-  background: rgba(16, 7, 34, 0.98);
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: 1px solid rgba(168, 85, 247, 0.4);
+  background: rgba(10, 5, 20, 0.98);
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.3);
   position: relative;
-  z-index: 100;
+  z-index: 1000;
 }
 .app-title { font-size: 15px; font-weight: 800; color: #fff; cursor: pointer; }
 
 .icon-btn {
-  background: #240d47;
+  background: #1f0c3d;
   border: 1px solid var(--neon-purple);
   color: #fff;
   padding: 6px 10px;
@@ -83,7 +78,71 @@ body.bg-pvp_mode { background: radial-gradient(circle at 50% 20%, #3b0764 0%, #0
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  z-index: 101;
+  position: relative;
+  z-index: 1001;
+}
+.icon-btn:active { transform: scale(0.96); }
+
+.mode-btn {
+  background: #13072b;
+  border: 1px solid #3b1d6e;
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mode-grid-8 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.mode-card-8 {
+  background: #13072b;
+  border: 1px solid #3b1d6e;
+  border-radius: 6px;
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  text-align: left;
+  height: 38px;
+}
+.mode-card-8.active {
+  background: linear-gradient(135deg, #7e22ce, #a855f7);
+  border-color: #fff;
+  box-shadow: 0 0 8px var(--neon-purple-glow);
+}
+.mode-card-8 b { font-size: 10px; color: #fff; display: block; }
+.mode-card-8 span { font-size: 8px; color: var(--text-dim); }
+.mode-card-8.active span { color: #f3e8ff; }
+
+.menu-preview-box {
+  width: 100%;
+  background: rgba(12, 4, 29, 0.95);
+  border: 1px solid var(--neon-purple);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid var(--neon-purple);
+  background-color: #070212;
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+  outline: none;
+  margin-bottom: 6px;
 }
 
 .btn-start {
@@ -102,10 +161,31 @@ body.bg-pvp_mode { background: radial-gradient(circle at 50% 20%, #3b0764 0%, #0
 }
 .btn-start:disabled { background: #4b5563; cursor: not-allowed; opacity: 0.6; }
 
-/* Rulet ve Gösterge Kaymasını Önleyen Düzen */
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 6px 0;
+}
+.avatar-option {
+  font-size: 22px;
+  padding: 6px;
+  background: #070212;
+  border: 1px solid #3b1d6e;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+.avatar-option.selected {
+  border-color: var(--neon-gold);
+  background: rgba(251, 191, 36, 0.2);
+  box-shadow: 0 0 8px var(--neon-gold);
+}
+
+/* KUSURSUZ HİZALANMIŞ RULET SİSTEMİ */
 .roulette-container {
   width: 100%;
-  height: 90px;
+  height: 85px;
   background: rgba(2, 6, 23, 0.95);
   border: 2px solid #3b1d6e;
   border-radius: 8px;
@@ -121,39 +201,49 @@ body.bg-pvp_mode { background: radial-gradient(circle at 50% 20%, #3b0764 0%, #0
   left: 50%;
   top: 0;
   bottom: 0;
-  width: 4px;
+  width: 3px;
   background: var(--danger);
   transform: translateX(-50%);
-  z-index: 20;
-  box-shadow: 0 0 12px var(--danger);
+  z-index: 50;
+  box-shadow: 0 0 10px var(--danger);
+  pointer-events: none;
 }
 .roulette-track {
   display: flex;
   position: absolute;
   left: 0;
-  top: 0;
-  bottom: 0;
-  height: 100%;
-  align-items: center;
+  height: 75px;
   will-change: transform;
 }
 .roulette-item {
   width: 80px;
-  height: 80px;
+  height: 75px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   border-right: 1px solid rgba(255,255,255,0.1);
-  background: rgba(20, 10, 42, 0.95);
+  background: rgba(18, 8, 38, 0.9);
   font-size: 10px;
   text-align: center;
   padding: 4px;
-  box-sizing: border-box;
 }
 
-/* Modal ve Rank Düzeni */
+.mines-grid-wrapper { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 290px; margin: auto; aspect-ratio: 1; flex-shrink: 0; }
+.mine-card { background: #120826; border: 2px solid #3b1d6e; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; aspect-ratio: 1; }
+
+.profile-badge-card { background: linear-gradient(135deg, #1e0b3d 0%, #0d041a 100%); border: 2px solid var(--neon-purple); border-radius: 12px; padding: 10px; text-align: center; margin-bottom: 6px; }
+.profile-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: rgba(5, 2, 10, 0.8); border-radius: 8px; padding: 6px 2px; margin-top: 6px; border: 1px solid #3b1d6e; }
+.stat-mini-box { display: flex; flex-direction: column; align-items: center; }
+.stat-mini-val { font-size: 13px; font-weight: 900; }
+.stat-mini-lbl { font-size: 8px; color: var(--text-dim); }
+
+.rank-card { background: #120826; border-radius: 8px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; cursor: pointer; border: 1px solid #3b1d6e; flex-shrink: 0; min-height: 44px; }
+.rank-1 { border-color: #fbbf24; background: linear-gradient(90deg, #3d2c00, #120826); }
+.rank-2 { border-color: #94a3b8; background: linear-gradient(90deg, #1e293b, #120826); }
+.rank-3 { border-color: #f97316; background: linear-gradient(90deg, #381500, #120826); }
+
 .modal-overlay {
   display: none;
   position: absolute;
@@ -168,7 +258,7 @@ body.bg-pvp_mode { background: radial-gradient(circle at 50% 20%, #3b0764 0%, #0
 .modal-card {
   width: 100%;
   max-width: 380px;
-  background: #160a2e;
+  background: #120826;
   border: 2px solid var(--neon-purple);
   border-radius: 14px;
   padding: 14px;
