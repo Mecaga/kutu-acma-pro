@@ -32,7 +32,7 @@
     <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#060b17; border-radius:12px; border:1px solid #1e293b; margin:6px 0; position:relative; overflow:hidden;">
       <div id="ready-view" style="text-align:center;">
         <div style="font-size:24px; font-weight:900; color:#38bdf8;">MEGA KASA!</div>
-        <div style="font-size:12px; color:#fbbf24; margin-top:3px;">Büyük Ödüller</div>
+        <div style="font-size:12px; color:#fbbf24; margin-top:3px;">Dengeli 45s Havuzu</div>
       </div>
       <div id="roulette-view" class="roulette-container" style="display:none; width:100%;">
         <div class="roulette-needle"></div>
@@ -67,10 +67,12 @@
 
   <script src="app.js"></script>
   <script>
+    // DENGELENMİŞ ORANLAR: Yüksek seviyeler nadirleştirildi
     const TIERS = [
-      { name: 'Mega Super', rate: 50.0, minP: 50, maxP: 150, c: '#38bdf8', items: ['Platin Kılıç', 'Kraliyet Kalkanı'] },
-      { name: 'Mega Ultra', rate: 35.0, minP: 200, maxP: 500, c: '#c084fc', items: ['Ejderha Yayı', 'Hiçlik Asası'] },
-      { name: 'Efsanevi', rate: 15.0, minP: 1000, maxP: 3000, c: '#f43f5e', items: ['Kainat Matrisi', 'Tanrısal Kılıç'] }
+      { name: 'Mega Classic', rate: 60.0, minP: 10, maxP: 30, c: '#ffffff', items: ['Deri Mega Başlık', 'Demir Kama'] },
+      { name: 'Mega Super', rate: 28.0, minP: 40, maxP: 90, c: '#38bdf8', items: ['Platin Kılıç', 'Kraliyet Kalkanı'] },
+      { name: 'Mega Ultra', rate: 10.0, minP: 120, maxP: 280, c: '#c084fc', items: ['Ejderha Yayı', 'Hiçlik Asası'] },
+      { name: 'Efsanevi', rate: 2.0, minP: 500, maxP: 1500, c: '#f43f5e', items: ['Kainat Matrisi', 'Tanrısal Kılıç'] }
     ];
 
     let totalScore = 0, drops = [], isSpinning = false, timeLeft = 45;
@@ -148,4 +150,3 @@
   </script>
 </body>
 </html>
-
