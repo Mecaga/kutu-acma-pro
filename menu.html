@@ -23,29 +23,29 @@
       </div>
 
       <!-- Sohbet & Arkadaşlar -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px;">
-        <a href="chat.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:6px;">💬 Sohbetler</a>
-        <a href="friends.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:6px;">👥 Arkadaşlar</a>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:4px;">
+        <a href="chat.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:5px; font-size:10px;">💬 Sohbetler</a>
+        <a href="friends.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:5px; font-size:10px;">👥 Arkadaşlar</a>
       </div>
     </div>
 
-    <!-- 2 YAN x 4 DİK TOPLAM 8 OYUN MODU -->
+    <!-- KÜÇÜLTÜLMÜŞ 2x4 MOD GRID -->
     <div class="mode-grid-8">
       <div class="mode-card-8 active" onclick="selectGameMode('standard', this, 'normal.html')">
         <b>⚔️ Normal Kasa</b>
-        <span>30s Klasik Rulet</span>
+        <span>30s Klasik</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('ten_cases', this, 'ten_cases.html')">
         <b>📦 10 Kutu Modu</b>
-        <span>Süresiz 10 Hak</span>
+        <span>10 Hak</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('catch_open', this, 'catch.html')">
         <b>🎯 Yakala & Aç</b>
-        <span>Düşenleri Topla</span>
+        <span>Kutuları Topla</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('upgrade_mode', this, 'upgrade.html')">
         <b>📈 Şans Yükseltme</b>
-        <span>Katlanan Godly</span>
+        <span>Katlanan Şans</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('mines_mode', this, 'mines.html')">
         <b>💣 Mayınlı Kasa</b>
@@ -53,19 +53,19 @@
       </div>
       <div class="mode-card-8" onclick="selectGameMode('mega_mode', this, 'mega.html')">
         <b>💎 Mega Kasa</b>
-        <span>45s Büyük Ödül</span>
+        <span>45s Dengeli Havuz</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('dice_mode', this, 'dice.html')">
         <b>🎲 Zar & Kasa</b>
         <span>Zarla Katlanan Skor</span>
       </div>
-      <div class="mode-card-8" onclick="selectGameMode('jackpot_mode', this, 'jackpot.html')">
-        <b>🎡 Çarkıfelek</b>
-        <span>Büyük Jackpot Çarkı</span>
+      <div class="mode-card-8" onclick="selectGameMode('speedrun_mode', this, 'speedrun.html')">
+        <b>⚡ Speedrun Modu</b>
+        <span>1000 Puan Yarışı</span>
       </div>
     </div>
 
-    <!-- Önizleme & Başlat Butonu -->
+    <!-- OKUNAKLI & RENKLİ ORANLAR TABLOSU -->
     <div>
       <div class="menu-preview-box" id="rates-preview-box"></div>
       <button class="btn-start" onclick="launchGame()">OYUNA BAŞLA</button>
@@ -91,14 +91,85 @@
   <script>
     let targetPage = 'normal.html';
     const MODE_RATES = {
-      standard: { bg: "bg-standard", title: "NORMAL KASA", rates: "Classic (%58): 1-3P | Super (%29): 4-10P | Ultra (%10): 12-30P | Omega (%2.8): 35-120P | Godly (%0.2): 500-1000P" },
-      ten_cases: { bg: "bg-ten_cases", title: "10 KUTU MODU", rates: "Classic (%35): 2-5P | Super (%35): 6-15P | Ultra (%20): 20-50P | Omega (%8.5): 60-200P | Godly (%1.5): 600-1200P" },
-      catch_open: { bg: "bg-catch_open", title: "YAKALA & AÇ", rates: "Classic (%45): 2-5P | Super (%30): 6-18P | Ultra (%15): 25-60P | Omega (%8): 80-250P | Godly (%2): 750-1500P" },
-      upgrade_mode: { bg: "bg-upgrade_mode", title: "ŞANS YÜKSELTME", rates: "Kademe 1 (%60): 5-15P | Kademe 2 (%25): 20-60P | Kademe 3 (%10): 70-180P | Kozmik (%5): 250-800P" },
-      mines_mode: { bg: "bg-mines_mode", title: "MAYINLI KASA", rates: "Güvenli Kasa (%70): 15-45P | Büyük Hazine (%30): 60-160P | Bomba: 0P" },
-      mega_mode: { bg: "bg-mega_mode", title: "MEGA KASA (45s)", rates: "Mega Super (%50): 50-150P | Mega Ultra (%35): 200-500P | Efsanevi (%15): 1000-3000P" },
-      dice_mode: { bg: "bg-dice_mode", title: "ZAR & KASA (3 HAK)", rates: "Zar Toplamı x1, x2, x3, x5 Çarpanı | Kasa Puanı: 20-250P" },
-      jackpot_mode: { bg: "bg-jackpot_mode", title: "ÇARKIFFELEK", rates: "Pas (%30): 0P | Bronz (%30): 100P | Altın (%25): 500P | BÜYÜK JACKPOT (%15): 2500P" }
+      standard: {
+        bg: "bg-standard",
+        title: "NORMAL KASA ORANLARI",
+        tiers: [
+          { name: "Classic (%58)", pts: "1-3 P", c: "#ffffff" },
+          { name: "Super (%29)", pts: "4-10 P", c: "#38bdf8" },
+          { name: "Ultra (%10)", pts: "12-30 P", c: "#c084fc" },
+          { name: "Omega (%2.8)", pts: "35-120 P", c: "#fb923c" },
+          { name: "Godly (%0.2)", pts: "500-1000 P", c: "#f43f5e" }
+        ]
+      },
+      ten_cases: {
+        bg: "bg-ten_cases",
+        title: "10 KUTU MODU ORANLARI",
+        tiers: [
+          { name: "Classic (%35)", pts: "2-5 P", c: "#ffffff" },
+          { name: "Super (%35)", pts: "6-15 P", c: "#38bdf8" },
+          { name: "Ultra (%20)", pts: "20-50 P", c: "#c084fc" },
+          { name: "Omega (%8.5)", pts: "60-200 P", c: "#fb923c" },
+          { name: "Godly (%1.5)", pts: "600-1200 P", c: "#f43f5e" }
+        ]
+      },
+      catch_open: {
+        bg: "bg-catch_open",
+        title: "YAKALA & AÇ ORANLARI",
+        tiers: [
+          { name: "Classic Kasa (%45)", pts: "2-5 P", c: "#ffffff" },
+          { name: "Super Kasa (%30)", pts: "6-18 P", c: "#38bdf8" },
+          { name: "Ultra Kasa (%15)", pts: "25-60 P", c: "#c084fc" },
+          { name: "Omega Kasa (%8)", pts: "80-250 P", c: "#fb923c" },
+          { name: "Godly Kasa (%2)", pts: "750-1500 P", c: "#f43f5e" }
+        ]
+      },
+      upgrade_mode: {
+        bg: "bg-upgrade_mode",
+        title: "ŞANS YÜKSELTME ORANLARI",
+        tiers: [
+          { name: "Kademe 1 (%60)", pts: "5-15 P", c: "#ffffff" },
+          { name: "Kademe 2 (%25)", pts: "20-60 P", c: "#38bdf8" },
+          { name: "Kademe 3 (%10)", pts: "70-180 P", c: "#c084fc" },
+          { name: "Kozmik Güç (%5)", pts: "250-800 P", c: "#f43f5e" }
+        ]
+      },
+      mines_mode: {
+        bg: "bg-mines_mode",
+        title: "MAYINLI KASA ORANLARI",
+        tiers: [
+          { name: "Güvenli Kasa (%70)", pts: "15-45 P", c: "#10b981" },
+          { name: "Büyük Hazine (%30)", pts: "60-160 P", c: "#fbbf24" },
+          { name: "Bomba (%11)", pts: "0 P (Patlar)", c: "#ef4444" }
+        ]
+      },
+      mega_mode: {
+        bg: "bg-mega_mode",
+        title: "MEGA KASA ORANLARI (DENGELİ)",
+        tiers: [
+          { name: "Mega Classic (%60)", pts: "10-30 P", c: "#ffffff" },
+          { name: "Mega Super (%28)", pts: "40-90 P", c: "#38bdf8" },
+          { name: "Mega Ultra (%10)", pts: "120-280 P", c: "#c084fc" },
+          { name: "Efsanevi (%2)", pts: "500-1500 P", c: "#f43f5e" }
+        ]
+      },
+      dice_mode: {
+        bg: "bg-dice_mode",
+        title: "ZAR & KASA ORANLARI",
+        tiers: [
+          { name: "Zar Çarpanı (x1, x2, x3, x5)", pts: "Zar Toplamına Göre", c: "#fbbf24" },
+          { name: "Kasa Taban Puanı", pts: "20-100 P", c: "#38bdf8" }
+        ]
+      },
+      speedrun_mode: {
+        bg: "bg-speedrun_mode",
+        title: "SPEEDRUN (1000 PUAN YARIŞI)",
+        tiers: [
+          { name: "Hızlı Kasa", pts: "15-60 P", c: "#38bdf8" },
+          { name: "Süper Destek", pts: "100-250 P", c: "#fbbf24" },
+          { name: "Hedef", pts: "En Hızlı 1000 Puan!", c: "#f43f5e" }
+        ]
+      }
     };
 
     window.onload = () => {
@@ -119,10 +190,13 @@
 
     function renderRates(key) {
       const info = MODE_RATES[key];
-      document.getElementById("rates-preview-box").innerHTML = `
-        <div style="color:var(--neon-gold); font-weight:bold; margin-bottom:2px;">📊 ${info.title}</div>
-        <div style="color:#cbd5e1;">${info.rates}</div>
-      `;
+      let html = `<div style="color:var(--neon-gold); font-weight:bold; font-size:11px; margin-bottom:3px;">📊 ${info.title}</div>`;
+      info.tiers.forEach(t => {
+        html += `<div style="display:flex; justify-content:space-between; color:${t.c}; font-weight:600; font-size:10px;">
+          <span>${t.name}</span><span>${t.pts}</span>
+        </div>`;
+      });
+      document.getElementById("rates-preview-box").innerHTML = html;
     }
 
     function launchGame() { window.location.href = targetPage; }
