@@ -176,7 +176,18 @@ if (readyCount === room.capacity && room.status === "waiting") {
   }
   document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${readyCount}/${room.capacity})`;
 }
+// pvp.html içerisindeki listenRoom fonksiyonuna eklenen net iptal mantığı
+if (readyCount < room.capacity && room.status === "starting") {
+  if (countdownInt) {
+    clearInterval(countdownInt);
+    countdownInt = null;
+  }
+  db.ref("pvp_rooms/" + chKey).update({ status: "waiting" });
+  document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${readyCount}/${room.capacity} Hazır)`;
+  document.getElementById("pvp-status-badge").style.color = "var(--neon-gold)";
+}
 
+    
     function createOnlineRoom() {
       const u = getActiveUser();
       if (!u) return;
