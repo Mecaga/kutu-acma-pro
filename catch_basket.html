@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tut & Aç Modu</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    #basket-arena {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      min-height: 260px;
+      background: #050a17;
+      border: 2px solid #3b1d6e;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #player-basket {
+      position: absolute;
+      bottom: 6px;
+      left: calc(50% - 30px);
+      width: 60px;
+      height: 38px;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      border: 2px solid #fff;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+      transition: left 0.08s linear;
+      z-index: 50;
+    }
+    .falling-box {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: bold;
+      z-index: 10;
+    }
+    .ctrl-btn {
+      flex: 1;
+      padding: 12px;
+      font-size: 20px;
+      font-weight: 900;
+      background: #1e1b4b;
+      border: 2px solid var(--neon-purple);
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+    }
+    .ctrl-btn:active {
+      background: var(--neon-purple);
+    }
+  </style>
+</head>
+<body class="bg-catch_open">
+  <div class="app-container" style="justify-content:space-between;">
+    <div>
+      <div class="top-header">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+        <div style="font-weight:bold; font-size:12px;">🧺 Tut & Aç (20s)</div>
+        <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
+      </div>
+
+      <div class="game-stats-top" style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <div class="stat-card timer" style="border:1px solid #ef4444; background:#0d1527; padding:4px 8px; border-radius:8px;">
+          <div style="font-size:9px; color:#94a3b8;">SÜRE</div>
+          <div style="font-size:14px; font-weight:bold; color:#f87171;" id="lbl-timer">20s</div>
+          <div style="font-size:10px; color:#38bdf8;" id="lbl-user-tag">@User</div>
+        </div>
+        <div class="stat-card score" style="border:1px solid #10b981; background:#0d1527; padding:4px 8px; border-radius:8px; text-align:right;">
+          <div style="font-size:9px; color:#94a3b8;">TOPLANAN SEPET</div>
+          <div style="font-size:14px; font-weight:bold; color:#34d399;" id="lbl-basket-count">0 Kutu</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. AŞAMA: OYUN ALANI & OKLAR -->
+    <div id="screen-game-phase" style="flex:1; display:flex; flex-direction:column; justify-content:space-between;">
+      <div id="basket-arena">
+        <div id="player-basket">🧺</div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button class="ctrl-btn" onpointerdown="startMove(-1)" onpointerup="stopMove()">◀ SOL</button>
+        <button class="ctrl-btn" onpointerdown="startMove(1)" onpointerup="stopMove()">SAĞ ▶</button>
+      </div>
+    </div>
+
+    <!-- 2. AŞAMA: RULET AÇILIMI -->
+    <div id="screen-roulette-phase" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
+      <div class="roulette-container" id="basket-roulette-box" style="height:85px;">
+        <div class="roulette-needle"></div>
+        <div id="basket-roulette-track" class="roulette-track"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:4px 0;">
+        <span style="font-size:11px; color:#38bdf8;">📦 Kalan Sepet: <b id="lbl-rem-basket">0</b></span>
+        <button id="btn-open-all-basket" class="icon-btn" style="background:var(--neon-purple);" onclick="openAllBasketBoxes()">⚡ Tümünü Aç</button>
+      </div>
+      <div id="basket-inv-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; flex:1; overflow-y:auto;"></div>
+    </div>
+
+    <!-- Özet Ekranı -->
+    <div id="summary-overlay" class="modal-overlay">
+      <div class="modal-card">
+        <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">TUT & AÇ TAMAMLANDI</div>
+        <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
+          <div>Toplam: <b id="sum-score" style="color:var(--neon-green);">0 P</b></div>
+          <div>Toplanan: <b id="sum-count" style="color:var(--neon-blue);">0</b></div>
+        </div>
+        <div id="summary-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+        <div style="display:flex; gap:6px;">
+          <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar</button>
+          <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Lobi</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const TIERS = [
+      { name: 'Tahta Kutu', rate: 45.0, minP: 3, maxP: 8, c: '#ffffff', items: ['Gümüş Kama', 'Deri Kemer'] },
+      { name: 'Çelik Kutu', rate: 30.0, minP: 10, maxP: 25, c: '#38bdf8', items: ['Safir Kılıç', 'Şövalye Zırhı'] },
+      { name: 'Mistik Kutu', rate: 16.0, minP: 30, maxP: 80, c: '#c084fc', items: ['Kutsal Asa', 'Işık Halkası'] },
+      { name: 'Kozmik Sandık', rate: 7.0, minP: 100, maxP: 300, c: '#fb923c', items: ['Meteor Çekici', 'Yıldız Miğferi'] },
+      { name: 'Tanrısal Kasa', rate: 2.0, minP: 800, maxP: 1600, c: '#f43f5e', items: ['Sonsuzluk Kılıcı'] }
+    ];
+
+    let timeLeft = 20, collected = [], totalScore = 0, drops = [];
+    let basketX = 150, moveDir = 0, moveInt = null, gameLoopInt = null, spawnInt = null, isOpening = false;
+
+    window.onload = () => {
+      const u = getActiveUser();
+      document.getElementById("lbl-user-tag").innerText = u ? `@${u.name}${u.tag}` : "@Misafir";
+      startBasketGame();
+    };
+
+    function startMove(dir) {
+      moveDir = dir;
+      if (!moveInt) {
+        moveInt = setInterval(() => {
+          const arena = document.getElementById("basket-arena");
+          const maxLeft = (arena.offsetWidth || 300) - 64;
+          basketX += moveDir * 7;
+          if (basketX < 0) basketX = 0;
+          if (basketX > maxLeft) basketX = maxLeft;
+          document.getElementById("player-basket").style.left = `${basketX}px`;
+        }, 20);
+      }
+    }
+
+    function stopMove() {
+      moveDir = 0;
+      clearInterval(moveInt);
+      moveInt = null;
+    }
+
+    function startBasketGame() {
+      const arena = document.getElementById("basket-arena");
+      basketX = ((arena.offsetWidth || 300) / 2) - 30;
+      document.getElementById("player-basket").style.left = `${basketX}px`;
+
+      // Sandık Düşürme Döngüsü
+      spawnInt = setInterval(() => {
+        if (timeLeft <= 0) return;
+        let rand = Math.random() * 100, cum = 0, d = TIERS[0];
+        for (let t of TIERS) {
+          cum += t.rate;
+          if (rand <= cum) { d = t; break; }
+        }
+
+        const box = document.createElement("div");
+        box.className = "falling-box";
+        box.style.border = `2px solid ${d.c}`;
+        box.style.background = "#0c1527";
+        box.style.color = d.c;
+        const maxSpawnX = (arena.offsetWidth || 300) - 40;
+        box.style.left = `${Math.random() * maxSpawnX}px`;
+        box.style.top = `-40px`;
+        box.innerHTML = `<span>📦</span><span>${d.name.split(' ')[0]}</span>`;
+        box.dataset.tier = d.name;
+        box.dataset.c = d.c;
+
+        arena.appendChild(box);
+
+        let curY = -40;
+        const fallSpeed = Math.random() * 2.5 + 3.5;
+        const fallInt = setInterval(() => {
+          if (timeLeft <= 0) {
+            clearInterval(fallInt);
+            box.remove();
+            return;
+          }
+          curY += fallSpeed;
+          box.style.top = `${curY}px`;
+
+          // Sepet ile Çarpışma Mantığı
+          const bRect = document.getElementById("player-basket").getBoundingClientRect();
+          const boxRect = box.getBoundingClientRect();
+
+          if (
+            boxRect.bottom >= bRect.top &&
+            boxRect.top <= bRect.bottom &&
+            boxRect.right >= bRect.left &&
+            boxRect.left <= bRect.right
+          ) {
+            collected.push({ tier: box.dataset.tier, c: box.dataset.c, opened: false });
+            document.getElementById("lbl-basket-count").innerText = `${collected.length} Kutu`;
+            clearInterval(fallInt);
+            box.remove();
+          } else if (curY > (arena.offsetHeight || 300)) {
+            clearInterval(fallInt);
+            box.remove();
+          }
+        }, 20);
+      }, 500);
+
+      // Süre Sayacı
+      const timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("lbl-timer").innerText = `${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          clearInterval(spawnInt);
+          stopMove();
+          setTimeout(startBasketRoulettePhase, 800);
+        }
+      }, 1000);
+    }
+
+    function startBasketRoulettePhase() {
+      document.getElementById("screen-game-phase").style.display = "none";
+      document.getElementById("screen-roulette-phase").style.display = "flex";
+      renderBasketGrid();
+    }
+
+    function renderBasketGrid() {
+      const grid = document.getElementById("basket-inv-grid");
+      grid.innerHTML = "";
+      const remaining = collected.filter(b => !b.opened).length;
+      document.getElementById("lbl-rem-basket").innerText = remaining;
+
+      if (collected.length === 0) {
+        grid.innerHTML = "<div style='grid-column:span 3; text-align:center; color:#666; padding:20px;'>Sepete hiç kutu düşüremedin!</div>";
+        setTimeout(triggerBasketSummary, 1200);
+        return;
+      }
+
+      collected.forEach((b, idx) => {
+        const itemBox = document.createElement("div");
+        itemBox.className = "roulette-item";
+        itemBox.style.cssText = `width:100%; height:70px; border:1px solid ${b.opened ? '#334155' : b.c}; opacity:${b.opened ? '0.4' : '1'}; cursor:${b.opened ? 'default' : 'pointer'};`;
+        itemBox.innerHTML = `<span>🧺</span><span style="color:${b.c}; font-size:8px;">${b.tier}</span><span style="font-size:7px;">${b.opened ? 'AÇILDI' : 'DOKUN AÇ'}</span>`;
+        if (!b.opened) itemBox.onclick = () => openSingleBasketBox(idx);
+        grid.appendChild(itemBox);
+      });
+    }
+
+    function openSingleBasketBox(idx) {
+      if (isOpening || collected[idx].opened) return;
+      isOpening = true;
+
+      const track = document.getElementById("basket-roulette-track");
+      const box = document.getElementById("basket-roulette-box");
+      track.style.transition = "none";
+      track.style.transform = "translateX(0px)";
+      track.innerHTML = "";
+
+      const totalItems = 28, winIdx = 22;
+      let winDrop = null;
+
+      for (let i = 0; i < totalItems; i++) {
+        const t = TIERS.find(x => x.name === (i === winIdx ? collected[idx].tier : TIERS[Math.floor(Math.random()*TIERS.length)].name)) || TIERS[0];
+        const pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
+        const it = t.items[Math.floor(Math.random() * t.items.length)];
+        const d = { tier: t.name, item: it, pts: pts, c: t.c };
+        if (i === winIdx) winDrop = d;
+
+        track.innerHTML += `<div class="roulette-item" style="border-bottom:3px solid ${d.c};"><span style="color:${d.c}; font-weight:bold;">${d.tier}</span><span style="color:var(--neon-green);">+${d.pts}P</span></div>`;
+      }
+
+      setTimeout(() => {
+        track.style.transition = "transform 2.6s cubic-bezier(0.12, 0.8, 0.2, 1)";
+        track.style.transform = `translateX(${-(winIdx * 75) + (box.offsetWidth / 2) - 37.5}px)`;
+      }, 20);
+
+      setTimeout(() => {
+        collected[idx].opened = true;
+        totalScore += winDrop.pts;
+        drops.push(winDrop);
+        document.getElementById("score-badge").innerText = `${totalScore} P`;
+        isOpening = false;
+        renderBasketGrid();
+        if (collected.every(b => b.opened)) setTimeout(triggerBasketSummary, 1000);
+      }, 2800);
+    }
+
+    function openAllBasketBoxes() {
+      if (isOpening) return;
+      document.getElementById("btn-open-all-basket").disabled = true;
+      collected.forEach(b => {
+        if (!b.opened) {
+          b.opened = true;
+          const t = TIERS.find(x => x.name === b.tier) || TIERS[0];
+          const pts = Math.floor(Math.random() * (t.maxP - t.minP + 1)) + t.minP;
+          totalScore += pts;
+          drops.push({ tier: t.name, item: t.items[0], pts: pts, c: t.c });
+        }
+      });
+      document.getElementById("score-badge").innerText = `${totalScore} P`;
+      renderBasketGrid();
+      setTimeout(triggerBasketSummary, 1000);
+    }
+
+    function triggerBasketSummary() {
+      document.getElementById("sum-score").innerText = `${totalScore} P`;
+      document.getElementById("sum-count").innerText = collected.length;
+      const dBox = document.getElementById("summary-drops-list");
+      dBox.innerHTML = "";
+      drops.forEach(d => {
+        dBox.innerHTML += `<div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px;"><span>[${d.tier}] ${d.item}</span><b style="color:var(--neon-green);">+${d.pts}P</b></div>`;
+      });
+      document.getElementById("summary-overlay").style.display = "flex";
+      recordGameScore('catch_basket', 'Tut & Aç Modu', totalScore, drops, totalScore > 0);
+    }
+  </script>
+</body>
+</html>
+
