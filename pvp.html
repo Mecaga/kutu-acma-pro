@@ -11,7 +11,6 @@
 <body class="bg-pvp_mode">
   <div class="app-container" style="justify-content:space-between;">
     
-    <!-- Üst Bar -->
     <div>
       <div class="top-header">
         <button id="btn-leave-room" class="icon-btn" style="border-color:var(--danger);" onclick="leavePvPRoom()">‹ Çıkış</button>
@@ -58,8 +57,6 @@
           <button class="icon-btn" style="font-size:9px; padding:3px 6px;" onclick="sendQuickAction('Hazır verin!')">Hazır verin!</button>
           <button class="icon-btn" style="font-size:9px; padding:3px 6px;" onclick="sendQuickAction('İyi maçtı!')">İyi maçtı!</button>
           <button class="icon-btn" style="font-size:9px; padding:3px 6px;" onclick="sendQuickAction('Yeni tur!')">Yeni tur!</button>
-          <button class="icon-btn" style="font-size:9px; padding:3px 6px;" onclick="sendQuickAction('Çok iyiydi!')">Çok iyiydi!</button>
-          <button class="icon-btn" style="font-size:9px; padding:3px 6px;" onclick="sendQuickAction('Kötüydü!')">Kötüydü!</button>
         </div>
       </div>
 
@@ -72,7 +69,7 @@
         <div class="pvp-grid-boxes" id="pvp-boxes-grid"></div>
       </div>
 
-      <!-- En Altta CS Slot Rulet Bandı -->
+      <!-- CS Slot Rulet Bandı -->
       <div>
         <div class="roulette-container" id="pvp-roulette-box">
           <div class="roulette-needle"></div>
@@ -99,30 +96,6 @@
 
   </div>
 
-  <!-- Profil Modalı -->
-  <div id="modal-pvp-profile" class="modal-overlay">
-    <div class="modal-card panel-theme-profile" style="text-align:center;">
-      <div style="font-size:36px;">👤</div>
-      <h3 id="pvp-prof-name" style="color:var(--neon-blue);">Oyuncu</h3>
-      <div id="pvp-prof-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
-      <div class="profile-stats-grid">
-        <div class="stat-mini-box">
-          <span class="stat-mini-val" id="pvp-prof-played" style="color:var(--neon-blue);">0</span>
-          <span class="stat-mini-lbl">Oyun</span>
-        </div>
-        <div class="stat-mini-box">
-          <span class="stat-mini-val" id="pvp-prof-wins" style="color:var(--neon-green);">0</span>
-          <span class="stat-mini-lbl">Kazanma</span>
-        </div>
-        <div class="stat-mini-box">
-          <span class="stat-mini-val" id="pvp-prof-winrate" style="color:var(--neon-gold);">%0</span>
-          <span class="stat-mini-lbl">Oran</span>
-        </div>
-      </div>
-      <button class="btn-close" onclick="document.getElementById('modal-pvp-profile').style.display='none'">Geri Dön</button>
-    </div>
-  </div>
-
   <script src="app.js"></script>
   <script>
     let roomCapacity = 2;
@@ -146,48 +119,11 @@
     function setRoomSize(num) {
       roomCapacity = num;
       totalBoxesPerPlayer = num === 2 ? 5 : (num === 3 ? 10 : 15);
-
       document.getElementById("btn-p2").style.background = num === 2 ? "var(--btn-blue)" : "#0f172a";
       document.getElementById("btn-p3").style.background = num === 3 ? "var(--btn-blue)" : "#0f172a";
       document.getElementById("btn-p4").style.background = num === 4 ? "var(--btn-blue)" : "#0f172a";
     }
-// PvP listenRoom fonksiyonu içindeki geri sayım kontrol güncellemesi:
-if (readyCount === room.capacity && room.status === "waiting") {
-  if (!countdownInt) {
-    db.ref("pvp_rooms/" + chKey).update({ status: "starting" });
-    let cd = 3;
-    document.getElementById("pvp-status-badge").innerText = `🔥 Başlıyor: ${cd}s`;
-    countdownInt = setInterval(() => {
-      cd--;
-      document.getElementById("pvp-status-badge").innerText = `🔥 Başlıyor: ${cd}s`;
-      if (cd <= 0) {
-        clearInterval(countdownInt);
-        countdownInt = null;
-        db.ref("pvp_rooms/" + chKey).update({ status: "playing" });
-      }
-    }, 1000);
-  }
-} else if (readyCount < room.capacity) {
-  // HAZIR GERİ ÇEKİLİRSE GERİ SAYIM İPTAL EDİLİR
-  if (countdownInt) {
-    clearInterval(countdownInt);
-    countdownInt = null;
-    db.ref("pvp_rooms/" + chKey).update({ status: "waiting" });
-  }
-  document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${readyCount}/${room.capacity})`;
-}
-// pvp.html içerisindeki listenRoom fonksiyonuna eklenen net iptal mantığı
-if (readyCount < room.capacity && room.status === "starting") {
-  if (countdownInt) {
-    clearInterval(countdownInt);
-    countdownInt = null;
-  }
-  db.ref("pvp_rooms/" + chKey).update({ status: "waiting" });
-  document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${readyCount}/${room.capacity} Hazır)`;
-  document.getElementById("pvp-status-badge").style.color = "var(--neon-gold)";
-}
 
-    
     function createOnlineRoom() {
       const u = getActiveUser();
       if (!u) return;
@@ -204,9 +140,7 @@ if (readyCount < room.capacity && room.status === "starting") {
         totalBoxes: totalBoxesPerPlayer,
         status: "waiting",
         players: pData
-      }).then(() => {
-        listenRoom(code);
-      });
+      }).then(() => listenRoom(code));
     }
 
     function joinOnlineRoom() {
@@ -216,16 +150,14 @@ if (readyCount < room.capacity && room.status === "starting") {
 
       db.ref("pvp_rooms").once("value", snap => {
         let foundKey = null, foundRoom = null;
-
         snap.forEach(c => {
-          if (c.val().code.toLowerCase() === inputCode.toLowerCase()) {
+          if (c.val().code && c.val().code.toLowerCase() === inputCode.toLowerCase()) {
             foundKey = c.key;
             foundRoom = c.val();
           }
         });
 
         if (!foundRoom) return alert("Böyle bir oda bulunamadı!");
-
         const currentCount = Object.keys(foundRoom.players || {}).length;
         if (currentCount >= foundRoom.capacity) return alert("Bu oda tamamen dolmuş!");
 
@@ -240,9 +172,7 @@ if (readyCount < room.capacity && room.status === "starting") {
           lastDrop: "-",
           ready: false,
           wantsReplay: false
-        }).then(() => {
-          listenRoom(foundRoom.code);
-        });
+        }).then(() => listenRoom(foundRoom.code));
       });
     }
 
@@ -273,7 +203,7 @@ if (readyCount < room.capacity && room.status === "starting") {
           if (p.wantsReplay) replayVotes++;
 
           pRow.innerHTML += `
-            <div style="background:#070212; border:1px solid ${isMe ? 'var(--neon-gold)' : '#3b1d6e'}; border-radius:6px; padding:4px 2px; text-align:center; cursor:pointer;" onclick="inspectPvPPlayer('${p.uid}', '${p.fullName}')">
+            <div style="background:#070212; border:1px solid ${isMe ? 'var(--neon-gold)' : '#3b1d6e'}; border-radius:6px; padding:4px 2px; text-align:center;">
               <div style="font-size:8px; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:${isMe ? 'var(--neon-gold)' : '#fff'};">${p.fullName}</div>
               <div style="font-size:14px; font-weight:bold; color:var(--neon-green); margin:1px 0;">${p.score} P</div>
               <div style="font-size:8px; color:#38bdf8;">${p.lastDrop}</div>
@@ -285,31 +215,31 @@ if (readyCount < room.capacity && room.status === "starting") {
         const voteBadge = document.getElementById("replay-vote-count");
         if (voteBadge) voteBadge.innerText = `${replayVotes}/${room.capacity}`;
 
-        // Oda Eksikse veya Biri Çıkarsa
-        if (pList.length < room.capacity) {
-          if (countdownInt) clearInterval(countdownInt);
-          document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${pList.length}/${room.capacity})`;
-          document.getElementById("pvp-status-badge").style.color = "var(--neon-gold)";
-          isMatchPlaying = false;
-          document.getElementById("btn-leave-room").disabled = false;
-          document.getElementById("btn-ready-pvp").style.display = "block";
-
-          const replayBtn = document.getElementById("btn-replay-pvp");
-          if (replayBtn && room.status === "finished") {
-            replayBtn.disabled = true;
-            document.getElementById("replay-status-txt").innerText = "⚠️ Bir oyuncu ayrıldı!";
+        // Hazır İptal Kontrolü (Biri hazır çekince geri sayım anında iptal edilir)
+        if (readyCount < room.capacity && (room.status === "starting" || room.status === "waiting")) {
+          if (countdownInt) {
+            clearInterval(countdownInt);
+            countdownInt = null;
           }
+          if (room.status === "starting") {
+            db.ref("pvp_rooms/" + chKey).update({ status: "waiting" });
+          }
+          document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${readyCount}/${room.capacity} Hazır)`;
+          document.getElementById("pvp-status-badge").style.color = "var(--neon-gold)";
         } 
-        // Herkes Hazır İse 3sn Geri Sayım
+        // Herkes Hazırsa 3sn Geri Sayım Başlat
         else if (readyCount === room.capacity && room.status === "waiting") {
           db.ref("pvp_rooms/" + chKey).update({ status: "starting" });
           let cd = 3;
           document.getElementById("pvp-status-badge").innerText = `🔥 Başlıyor: ${cd}s`;
+          
+          if (countdownInt) clearInterval(countdownInt);
           countdownInt = setInterval(() => {
             cd--;
             document.getElementById("pvp-status-badge").innerText = `🔥 Başlıyor: ${cd}s`;
             if (cd <= 0) {
               clearInterval(countdownInt);
+              countdownInt = null;
               db.ref("pvp_rooms/" + chKey).update({ status: "playing" });
             }
           }, 1000);
@@ -330,9 +260,7 @@ if (readyCount < room.capacity && room.status === "starting") {
         if (allDone && room.status === "playing") {
           document.getElementById("pvp-status-badge").innerText = "🏆 Kazanan Belirlendi!";
           db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
-          setTimeout(() => {
-            showPodium(pList);
-          }, 3000);
+          setTimeout(() => showPodium(pList), 3000);
         }
       });
     }
@@ -342,7 +270,7 @@ if (readyCount < room.capacity && room.status === "starting") {
       const u = getActiveUser();
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
       db.ref(`pvp_rooms/${chKey}/players/${u.uid}/ready`).set(isMyReady);
-      document.getElementById("btn-ready-pvp").innerText = isMyReady ? "✅ HAZIR VERİLDİ" : "⚡ HAZIR VER";
+      document.getElementById("btn-ready-pvp").innerText = isMyReady ? "✅ HAZIR GERİ AL" : "⚡ HAZIR VER";
       document.getElementById("btn-ready-pvp").style.background = isMyReady ? "var(--neon-green)" : "var(--neon-gold)";
     }
 
@@ -441,8 +369,6 @@ if (readyCount < room.capacity && room.status === "starting") {
           </div>
         `;
       });
-
-      // PvP Puanı Sıralamaya YAZILMAZ (Kural Korundu)
     }
 
     function voteReplayPvP() {
@@ -480,31 +406,10 @@ if (readyCount < room.capacity && room.status === "starting") {
       document.getElementById("btn-replay-pvp").innerHTML = `🔄 Tekrar Oyna (<span id="replay-vote-count">0</span>)`;
     }
 
-    function inspectPvPPlayer(uid, name) {
-      db.ref("users/" + uid).once("value", snap => {
-        const fullUser = snap.val() || {};
-        const stats = fullUser.stats || {};
-        let totalGames = 0, totalWins = 0;
-        for (let k in stats) {
-          totalGames += stats[k].played || 0;
-          totalWins += stats[k].wins || 0;
-        }
-
-        document.getElementById("pvp-prof-name").innerText = name;
-        document.getElementById("pvp-prof-title").innerText = `[${fullUser.title || 'Çaylak'}]`;
-        document.getElementById("pvp-prof-played").innerText = totalGames;
-        document.getElementById("pvp-prof-wins").innerText = totalWins;
-        document.getElementById("pvp-prof-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
-        document.getElementById("modal-pvp-profile").style.display = "flex";
-      });
-    }
-
-    // Odadan Çıkınca Oda Boşsa Tamamen Siler (Depo Temizliği)
     function leavePvPRoom() {
       if (currentRoomCode) {
         const u = getActiveUser();
         const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
-        
         db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).remove().then(() => {
           db.ref(`pvp_rooms/${chKey}/players`).once("value", pSnap => {
             if (!pSnap.exists() || pSnap.numChildren() === 0) {
