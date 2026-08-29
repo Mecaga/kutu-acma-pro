@@ -23,7 +23,6 @@
       <input type="password" id="auth-pass" class="input-field" placeholder="Şifre" maxlength="20">
 
       <button id="auth-btn" class="btn-start" style="background:linear-gradient(90deg, #9333ea, #a855f7);" onclick="handleAuth()">Giriş Yap</button>
-      <div style="font-size:10px; color:var(--text-dim); margin-top:10px;">Admin Girişi: <b>admin</b> / <b>12345</b></div>
     </div>
   </div>
 
@@ -45,7 +44,7 @@
       const uPass = document.getElementById("auth-pass").value.trim();
       if (!uName || !uPass) return alert("Kullanıcı adı ve şifre zorunludur!");
 
-      // Sabit Admin Hesabı Kontrolü
+      // Gizli Admin Girişi
       if (uName.toLowerCase() === "admin" && uPass === "12345") {
         const adminUser = {
           uid: "ADMIN_ROOT",
@@ -54,7 +53,8 @@
           avatar: "👑",
           title: "Hükümdar",
           isAdmin: true,
-          stats: {}
+          stats: {},
+          createdAt: "Sistem Yöneticisi"
         };
         setActiveUser(adminUser);
         return window.location.href = "menu.html";
@@ -85,7 +85,8 @@
             avatar: "👤",
             title: "Çaylak",
             stats: {},
-            password: uPass
+            password: uPass,
+            createdAt: new Date().toLocaleString("tr-TR")
           };
 
           db.ref("accounts/" + safeKey).set({ uid: uid, password: uPass });
