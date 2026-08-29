@@ -6,8 +6,11 @@ const firebaseConfig = {
   messagingSenderId: "483395048462",
   appId: "1:483395048462:web:450f18178e682a4a2f985f"
 };
+
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
+const AVATAR_LIST = ["👤", "😄", "😍", "😎", "🤓", "🥸", "🤠", "😈", "👽", "🎃", "💀", "👁", "🧠", "⛑️", "🎒", "🛜", "👑"];
 
 function getActiveUser() {
   const data = localStorage.getItem("kutu_active_session");
@@ -21,6 +24,7 @@ function setActiveUser(userData) {
       fullName: `${userData.name}${userData.tag}`,
       name: userData.name,
       tag: userData.tag,
+      avatar: userData.avatar || "👤",
       title: userData.title || "Çaylak",
       sound: userData.sound !== undefined ? userData.sound : true,
       stats: userData.stats || {},
@@ -39,34 +43,58 @@ function syncUserFromDB(uid, callback) {
   });
 }
 
-// Kazanma / Kaybetme ve Skor Kaydı
-function recordGameScore(modeKey, modeName, score, dropsList, isWin = true) {
+// Skor ve Speedrun Süre Kaydı
+function recordGameScore(modeKey, modeName, score, dropsList, isWin = true, speedTime = null) {
   const u = getActiveUser();
   if (!u) return;
 
   if (!u.stats) u.stats = {};
-  if (!u.stats[modeKey]) u.stats[modeKey] = { played: 0, wins: 0, losses: 0, best: 0 };
+  if (!u.stats[modeKey]) u.stats[modeKey] = { played: 0, wins: 0, losses: 0, best: 0, bestTime: null };
 
   u.stats[modeKey].played = (u.stats[modeKey].played || 0) + 1;
-  if (isWin && score > 0) {
+  if (isWin) {
     u.stats[modeKey].wins = (u.stats[modeKey].wins || 0) + 1;
   } else {
     u.stats[modeKey].losses = (u.stats[modeKey].losses || 0) + 1;
   }
 
-  if (score > (u.stats[modeKey].best || 0)) {
+  // Speedrun modunda en düşük süre kaydedilir
+  if (modeKey === 'speedrun_mode' && speedTime !== null) {
+    const numTime = parseFloat(speedTime);
+    if (!u.stats[modeKey].bestTime || numTime < u.stats[modeKey].bestTime) {
+      u.stats[modeKey].bestTime = numTime;
+    }
+  } else if (score > (u.stats[modeKey].best || 0)) {
     u.stats[modeKey].best = score;
   }
   setActiveUser(u);
 
-  if (score > 0) {
-    const recRef = db.ref(`leaderboards/${modeKey}/${u.uid}`);
-    recRef.once("value", snap => {
-      const old = snap.val();
+  // Sıralamaya Yazma
+  const recRef = db.ref(`leaderboards/${modeKey}/${u.uid}`);
+  recRef.once("value", snap => {
+    const old = snap.val();
+
+    if (modeKey === 'speedrun_mode' && speedTime !== null) {
+      const numTime = parseFloat(speedTime);
+      if (!old || numTime < old.time) {
+        recRef.set({
+          uid: u.uid,
+          fullName: `${u.name}${u.tag}`,
+          avatar: u.avatar || "👤",
+          title: u.title || "Çaylak",
+          modeKey: modeKey,
+          modeName: modeName,
+          time: numTime,
+          date: new Date().toLocaleString("tr-TR"),
+          drops: dropsList || []
+        });
+      }
+    } else if (score > 0) {
       if (!old || score > old.score) {
         recRef.set({
           uid: u.uid,
           fullName: `${u.name}${u.tag}`,
+          avatar: u.avatar || "👤",
           title: u.title || "Çaylak",
           modeKey: modeKey,
           modeName: modeName,
@@ -75,84 +103,37 @@ function recordGameScore(modeKey, modeName, score, dropsList, isWin = true) {
           drops: dropsList || []
         });
       }
-    });
-  }
-}
-
-function updateUsernameGlobal(newName) {
-  const u = getActiveUser();
-  if (!u || !newName.trim()) return;
-
-  const oldSafeKey = u.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
-  const newSafeKey = newName.toLowerCase().replace(/[^a-z0-9]/g, "_");
-
-  db.ref("accounts/" + newSafeKey).once("value", snap => {
-    if (snap.exists() && snap.val().uid !== u.uid) {
-      return alert("Bu kullanıcı adı zaten kullanımda!");
     }
-
-    db.ref("accounts/" + oldSafeKey).remove();
-    db.ref("accounts/" + newSafeKey).set({ uid: u.uid, password: u.password });
-
-    u.name = newName.trim();
-    setActiveUser(u);
-
-    db.ref("global_chat").once("value", mSnap => {
-      mSnap.forEach(child => {
-        if (child.val().uid === u.uid) {
-          db.ref(`global_chat/${child.key}`).update({ sender: `${u.name}${u.tag}` });
-        }
-      });
-    });
-
-    const modes = ['standard', 'ten_cases', 'catch_open', 'upgrade_mode', 'mines_mode', 'mega_mode', 'dice_mode', 'jackpot_mode', 'pvp_mode'];
-    modes.forEach(m => {
-      db.ref(`leaderboards/${m}/${u.uid}`).update({ fullName: `${u.name}${u.tag}` });
-    });
-
-    alert("Kullanıcı adınız güncellendi!");
-    location.reload();
   });
 }
 
-function removeFriendBidirectional(friendUID, friendName, callback) {
-  const u = getActiveUser();
-  if (!u) return;
-  if (!confirm(`${friendName} arkadaşlıktan çıkarılsın mı?`)) return;
-
-  db.ref(`friends/${u.uid}/${friendUID}`).remove();
-  db.ref(`friends/${friendUID}/${u.uid}`).remove();
-  alert(`${friendName} arkadaş listenizden çıkarıldı.`);
-  if (callback) callback();
+// Admin İşlemleri
+function adminClearAllUsers() {
+  if (!confirm("Tüm kayıtlı kullanıcı hesapları silinecektir! Onaylıyor musunuz?")) return;
+  db.ref("accounts").remove();
+  db.ref("users").remove();
+  alert("Tüm kullanıcılar silindi!");
 }
 
-function deleteAccountPermanently() {
-  const u = getActiveUser();
-  if (!u) return;
-  if (!confirm("Hesabınızı ve tüm verilerinizi kalıcı olarak silmek istediğinize emin misiniz?")) return;
+function adminClearAllScores() {
+  if (!confirm("Tüm modların liderlik skorları silinecektir! Onaylıyor musunuz?")) return;
+  db.ref("leaderboards").remove();
+  alert("Tüm sıralama skorları silindi!");
+}
 
-  const safeKey = u.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
-  db.ref("accounts/" + safeKey).remove();
-  db.ref("users/" + u.uid).remove();
+function adminClearAllChannels() {
+  if (!confirm("Tüm global ve özel kanallar silinecektir! Onaylıyor musunuz?")) return;
+  db.ref("channels").remove();
+  db.ref("channel_msgs").remove();
+  alert("Tüm kanallar silindi!");
+}
 
-  const modes = ['standard', 'ten_cases', 'catch_open', 'upgrade_mode', 'mines_mode', 'mega_mode', 'dice_mode', 'jackpot_mode', 'pvp_mode'];
-  modes.forEach(m => {
-    db.ref(`leaderboards/${m}/${u.uid}`).remove();
+function adminWipeEverything() {
+  if (!confirm("DİKKAT: Veritabanındaki HER ŞEY (kullanıcılar, skorlar, kanallar, mesajlar) silinecektir!")) return;
+  if (!confirm("GERÇEKTEN HER ŞEYİ SİLMEK İSTİYOR MUSUNUZ?")) return;
+  db.ref().remove().then(() => {
+    alert("Tüm veritabanı sıfırlandı!");
+    localStorage.clear();
+    window.location.href = "index.html";
   });
-
-  db.ref("global_chat").once("value", snap => {
-    snap.forEach(child => {
-      if (child.val().uid === u.uid) {
-        db.ref(`global_chat/${child.key}`).update({ sender: "deleteUser#0000" });
-      }
-    });
-  });
-
-  db.ref("friends/" + u.uid).remove();
-  db.ref("friend_requests/" + u.uid).remove();
-  db.ref("channel_invites/" + u.uid).remove();
-
-  localStorage.removeItem("kutu_active_session");
-  alert("Hesabınız silindi.");
-  window.location.href = "index.html";
 }
