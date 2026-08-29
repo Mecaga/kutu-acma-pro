@@ -10,6 +10,7 @@ if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const AVATAR_LIST = ["👤", "😄", "😍", "😎", "🤓", "🥸", "🤠", "😈", "👽", "🎃", "💀", "👁", "🧠", "⛑️", "🎒", "🛜", "👑"];
+const FORBIDDEN_NAMES = ["trump", "putin", "admin", "moderator", "kurucu", "root"];
 
 function getActiveUser() {
   const data = localStorage.getItem("kutu_active_session");
@@ -44,6 +45,56 @@ function syncUserFromDB(uid, callback) {
       setActiveUser(val);
       if (callback) callback(val);
     }
+  });
+}
+
+function updateAvatarGlobal(newAvatar) {
+  const u = getActiveUser();
+  if (!u) return;
+  u.avatar = newAvatar;
+  setActiveUser(u);
+
+  // Sıralamalardaki avatarları güncelle
+  const modes = ['standard', 'ten_cases', 'catch_basket', 'catch_open', 'mines_mode', 'mega_mode', 'speedrun_mode', 'double_mode', 'temple_mode'];
+  modes.forEach(m => {
+    db.ref(`leaderboards/${m}/${u.uid}`).once("value", s => {
+      if (s.exists()) db.ref(`leaderboards/${m}/${u.uid}`).update({ avatar: newAvatar });
+    });
+  });
+}
+
+function updateUsernameGlobal(newName) {
+  const u = getActiveUser();
+  if (!u || !newName.trim()) return;
+  if (u.isAdmin) return alert("Admin kullanıcı adı değiştirilemez!");
+
+  const lower = newName.toLowerCase().trim();
+  if (FORBIDDEN_NAMES.some(f => lower.includes(f))) {
+    return alert("Bu kullanıcı adı yasaklı bir kelime içeriyor!");
+  }
+
+  const oldSafeKey = u.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
+  const newSafeKey = lower.replace(/[^a-z0-9]/g, "_");
+
+  db.ref("accounts/" + newSafeKey).once("value", snap => {
+    if (snap.exists() && snap.val().uid !== u.uid) return alert("Bu kullanıcı adı zaten kullanımda!");
+
+    db.ref("accounts/" + oldSafeKey).remove();
+    db.ref("accounts/" + newSafeKey).set({ uid: u.uid, password: u.password });
+
+    u.name = newName.trim();
+    setActiveUser(u);
+
+    // Sıralamalardaki isimleri güncelle
+    const modes = ['standard', 'ten_cases', 'catch_basket', 'catch_open', 'mines_mode', 'mega_mode', 'speedrun_mode', 'double_mode', 'temple_mode'];
+    modes.forEach(m => {
+      db.ref(`leaderboards/${m}/${u.uid}`).once("value", s => {
+        if (s.exists()) db.ref(`leaderboards/${m}/${u.uid}`).update({ fullName: `${u.name}${u.tag}` });
+      });
+    });
+
+    alert("Kullanıcı adınız güncellendi! Yeni adınızla giriş yapabilirsiniz.");
+    location.reload();
   });
 }
 
@@ -106,70 +157,21 @@ function recordGameScore(modeKey, modeName, score, dropsList, isWin = true, spee
   });
 }
 
-function updateUsernameGlobal(newName) {
-  const u = getActiveUser();
-  if (!u || !newName.trim()) return;
-  if (u.isAdmin) return alert("Admin kullanıcı adı değiştirilemez!");
-
-  const oldSafeKey = u.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
-  const newSafeKey = newName.toLowerCase().replace(/[^a-z0-9]/g, "_");
-
-  db.ref("accounts/" + newSafeKey).once("value", snap => {
-    if (snap.exists() && snap.val().uid !== u.uid) return alert("Bu kullanıcı adı zaten kullanımda!");
-
-    db.ref("accounts/" + oldSafeKey).remove();
-    db.ref("accounts/" + newSafeKey).set({ uid: u.uid, password: u.password });
-
-    u.name = newName.trim();
-    setActiveUser(u);
-    alert("Kullanıcı adınız güncellendi!");
-    location.reload();
-  });
-}
-
-function removeFriendBidirectional(friendUID, friendName, callback) {
-  const u = getActiveUser();
-  if (!u || !confirm(`${friendName} arkadaşlıktan çıkarılsın mı?`)) return;
-
-  db.ref(`friends/${u.uid}/${friendUID}`).remove();
-  db.ref(`friends/${friendUID}/${u.uid}`).remove();
-  alert(`${friendName} arkadaş listenizden çıkarıldı.`);
-  if (callback) callback();
-}
-
 function deleteAccountPermanently() {
   const u = getActiveUser();
-  if (!u) return;
-  if (u.isAdmin) return alert("Admin hesabı silinemez!");
-
-  if (!confirm("Hesabınızı ve tüm verilerinizi kalıcı olarak silmek istediğinize emin misiniz?")) return;
+  if (!u || u.isAdmin) return alert("Admin hesabı silinemez!");
+  if (!confirm("Hesabınızı ve tüm verilerinizi silmek istediğinize emin misiniz?")) return;
 
   const safeKey = u.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
   db.ref("accounts/" + safeKey).remove();
   db.ref("users/" + u.uid).remove();
 
-  const modes = ['standard', 'ten_cases', 'catch_open', 'upgrade_mode', 'mines_mode', 'mega_mode', 'speedrun_mode', 'bomb_mode', 'double_mode', 'catch_basket', 'jackpot_mode'];
+  const modes = ['standard', 'ten_cases', 'catch_basket', 'catch_open', 'mines_mode', 'mega_mode', 'speedrun_mode', 'double_mode', 'temple_mode'];
   modes.forEach(m => db.ref(`leaderboards/${m}/${u.uid}`).remove());
-
   db.ref("friends/" + u.uid).remove();
   db.ref("friend_requests/" + u.uid).remove();
 
   localStorage.removeItem("kutu_active_session");
   alert("Hesabınız silindi.");
   window.location.href = "index.html";
-}
-
-function adminClearAllUsers() {
-  if (confirm("Tüm kayıtlı kullanıcılar silinsin mi?")) { db.ref("accounts").remove(); db.ref("users").remove(); alert("Silindi!"); }
-}
-function adminClearAllScores() {
-  if (confirm("Tüm sıralama skorları silinsin mi?")) { db.ref("leaderboards").remove(); alert("Silindi!"); }
-}
-function adminClearAllChannels() {
-  if (confirm("Tüm kanallar silinsin mi?")) { db.ref("channels").remove(); db.ref("channel_msgs").remove(); alert("Silindi!"); }
-}
-function adminWipeEverything() {
-  if (confirm("HER ŞEY silinecektir! Onaylıyor musunuz?")) {
-    db.ref().remove().then(() => { localStorage.clear(); window.location.href = "index.html"; });
-  }
 }
