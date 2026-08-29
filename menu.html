@@ -31,21 +31,19 @@
       </div>
     </div>
 
-    <!-- 14 MODLU KOMPAKT GRID -->
-    <div class="mode-grid-8" style="grid-template-rows: repeat(7, 1fr); max-height:270px; overflow-y:auto;">
+    <!-- MOD GRID (12 MODLU) -->
+    <div class="mode-grid-8" style="grid-template-rows: repeat(6, 1fr); max-height:270px; overflow-y:auto;">
       <div class="mode-card-8 active" onclick="selectGameMode('standard', this, 'normal.html')"><b>⚔️ Normal Kasa</b><span>30s Klasik</span></div>
       <div class="mode-card-8" onclick="selectGameMode('ten_cases', this, 'ten_cases.html')"><b>📦 10 Kutu Modu</b><span>10 Hak</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('catch_basket', this, 'catch_basket.html')"><b>🧺 Tut & Aç</b><span>Sepetle Yakala</span></div>
       <div class="mode-card-8" onclick="selectGameMode('catch_open', this, 'catch.html')"><b>🎯 Yakala & Aç</b><span>Kutuları Topla</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('upgrade_mode', this, 'upgrade.html')"><b>📈 Şans Yükseltme</b><span>Katlanan Şans</span></div>
       <div class="mode-card-8" onclick="selectGameMode('mines_mode', this, 'mines.html')"><b>💣 Mayınlı Kasa</b><span>Risk & Çıkış</span></div>
       <div class="mode-card-8" onclick="selectGameMode('mega_mode', this, 'mega.html')"><b>💎 Mega Kasa</b><span>45s Dengeli</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('dice_mode', this, 'dice.html')"><b>🎲 Zar & Kasa</b><span>Zarla Çarp</span></div>
       <div class="mode-card-8" onclick="selectGameMode('speedrun_mode', this, 'speedrun.html')"><b>⚡ Speedrun</b><span>1000P Yarışı</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('bomb_mode', this, 'bomb.html')"><b>⏳ Zaman Bombası</b><span>10s Kablo Kes</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('bomb_mode', this, 'bomba.html')"><b>⏳ Zaman Bombası</b><span>10s Kablo Kes</span></div>
       <div class="mode-card-8" onclick="selectGameMode('double_mode', this, 'double.html')"><b>🎰 Çift Rulet</b><span>Eşya + Çarpan</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('standard', this, 'normal.html')"><b>🛡️ Hazır Sandık</b><span>Defans Kasası</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('mega_mode', this, 'mega.html')"><b>⛏️ Altın Madeni</b><span>Cevher Kasası</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('upgrade_mode', this, 'upgrade.html')"><b>🎡 Şans Çarkı</b><span>Dinamik Kasa</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('jackpot_mode', this, 'jackpot.html')"><b>🎡 Çarkıfelek</b><span>Büyük İkramiye</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('upgrade_mode', this, 'upgrade.html')"><b>📈 Şans Yükseltme</b><span>Katlanan Şans</span></div>
       <div class="mode-card-8" onclick="selectGameMode('mines_mode', this, 'mines.html')"><b>🏛️ Gizli Tapınak</b><span>Antik Kasa</span></div>
     </div>
 
@@ -86,9 +84,7 @@
       </div>
 
       <button id="btn-sound-toggle" class="mode-btn" style="margin-bottom:6px; text-align:center; color:#fff;" onclick="toggleSound()">🔊 Ses: Açık</button>
-      <button class="btn-start" style="background:var(--danger); font-size:11px; padding:6px; margin-bottom:6px;" onclick="deleteAccountPermanently()">🗑️ Hesabı Kalıcı Olarak Sil</button>
-      
-      <!-- Çıkış Butonu Buraya Alındı -->
+      <button id="btn-delete-acc" class="btn-start" style="background:var(--danger); font-size:11px; padding:6px; margin-bottom:6px;" onclick="deleteAccountPermanently()">🗑️ Hesabı Kalıcı Olarak Sil</button>
       <button class="btn-start" style="background:#334155; font-size:11px; padding:6px; margin-bottom:6px;" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
       <button class="btn-close" onclick="closeSettingsModal()">Kapat</button>
     </div>
@@ -102,30 +98,31 @@
         <input type="text" id="in-announce-txt" class="input-field" style="margin:4px 0;" placeholder="Duyuru veya Oylama Sorusu...">
         <div style="display:flex; gap:4px;">
           <button class="icon-btn" style="flex:1; background:var(--neon-blue);" onclick="publishAnnouncement(false)">📢 Paylaş</button>
-          <button class="icon-btn" style="flex:1; background:var(--neon-gold); color:#000;" onclick="publishAnnouncement(true)">🗳️ Oylama</button>
+          <button class="icon-btn" style="flex:1; background:var(--neon-gold); color:#000;" onclick="publishAnnouncement(true)">🗳️ Oylama Başlat</button>
         </div>
       </div>
-      <div id="announcements-feed" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
+      <div id="announcements-feed" style="max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
       <button class="btn-close" onclick="document.getElementById('modal-announcements').style.display='none'">Kapat</button>
     </div>
   </div>
 
-  <!-- MOD REHBERİ -->
+  <!-- GÜNCELLENMİŞ MOD REHBERİ -->
   <div id="modal-guide" class="modal-overlay">
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-blue); text-align:center; margin-bottom:6px;">ℹ️ Mod Rehberi</div>
-      <div style="font-size:10px; color:#cbd5e1; line-height:1.6; max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
-        <div><b>⚔️ Normal Kasa:</b> 30s klasik kasa açma yarışı.</div>
-        <div><b>📦 10 Kutu:</b> Süresiz tam 10 kutu açma hakkı.</div>
-        <div><b>🎯 Yakala & Aç:</b> 20s düşen kutuları toplayıp CS ruletinde aç.</div>
-        <div><b>📈 Şans Yükseltme:</b> Her adımda katlanan Godly şansı.</div>
-        <div><b>💣 Mayınlı Kasa:</b> 9 kutuda 1 mayın; bombaya basarsan puanlar sıfırlanır.</div>
-        <div><b>💎 Mega Kasa:</b> 45s yüksek ödüllü dengeli kasa.</div>
-        <div><b>🎲 Zar & Kasa:</b> 2 zar at, çarpanını belirle, kasa puanını katla.</div>
-        <div><b>⚡ Speedrun:</b> En hızlı sürede 1000 puana ulaş!</div>
-        <div><b>⏳ Zaman Bombası:</b> 10s içinde 3 doğru kabloyu keserek bombayı imha et.</div>
-        <div><b>🎰 Çift Rulet:</b> Aynı anda eşya ve x1-x10 çarpan kazan.</div>
-        <div><b>⚔️ 1v1 PvP:</b> Canlı rakiple hazır verip sandık düellosu yap.</div>
+      <div style="font-size:10px; color:#cbd5e1; line-height:1.6; max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
+        <div><b>⚔️ Normal Kasa:</b> 30s klasik kasa açma maratonu.</div>
+        <div><b>📦 10 Kutu:</b> Süre kısıtlamasız 10 kutu açma hakkı.</div>
+        <div><b>🧺 Tut & Aç:</b> 20s boyunca sepeti sağ-sol yaparak düşen kutuları tam ortasında yakala ve rulette aç!</div>
+        <div><b>🎯 Yakala & Aç:</b> 20s ekrana yağan kutuları toplayıp rulette puanlarını topla.</div>
+        <div><b>💣 Mayınlı Kasa:</b> 9 kutudan 1'i mayın; bombaya denk gelmeden puanını al ve çekil.</div>
+        <div><b>💎 Mega Kasa:</b> 45s yüksek ödüllü dengeli havuz.</div>
+        <div><b>⚡ Speedrun:</b> En hızlı saniyede 1000 puana ulaş ve sıralamaya adını yazdır!</div>
+        <div><b>⏳ Zaman Bombası:</b> 10s içinde patlamadan 3 doğru kabloyu kes ve +800P kazan.</div>
+        <div><b>🎰 Çift Rulet:</b> Hem eşya hem x1-x10 rastgele çarpan kazan.</div>
+        <div><b>🎡 Çarkıfelek:</b> Çarkı çevir, 2500P büyük jackpot ödülünü hedefle!</div>
+        <div><b>📈 Şans Yükseltme:</b> Her kasa açışında kademen yükselir, Godly eşya şansı katlanır.</div>
+        <div><b>⚔️ 1v1 PvP:</b> Canlı rakiplerle hazır verip düelloda yarış.</div>
       </div>
       <button class="btn-close" onclick="document.getElementById('modal-guide').style.display='none'">Kapat</button>
     </div>
@@ -139,14 +136,15 @@
     const MODE_RATES = {
       standard: { bg: "bg-standard", title: "NORMAL KASA", tiers: [{name:"Classic (%58)",pts:"1-3P",c:"#fff"},{name:"Super (%29)",pts:"4-10P",c:"#38bdf8"},{name:"Ultra (%10)",pts:"12-30P",c:"#c084fc"},{name:"Omega (%2.8)",pts:"35-120P",c:"#fb923c"},{name:"Godly (%0.2)",pts:"500-1000P",c:"#f43f5e"}] },
       ten_cases: { bg: "bg-ten_cases", title: "10 KUTU MODU", tiers: [{name:"Classic (%35)",pts:"2-5P",c:"#fff"},{name:"Super (%35)",pts:"6-15P",c:"#38bdf8"},{name:"Ultra (%20)",pts:"20-50P",c:"#c084fc"},{name:"Omega (%8.5)",pts:"60-200P",c:"#fb923c"},{name:"Godly (%1.5)",pts:"600-1200P",c:"#f43f5e"}] },
+      catch_basket: { bg: "bg-catch_open", title: "TUT & AÇ (SEPET)", tiers: [{name:"Tahta Kutu (%45)",pts:"3-8P",c:"#fff"},{name:"Çelik Kutu (%30)",pts:"10-25P",c:"#38bdf8"},{name:"Mistik Kutu (%16)",pts:"30-80P",c:"#c084fc"},{name:"Kozmik Sandık (%7)",pts:"100-300P",c:"#fb923c"},{name:"Tanrısal Kasa (%2)",pts:"800-1600P",c:"#f43f5e"}] },
       catch_open: { bg: "bg-catch_open", title: "YAKALA & AÇ", tiers: [{name:"Classic Kasa (%45)",pts:"2-5P",c:"#fff"},{name:"Super Kasa (%30)",pts:"6-18P",c:"#38bdf8"},{name:"Ultra Kasa (%15)",pts:"25-60P",c:"#c084fc"},{name:"Omega Kasa (%8)",pts:"80-250P",c:"#fb923c"},{name:"Godly Kasa (%2)",pts:"750-1500P",c:"#f43f5e"}] },
       upgrade_mode: { bg: "bg-upgrade_mode", title: "ŞANS YÜKSELTME", tiers: [{name:"Kademe 1 (%60)",pts:"5-15P",c:"#fff"},{name:"Kademe 2 (%25)",pts:"20-60P",c:"#38bdf8"},{name:"Kademe 3 (%10)",pts:"70-180P",c:"#c084fc"},{name:"Kozmik (%5)",pts:"250-800P",c:"#f43f5e"}] },
       mines_mode: { bg: "bg-mines_mode", title: "MAYINLI KASA", tiers: [{name:"Güvenli Kasa (%70)",pts:"15-45P",c:"#10b981"},{name:"Büyük Hazine (%30)",pts:"60-160P",c:"#fbbf24"},{name:"Bomba",pts:"0P",c:"#ef4444"}] },
       mega_mode: { bg: "bg-mega_mode", title: "MEGA KASA", tiers: [{name:"Mega Classic (%60)",pts:"10-30P",c:"#fff"},{name:"Mega Super (%28)",pts:"40-90P",c:"#38bdf8"},{name:"Mega Ultra (%10)",pts:"120-280P",c:"#c084fc"},{name:"Efsanevi (%2)",pts:"500-1500P",c:"#f43f5e"}] },
-      dice_mode: { bg: "bg-dice_mode", title: "ZAR & KASA", tiers: [{name:"Zar Çarpanı",pts:"x1, x2, x3, x5",c:"#fbbf24"},{name:"Taban Puan",pts:"20-100P",c:"#38bdf8"}] },
       speedrun_mode: { bg: "bg-speedrun_mode", title: "SPEEDRUN YARIŞI", tiers: [{name:"Hızlı Kasa",pts:"20-60P",c:"#38bdf8"},{name:"Hedef",pts:"En Hızlı 1000P!",c:"#f43f5e"}] },
-      bomb_mode: { bg: "bg-standard", title: "ZAMAN BOMBASI", tiers: [{name:"Doğru Kablo",pts:"x5 Çarpan",c:"#10b981"},{name:"Yanlış Kablo",pts:"0P Patlama",c:"#ef4444"}] },
-      double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] }
+      bomb_mode: { bg: "bg-standard", title: "ZAMAN BOMBASI", tiers: [{name:"3 Doğru Kablo",pts:"+800P",c:"#10b981"},{name:"Tuzak Kablo",pts:"0P Patlama",c:"#ef4444"}] },
+      double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] },
+      jackpot_mode: { bg: "bg-jackpot_mode", title: "ÇARKIFELEK", tiers: [{name:"Büyük Jackpot",pts:"2500P",c:"#fbbf24"},{name:"Ödüller",pts:"100P - 500P",c:"#38bdf8"}] }
     };
 
     window.onload = () => {
@@ -158,9 +156,10 @@
       document.getElementById("in-new-name").value = u.name;
       document.getElementById("sel-title").value = u.title || "Çaylak";
 
-      if (u.name.toLowerCase() === "admin") {
+      if (u.isAdmin || u.name.toLowerCase() === "admin") {
         document.getElementById("admin-panel-section").style.display = "block";
         document.getElementById("admin-broadcast-box").style.display = "block";
+        document.getElementById("btn-delete-acc").style.display = "none";
       }
 
       renderAvatarPicker();
@@ -190,12 +189,12 @@
       targetPage = page;
       document.querySelectorAll(".mode-card-8").forEach(b => b.classList.remove("active"));
       cardEl.classList.add("active");
-      document.body.className = MODE_RATES[key].bg;
+      document.body.className = MODE_RATES[key] ? MODE_RATES[key].bg : "bg-standard";
       renderRates(key);
     }
 
     function renderRates(key) {
-      const info = MODE_RATES[key];
+      const info = MODE_RATES[key] || MODE_RATES['standard'];
       let html = `<div style="color:var(--neon-gold); font-weight:bold; font-size:11px; margin-bottom:2px;">📊 ${info.title}</div>`;
       info.tiers.forEach(t => {
         html += `<div style="display:flex; justify-content:space-between; color:${t.c}; font-weight:600; font-size:10px;">
@@ -227,8 +226,35 @@
       const txt = document.getElementById("in-announce-txt").value.trim();
       if (!txt) return;
       const u = getActiveUser();
-      db.ref("announcements").push({ author: `${u.name}${u.tag}`, text: txt, isPoll: isPoll, votesYes: 0, votesNo: 0, date: new Date().toLocaleDateString("tr-TR") });
+      db.ref("announcements").push({
+        author: `${u.name}${u.tag}`,
+        text: txt,
+        isPoll: isPoll,
+        votesYes: 0,
+        votesNo: 0,
+        votedUsers: {},
+        date: new Date().toLocaleDateString("tr-TR")
+      });
       document.getElementById("in-announce-txt").value = "";
+    }
+
+    function castVote(announceId, voteType) {
+      const u = getActiveUser();
+      if (!u) return;
+
+      const ref = db.ref(`announcements/${announceId}`);
+      ref.once("value", snap => {
+        const a = snap.val();
+        if (!a) return;
+        if (a.votedUsers && a.votedUsers[u.uid]) return alert("Zaten oy kullandınız!");
+
+        const updates = {};
+        updates[`votedUsers/${u.uid}`] = voteType;
+        if (voteType === 'yes') updates.votesYes = (a.votesYes || 0) + 1;
+        else updates.votesNo = (a.votesNo || 0) + 1;
+
+        ref.update(updates);
+      });
     }
 
     function loadAnnouncements() {
@@ -239,12 +265,25 @@
         if (!snap.exists()) { feed.innerHTML = "<div style='color:#666; font-size:10px; padding:6px;'>Duyuru bulunmuyor.</div>"; return; }
         snap.forEach(c => {
           const a = c.val();
+          const hasVoted = a.votedUsers && a.votedUsers[u.uid];
+          
+          let pollHtml = "";
+          if (a.isPoll) {
+            pollHtml = `
+              <div style="display:flex; gap:6px; margin-top:4px; width:100%;">
+                <button class="icon-btn" style="flex:1; background:var(--neon-green); justify-content:center;" ${hasVoted ? 'disabled' : ''} onclick="castVote('${c.key}', 'yes')">👍 Evet (${a.votesYes || 0})</button>
+                <button class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;" ${hasVoted ? 'disabled' : ''} onclick="castVote('${c.key}', 'no')">👎 Hayır (${a.votesNo || 0})</button>
+              </div>
+            `;
+          }
+
           feed.innerHTML += `
-            <div class="rank-card" style="flex-direction:column; align-items:flex-start; gap:4px;">
+            <div class="rank-card" style="flex-direction:column; align-items:flex-start; gap:4px; margin-bottom:4px;">
               <div style="display:flex; justify-content:space-between; width:100%; font-size:9px; color:var(--neon-gold);">
                 <b>${a.isPoll ? '🗳️ OYLAMA' : '📢 DUYURU'} (${a.author})</b><span>${a.date}</span>
               </div>
               <div style="font-size:11px; color:#fff;">${a.text}</div>
+              ${pollHtml}
             </div>
           `;
         });
