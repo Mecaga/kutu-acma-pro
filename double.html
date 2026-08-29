@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Çift Rulet Modu</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-standard">
+  <div class="app-container" style="justify-content:space-between;">
+    <div>
+      <div class="top-header">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+        <div style="font-weight:bold; font-size:12px;">🎰 Çift Rulet (5 Hak)</div>
+        <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
+      </div>
+      <div class="game-stats-top" style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <div class="stat-card timer" style="border:1px solid #ef4444; background:#0d1527; padding:4px 8px; border-radius:8px;">
+          <div style="font-size:9px; color:#94a3b8;">KALAN HAK</div>
+          <div style="font-size:14px; font-weight:bold; color:#f87171;" id="lbl-hak">5 Hak</div>
+          <div style="font-size:10px; color:#38bdf8;" id="lbl-user-tag">@User</div>
+        </div>
+        <div class="stat-card score" style="border:1px solid #10b981; background:#0d1527; padding:4px 8px; border-radius:8px; text-align:right;">
+          <div style="font-size:9px; color:#94a3b8;">SON ÇARPAN</div>
+          <div style="font-size:14px; font-weight:bold; color:#fbbf24;" id="lbl-mult">x1</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- İkili Rulet Alanı -->
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:6px; background:#060b17; border-radius:12px; border:1px solid #1e293b; margin:6px 0; padding:6px; overflow:hidden;">
+      <div style="font-size:9px; color:#38bdf8; font-weight:bold;">1. Eşya Ruleti:</div>
+      <div class="roulette-container" id="item-roulette-box" style="height:65px; margin:0;">
+        <div class="roulette-needle"></div>
+        <div id="item-track" class="roulette-track" style="height:60px;"></div>
+      </div>
+
+      <div style="font-size:9px; color:#fbbf24; font-weight:bold;">2. Çarpan Ruleti:</div>
+      <div class="roulette-container" id="mult-roulette-box" style="height:65px; margin:0;">
+        <div class="roulette-needle"></div>
+        <div id="mult-track" class="roulette-track" style="height:60px;"></div>
+      </div>
+    </div>
+
+    <button id="btn-spin-double" class="btn-start" style="background:#7c3aed;" onclick="spinDouble()">İKİ RULETİ AYNI ANDA ÇEVİR</button>
+
+    <div id="summary-overlay" class="modal-overlay">
+      <div class="modal-card">
+        <div style="font-size:14px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">ÇİFT RULET BİTTİ</div>
+        <div style="display:flex; justify-content:space-around; margin-bottom:8px; background:#070212; padding:6px; border-radius:6px;">
+          <div>Toplam: <b id="sum-score" style="color:var(--neon-green);">0 P</b></div>
+          <div>Açılan: <b style="color:var(--neon-blue);">5</b></div>
+        </div>
+        <div id="summary-drops-list" style="max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
+        <div style="display:flex; gap:6px;">
+          <button class="icon-btn" style="flex:1; background:var(--btn-blue); justify-content:center;" onclick="location.reload()">🔄 Tekrar</button>
+          <a href="menu.html" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center;">🚪 Lobi</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let remHak = 5, totalScore = 0, drops = [], isSpinning = false;
+    const MULTIPLIERS = [1, 1, 2, 2, 3, 4, 5, 10];
+
+    window.onload = () => {
+      const u = getActiveUser();
+      document.getElementById("lbl-user-tag").innerText = u ? `@${u.name}${u.tag}` : "@Misafir";
+    };
+
+    function spinDouble() {
+      if (isSpinning || remHak <= 0) return;
+      isSpinning = true;
+      document.getElementById("btn-spin-double").disabled = true;
+
+      const iTrack = document.getElementById("item-track");
+      const mTrack = document.getElementById("mult-track");
+      const iBox = document.getElementById("item-roulette-box");
+      const mBox = document.getElementById("mult-roulette-box");
+
+      iTrack.style.transition = "none"; mTrack.style.transition = "none";
+      iTrack.style.transform = "translateX(0px)"; mTrack.style.transform = "translateX(0px)";
+      iTrack.innerHTML = ""; mTrack.innerHTML = "";
+
+      const winIdx = 20;
+      let winBase = 0, winMult = 1;
+
+      for (let i = 0; i < 25; i++) {
+        const base = Math.floor(Math.random() * 50) + 15;
+        const mult = MULTIPLIERS[Math.floor(Math.random() * MULTIPLIERS.length)];
+        if (i === winIdx) { winBase = base; winMult = mult; }
+
+        iTrack.innerHTML += `<div class="roulette-item" style="width:65px; height:60px;"><span style="font-size:8px;">Kılıç</span><b style="color:var(--neon-green);">+${base}P</b></div>`;
+        mTrack.innerHTML += `<div class="roulette-item" style="width:65px; height:60px;"><span style="font-size:12px; font-weight:900; color:var(--neon-gold);">x${mult}</span></div>`;
+      }
+
+      setTimeout(() => {
+        iTrack.style.transition = "transform 2.8s cubic-bezier(0.12, 0.8, 0.2, 1)";
+        mTrack.style.transition = "transform 2.8s cubic-bezier(0.12, 0.8, 0.2, 1)";
+        iTrack.style.transform = `translateX(${-(winIdx * 65) + (iBox.offsetWidth / 2) - 32.5}px)`;
+        mTrack.style.transform = `translateX(${-(winIdx * 65) + (mBox.offsetWidth / 2) - 32.5}px)`;
+      }, 20);
+
+      setTimeout(() => {
+        const finalPts = winBase * winMult;
+        totalScore += finalPts;
+        drops.push({ tier: `x${winMult} Çarpan`, item: `Taban: ${winBase}P`, pts: finalPts, c: "#fbbf24" });
+
+        document.getElementById("score-badge").innerText = `${totalScore} P`;
+        document.getElementById("lbl-mult").innerText = `x${winMult}`;
+
+        remHak--;
+        document.getElementById("lbl-hak").innerText = `${remHak} Hak`;
+        isSpinning = false;
+
+        if (remHak <= 0) {
+          triggerSummary();
+        } else {
+          document.getElementById("btn-spin-double").disabled = false;
+        }
+      }, 3000);
+    }
+
+    function triggerSummary() {
+      document.getElementById("sum-score").innerText = `${totalScore} P`;
+      const dBox = document.getElementById("summary-drops-list");
+      dBox.innerHTML = "";
+      drops.forEach(d => {
+        dBox.innerHTML += `<div style="background:#070212; padding:4px 8px; border-radius:4px; display:flex; justify-content:space-between; font-size:10px;"><span>[${d.tier}] ${d.item}</span><b style="color:var(--neon-green);">+${d.pts}P</b></div>`;
+      });
+      document.getElementById("summary-overlay").style.display = "flex";
+      recordGameScore('double_mode', 'Çift Rulet', totalScore, drops, totalScore > 0);
+    }
+  </script>
+</body>
+</html>
+
