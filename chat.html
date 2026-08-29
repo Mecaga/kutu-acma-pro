@@ -3,183 +3,154 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sohbetler & Kanallar</title>
+  <title>Sohbet & Kanallar</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    .chat-bubble {
+      max-width: 78%;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      margin-bottom: 4px;
+      display: flex;
+      flex-direction: column;
+      word-break: break-word;
+    }
+    .chat-me {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff;
+      border-bottom-right-radius: 2px;
+    }
+    .chat-other {
+      align-self: flex-start;
+      background: #1e1b4b;
+      border: 1px solid #3b1d6e;
+      color: #fff;
+      border-bottom-left-radius: 2px;
+    }
+    .chat-time {
+      font-size: 7.5px;
+      color: rgba(255, 255, 255, 0.7);
+      align-self: flex-end;
+      margin-top: 2px;
+    }
+  </style>
 </head>
 <body>
-  <div class="app-container">
-    <div class="top-header">
-      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
-      <div style="font-weight:bold; font-size:12px;" id="lbl-chat-main-title">Sohbetler & Kanallar</div>
-      <div style="display:flex; gap:3px;">
-        <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openJoinChannelModal()">Katıl</button>
-        <button class="icon-btn" style="border-color:var(--neon-purple);" onclick="openCreateChannelModal()">+ Kur</button>
+  <div class="app-container" style="justify-content:space-between;">
+    <div>
+      <div class="top-header">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
+        <div id="active-channel-lbl" style="font-weight:bold; font-size:12px; color:var(--neon-gold);">💬 Genel Sohbet</div>
+        <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="toggleChannelPanel()">📡 Kanallar</button>
       </div>
-    </div>
 
-    <!-- Sohbet Seçim Paneli -->
-    <div id="panel-chat-select" style="display:flex; flex-direction:column; flex:1; overflow-y:auto;">
-      <button class="mode-btn" style="padding:12px; font-weight:bold; font-size:12px; color:#fff; background:linear-gradient(90deg, #7e22ce, #a855f7); margin-bottom:6px;" onclick="openRoom('global', '🌐 Global Sohbet', 'global')">
-        🌐 GLOBAL SOHBET (HERKESE AÇIK)
-      </button>
-
-      <div style="font-size:11px; color:var(--neon-purple); font-weight:bold; margin:4px 0 2px 0;">📡 Kanallar:</div>
-      <div id="channels-list-box" style="display:flex; flex-direction:column; gap:4px; margin-bottom:8px;"></div>
-
-      <div style="font-size:11px; color:var(--neon-gold); font-weight:bold; margin-bottom:2px;">💬 Özel Sohbetler (DM):</div>
-      <div id="dm-conversations-list" style="display:flex; flex-direction:column; gap:4px;"></div>
-    </div>
-
-    <!-- Mesajlaşma Odası (WhatsApp Tarzı Saatli & Sistem Rozetli) -->
-    <div id="panel-chat-room" style="display:none; flex-direction:column; flex:1;">
-      <div class="top-header" style="background:#120826; border-bottom:1px solid #3b1d6e; padding:4px 6px; margin-bottom:4px;">
-        <button class="icon-btn" onclick="closeChatRoom()">‹ Geri</button>
-        <div id="room-active-title" style="font-size:11px; font-weight:bold; color:var(--neon-blue);">Oda</div>
-        <div id="room-header-actions" style="display:flex; gap:4px;">
-          <button id="btn-channel-settings" class="icon-btn" style="display:none;" onclick="openChannelSettingsModal()">⚙️</button>
-          <button id="btn-channel-leave" class="icon-btn" style="border-color:var(--danger); display:none;" onclick="leaveCurrentChannel()">Çık</button>
+      <!-- Kanal Oluşturma & Katılma Bölümü -->
+      <div id="channel-drawer" style="display:none; background:#070212; border:1px solid var(--neon-purple); border-radius:8px; padding:6px; margin-bottom:6px;">
+        <div style="display:flex; gap:4px; margin-bottom:4px;">
+          <input type="text" id="in-chan-name" class="input-field" style="margin:0; font-size:10px;" placeholder="Kanal İsmi (#klan)">
+          <button class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="joinOrCreateChannel()">Katıl/Kur</button>
         </div>
+        <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">Mevcut Kanallar:</div>
+        <div id="channels-list" style="display:flex; gap:4px; overflow-x:auto; padding-bottom:2px;"></div>
       </div>
+    </div>
 
-      <!-- Tarih Ayracı -->
-      <div style="text-align:center; margin:2px 0;">
-        <span style="background:#1e0b3d; border:1px solid #3b1d6e; padding:2px 8px; border-radius:10px; font-size:8px; color:var(--text-dim);">📅 29 Ağustos 2026</span>
-      </div>
+    <!-- Mesaj Akış Alanı -->
+    <div id="chat-messages-box" style="flex:1; background:#040814; border:1px solid #1e293b; border-radius:8px; padding:8px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin:4px 0;"></div>
 
-      <div id="active-chat-messages" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:6px; background:#070212; border-radius:8px; margin-bottom:6px;"></div>
-
-      <div style="display:flex; gap:4px;">
-        <input type="text" id="in-msg-text" class="input-field" style="margin:0; font-size:11px; flex:1;" placeholder="Mesaj yaz...">
-        <button class="icon-btn" style="background:var(--neon-green); border-radius:50%; width:34px; height:34px; justify-content:center;" onclick="sendMessage()">➤</button>
-      </div>
+    <!-- Mesaj Gönderme Paneli -->
+    <div style="display:flex; gap:4px;">
+      <input type="text" id="in-msg-txt" class="input-field" style="margin:0; text-align:left; font-size:11px;" placeholder="Mesaj yaz..." onkeydown="if(event.key==='Enter') sendMessage()">
+      <button class="icon-btn" style="background:var(--neon-purple); padding:0 14px;" onclick="sendMessage()">➤</button>
     </div>
   </div>
 
   <script src="app.js"></script>
   <script>
-    let currentChatPath = null, activeChannelID = null, activeChannelData = null;
+    let currentChannel = "genel";
 
     window.onload = () => {
-      loadChannels();
-      loadDMConversations();
+      loadMessages("genel");
+      loadChannelsList();
     };
 
-    function loadChannels() {
-      const u = getActiveUser();
+    function toggleChannelPanel() {
+      const el = document.getElementById("channel-drawer");
+      el.style.display = el.style.display === "none" ? "block" : "none";
+    }
+
+    function joinOrCreateChannel() {
+      const val = document.getElementById("in-chan-name").value.trim().toLowerCase().replace(/[^a-z0-9]/g, '_');
+      if (!val) return;
+      db.ref("channels/" + val).set({ name: val, createdAt: Date.now() });
+      switchChannel(val);
+      document.getElementById("in-chan-name").value = "";
+      toggleChannelPanel();
+    }
+
+    function switchChannel(chanKey) {
+      currentChannel = chanKey;
+      document.getElementById("active-channel-lbl").innerText = `💬 #${chanKey}`;
+      loadMessages(chanKey);
+    }
+
+    function loadChannelsList() {
       db.ref("channels").on("value", snap => {
-        const box = document.getElementById("channels-list-box");
-        box.innerHTML = "";
-        if (!snap.exists()) { box.innerHTML = "<div style='color:#666; font-size:10px;'>Kanal yok.</div>"; return; }
-        snap.forEach(c => {
-          const ch = c.val();
-          if (ch.type === "Açık" || (ch.members && ch.members[u.uid]) || ch.ownerUID === u.uid) {
-            box.innerHTML += `
-              <div class="rank-card" onclick="openRoom('channel_${c.key}', '# ${ch.name}', 'channel', '${c.key}')">
-                <span>📡 <b>${ch.name}</b> <small style="color:${ch.type==='Özel'?'var(--danger)':'var(--neon-green)'};">[${ch.type}]</small></span>
-                <span style="font-size:10px; color:#38bdf8;">Gir ›</span>
-              </div>
-            `;
-          }
-        });
+        const box = document.getElementById("channels-list");
+        box.innerHTML = `<button class="icon-btn" style="background:#1e1b4b;" onclick="switchChannel('genel')">#genel</button>`;
+        if (snap.exists()) {
+          snap.forEach(c => {
+            box.innerHTML += `<button class="icon-btn" style="background:#1e1b4b;" onclick="switchChannel('${c.key}')">#${c.key}</button>`;
+          });
+        }
       });
     }
 
-    function loadDMConversations() {
+    function loadMessages(chanKey) {
       const u = getActiveUser();
-      db.ref("friends/" + u.uid).on("value", snap => {
-        const list = document.getElementById("dm-conversations-list");
-        list.innerHTML = "";
-        if (!snap.exists()) { list.innerHTML = "<div style='color:#666; font-size:10px;'>Arkadaş yok.</div>"; return; }
+      db.ref("channel_msgs/" + chanKey).limitToLast(40).on("value", snap => {
+        const box = document.getElementById("chat-messages-box");
+        box.innerHTML = "";
+        if (!snap.exists()) {
+          box.innerHTML = "<div style='text-align:center; color:#666; font-size:10px; margin:auto;'>Henüz mesaj yok. İlk mesajı sen gönder!</div>";
+          return;
+        }
+
         snap.forEach(c => {
-          list.innerHTML += `
-            <div class="rank-card" onclick="openRoom('dm_${[u.uid, c.key].sort().join('_')}', '💬 ${c.val().fullName}', 'dm')">
-              <span>👤 <b>${c.val().fullName}</b></span>
-              <span style="font-size:10px; color:#38bdf8;">Sohbet ›</span>
+          const m = c.val();
+          const isMe = u && m.senderUid === u.uid;
+          box.innerHTML += `
+            <div class="chat-bubble ${isMe ? 'chat-me' : 'chat-other'}">
+              <span style="font-size:8.5px; font-weight:bold; color:${isMe ? '#fef08a' : '#38bdf8'};">${m.senderName}</span>
+              <span>${m.text}</span>
+              <span class="chat-time">${m.time || ''}</span>
             </div>
           `;
-        });
-      });
-    }
-
-    function openRoom(pathKey, title, roomType, chKey = null) {
-      const u = getActiveUser();
-      activeChannelID = chKey;
-      currentChatPath = pathKey.startsWith('global') ? 'global_chat' : (pathKey.startsWith('channel_') ? `channel_msgs/${chKey}` : `dm_chats/${pathKey.replace('dm_', '')}`);
-
-      document.getElementById("panel-chat-select").style.display = "none";
-      document.getElementById("panel-chat-room").style.display = "flex";
-      document.getElementById("room-active-title").innerText = title;
-
-      if (roomType === 'channel') {
-        db.ref("channels/" + chKey).on("value", snap => {
-          activeChannelData = snap.val();
-          if (!activeChannelData || (activeChannelData.type === "Özel" && !activeChannelData.members[u.uid] && activeChannelData.ownerUID !== u.uid)) {
-            alert("Bu kanaldan çıkarıldınız.");
-            return closeChatRoom();
-          }
-          document.getElementById("btn-channel-settings").style.display = "inline-flex";
-          document.getElementById("btn-channel-leave").style.display = (activeChannelData.type === "Özel" && activeChannelData.ownerUID !== u.uid) ? "inline-flex" : "none";
-        });
-      } else {
-        document.getElementById("btn-channel-settings").style.display = "none";
-        document.getElementById("btn-channel-leave").style.display = "none";
-      }
-
-      listenRoomMessages();
-    }
-
-    function closeChatRoom() {
-      document.getElementById("panel-chat-room").style.display = "none";
-      document.getElementById("panel-chat-select").style.display = "flex";
-      currentChatPath = null;
-    }
-
-    function listenRoomMessages() {
-      const u = getActiveUser();
-      db.ref(currentChatPath).limitToLast(40).on("value", snap => {
-        const box = document.getElementById("active-chat-messages");
-        box.innerHTML = "";
-        snap.forEach(c => {
-          const m = c.val(), isMe = m.uid === u.uid;
-          
-          // Sistem İşlem Mesajı (Kanalın tam ortasında gri rozet)
-          if (m.isSystem) {
-            box.innerHTML += `
-              <div style="text-align:center; margin:4px 0;">
-                <span style="background:rgba(30,41,59,0.9); padding:2px 8px; border-radius:6px; font-size:8.5px; color:#cbd5e1;">ℹ️ ${m.text}</span>
-              </div>
-            `;
-          } else {
-            box.innerHTML += `
-              <div class="msg-bubble ${isMe ? 'me' : 'other'}">
-                <div style="font-size:8.5px; color:#60a5fa; font-weight:bold;">${m.sender}</div>
-                <div style="font-size:11px;">${m.text}</div>
-                <div style="text-align:right; font-size:7.5px; color:#94a3b8; margin-top:2px;">${m.time || '16:28'}</div>
-              </div>
-            `;
-          }
         });
         box.scrollTop = box.scrollHeight;
       });
     }
 
     function sendMessage() {
-      const inp = document.getElementById("in-msg-text");
-      let text = inp.value.trim();
-      if (!text || !currentChatPath) return;
+      const txt = document.getElementById("in-msg-txt").value.trim();
       const u = getActiveUser();
-      const now = new Date();
-      const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      if (!txt || !u) return;
 
-      db.ref(currentChatPath).push({
-        uid: u.uid,
-        sender: `${u.avatar || '👤'} ${u.name}${u.tag}`,
-        text: text,
-        time: timeStr
+      const timeStr = new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+
+      db.ref("channel_msgs/" + currentChannel).push({
+        senderUid: u.uid,
+        senderName: `${u.avatar || '👤'} ${u.name}${u.tag}`,
+        text: txt,
+        time: timeStr,
+        timestamp: Date.now()
       });
-      inp.value = "";
+
+      document.getElementById("in-msg-txt").value = "";
     }
   </script>
 </body>
