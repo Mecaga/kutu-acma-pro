@@ -9,66 +9,34 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <div class="app-container">
-    <div class="top-header">
-      <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
-      <div style="font-weight:bold; font-size:12px;">👥 Arkadaşlar</div>
-      <button class="icon-btn" style="border-color:var(--neon-gold);" onclick="openRequestsModal()">📩 İstekler</button>
-    </div>
-
-    <!-- Arkadaş Ekle Input -->
-    <div style="display:flex; gap:4px; margin-bottom:8px;">
-      <input type="text" id="in-tag-search" class="input-field" style="margin:0; font-size:11px; padding:6px;" placeholder="KullanıcıAdı#12345">
-      <button class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="sendFriendRequest()">Ekle</button>
-    </div>
-
-    <!-- 1. KATEGORİ: ARKADAŞLARIM -->
-    <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">⭐ Arkadaşlarım:</div>
-    <div id="my-friends-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:12px;"></div>
-
-    <!-- 2. KATEGORİ: KAYITLI DİĞER TÜM OYUNCULAR -->
-    <div style="font-size:11px; font-weight:bold; color:#38bdf8; margin-bottom:4px;">🌐 Kayıtlı Diğer Oyuncular:</div>
-    <div id="other-users-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
-  </div>
-
-  <!-- Profil Paneli Modalı -->
-  <div id="modal-user-profile" class="modal-overlay">
-    <div class="modal-card panel-theme-profile">
-      <div style="text-align:center;">
-        <div style="font-size:36px;">👤</div>
-        <h3 id="prof-modal-name" style="color:var(--neon-blue);">Oyuncu</h3>
-        <div id="prof-modal-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
+  <div class="app-container" style="justify-content:space-between;">
+    <div>
+      <div class="top-header">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
+        <div style="font-weight:bold; font-size:12px;">👥 Arkadaşlar</div>
+        <button class="icon-btn" style="border-color:var(--neon-gold);" onclick="openRequestsModal()">📩 İstekler</button>
       </div>
-      <div style="background:#050a14; padding:8px; border-radius:6px; font-size:11px; margin-bottom:8px; line-height:1.8;">
-        <div><b>Toplam Oyun:</b> <span id="prof-modal-played">0</span></div>
-        <div><b>Kazanma Oranı:</b> <span id="prof-modal-winrate">%100</span></div>
+
+      <div style="display:flex; gap:4px; margin-bottom:8px;">
+        <input type="text" id="in-tag-search" class="input-field" style="margin:0; font-size:11px;" placeholder="KullanıcıAdı#12345">
+        <button class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="sendFriendRequest()">Ekle</button>
       </div>
-      <div style="font-size:10px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Mod Rekorları:</div>
-      <div id="prof-modal-records" style="display:flex; flex-direction:column; gap:3px; max-height:100px; overflow-y:auto; margin-bottom:8px;"></div>
-      <button class="btn-close" onclick="document.getElementById('modal-user-profile').style.display='none'">Kapat</button>
+
+      <!-- 1. Arkadaşlarım -->
+      <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">⭐ Arkadaşlarım:</div>
+      <div id="my-friends-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; margin-bottom:10px;"></div>
+
+      <!-- 2. Kayıtlı Diğer Kullanıcılar -->
+      <div style="font-size:11px; font-weight:bold; color:#38bdf8; margin-bottom:4px;">🌐 Kayıtlı Diğer Oyuncular:</div>
+      <div id="other-users-list" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
     </div>
   </div>
 
-  <!-- Sayfada Pop-up Sohbet Paneli -->
-  <div id="modal-popup-chat" class="modal-overlay">
-    <div class="modal-card" style="height:80%;">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #3b1d6e; padding-bottom:6px; margin-bottom:6px;">
-        <span id="popup-chat-title" style="font-size:12px; font-weight:bold; color:var(--neon-blue);">💬 Sohbet</span>
-        <button class="icon-btn" style="border-color:var(--danger); padding:2px 6px;" onclick="closePopupChat()">X</button>
-      </div>
-      <div id="popup-chat-messages" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; background:#070212; padding:6px; border-radius:6px; margin-bottom:6px;"></div>
-      <div style="display:flex; gap:4px;">
-        <input type="text" id="popup-msg-input" class="input-field" style="margin:0; font-size:11px; flex:1;" placeholder="Mesaj yaz...">
-        <button class="icon-btn" style="background:var(--neon-green); border-radius:50%; width:32px; height:32px; justify-content:center;" onclick="sendPopupMessage()">➤</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- İstekler Modalı -->
+  <!-- İstekler Modalı (Kabul / Red Butonları) -->
   <div id="modal-reqs" class="modal-overlay">
     <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">Gelen İstekler</div>
-      <div id="reqs-list-box" style="display:flex; flex-direction:column; gap:4px;"></div>
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">Gelen Arkadaşlık İstekleri</div>
+      <div id="reqs-list-box" style="display:flex; flex-direction:column; gap:4px; max-height:180px; overflow-y:auto;"></div>
       <button class="btn-close" onclick="document.getElementById('modal-reqs').style.display='none'">Kapat</button>
     </div>
   </div>
@@ -76,8 +44,6 @@
   <script src="app.js"></script>
   <script>
     let myFriendUIDs = [];
-    let incomingRequests = {};
-    let activeChatTargetUID = null;
 
     window.onload = () => {
       loadFriendsAndUsers();
@@ -87,33 +53,26 @@
       const u = getActiveUser();
       if (!u) return;
 
-      db.ref("friend_requests/" + u.uid).on("value", rSnap => {
-        incomingRequests = rSnap.val() || {};
+      db.ref("friends/" + u.uid).on("value", snap => {
+        const myBox = document.getElementById("my-friends-list");
+        myBox.innerHTML = "";
+        myFriendUIDs = [];
 
-        db.ref("friends/" + u.uid).on("value", snap => {
-          const myBox = document.getElementById("my-friends-list");
-          myBox.innerHTML = "";
-          myFriendUIDs = [];
-
-          if (!snap.exists()) {
-            myBox.innerHTML = "<div style='color:#666; font-size:10px; padding:6px;'>Henüz ekli arkadaşınız yok.</div>";
-          } else {
-            snap.forEach(c => {
-              const f = c.val();
-              myFriendUIDs.push(c.key);
-              myBox.innerHTML += `
-                <div class="rank-card">
-                  <span style="font-size:11px; cursor:pointer;" onclick="openUserProfile('${c.key}', '${f.fullName}')">⭐ <b>${f.fullName}</b></span>
-                  <div style="display:flex; gap:4px;">
-                    <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openPopupChat('${c.key}', '${f.fullName}')">💬 Sohbet</button>
-                    <button class="icon-btn" style="border-color:var(--danger);" onclick="removeFriendBidirectional('${c.key}', '${f.fullName}', loadFriendsAndUsers)">❌</button>
-                  </div>
-                </div>
-              `;
-            });
-          }
-          loadOtherUsers(u);
-        });
+        if (!snap.exists()) {
+          myBox.innerHTML = "<div style='color:#666; font-size:10px; padding:4px;'>Ekli arkadaşınız yok.</div>";
+        } else {
+          snap.forEach(c => {
+            const f = c.val();
+            myFriendUIDs.push(c.key);
+            myBox.innerHTML += `
+              <div class="rank-card">
+                <span style="font-size:11px;">⭐ <b>${f.fullName}</b></span>
+                <button class="icon-btn" style="border-color:var(--danger);" onclick="removeFriendBidirectional('${c.key}', '${f.fullName}', loadFriendsAndUsers)">❌ Çıkar</button>
+              </div>
+            `;
+          });
+        }
+        loadOtherUsers(u);
       });
     }
 
@@ -127,25 +86,10 @@
           if (!reg || reg.uid === u.uid) return;
           if (myFriendUIDs.includes(reg.uid)) return;
 
-          const isDeleted = reg.fullName && reg.fullName.startsWith("deleteUser");
-          const hasSentMeRequest = !!incomingRequests[reg.uid];
-
-          let actionBtn = "";
-          if (isDeleted) {
-            actionBtn = '<span style="font-size:9px; color:#666;">Silinmiş</span>';
-          } else if (hasSentMeRequest) {
-            actionBtn = `<button class="icon-btn" style="background:var(--neon-gold); color:#000;" onclick="acceptFriendRequestBidirectional('${reg.uid}', '${reg.fullName}', loadFriendsAndUsers)">⚡ Onayla</button>`;
-          } else {
-            actionBtn = `<button class="icon-btn" style="border-color:var(--neon-green);" onclick="requestUser('${reg.uid}', '${reg.fullName}')">➕ İstek</button>`;
-          }
-
           otherBox.innerHTML += `
             <div class="rank-card">
-              <span style="font-size:11px; cursor:pointer;" onclick="openUserProfile('${reg.uid}', '${reg.fullName}')">👤 ${reg.fullName}</span>
-              <div style="display:flex; gap:4px;">
-                ${actionBtn}
-                <button class="icon-btn" style="border-color:var(--neon-blue);" onclick="openPopupChat('${reg.uid}', '${reg.fullName}')">💬</button>
-              </div>
+              <span style="font-size:11px;">${reg.avatar || '👤'} ${reg.fullName}</span>
+              <button class="icon-btn" style="border-color:var(--neon-green);" onclick="requestUser('${reg.uid}', '${reg.fullName}')">➕ İstek Gönder</button>
             </div>
           `;
         });
@@ -156,103 +100,22 @@
       const tag = document.getElementById("in-tag-search").value.trim();
       const u = getActiveUser();
       if (!tag) return;
-      if (tag === `${u.name}${u.tag}`) return alert("Kendinize arkadaşlık isteği gönderemezsiniz!");
-      if (tag.startsWith("deleteUser")) return alert("Silinmiş bir hesaba istek gönderemezsiniz!");
+      if (tag === `${u.name}${u.tag}`) return alert("Kendinize istek gönderemezsiniz!");
 
       db.ref("users").orderByChild("fullName").equalTo(tag).once("value", snap => {
-        if (!snap.exists()) return alert("Bu etikete sahip kullanıcı bulunamadı!");
-        snap.forEach(c => {
-          requestUser(c.val().uid, c.val().fullName);
-        });
+        if (!snap.exists()) return alert("Kullanıcı bulunamadı!");
+        snap.forEach(c => requestUser(c.val().uid, c.val().fullName));
       });
       document.getElementById("in-tag-search").value = "";
     }
 
     function requestUser(targetUID, targetName) {
       const u = getActiveUser();
-      if (targetUID === u.uid) return alert("Kendinize istek atamazsınız!");
-      if (targetName.startsWith("deleteUser")) return alert("Silinmiş kullanıcıya istek atılamaz!");
-
-      if (incomingRequests[targetUID]) {
-        return acceptFriendRequestBidirectional(targetUID, targetName, loadFriendsAndUsers);
-      }
-
-      db.ref(`friend_requests/${targetUID}/${u.uid}`).set({ fromUID: u.uid, fromName: `${u.name}${u.tag}` });
+      db.ref(`friend_requests/${targetUID}/${u.uid}`).set({
+        fromUID: u.uid,
+        fromName: `${u.name}${u.tag}`
+      });
       alert(`${targetName} kullanıcısına istek gönderildi!`);
-    }
-
-    function openUserProfile(uid, fullName) {
-      db.ref("users/" + uid).once("value", snap => {
-        const fullUser = snap.val() || {};
-        document.getElementById("prof-modal-name").innerText = fullName;
-        document.getElementById("prof-modal-title").innerText = `[${fullUser.title || 'Çaylak'}]`;
-
-        const stats = fullUser.stats || {};
-        let totalGames = 0, totalWins = 0;
-        const recBox = document.getElementById("prof-modal-records");
-        recBox.innerHTML = "";
-
-        const modLabels = { standard: "Normal", ten_cases: "10 Kutu", catch_open: "Yakala&Aç", upgrade_mode: "Yükselt", mines_mode: "Mayın" };
-        for (let k in modLabels) {
-          const s = stats[k] || { played: 0, wins: 0, best: 0 };
-          totalGames += s.played || 0;
-          totalWins += s.wins || 0;
-          recBox.innerHTML += `
-            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px;">
-              <span>${modLabels[k]}: ${s.played} Oyun</span>
-              <b style="color:var(--neon-green);">${s.best} P</b>
-            </div>
-          `;
-        }
-
-        document.getElementById("prof-modal-played").innerText = totalGames;
-        document.getElementById("prof-modal-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
-        document.getElementById("modal-user-profile").style.display = "flex";
-      });
-    }
-
-    function openPopupChat(targetUID, targetName) {
-      activeChatTargetUID = targetUID;
-      document.getElementById("popup-chat-title").innerText = `💬 ${targetName}`;
-      document.getElementById("modal-popup-chat").style.display = "flex";
-
-      const u = getActiveUser();
-      const chatID = [u.uid, targetUID].sort().join("_");
-      db.ref("friends/" + u.uid + "/" + targetUID).set({ fullName: targetName });
-
-      db.ref("dm_chats/" + chatID).limitToLast(35).on("value", snap => {
-        const box = document.getElementById("popup-chat-messages");
-        box.innerHTML = "";
-        snap.forEach(c => {
-          const m = c.val(), isMe = m.uid === u.uid;
-          box.innerHTML += `
-            <div class="msg-bubble ${isMe ? 'me' : 'other'}">
-              <div style="font-size:9px; color:#60a5fa; font-weight:bold;">${m.sender}</div>
-              <div>${m.text}</div>
-            </div>
-          `;
-        });
-        box.scrollTop = box.scrollHeight;
-      });
-    }
-
-    function closePopupChat() {
-      document.getElementById("modal-popup-chat").style.display = "none";
-      activeChatTargetUID = null;
-    }
-
-    function sendPopupMessage() {
-      const inp = document.getElementById("popup-msg-input");
-      if (!inp.value.trim() || !activeChatTargetUID) return;
-      const u = getActiveUser();
-      const chatID = [u.uid, activeChatTargetUID].sort().join("_");
-
-      db.ref("dm_chats/" + chatID).push({
-        uid: u.uid,
-        sender: `${u.name}${u.tag}`,
-        text: inp.value.trim()
-      });
-      inp.value = "";
     }
 
     function openRequestsModal() {
@@ -260,26 +123,44 @@
       db.ref("friend_requests/" + u.uid).once("value", snap => {
         const box = document.getElementById("reqs-list-box");
         box.innerHTML = "";
-        snap.forEach(c => {
-          const r = c.val();
-          box.innerHTML += `
-            <div class="rank-card">
-              <span style="font-size:11px;">${r.fromName}</span>
-              <div style="display:flex; gap:4px;">
-                <button class="icon-btn" style="border-color:var(--neon-green);" onclick="acceptFriendRequestBidirectional('${r.fromUID}', '${r.fromName}', loadFriendsAndUsers)">Kabul</button>
-                <button class="icon-btn" style="border-color:var(--danger);" onclick="rejectReq('${r.fromUID}')">Reddet</button>
+
+        if (!snap.exists() || !snap.hasChildren()) {
+          box.innerHTML = "<div style='color:#666; font-size:10px; text-align:center; padding:10px;'>Bekleyen istek bulunmuyor.</div>";
+        } else {
+          snap.forEach(c => {
+            const r = c.val();
+            box.innerHTML += `
+              <div class="rank-card">
+                <span style="font-size:11px;">${r.fromName}</span>
+                <div style="display:flex; gap:4px;">
+                  <button class="icon-btn" style="border-color:var(--neon-green);" onclick="acceptReq('${r.fromUID}', '${r.fromName}')">✅ Kabul</button>
+                  <button class="icon-btn" style="border-color:var(--danger);" onclick="rejectReq('${r.fromUID}')">❌ Red</button>
+                </div>
               </div>
-            </div>
-          `;
-        });
+            `;
+          });
+        }
         document.getElementById("modal-reqs").style.display = "flex";
       });
     }
 
-    function rejectReq(uid) {
+    function acceptReq(fromUID, fromName) {
       const u = getActiveUser();
-      db.ref(`friend_requests/${u.uid}/${uid}`).remove();
+      db.ref(`friends/${u.uid}/${fromUID}`).set({ fullName: fromName });
+      db.ref(`friends/${fromUID}/${u.uid}`).set({ fullName: `${u.name}${u.tag}` });
+      db.ref(`friend_requests/${u.uid}/${fromUID}`).remove();
+      db.ref(`friend_requests/${fromUID}/${u.uid}`).remove();
+
+      alert(`${fromName} ile arkadaş oldunuz!`);
       document.getElementById("modal-reqs").style.display = "none";
+      loadFriendsAndUsers();
+    }
+
+    function rejectReq(fromUID) {
+      const u = getActiveUser();
+      db.ref(`friend_requests/${u.uid}/${fromUID}`).remove();
+      alert("İstek reddedildi.");
+      openRequestsModal();
     }
   </script>
 </body>
