@@ -151,6 +151,31 @@
       document.getElementById("btn-p3").style.background = num === 3 ? "var(--btn-blue)" : "#0f172a";
       document.getElementById("btn-p4").style.background = num === 4 ? "var(--btn-blue)" : "#0f172a";
     }
+// PvP listenRoom fonksiyonu içindeki geri sayım kontrol güncellemesi:
+if (readyCount === room.capacity && room.status === "waiting") {
+  if (!countdownInt) {
+    db.ref("pvp_rooms/" + chKey).update({ status: "starting" });
+    let cd = 3;
+    document.getElementById("pvp-status-badge").innerText = `🔥 Başlıyor: ${cd}s`;
+    countdownInt = setInterval(() => {
+      cd--;
+      document.getElementById("pvp-status-badge").innerText = `🔥 Başlıyor: ${cd}s`;
+      if (cd <= 0) {
+        clearInterval(countdownInt);
+        countdownInt = null;
+        db.ref("pvp_rooms/" + chKey).update({ status: "playing" });
+      }
+    }, 1000);
+  }
+} else if (readyCount < room.capacity) {
+  // HAZIR GERİ ÇEKİLİRSE GERİ SAYIM İPTAL EDİLİR
+  if (countdownInt) {
+    clearInterval(countdownInt);
+    countdownInt = null;
+    db.ref("pvp_rooms/" + chKey).update({ status: "waiting" });
+  }
+  document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${readyCount}/${room.capacity})`;
+}
 
     function createOnlineRoom() {
       const u = getActiveUser();
