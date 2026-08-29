@@ -12,7 +12,7 @@
   <div class="app-container" style="justify-content:space-between;">
     <div>
       <div class="top-header">
-        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger); z-index:999;">‹ Çıkış</a>
         <div style="font-weight:bold; font-size:12px;">🎰 Çift Rulet (5 Hak)</div>
         <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
       </div>
@@ -86,10 +86,11 @@
       iTrack.style.transform = "translateX(0px)"; mTrack.style.transform = "translateX(0px)";
       iTrack.innerHTML = ""; mTrack.innerHTML = "";
 
-      const winIdx = 20;
+      const totalItems = 25, winIdx = 20;
       let winBase = 0, winMult = 1;
+      const itemW = 65;
 
-      for (let i = 0; i < 25; i++) {
+      for (let i = 0; i < totalItems; i++) {
         const base = Math.floor(Math.random() * 50) + 15;
         const mult = MULTIPLIERS[Math.floor(Math.random() * MULTIPLIERS.length)];
         if (i === winIdx) { winBase = base; winMult = mult; }
@@ -101,8 +102,9 @@
       setTimeout(() => {
         iTrack.style.transition = "transform 2.8s cubic-bezier(0.12, 0.8, 0.2, 1)";
         mTrack.style.transition = "transform 2.8s cubic-bezier(0.12, 0.8, 0.2, 1)";
-        iTrack.style.transform = `translateX(${-(winIdx * 65) + (iBox.offsetWidth / 2) - 32.5}px)`;
-        mTrack.style.transform = `translateX(${-(winIdx * 65) + (mBox.offsetWidth / 2) - 32.5}px)`;
+        const targetX = -(winIdx * itemW) + (iBox.offsetWidth / 2) - (itemW / 2);
+        iTrack.style.transform = `translateX(${targetX}px)`;
+        mTrack.style.transform = `translateX(${targetX}px)`;
       }, 20);
 
       setTimeout(() => {
@@ -138,4 +140,3 @@
   </script>
 </body>
 </html>
-
