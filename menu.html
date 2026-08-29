@@ -17,6 +17,8 @@
         </div>
         <div style="display:flex; gap:4px;">
           <a href="leaderboard.html" class="icon-btn">🏆 Sıralama</a>
+          <button class="icon-btn" style="border-color:var(--neon-gold);" onclick="openAnnouncementsModal()">📢 Duyurular</button>
+          <button class="icon-btn" onclick="openGuideModal()">ℹ️ Rehber</button>
           <button class="icon-btn" onclick="openSettingsModal()">⚙️ Ayarlar</button>
           <button class="icon-btn" onclick="logout()" style="border-color:var(--danger);">🚪 Çıkış</button>
         </div>
@@ -29,39 +31,37 @@
       </div>
     </div>
 
-    <!-- 2x4 MOD GRID -->
-    <div class="mode-grid-8">
+    <!-- 10 MODLU GRID -->
+    <div class="mode-grid-8" style="grid-template-rows: repeat(5, 1fr); max-height:230px;">
       <div class="mode-card-8 active" onclick="selectGameMode('standard', this, 'normal.html')">
-        <b>⚔️ Normal Kasa</b>
-        <span>30s Klasik</span>
+        <b>⚔️ Normal Kasa</b><span>30s Klasik</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('ten_cases', this, 'ten_cases.html')">
-        <b>📦 10 Kutu Modu</b>
-        <span>10 Hak</span>
+        <b>📦 10 Kutu Modu</b><span>10 Hak</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('catch_open', this, 'catch.html')">
-        <b>🎯 Yakala & Aç</b>
-        <span>Kutuları Topla</span>
+        <b>🎯 Yakala & Aç</b><span>Kutuları Topla</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('upgrade_mode', this, 'upgrade.html')">
-        <b>📈 Şans Yükseltme</b>
-        <span>Katlanan Şans</span>
+        <b>📈 Şans Yükseltme</b><span>Katlanan Şans</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('mines_mode', this, 'mines.html')">
-        <b>💣 Mayınlı Kasa</b>
-        <span>Risk & Çıkış</span>
+        <b>💣 Mayınlı Kasa</b><span>Risk & Çıkış</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('mega_mode', this, 'mega.html')">
-        <b>💎 Mega Kasa</b>
-        <span>45s Dengeli Havuz</span>
+        <b>💎 Mega Kasa</b><span>45s Dengeli</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('dice_mode', this, 'dice.html')">
-        <b>🎲 Zar & Kasa</b>
-        <span>Zarla Katlanan Skor</span>
+        <b>🎲 Zar & Kasa</b><span>Zarla Çarp</span>
       </div>
       <div class="mode-card-8" onclick="selectGameMode('speedrun_mode', this, 'speedrun.html')">
-        <b>⚡ Speedrun Modu</b>
-        <span>1000 Puan Yarışı</span>
+        <b>⚡ Speedrun</b><span>1000P Yarışı</span>
+      </div>
+      <div class="mode-card-8" onclick="selectGameMode('bomb_mode', this, 'bomb.html')">
+        <b>⏳ Zaman Bombası</b><span>10s Kablo Kes</span>
+      </div>
+      <div class="mode-card-8" onclick="selectGameMode('double_mode', this, 'double.html')">
+        <b>🎰 Çift Rulet</b><span>Eşya + Çarpan</span>
       </div>
     </div>
 
@@ -71,16 +71,65 @@
     </div>
   </div>
 
-  <!-- Ayarlar Modalı (Avatar & Admin Paneli Ekli) -->
+  <!-- CANLI GELEN İSTEK / DAVET POP-UP'I -->
+  <div id="modal-live-alert" class="modal-overlay">
+    <div class="modal-card" style="text-align:center;">
+      <div style="font-size:32px;" id="live-alert-icon">📩</div>
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); margin:4px 0;" id="live-alert-title">Yeni Bildirim</div>
+      <div style="font-size:11px; color:#fff; margin-bottom:10px;" id="live-alert-body">...</div>
+      <div style="display:flex; gap:6px;">
+        <button id="btn-live-accept" class="icon-btn" style="flex:1; background:var(--neon-green); justify-content:center; padding:8px;">✅ Kabul Et</button>
+        <button id="btn-live-reject" class="icon-btn" style="flex:1; background:var(--danger); justify-content:center; padding:8px;">❌ Reddet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DUYURULAR & OYLAMA MODALI -->
+  <div id="modal-announcements" class="modal-overlay">
+    <div class="modal-card">
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">📢 Duyurular & Oylama</div>
+      
+      <!-- Admin Duyuru / Oylama Oluşturma Paneli -->
+      <div id="admin-broadcast-box" style="display:none; border:1px solid var(--neon-purple); padding:6px; border-radius:6px; margin-bottom:8px;">
+        <div style="font-size:10px; font-weight:bold; color:var(--neon-purple);">Yönetici: Duyuru veya Oylama Yayınla</div>
+        <input type="text" id="in-announce-txt" class="input-field" style="margin:4px 0;" placeholder="Duyuru veya Oylama Sorusu...">
+        <div style="display:flex; gap:4px;">
+          <button class="icon-btn" style="flex:1; background:var(--neon-blue);" onclick="publishAnnouncement(false)">📢 Duyuru Paylaş</button>
+          <button class="icon-btn" style="flex:1; background:var(--neon-gold); color:#000;" onclick="publishAnnouncement(true)">🗳️ Oylama Başlat</button>
+        </div>
+      </div>
+
+      <div id="announcements-feed" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
+      <button class="btn-close" onclick="document.getElementById('modal-announcements').style.display='none'">Kapat</button>
+    </div>
+  </div>
+
+  <!-- MOD REHBERİ MODALI -->
+  <div id="modal-guide" class="modal-overlay">
+    <div class="modal-card">
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-blue); text-align:center; margin-bottom:6px;">ℹ️ Mod Rehberi</div>
+      <div style="font-size:10px; color:#cbd5e1; line-height:1.6; max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
+        <div><b>⚔️ Normal Kasa:</b> 30 saniyede açabildiğin kadar kasa aç, en yüksek skora ulaş.</div>
+        <div><b>📦 10 Kutu:</b> Süre sınırı yok, tam 10 kutu açma hakkın var.</div>
+        <div><b>🎯 Yakala & Aç:</b> 20 saniyede düşen kutuları topla, sonra CS ruletinde aç.</div>
+        <div><b>📈 Şans Yükseltme:</b> Açtığın her kutuda Godly eşya çıkma şansı katlanarak artar.</div>
+        <div><b>💣 Mayınlı Kasa:</b> 9 kutuda 1 mayın var; bombaya basarsan puanlar sıfırlanır.</div>
+        <div><b>💎 Mega Kasa:</b> 45 saniyede yüksek puanlı ve dengeli ödüller kazan.</div>
+        <div><b>🎲 Zar & Kasa:</b> Zarları atıp çarpanı belirle, çıkan kasa puanını katla.</div>
+        <div><b>⚡ Speedrun:</b> En kısa sürede 1000 puana ulaşmaya çalış!</div>
+        <div><b>⏳ Zaman Bombası:</b> 10 saniyede 3 doğru kabloyu seçerek bombayı etkisiz hale getir.</div>
+        <div><b>🎰 Çift Rulet:</b> Aynı anda hem eşya hem de x1-x10 arası puan çarpanı kazan.</div>
+      </div>
+      <button class="btn-close" onclick="document.getElementById('modal-guide').style.display='none'">Kapat</button>
+    </div>
+  </div>
+
+  <!-- Ayarlar Modalı -->
   <div id="modal-settings" class="modal-overlay">
     <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">⚙️ Profil & Oyun Ayarları</div>
-      
-      <!-- 16 Avatar Seçim Izgarası -->
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">⚙️ Ayarlar</div>
       <div style="font-size:10px; color:var(--text-dim); margin-bottom:2px;">Avatarını Seç:</div>
       <div class="avatar-grid" id="avatar-picker-box"></div>
-
-      <!-- Unvan Seçimi -->
       <div style="font-size:10px; color:var(--text-dim); margin-bottom:2px;">Unvan Seç:</div>
       <select id="sel-title" class="input-field" onchange="changeTitle(this.value)">
         <option value="Çaylak">Çaylak</option>
@@ -89,18 +138,15 @@
         <option value="Kral">Kral</option>
         <option value="Hükümdar">Hükümdar</option>
       </select>
-
-      <!-- İsim Değiştir -->
       <div style="font-size:10px; color:var(--text-dim); margin-bottom:2px;">Kullanıcı Adı:</div>
       <div style="display:flex; gap:4px; margin-bottom:6px;">
         <input type="text" id="in-new-name" class="input-field" style="margin:0; font-size:11px;" placeholder="Yeni isim...">
         <button class="icon-btn" style="background:var(--neon-green);" onclick="submitNewName()">Kaydet</button>
       </div>
 
-      <!-- Admin Paneli (Sadece admin kullanıcısında görünür) -->
       <div id="admin-panel-section" style="display:none; border:2px solid var(--danger); border-radius:8px; padding:6px; margin:6px 0; background:rgba(239, 68, 68, 0.1);">
-        <div style="font-size:11px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:4px;">🛑 ADMIN YÖNETİM PANELİ</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:4px;">
+        <div style="font-size:11px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:4px;">🛑 ADMIN PANELİ</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
           <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllUsers()">Kullanıcıları Sil</button>
           <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllScores()">Skorları Sil</button>
           <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllChannels()">Kanalları Sil</button>
@@ -127,7 +173,9 @@
       mines_mode: { bg: "bg-mines_mode", title: "MAYINLI KASA", tiers: [{name:"Güvenli Kasa (%70)",pts:"15-45P",c:"#10b981"},{name:"Büyük Hazine (%30)",pts:"60-160P",c:"#fbbf24"},{name:"Bomba",pts:"0P",c:"#ef4444"}] },
       mega_mode: { bg: "bg-mega_mode", title: "MEGA KASA", tiers: [{name:"Mega Classic (%60)",pts:"10-30P",c:"#fff"},{name:"Mega Super (%28)",pts:"40-90P",c:"#38bdf8"},{name:"Mega Ultra (%10)",pts:"120-280P",c:"#c084fc"},{name:"Efsanevi (%2)",pts:"500-1500P",c:"#f43f5e"}] },
       dice_mode: { bg: "bg-dice_mode", title: "ZAR & KASA", tiers: [{name:"Zar Çarpanı",pts:"x1, x2, x3, x5",c:"#fbbf24"},{name:"Taban Puan",pts:"20-100P",c:"#38bdf8"}] },
-      speedrun_mode: { bg: "bg-speedrun_mode", title: "SPEEDRUN YARIŞI", tiers: [{name:"Hızlı Kasa",pts:"20-60P",c:"#38bdf8"},{name:"Hedef",pts:"En Hızlı 1000P!",c:"#f43f5e"}] }
+      speedrun_mode: { bg: "bg-speedrun_mode", title: "SPEEDRUN YARIŞI", tiers: [{name:"Hızlı Kasa",pts:"20-60P",c:"#38bdf8"},{name:"Hedef",pts:"En Hızlı 1000P!",c:"#f43f5e"}] },
+      bomb_mode: { bg: "bg-standard", title: "ZAMAN BOMBASI", tiers: [{name:"Doğru Kablo",pts:"x5 Çarpan",c:"#10b981"},{name:"Yanlış Kablo",pts:"0P Patlama",c:"#ef4444"}] },
+      double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] }
     };
 
     window.onload = () => {
@@ -139,15 +187,125 @@
       document.getElementById("in-new-name").value = u.name;
       document.getElementById("sel-title").value = u.title || "Çaylak";
 
-      // Admin Kontrolü
       if (u.name.toLowerCase() === "admin") {
         document.getElementById("admin-panel-section").style.display = "block";
+        document.getElementById("admin-broadcast-box").style.display = "block";
       }
 
       renderAvatarPicker();
       renderRates('standard');
+      listenLiveAlerts(u);
     };
 
+    // Ana Menüde Canlı İstek ve Davet Bildirimleri
+    function listenLiveAlerts(u) {
+      db.ref("friend_requests/" + u.uid).on("child_added", snap => {
+        const req = snap.val();
+        if (!req) return;
+        showLivePopup("👥 Arkadaşlık İsteği", `${req.fromName} size arkadaşlık isteği gönderdi!`, () => {
+          db.ref(`friends/${u.uid}/${req.fromUID}`).set({ fullName: req.fromName });
+          db.ref(`friends/${req.fromUID}/${u.uid}`).set({ fullName: `${u.name}${u.tag}` });
+          db.ref(`friend_requests/${u.uid}/${req.fromUID}`).remove();
+          alert("Arkadaşlık kabul edildi!");
+          hideLivePopup();
+        }, () => {
+          db.ref(`friend_requests/${u.uid}/${req.fromUID}`).remove();
+          hideLivePopup();
+        });
+      });
+
+      db.ref("channel_invites/" + u.uid).on("child_added", snap => {
+        const inv = snap.val();
+        if (!inv) return;
+        showLivePopup("📡 Kanal Daveti", `${inv.fromName} sizi [${inv.chName}] kanalına davet etti!`, () => {
+          db.ref(`channels/${inv.chKey}/members/${u.uid}`).set({ fullName: `${u.name}${u.tag}`, role: "member" });
+          db.ref(`channel_invites/${u.uid}/${inv.chKey}`).remove();
+          alert("Kanala katıldınız!");
+          hideLivePopup();
+        }, () => {
+          db.ref(`channel_invites/${u.uid}/${inv.chKey}`).remove();
+          hideLivePopup();
+        });
+      });
+    }
+
+    function showLivePopup(title, body, onAccept, onReject) {
+      document.getElementById("live-alert-title").innerText = title;
+      document.getElementById("live-alert-body").innerText = body;
+      document.getElementById("btn-live-accept").onclick = onAccept;
+      document.getElementById("btn-live-reject").onclick = onReject;
+      document.getElementById("modal-live-alert").style.display = "flex";
+    }
+    function hideLivePopup() { document.getElementById("modal-live-alert").style.display = "none"; }
+
+    function openAnnouncementsModal() {
+      document.getElementById("modal-announcements").style.display = "flex";
+      loadAnnouncements();
+    }
+
+    function publishAnnouncement(isPoll) {
+      const txt = document.getElementById("in-announce-txt").value.trim();
+      if (!txt) return;
+      const u = getActiveUser();
+
+      db.ref("announcements").push({
+        author: `${u.name}${u.tag}`,
+        text: txt,
+        isPoll: isPoll,
+        votesYes: 0,
+        votesNo: 0,
+        date: new Date().toLocaleDateString("tr-TR")
+      });
+      document.getElementById("in-announce-txt").value = "";
+    }
+
+    function loadAnnouncements() {
+      const u = getActiveUser();
+      db.ref("announcements").on("value", snap => {
+        const feed = document.getElementById("announcements-feed");
+        feed.innerHTML = "";
+        if (!snap.exists()) {
+          feed.innerHTML = "<div style='color:#666; font-size:10px; padding:6px;'>Duyuru bulunmuyor.</div>";
+          return;
+        }
+        snap.forEach(c => {
+          const a = c.val();
+          feed.innerHTML += `
+            <div class="rank-card" style="flex-direction:column; align-items:flex-start; gap:4px;">
+              <div style="display:flex; justify-content:space-between; width:100%; font-size:9px; color:var(--neon-gold);">
+                <b>${a.isPoll ? '🗳️ OYLAMA' : '📢 DUYURU'} (${a.author})</b>
+                <span>${a.date}</span>
+              </div>
+              <div style="font-size:11px; color:#fff;">${a.text}</div>
+              ${a.isPoll ? `
+                <div style="display:flex; gap:6px; width:100%; margin-top:2px;">
+                  <button class="icon-btn" style="flex:1; border-color:var(--neon-green);" onclick="votePoll('${c.key}', 'yes')">👍 Evet (${a.votesYes||0})</button>
+                  <button class="icon-btn" style="flex:1; border-color:var(--danger);" onclick="votePoll('${c.key}', 'no')">👎 Hayır (${a.votesNo||0})</button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        });
+      });
+    }
+
+    function votePoll(key, choice) {
+      const u = getActiveUser();
+      const voteRef = db.ref(`announcements/${key}/votedUsers/${u.uid}`);
+      voteRef.once("value", snap => {
+        if (snap.exists()) return alert("Bu oylamaya zaten oy verdiniz!");
+        voteRef.set(true);
+        db.ref(`announcements/${key}`).transaction(p => {
+          if (p) {
+            if (choice === 'yes') p.votesYes = (p.votesYes || 0) + 1;
+            else p.votesNo = (p.votesNo || 0) + 1;
+          }
+          return p;
+        });
+      });
+    }
+
+    function openGuideModal() { document.getElementById("modal-guide").style.display = "flex"; }
     function renderAvatarPicker() {
       const box = document.getElementById("avatar-picker-box");
       box.innerHTML = "";
@@ -166,7 +324,6 @@
         box.appendChild(div);
       });
     }
-
     function selectGameMode(key, cardEl, page) {
       targetPage = page;
       document.querySelectorAll(".mode-card-8").forEach(b => b.classList.remove("active"));
@@ -174,7 +331,6 @@
       document.body.className = MODE_RATES[key].bg;
       renderRates(key);
     }
-
     function renderRates(key) {
       const info = MODE_RATES[key];
       let html = `<div style="color:var(--neon-gold); font-weight:bold; font-size:11px; margin-bottom:3px;">📊 ${info.title}</div>`;
@@ -185,7 +341,6 @@
       });
       document.getElementById("rates-preview-box").innerHTML = html;
     }
-
     function launchGame() { window.location.href = targetPage; }
     function openSettingsModal() { document.getElementById("modal-settings").style.display = "flex"; }
     function closeSettingsModal() { document.getElementById("modal-settings").style.display = "none"; }
@@ -194,9 +349,7 @@
       u.title = val;
       setActiveUser(u);
     }
-    function submitNewName() {
-      updateUsernameGlobal(document.getElementById("in-new-name").value.trim());
-    }
+    function submitNewName() { updateUsernameGlobal(document.getElementById("in-new-name").value.trim()); }
     function toggleSound() {
       let u = getActiveUser();
       u.sound = !u.sound;
