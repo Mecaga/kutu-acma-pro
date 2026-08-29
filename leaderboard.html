@@ -12,7 +12,7 @@
   <div class="app-container" style="justify-content:space-between;">
     <div>
       <div class="top-header">
-        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger); z-index:999;">‹ Lobi</a>
         <div style="font-weight:bold; font-size:12px;">🏆 Sıralama Tablosu</div>
         <div></div>
       </div>
@@ -27,9 +27,8 @@
         <button class="icon-btn" onclick="loadLB('mines_mode', this)">💣 Mayınlı</button>
         <button class="icon-btn" onclick="loadLB('mega_mode', this)">💎 Mega</button>
         <button class="icon-btn" style="border-color:var(--danger);" onclick="loadLB('speedrun_mode', this)">⚡ Speedrun</button>
-        <button class="icon-btn" onclick="loadLB('bomb_mode', this)">⏳ Bomba</button>
-        <button class="icon-btn" onclick="loadLB('double_mode', this)">🎰 Çift Rulet</button>
         <button class="icon-btn" onclick="loadLB('temple_mode', this)">🏛️ Tapınak</button>
+        <button class="icon-btn" onclick="loadLB('double_mode', this)">🎰 Çift Rulet</button>
       </div>
     </div>
 
@@ -51,7 +50,7 @@
     </div>
   </div>
 
-  <!-- Tam Profil Modalı (Mod Bazlı Kazanma Oranlı) -->
+  <!-- Tam Profil Modalı -->
   <div id="modal-full-profile" class="modal-overlay">
     <div class="modal-card panel-theme-profile" style="max-height:90vh;">
       <div class="profile-badge-card" style="margin-bottom:6px;">
@@ -78,9 +77,7 @@
   <script src="app.js"></script>
   <script>
     let activeFilter = 'all';
-
-    // "Tümü" filtresinde genel sıralamayı bozan yüksek puanlı veya farklı mekanikli modlar gizlenir
-    const EXCLUDED_FROM_ALL = ['speedrun_mode', 'bomb_mode', 'temple_mode'];
+    const EXCLUDED_FROM_ALL = ['speedrun_mode', 'temple_mode'];
 
     window.onload = () => {
       loadLB('all', document.getElementById("flt-all"));
@@ -95,25 +92,27 @@
       const listContainer = document.getElementById("lb-records-list");
       listContainer.innerHTML = "<div style='text-align:center; font-size:11px; color:#888; padding:15px;'>Yükleniyor...</div>";
 
-      db.ref("leaderboards").once("value", snap => {
+      db.ref("leaderboards").on("value", snap => {
         listContainer.innerHTML = "";
         let allScores = [];
 
-        snap.forEach(modeSnap => {
-          if (filter === 'all' && EXCLUDED_FROM_ALL.includes(modeSnap.key)) return;
+        if (snap.exists()) {
+          snap.forEach(modeSnap => {
+            if (filter === 'all' && EXCLUDED_FROM_ALL.includes(modeSnap.key)) return;
 
-          if (filter === 'all' || modeSnap.key === filter) {
-            modeSnap.forEach(userRecord => {
-              const r = userRecord.val();
-              if (r) allScores.push(r);
-            });
-          }
-        });
+            if (filter === 'all' || modeSnap.key === filter) {
+              modeSnap.forEach(userRecord => {
+                const r = userRecord.val();
+                if (r) allScores.push(r);
+              });
+            }
+          });
+        }
 
         if (filter === 'speedrun_mode') {
           allScores.sort((a, b) => (parseFloat(a.time) || 999) - (parseFloat(b.time) || 999));
         } else {
-          allScores.sort((a, b) => (b.score || 0) - (a.score || 0));
+          allScores.sort((a, b) => (parseInt(b.score, 10) || 0) - (parseInt(a.score, 10) || 0));
         }
 
         if (allScores.length === 0) {
@@ -128,7 +127,7 @@
           else if (idx === 1) rankClass += " rank-2";
           else if (idx === 2) rankClass += " rank-3";
 
-          const valDisplay = filter === 'speedrun_mode' 
+          const valDisplay = (filter === 'speedrun_mode' || rec.modeKey === 'speedrun_mode')
             ? `<b style="color:var(--neon-green); font-size:13px;">⚡ ${parseFloat(rec.time).toFixed(1)} sn</b>` 
             : `<b style="color:var(--neon-green); font-size:13px;">${rec.score} P</b>`;
 
@@ -185,9 +184,8 @@
           mines_mode: "Mayınlı Kasa",
           mega_mode: "Mega Kasa",
           speedrun_mode: "Speedrun",
-          bomb_mode: "Zaman Bombası",
-          double_mode: "Çift Rulet",
-          temple_mode: "Gizli Tapınak"
+          temple_mode: "Gizli Tapınak",
+          double_mode: "Çift Rulet"
         };
 
         const box = document.getElementById("prof-modal-stats-list");
