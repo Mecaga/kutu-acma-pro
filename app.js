@@ -9,7 +9,7 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const AVATAR_LIST = ["👤", "😄", "😍", "😎", "🤓", "🤠", "😈", "👽", "🎃", "💀", "👁", "🧠", "🎒", "👑"];
+const AVATAR_LIST = ["👤", "😄", "😍", "😎", "🤓", "🤠", "😈", "👽", "🎃", "💀", "👁", "🧠", "⛑️", "🎒", "👑"];
 
 function getActiveUser() {
   const data = localStorage.getItem("kutu_active_session");
@@ -25,13 +25,24 @@ function setActiveUser(userData) {
       tag: userData.tag,
       avatar: userData.avatar || "👤",
       title: userData.title || "Çaylak",
-      isAdmin: userData.isAdmin || false,
+      sound: userData.sound !== undefined ? userData.sound : true,
+      createdAt: userData.createdAt || new Date().toLocaleString("tr-TR"),
+      stats: userData.stats || {},
       lastOnline: Date.now()
     });
   }
 }
 
-// Skor Kayıt Fonksiyonu (Speedrun süre odaklı)
+function syncUserFromDB(uid, callback) {
+  db.ref("users/" + uid).once("value", snap => {
+    const val = snap.val();
+    if (val) {
+      setActiveUser(val);
+      if (callback) callback(val);
+    }
+  });
+}
+
 function recordGameScore(modeKey, modeName, score, dropsList, isWin = true, speedTime = null) {
   const u = getActiveUser();
   if (!u) return;
@@ -91,8 +102,8 @@ function recordGameScore(modeKey, modeName, score, dropsList, isWin = true, spee
   });
 }
 
-// Güvenli Çıkış (Admin hesabı silinmez)
-function safeLogout() {
-  localStorage.removeItem("kutu_active_session");
-  window.location.href = "index.html";
+function adminLogoutOnly() {
+  localStorage.removeItem("admin_auth_session");
+  alert("Admin panelinden güvenli çıkış yapıldı.");
+  window.location.href = "menu.html";
 }
