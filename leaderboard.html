@@ -35,21 +35,35 @@
     <div id="lb-records-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
   </div>
 
-  <!-- Detay Modalı -->
-  <div id="modal-lb-details" class="modal-overlay">
+  <!-- 1. Aşama: Oyun Detay Modalı -->
+  <div id="modal-lb-game-info" class="modal-overlay">
+    <div class="modal-card">
+      <div style="font-size:10px; color:var(--text-dim); margin-bottom:4px;">Oyuncu İsmine Basarak Profili Açın:</div>
+      <h3 id="det-user-clickable" style="color:var(--neon-blue); font-size:14px; cursor:pointer; text-decoration:underline; margin-bottom:4px;">Oyuncu#12345</h3>
+      <div id="det-mode-info" style="font-size:10px; color:var(--neon-gold); margin-bottom:2px;">Mod: Normal Kasa</div>
+      <div id="det-date" style="font-size:9px; color:#94a3b8; margin-bottom:6px;">Tarih: -</div>
+
+      <div style="font-size:10px; font-weight:bold; color:#fff; margin-bottom:4px;">📦 Çıkan Eşyalar:</div>
+      <div id="det-drops-list" style="max-height:120px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:6px;"></div>
+      <button class="btn-close" onclick="document.getElementById('modal-lb-game-info').style.display='none'">Kapat</button>
+    </div>
+  </div>
+
+  <!-- 2. Aşama: Derinlemesine Oyuncu Profili Modalı -->
+  <div id="modal-full-profile" class="modal-overlay">
     <div class="modal-card panel-theme-profile">
       <div style="text-align:center;">
-        <div style="font-size:36px;" id="det-prof-avatar">👤</div>
-        <h3 id="det-prof-name" style="color:var(--neon-blue);">Oyuncu</h3>
-        <div id="det-prof-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
+        <div style="font-size:36px;" id="prof-modal-avatar">👤</div>
+        <h3 id="prof-modal-name" style="color:var(--neon-blue);">Oyuncu</h3>
+        <div id="prof-modal-title" style="color:var(--neon-gold); font-size:11px; margin-bottom:6px;">[Çaylak]</div>
       </div>
       <div class="profile-stats-grid">
-        <div class="stat-mini-box"><span class="stat-mini-val" id="det-played" style="color:var(--neon-blue);">0</span><span class="stat-mini-lbl">Oyun</span></div>
-        <div class="stat-mini-box"><span class="stat-mini-val" id="det-wins" style="color:var(--neon-green);">0</span><span class="stat-mini-lbl">Kazanma</span></div>
-        <div class="stat-mini-box"><span class="stat-mini-val" id="det-losses" style="color:var(--danger);">0</span><span class="stat-mini-lbl">Kaybetme</span></div>
-        <div class="stat-mini-box"><span class="stat-mini-val" id="det-winrate" style="color:var(--neon-gold);">%0</span><span class="stat-mini-lbl">Oran</span></div>
+        <div class="stat-mini-box"><span class="stat-mini-val" id="prof-modal-played" style="color:var(--neon-blue);">0</span><span class="stat-mini-lbl">Oyun</span></div>
+        <div class="stat-mini-box"><span class="stat-mini-val" id="prof-modal-wins" style="color:var(--neon-green);">0</span><span class="stat-mini-lbl">Kazanma</span></div>
+        <div class="stat-mini-box"><span class="stat-mini-val" id="prof-modal-losses" style="color:var(--danger);">0</span><span class="stat-mini-lbl">Kaybetme</span></div>
+        <div class="stat-mini-box"><span class="stat-mini-val" id="prof-modal-winrate" style="color:var(--neon-gold);">%0</span><span class="stat-mini-lbl">Oran</span></div>
       </div>
-      <button class="btn-close" onclick="document.getElementById('modal-lb-details').style.display='none'">Kapat</button>
+      <button class="btn-close" onclick="document.getElementById('modal-full-profile').style.display='none'">Geri Dön</button>
     </div>
   </div>
 
@@ -75,7 +89,6 @@
         let allScores = [];
 
         snap.forEach(modeSnap => {
-          // Speedrun modu genel tümü sekmesinde görünmez, sadece kendi sekmesinde görünür
           if (filter === 'all' && modeSnap.key === 'speedrun_mode') return;
 
           if (filter === 'all' || modeSnap.key === filter) {
@@ -86,9 +99,9 @@
           }
         });
 
-        // Speedrun modunda en düşük süre üstte, diğerlerinde en yüksek puan üstte
+        // Speedrun modunda en hızlı (en düşük) süre 1. olur
         if (filter === 'speedrun_mode') {
-          allScores.sort((a, b) => (a.time || 999) - (b.time || 999));
+          allScores.sort((a, b) => (parseFloat(a.time) || 999) - (parseFloat(b.time) || 999));
         } else {
           allScores.sort((a, b) => (b.score || 0) - (a.score || 0));
         }
@@ -114,31 +127,61 @@
             <span><b>${idx+1}.</b> ${rec.avatar || '👤'} ${rec.fullName} <small style="color:var(--neon-gold);">[${rec.modeName}]</small></span>
             ${valDisplay}
           `;
-          itemRow.onclick = () => openPlayerProfile(rec);
+          itemRow.onclick = () => openGameInfoModal(rec);
           listContainer.appendChild(itemRow);
         });
       });
     }
 
-    function openPlayerProfile(rec) {
-      db.ref("users/" + rec.uid).once("value", snap => {
+    function openGameInfoModal(rec) {
+      document.getElementById("det-user-clickable").innerText = rec.fullName;
+      document.getElementById("det-mode-info").innerText = `Mod: ${rec.modeName}`;
+      document.getElementById("det-date").innerText = `Tarih: ${rec.date || 'Bilinmiyor'}`;
+
+      document.getElementById("det-user-clickable").onclick = () => {
+        document.getElementById("modal-lb-game-info").style.display = "none";
+        openPlayerProfile(rec.uid, rec.fullName);
+      };
+
+      const dropsBox = document.getElementById("det-drops-list");
+      dropsBox.innerHTML = "";
+      if (rec.drops && rec.drops.length > 0) {
+        rec.drops.forEach(d => {
+          dropsBox.innerHTML += `
+            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:9px;">
+              <span><b style="color:${d.c || '#fff'};">[${d.tier}]</b> ${d.item}</span>
+              <b style="color:var(--neon-green);">+${d.pts}P</b>
+            </div>
+          `;
+        });
+      } else {
+        dropsBox.innerHTML = "<div style='color:#666; font-size:9px;'>Eşya dökümü yok.</div>";
+      }
+
+      document.getElementById("modal-lb-game-info").style.display = "flex";
+    }
+
+    function openPlayerProfile(uid, fullName) {
+      db.ref("users/" + uid).once("value", snap => {
         const fullUser = snap.val() || {};
         const stats = fullUser.stats || {};
         let totalGames = 0, totalWins = 0, totalLosses = 0;
+
         for (let k in stats) {
           totalGames += stats[k].played || 0;
           totalWins += stats[k].wins || 0;
           totalLosses += stats[k].losses || 0;
         }
 
-        document.getElementById("det-prof-avatar").innerText = fullUser.avatar || "👤";
-        document.getElementById("det-prof-name").innerText = rec.fullName;
-        document.getElementById("det-prof-title").innerText = `[${fullUser.title || 'Çaylak'}]`;
-        document.getElementById("det-played").innerText = totalGames;
-        document.getElementById("det-wins").innerText = totalWins;
-        document.getElementById("det-losses").innerText = totalLosses;
-        document.getElementById("det-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
-        document.getElementById("modal-lb-details").style.display = "flex";
+        document.getElementById("prof-modal-avatar").innerText = fullUser.avatar || "👤";
+        document.getElementById("prof-modal-name").innerText = fullName;
+        document.getElementById("prof-modal-title").innerText = `[${fullUser.title || 'Çaylak'}]`;
+        document.getElementById("prof-modal-played").innerText = totalGames;
+        document.getElementById("prof-modal-wins").innerText = totalWins;
+        document.getElementById("prof-modal-losses").innerText = totalLosses;
+        document.getElementById("prof-modal-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
+
+        document.getElementById("modal-full-profile").style.display = "flex";
       });
     }
   </script>
