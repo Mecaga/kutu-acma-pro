@@ -12,7 +12,7 @@
   <div class="app-container" style="justify-content:space-between;">
     <div>
       <div class="top-header">
-        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Çıkış</a>
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger); z-index:999;">‹ Çıkış</a>
         <div style="font-weight:bold; font-size:12px;">💎 Mega Kasa (45s)</div>
         <div id="score-badge" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">0 P</div>
       </div>
@@ -34,7 +34,7 @@
         <div style="font-size:24px; font-weight:900; color:#38bdf8;">MEGA KASA!</div>
         <div style="font-size:12px; color:#fbbf24; margin-top:3px;">Dengeli 45s Havuzu</div>
       </div>
-      <div id="roulette-view" class="roulette-container" style="display:none; width:100%;">
+      <div id="roulette-view" class="roulette-container" style="display:none; width:100%; height:85px;">
         <div class="roulette-needle"></div>
         <div id="roulette-track" class="roulette-track"></div>
       </div>
@@ -67,7 +67,6 @@
 
   <script src="app.js"></script>
   <script>
-    // DENGELENMİŞ ORANLAR: Yüksek seviyeler nadirleştirildi
     const TIERS = [
       { name: 'Mega Classic', rate: 60.0, minP: 10, maxP: 30, c: '#ffffff', items: ['Deri Mega Başlık', 'Demir Kama'] },
       { name: 'Mega Super', rate: 28.0, minP: 40, maxP: 90, c: '#38bdf8', items: ['Platin Kılıç', 'Kraliyet Kalkanı'] },
@@ -86,6 +85,7 @@
         if (timeLeft <= 0) {
           clearInterval(timer);
           document.getElementById("btn-spin").disabled = true;
+          document.getElementById("btn-spin").innerText = "SÜRE BİTTİ!";
           if (!isSpinning) triggerSummary();
         }
       }, 1000);
@@ -103,8 +103,9 @@
       track.style.transform = "translateX(0px)";
       track.innerHTML = "";
 
-      const totalItems = 30, winIdx = 24;
+      const totalItems = 30, winIdx = 22;
       let winDrop = null;
+      const itemWidth = 80;
 
       for (let i = 0; i < totalItems; i++) {
         let rand = Math.random() * 100, cum = 0, d = TIERS[0];
@@ -120,8 +121,8 @@
       }
 
       setTimeout(() => {
-        track.style.transition = "transform 3s cubic-bezier(0.12, 0.8, 0.2, 1)";
-        const targetX = -(winIdx * 80) + (rView.offsetWidth / 2) - 40;
+        track.style.transition = "transform 2.8s cubic-bezier(0.12, 0.8, 0.2, 1)";
+        const targetX = -(winIdx * itemWidth) + (rView.offsetWidth / 2) - (itemWidth / 2);
         track.style.transform = `translateX(${targetX}px)`;
       }, 20);
 
@@ -129,11 +130,12 @@
         totalScore += winDrop.pts;
         drops.push(winDrop);
         document.getElementById("lbl-score").innerText = totalScore;
+        document.getElementById("score-badge").innerText = `${totalScore} P`;
         document.getElementById("drop-badge").innerHTML = `Son: <span style="color:${winDrop.c};">${winDrop.tier}</span> +${winDrop.pts}P`;
         isSpinning = false;
         if (timeLeft <= 0) triggerSummary();
         else document.getElementById("btn-spin").disabled = false;
-      }, 3100);
+      }, 2900);
     }
 
     function triggerSummary() {
