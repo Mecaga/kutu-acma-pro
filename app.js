@@ -12,6 +12,72 @@ const db = firebase.database();
 const AVATAR_LIST = ["👤", "😄", "😍", "😎", "🤓", "🥸", "🤠", "😈", "👽", "🎃", "💀", "👁", "🧠", "⛑️", "🎒", "🛜", "👑"];
 const FORBIDDEN_NAMES = ["trump", "putin", "admin", "moderator", "kurucu", "root"];
 
+// WEB AUDIO API SES MOTORU
+let audioCtx = null;
+function getAudioContext() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) audioCtx = new AudioContextClass();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playSound(type) {
+  const u = getActiveUser();
+  if (u && u.sound === false) return;
+
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  if (type === 'tick') {
+    // Rulet Tık Sesi
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(450, now);
+    osc.frequency.exponentialRampToValueAtTime(120, now + 0.04);
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.04);
+    osc.start(now);
+    osc.stop(now + 0.04);
+  } else if (type === 'win') {
+    // Eşya Düşüş / Kazanma Sesi
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523.25, now); // C5
+    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+    osc.frequency.setValueAtTime(1046.50, now + 0.24); // C6
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+    osc.start(now);
+    osc.stop(now + 0.4);
+  } else if (type === 'explosion') {
+    // Mayın / Bomba Patlama Sesi
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(120, now);
+    osc.frequency.exponentialRampToValueAtTime(30, now + 0.4);
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+    osc.start(now);
+    osc.stop(now + 0.4);
+  } else if (type === 'click') {
+    // Buton Tıklama
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, now);
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.linearRampToValueAtTime(0.01, now + 0.03);
+    osc.start(now);
+    osc.stop(now + 0.03);
+  }
+}
+
 function getActiveUser() {
   const data = localStorage.getItem("kutu_active_session");
   return data ? JSON.parse(data) : null;
@@ -54,7 +120,6 @@ function updateAvatarGlobal(newAvatar) {
   u.avatar = newAvatar;
   setActiveUser(u);
 
-  // Sıralamalardaki avatarları güncelle
   const modes = ['standard', 'ten_cases', 'catch_basket', 'catch_open', 'mines_mode', 'mega_mode', 'speedrun_mode', 'double_mode', 'temple_mode'];
   modes.forEach(m => {
     db.ref(`leaderboards/${m}/${u.uid}`).once("value", s => {
@@ -85,7 +150,6 @@ function updateUsernameGlobal(newName) {
     u.name = newName.trim();
     setActiveUser(u);
 
-    // Sıralamalardaki isimleri güncelle
     const modes = ['standard', 'ten_cases', 'catch_basket', 'catch_open', 'mines_mode', 'mega_mode', 'speedrun_mode', 'double_mode', 'temple_mode'];
     modes.forEach(m => {
       db.ref(`leaderboards/${m}/${u.uid}`).once("value", s => {
@@ -157,6 +221,16 @@ function recordGameScore(modeKey, modeName, score, dropsList, isWin = true, spee
   });
 }
 
+function removeFriendBidirectional(friendUID, friendName, callback) {
+  const u = getActiveUser();
+  if (!u || !confirm(`${friendName} arkadaşlıktan çıkarılsın mı?`)) return;
+
+  db.ref(`friends/${u.uid}/${friendUID}`).remove();
+  db.ref(`friends/${friendUID}/${u.uid}`).remove();
+  alert(`${friendName} arkadaş listenizden çıkarıldı.`);
+  if (callback) callback();
+}
+
 function deleteAccountPermanently() {
   const u = getActiveUser();
   if (!u || u.isAdmin) return alert("Admin hesabı silinemez!");
@@ -174,4 +248,19 @@ function deleteAccountPermanently() {
   localStorage.removeItem("kutu_active_session");
   alert("Hesabınız silindi.");
   window.location.href = "index.html";
+}
+
+function adminClearAllUsers() {
+  if (confirm("Tüm kayıtlı kullanıcılar silinsin mi?")) { db.ref("accounts").remove(); db.ref("users").remove(); alert("Silindi!"); }
+}
+function adminClearAllScores() {
+  if (confirm("Tüm sıralama skorları silinsin mi?")) { db.ref("leaderboards").remove(); alert("Silindi!"); }
+}
+function adminClearAllChannels() {
+  if (confirm("Tüm kanallar silinsin mi?")) { db.ref("channels").remove(); db.ref("channel_msgs").remove(); db.ref("direct_msgs").remove(); alert("Silindi!"); }
+}
+function adminWipeEverything() {
+  if (confirm("HER ŞEY silinecektir! Onaylıyor musunuz?")) {
+    db.ref().remove().then(() => { localStorage.clear(); window.location.href = "index.html"; });
+  }
 }
