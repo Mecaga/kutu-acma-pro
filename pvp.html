@@ -96,6 +96,27 @@
       white-space: nowrap;
       cursor: pointer;
     }
+
+    /* 3 Saniyelik Kazanan Bildirim Bannerı */
+    #winner-toast-banner {
+      display: none;
+      position: absolute;
+      top: 35%;
+      left: 5%;
+      right: 5%;
+      background: rgba(15, 7, 32, 0.96);
+      border: 2px solid var(--neon-gold);
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.5);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      z-index: 3000;
+      animation: popIn 0.3s ease;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body class="theme-standard">
@@ -139,16 +160,14 @@
     <!-- 2. CANLI MAÇ & ODA ALANI -->
     <div id="pvp-game-panel" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
       <div>
-        <!-- Oyuncuların Skor Kartları -->
         <div style="display:grid; gap:4px; margin-bottom:6px;" id="pvp-players-row"></div>
 
-        <!-- Canlı Sohbet & Reaksiyon Çubuğu -->
         <div style="background:#0c0418; padding:5px; border-radius:6px; border:1px solid #3b1d6e; margin-bottom:6px;">
           <div class="quick-chat-row" style="margin-bottom:4px;">
             <span class="chat-chip" onclick="sendQuickAction('🔥 Alev!')">🔥 Alev!</span>
             <span class="chat-chip" onclick="sendQuickAction('😎 Kolay')">😎 Kolay</span>
             <span class="chat-chip" onclick="sendQuickAction('⚡ 1000P Benim!')">⚡ 1000P!</span>
-            <span class="chat-chip" onclick="sendQuickAction('💀 Mayın!')">💀 Mayın!</span>
+            <span class="chat-chip" onclick="sendQuickAction('💀 Bomba!')">💀 Bomba!</span>
             <span class="chat-chip" onclick="sendQuickAction('👑 GG!')">👑 GG</span>
           </div>
           <div style="display:flex; gap:4px;">
@@ -182,7 +201,7 @@
           <div class="mines-grid-3x3" id="mines-3x3-board"></div>
         </div>
 
-        <!-- 3. Speedrun Alanı (Ruletli 1000P Yarışı) -->
+        <!-- 3. Speedrun Alanı -->
         <div id="speedrun-zone" style="display:none; text-align:center; margin-bottom:4px;">
           <div style="font-size:11px; color:#38bdf8; margin-bottom:4px;">⚡ En hızlı 1.000 puana ulaşan kazanır!</div>
           <button type="button" id="btn-spin-speedrun" class="btn-start" style="background:#db2777; font-size:13px;" onclick="spinSpeedrunPVP()">⚡ HIZLI KASA AÇ (1.5s)</button>
@@ -194,7 +213,7 @@
           <div class="xox-board-grid" id="xox-board-box"></div>
         </div>
 
-        <!-- Rulet Alanı (Normal, Mega ve Speedrun için) -->
+        <!-- Rulet Alanı -->
         <div id="roulette-wrap-area" style="display:none;">
           <div class="roulette-container" id="pvp-roulette-box">
             <div class="roulette-needle"></div>
@@ -203,6 +222,13 @@
         </div>
 
       </div>
+    </div>
+
+    <!-- 3 SANİYELİK KAZANAN DUYURUSU -->
+    <div id="winner-toast-banner">
+      <div style="font-size:26px; margin-bottom:4px;">👑🏆</div>
+      <div id="winner-toast-text" style="font-size:15px; font-weight:900; color:var(--neon-gold);">1. OYUNCU KAZANDI!</div>
+      <div style="font-size:10px; color:#94a3b8; margin-top:4px;">Sonuç tablosu açılıyor...</div>
     </div>
 
     <!-- 3. PODYUM & SONUÇLAR -->
@@ -246,6 +272,7 @@
     let roomCapacity = 2, totalBoxesPerPlayer = 5, currentRoomCode = null, selectedGameType = 'standard';
     let myOpenedCount = 0, myTotalScore = 0, myDrops = [], isMatchPlaying = false, isSpinningSlot = false, isMyReady = false, countdownInt = null;
     let mySymbol = "X";
+    let isResultShowing = false;
 
     const PVP_TIERS = {
       standard: [
@@ -302,7 +329,6 @@
 
     function setRoomSize(num) {
       roomCapacity = num;
-      // 2 Kişi = 5 Kutu, 3 Kişi = 10 Kutu, 4 Kişi = 15 Kutu
       totalBoxesPerPlayer = num === 2 ? 5 : (num === 3 ? 10 : 15);
       document.getElementById("btn-p2").style.background = num === 2 ? "var(--btn-blue)" : "#13072b";
       document.getElementById("btn-p3").style.background = num === 3 ? "var(--btn-blue)" : "#13072b";
@@ -339,6 +365,7 @@
           totalBoxes: parseInt(totalBoxesPerPlayer, 10) || 5,
           gameType: selectedGameType || 'standard',
           status: "waiting",
+          winnerText: "",
           createdAt: Date.now(),
           turn: cleanUID,
           xoxBoard: ["", "", "", "", "", "", "", "", ""],
@@ -505,14 +532,25 @@
           startModeGameplay(room);
         }
 
+        // MAÇ BİTTİĞİNDE HER İKİ OYUNCUDA DA ORTAK TETİKLENİR
+        if (room.status === "finished" && !isResultShowing) {
+          isResultShowing = true;
+          isMatchPlaying = false;
+          triggerWinnerToastAndPodium(pList, room.winnerText || "Maç Sona Erdi!");
+        }
+
         if (replayVotes === room.capacity && room.status === "finished") resetPvPRound();
 
-        if (selectedGameType !== 'speedrun' && selectedGameType !== 'xox') {
+        // Standart, Mega & Mayınlı Modda Kutu Bitimi Kontrolü
+        if (selectedGameType !== 'speedrun' && selectedGameType !== 'xox' && room.status === "playing") {
           const allDone = pList.length === room.capacity && pList.every(p => p.opened === totalBoxesPerPlayer);
-          if (allDone && room.status === "playing") {
-            document.getElementById("pvp-status-badge").innerText = "🏆 Maç Bitti!";
-            db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
-            setTimeout(() => showPodium(pList, "Maç Tamamlandı!"), 1800);
+          if (allDone) {
+            let sorted = [...pList].sort((a, b) => b.score - a.score);
+            let winText = sorted[0].score === sorted[1]?.score ? "Dostluk Kazandı! (Berabere)" : `${sorted[0].fullName} Kazandı!`;
+            db.ref("pvp_rooms/" + chKey).update({
+              status: "finished",
+              winnerText: winText
+            });
           }
         }
       });
@@ -619,10 +657,9 @@
         isSpinningSlot = false;
 
         if (myTotalScore >= 1000) {
-          db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
-          db.ref("pvp_rooms/" + chKey + "/players").once("value", snap => {
-            const list = Object.values(snap.val() || {});
-            showPodium(list, `🏆 ${u.name}${u.tag} 1000 Puana İlk Ulaştı!`);
+          db.ref("pvp_rooms/" + chKey).update({
+            status: "finished",
+            winnerText: `${u.name}${u.tag} 1000 Puana İlk Ulaştı!`
           });
         } else {
           document.getElementById("btn-spin-speedrun").disabled = false;
@@ -669,27 +706,19 @@
               drops: myDrops
             });
 
+            // Odayı ve son hamleyi güncelle -> Firebase üzerinden iki tarafta da sonuç tetiklenir
             db.ref("pvp_rooms/" + chKey).update({
               xoxBoard: board,
-              status: "finished"
+              status: "finished",
+              winnerText: `${u.name}${u.tag} XOX'i Kazandı!`
             });
-
-            setTimeout(() => {
-              db.ref("pvp_rooms/" + chKey + "/players").once("value", snap => {
-                showPodium(Object.values(snap.val() || {}), `🏆 ${u.name}${u.tag} XOX'i Kazandı!`);
-              });
-            }, 600);
 
           } else if (board.every(b => b !== "")) {
             db.ref("pvp_rooms/" + chKey).update({
               xoxBoard: board,
-              status: "finished"
+              status: "finished",
+              winnerText: "Dostluk Kazandı! (Berabere)"
             });
-            setTimeout(() => {
-              db.ref("pvp_rooms/" + chKey + "/players").once("value", snap => {
-                showPodium(Object.values(snap.val() || {}), "🤝 Berabere Bitti!");
-              });
-            }, 600);
           } else {
             db.ref("pvp_rooms/" + chKey).update({
               xoxBoard: board,
@@ -868,31 +897,40 @@
       input.value = "";
     }
 
-    function showPodium(pList, msg) {
-      document.getElementById("pvp-game-panel").style.display = "none";
-      document.getElementById("pvp-podium-panel").style.display = "flex";
-      document.getElementById("podium-result-msg").innerText = msg || "Maç Bitti!";
+    // 3 SANİYELİK KAZANAN DUYURUSU VE PODYUM AÇILIŞI
+    function triggerWinnerToastAndPodium(pList, msg) {
+      const banner = document.getElementById("winner-toast-banner");
+      const bannerTxt = document.getElementById("winner-toast-text");
+      bannerTxt.innerText = msg;
+      banner.style.display = "block";
 
-      const u = getUserInfo();
-      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
-      pList.sort((a, b) => b.score - a.score);
+      setTimeout(() => {
+        banner.style.display = "none";
+        document.getElementById("pvp-game-panel").style.display = "none";
+        document.getElementById("pvp-podium-panel").style.display = "flex";
+        document.getElementById("podium-result-msg").innerText = msg;
 
-      const podBox = document.getElementById("podium-list");
-      podBox.innerHTML = "";
+        const u = getUserInfo();
+        const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+        pList.sort((a, b) => b.score - a.score);
 
-      pList.forEach((p, idx) => {
-        const isMe = p.uid === cleanUID;
-        const item = document.createElement("div");
-        item.className = `rank-card ${idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''))}`;
-        if (isMe) item.style.border = "2px solid var(--neon-gold)";
+        const podBox = document.getElementById("podium-list");
+        podBox.innerHTML = "";
 
-        item.innerHTML = `
-          <span><b>${idx+1}.</b> ${p.fullName} ${isMe ? '(SEN)' : ''}</span>
-          <b style="color:var(--neon-green); font-size:13px;">${p.score} P</b>
-        `;
-        item.onclick = () => openPvPInspect(p);
-        podBox.appendChild(item);
-      });
+        pList.forEach((p, idx) => {
+          const isMe = p.uid === cleanUID;
+          const item = document.createElement("div");
+          item.className = `rank-card ${idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''))}`;
+          if (isMe) item.style.border = "2px solid var(--neon-gold)";
+
+          item.innerHTML = `
+            <span><b>${idx+1}.</b> ${p.fullName} ${isMe ? '(SEN)' : ''}</span>
+            <b style="color:var(--neon-green); font-size:13px;">${p.score} P</b>
+          `;
+          item.onclick = () => openPvPInspect(p);
+          podBox.appendChild(item);
+        });
+      }, 3000);
     }
 
     function openPvPInspect(player) {
@@ -926,7 +964,7 @@
     }
 
     function resetPvPRound() {
-      myOpenedCount = 0; myTotalScore = 0; myDrops = []; isMyReady = false;
+      myOpenedCount = 0; myTotalScore = 0; myDrops = []; isMyReady = false; isResultShowing = false;
       const u = getUserInfo();
       const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
@@ -937,6 +975,7 @@
 
       db.ref(`pvp_rooms/${chKey}`).update({
         status: "waiting",
+        winnerText: "",
         xoxBoard: ["", "", "", "", "", "", "", "", ""]
       });
 
