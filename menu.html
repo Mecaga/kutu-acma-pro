@@ -17,13 +17,13 @@
         </div>
         <div style="display:flex; gap:3px;">
           <a href="leaderboard.html" class="icon-btn">🏆 Sıralama</a>
-          <button class="icon-btn" style="border-color:var(--neon-gold);" onclick="openAnnouncementsModal()">📢 Duyurular</button>
-          <button class="icon-btn" onclick="openGuideModal()">ℹ️ Rehber</button>
-          <button class="icon-btn" onclick="openSettingsModal()">⚙️ Ayarlar</button>
+          <button type="button" class="icon-btn" style="border-color:var(--neon-gold);" onclick="openAnnouncementsModal()">📢 Duyurular</button>
+          <button type="button" class="icon-btn" onclick="openGuideModal()">ℹ️ Rehber</button>
+          <button type="button" class="icon-btn" onclick="openSettingsModal()">⚙️ Ayarlar</button>
         </div>
       </div>
 
-      <!-- Üst Butonlar -->
+      <!-- Üst Hızlı Erişim Butonları -->
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-bottom:4px;">
         <a href="chat.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:5px; font-size:10px;">💬 Sohbet</a>
         <a href="friends.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:5px; font-size:10px;">👥 Arkadaşlar</a>
@@ -31,8 +31,9 @@
       </div>
     </div>
 
-    <!-- TÜM OYUN MODLARINI İÇEREN KAYDIRILABİLİR IZGARA -->
+    <!-- TÜM MODLARI İÇEREN TAM KAYDIRILABİLİR IZGARA -->
     <div class="mode-grid-8" style="grid-template-rows: repeat(4, 1fr); max-height:270px; overflow-y:auto;">
+      <!-- Ana Modlar -->
       <div class="mode-card-8 active" onclick="selectGameMode('standard', this, 'normal.html')"><b>⚔️ Normal Kasa</b><span>30s Klasik</span></div>
       <div class="mode-card-8" onclick="selectGameMode('ten_cases', this, 'ten_cases.html')"><b>📦 10 Kutu Modu</b><span>10 Hak</span></div>
       <div class="mode-card-8" onclick="selectGameMode('catch_basket', this, 'catch_basket.html')"><b>🧺 Tut & Aç</b><span>Sepetle Topla</span></div>
@@ -43,7 +44,8 @@
       <div class="mode-card-8" onclick="selectGameMode('temple_mode', this, 'temple.html')"><b>🏛️ Gizli Tapınak</b><span>5 Katlı Zindan</span></div>
       <div class="mode-card-8" onclick="selectGameMode('double_mode', this, 'double.html')"><b>🎰 Çift Rulet</b><span>Eşya + Çarpan</span></div>
 
-      <!-- YENİ EKLENEN 5 OYUN MODU -->
+      <!-- Yeni Mini ve Süresiz Modlar -->
+      <div class="mode-card-8" onclick="selectGameMode('farm_mode', this, 'farm.html')"><b>🌾 Kasa Çiftliği</b><span>Süresiz & Kayıtlı</span></div>
       <div class="mode-card-8" onclick="selectGameMode('wheel_mode', this, 'wheel.html')"><b>🎡 Çarkıfelek</b><span>5 Çevirme Hakkı</span></div>
       <div class="mode-card-8" onclick="selectGameMode('memory_mode', this, 'memory.html')"><b>🃏 Kart Eşle</b><span>4 Çift Eşleştir</span></div>
       <div class="mode-card-8" onclick="selectGameMode('scratch_mode', this, 'scratch.html')"><b>🪙 Kazı Kazan</b><span>3 Altın Kart Kazı</span></div>
@@ -53,7 +55,7 @@
 
     <div>
       <div class="menu-preview-box" id="rates-preview-box"></div>
-      <button class="btn-start" onclick="launchGame()">OYUNA BAŞLA</button>
+      <button type="button" class="btn-start" onclick="launchGame()">OYUNA BAŞLA</button>
     </div>
   </div>
 
@@ -74,23 +76,23 @@
       <div style="font-size:10px; color:var(--text-dim); margin-bottom:2px;">Kullanıcı Adı:</div>
       <div style="display:flex; gap:4px; margin-bottom:6px;">
         <input type="text" id="in-new-name" class="input-field" style="margin:0; font-size:11px;" placeholder="Yeni isim...">
-        <button class="icon-btn" style="background:var(--neon-green);" onclick="submitNewName()">Kaydet</button>
+        <button type="button" class="icon-btn" style="background:var(--neon-green);" onclick="submitNewName()">Kaydet</button>
       </div>
 
       <div id="admin-panel-section" style="display:none; border:2px solid var(--danger); border-radius:8px; padding:6px; margin:6px 0; background:rgba(239, 68, 68, 0.1);">
         <div style="font-size:11px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:4px;">🛑 ADMIN PANELİ</div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
-          <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllUsers()">Kullanıcıları Sil</button>
-          <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllScores()">Skorları Sil</button>
-          <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllChannels()">Kanalları Sil</button>
-          <button class="icon-btn" style="background:#7f1d1d; border-color:var(--danger); justify-content:center;" onclick="adminWipeEverything()">🔥 TÜMÜNÜ SİL</button>
+          <button type="button" class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllUsers()">Kullanıcıları Sil</button>
+          <button type="button" class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllScores()">Skorları Sil</button>
+          <button type="button" class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllChannels()">Kanalları Sil</button>
+          <button type="button" class="icon-btn" style="background:#7f1d1d; border-color:var(--danger); justify-content:center;" onclick="adminWipeEverything()">🔥 TÜMÜNÜ SİL</button>
         </div>
       </div>
 
-      <button id="btn-sound-toggle" class="mode-btn" style="margin-bottom:6px; text-align:center; color:#fff;" onclick="toggleSound()">🔊 Ses: Açık</button>
-      <button id="btn-delete-acc" class="btn-start" style="background:var(--danger); font-size:11px; padding:6px; margin-bottom:6px;" onclick="deleteAccountPermanently()">🗑️ Hesabı Kalıcı Olarak Sil</button>
-      <button class="btn-start" style="background:#334155; font-size:11px; padding:6px; margin-bottom:6px;" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
-      <button class="btn-close" onclick="closeSettingsModal()">Kapat</button>
+      <button type="button" id="btn-sound-toggle" class="mode-btn" style="margin-bottom:6px; text-align:center; color:#fff;" onclick="toggleSound()">🔊 Ses: Açık</button>
+      <button type="button" id="btn-delete-acc" class="btn-start" style="background:var(--danger); font-size:11px; padding:6px; margin-bottom:6px;" onclick="deleteAccountPermanently()">🗑️ Hesabı Kalıcı Olarak Sil</button>
+      <button type="button" class="btn-start" style="background:#334155; font-size:11px; padding:6px; margin-bottom:6px;" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
+      <button type="button" class="btn-close" onclick="closeSettingsModal()">Kapat</button>
     </div>
   </div>
 
@@ -101,12 +103,12 @@
       <div id="admin-broadcast-box" style="display:none; border:1px solid var(--neon-purple); padding:6px; border-radius:6px; margin-bottom:6px;">
         <input type="text" id="in-announce-txt" class="input-field" style="margin:4px 0;" placeholder="Duyuru veya Oylama Sorusu...">
         <div style="display:flex; gap:4px;">
-          <button class="icon-btn" style="flex:1; background:var(--neon-blue);" onclick="publishAnnouncement(false)">📢 Paylaş</button>
-          <button class="icon-btn" style="flex:1; background:var(--neon-gold); color:#000;" onclick="publishAnnouncement(true)">🗳️ Oylama</button>
+          <button type="button" class="icon-btn" style="flex:1; background:var(--neon-blue);" onclick="publishAnnouncement(false)">📢 Paylaş</button>
+          <button type="button" class="icon-btn" style="flex:1; background:var(--neon-gold); color:#000;" onclick="publishAnnouncement(true)">🗳️ Oylama</button>
         </div>
       </div>
       <div id="announcements-feed" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
-      <button class="btn-close" onclick="document.getElementById('modal-announcements').style.display='none'">Kapat</button>
+      <button type="button" class="btn-close" onclick="document.getElementById('modal-announcements').style.display='none'">Kapat</button>
     </div>
   </div>
 
@@ -124,13 +126,14 @@
         <div><b>⚡ Speedrun:</b> En hızlı sürede 1000 puana ulaş!</div>
         <div><b>🏛️ Gizli Tapınak:</b> 5 katlı kapı bulmacası.</div>
         <div><b>🎰 Çift Rulet:</b> Eşya ve x1-x10 çarpan kazan.</div>
-        <div><b>🎡 Çarkıfelek:</b> 5 hak ile çarkı çevirip büyük ödülü yakala.</div>
+        <div><b>🌾 Kasa Çiftliği:</b> Tohum ek, büyüt, hasat et (Süresiz & Otomatik Kayıt).</div>
+        <div><b>🎡 Çarkıfelek:</b> 5 çevirme hakkı ile çarkı döndür.</div>
         <div><b>🃏 Kart Eşle:</b> 4 çift aynı kartı en az hamlede eşleştir.</div>
         <div><b>🪙 Kazı Kazan:</b> 6 altın karttan 3 tanesini kazı.</div>
         <div><b>🔮 Kasa Tahmin:</b> Gelecek kasanın rengini tahmin et (x2-x5).</div>
-        <div><b>♾️ Birleştirme:</b> Aynı seviyedeki blokları birleştirip en üst kademeye ulaş.</div>
+        <div><b>♾️ Birleştirme:</b> Aynı blokları birleştirip en üst kademeye ulaş.</div>
       </div>
-      <button class="btn-close" onclick="document.getElementById('modal-guide').style.display='none'">Kapat</button>
+      <button type="button" class="btn-close" onclick="document.getElementById('modal-guide').style.display='none'">Kapat</button>
     </div>
   </div>
 
@@ -149,6 +152,7 @@
       speedrun_mode: { bg: "bg-speedrun_mode", title: "SPEEDRUN YARIŞI", tiers: [{name:"Hızlı Kasa",pts:"20-60P",c:"#38bdf8"},{name:"Hedef",pts:"En Hızlı 1000P!",c:"#f43f5e"}] },
       temple_mode: { bg: "bg-temple_mode", title: "GİZLİ TAPINAK", tiers: [{name:"5. Kat Büyük Ödül",pts:"1000P",c:"#fbbf24"},{name:"Ara Katlar",pts:"50-500P",c:"#10b981"}] },
       double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] },
+      farm_mode: { bg: "bg-standard", title: "KASA ÇİFTLİĞİ", tiers: [{name:"Tahta Tohum",pts:"10s (15P / 10🪙)",c:"#94a3b8"},{name:"Safir Tohum",pts:"30s (60P / 40🪙)",c:"#38bdf8"},{name:"Efsane Tohum",pts:"60s (200P / 120🪙)",c:"#fbbf24"}] },
       wheel_mode: { bg: "bg-standard", title: "ŞANSLI ÇARKI FELEK", tiers: [{name:"Büyük Dilim (%12.5)",pts:"500P",c:"#f43f5e"},{name:"Orta Dilim (%25)",pts:"100-250P",c:"#fbbf24"},{name:"Küçük Dilim (%62.5)",pts:"10-50P",c:"#38bdf8"}] },
       memory_mode: { bg: "bg-standard", title: "KART EŞLEŞTİRME", tiers: [{name:"4 Çift Kart",pts:"Her Eşleşme 75P",c:"#10b981"},{name:"Toplam Ödül",pts:"300P",c:"#fbbf24"}] },
       scratch_mode: { bg: "bg-standard", title: "ALTIN KAZI KAZAN", tiers: [{name:"6 Karttan 3 Seçim",pts:"15 - 400P",c:"#fbbf24"},{name:"Büyük İkramiye",pts:"400P",c:"#f43f5e"}] },
