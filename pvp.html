@@ -10,28 +10,35 @@
 </head>
 <body class="bg-pvp_mode">
   <div class="app-container" style="justify-content:space-between;">
-    
     <div>
       <div class="top-header">
-        <button id="btn-leave-room" class="icon-btn" style="border-color:var(--danger); z-index:999;" onclick="leavePvPRoom()">‹ Çıkış</button>
+        <a href="menu.html" id="btn-leave-room" class="icon-btn" style="border-color:var(--danger); z-index:999;" onclick="leavePvPRoom()">‹ Çıkış</a>
         <div id="pvp-room-tag" style="font-weight:bold; font-size:12px;">⚔️ PvP Arenası</div>
         <div id="pvp-status-badge" style="color:var(--neon-gold); font-weight:bold; font-size:11px;">Oda Seç</div>
       </div>
     </div>
 
     <!-- 1. ODA KURMA & KATILMA MENÜSÜ -->
-    <div id="pvp-lobby-panel" style="display:flex; flex-direction:column; gap:8px; flex:1; justify-content:center;">
-      <div style="font-size:11px; color:var(--text-dim); text-align:center;">Oyun Türü & Kutu Sayısı Seç:</div>
+    <div id="pvp-lobby-panel" style="display:flex; flex-direction:column; gap:6px; flex:1; justify-content:center;">
+      <div style="font-size:10px; color:var(--text-dim); text-align:center;">1. Kapışma Modunu Seç:</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+        <button class="mode-btn" id="m-std" style="background:var(--btn-blue); font-size:10px; text-align:center;" onclick="setGameType('standard')">⚔️ Normal Kasa</button>
+        <button class="mode-btn" id="m-mega" style="font-size:10px; text-align:center;" onclick="setGameType('mega')">💎 Mega Kasa</button>
+        <button class="mode-btn" id="m-speed" style="font-size:10px; text-align:center;" onclick="setGameType('speedrun')">⚡ Speedrun</button>
+        <button class="mode-btn" id="m-mines" style="font-size:10px; text-align:center;" onclick="setGameType('mines')">💣 Mayınlı Kasa</button>
+      </div>
+
+      <div style="font-size:10px; color:var(--text-dim); text-align:center; margin-top:4px;">2. Oyuncu Sayısı & Kutu:</div>
       <div style="display:flex; gap:4px;">
         <button class="mode-btn" id="btn-p2" style="flex:1; background:var(--btn-blue); color:#fff; text-align:center;" onclick="setRoomSize(2)">1v1<br><small>(5 Kutu)</small></button>
         <button class="mode-btn" id="btn-p3" style="flex:1; text-align:center;" onclick="setRoomSize(3)">1v1v1<br><small>(10 Kutu)</small></button>
         <button class="mode-btn" id="btn-p4" style="flex:1; text-align:center;" onclick="setRoomSize(4)">1v1v1v1<br><small>(15 Kutu)</small></button>
       </div>
 
-      <button class="btn-start" style="background:linear-gradient(90deg, #9333ea, #c084fc); margin-top:8px;" onclick="createOnlineRoom()">🔥 Oda Kur</button>
+      <button class="btn-start" style="background:linear-gradient(90deg, #9333ea, #c084fc); margin-top:6px;" onclick="createOnlineRoom()">🔥 Oda Kur</button>
 
-      <div style="display:flex; gap:4px; margin-top:10px;">
-        <input type="text" id="in-room-code" class="input-field" style="margin:0; font-size:11px;" placeholder="Oda Adı (Örn: pvp#1234)">
+      <div style="display:flex; gap:4px; margin-top:8px;">
+        <input type="text" id="in-room-code" class="input-field" style="margin:0; font-size:11px;" placeholder="Oda Kodu (Örn: pvp#1234)">
         <button class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="joinOnlineRoom()">Katıl</button>
       </div>
     </div>
@@ -40,26 +47,18 @@
     <div id="pvp-game-panel" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
       <div style="display:grid; gap:4px; margin-bottom:4px;" id="pvp-players-row"></div>
 
-      <div style="display:flex; flex-direction:column; gap:4px;">
-        <div style="display:flex; justify-content:center; gap:4px; overflow-x:auto;">
-          <button class="icon-btn" onclick="sendQuickAction('🔥')">🔥</button>
-          <button class="icon-btn" onclick="sendQuickAction('😎')">😎</button>
-          <button class="icon-btn" onclick="sendQuickAction('💀')">💀</button>
-          <button class="icon-btn" onclick="sendQuickAction('🎉')">🎉</button>
-          <button class="icon-btn" onclick="sendQuickAction('😡')">😡</button>
-          <button class="icon-btn" onclick="sendQuickAction('👑')">👑</button>
-          <button class="icon-btn" onclick="sendQuickAction('💩')">💩</button>
-        </div>
-        <div style="display:flex; justify-content:center; gap:4px; overflow-x:auto;">
-          <button class="icon-btn" style="font-size:9px; padding:3px 6px;" onclick="sendQuickAction('Hazır verin!')">Hazır verin!</button>
-          <button class="icon-btn" style="font-size:9px; padding:3px 6px;" onclick="sendQuickAction('İyi maçtı!')">İyi maçtı!</button>
-          <button class="icon-btn" style="font-size:9px; padding:3px 6px;" onclick="sendQuickAction('Yeni tur!')">Yeni tur!</button>
-        </div>
+      <!-- Hızlı Reaksiyonlar -->
+      <div style="display:flex; justify-content:center; gap:4px; overflow-x:auto;">
+        <button class="icon-btn" onclick="sendQuickAction('🔥')">🔥</button>
+        <button class="icon-btn" onclick="sendQuickAction('😎')">😎</button>
+        <button class="icon-btn" onclick="sendQuickAction('💀')">💀</button>
+        <button class="icon-btn" onclick="sendQuickAction('🎉')">🎉</button>
+        <button class="icon-btn" onclick="sendQuickAction('👑')">👑</button>
       </div>
 
       <div style="margin:4px 0;">
         <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:2px;">
-          <span style="color:var(--neon-blue); font-weight:bold;">📦 Açılacak Kutularınız:</span>
+          <span style="color:var(--neon-blue); font-weight:bold;" id="lbl-pvp-modename">📦 Kutularınız:</span>
           <span style="color:var(--neon-gold);" id="lbl-pvp-progress">0 / 5</span>
         </div>
         <div class="pvp-grid-boxes" id="pvp-boxes-grid"></div>
@@ -74,24 +73,23 @@
       </div>
     </div>
 
-    <!-- 3. PODYUM & SIRALAMA (EŞYA İNCELEME TIKLANABİLİR) -->
+    <!-- 3. PODYUM & SONUÇLAR -->
     <div id="pvp-podium-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:2px solid var(--neon-purple); justify-content:space-between;">
       <div>
         <div style="font-size:15px; font-weight:900; color:var(--neon-gold); text-align:center; margin-bottom:4px;">🏆 MAÇ BİTTİ - SIRALAMA</div>
-        <div style="font-size:9.5px; color:#94a3b8; text-align:center; margin-bottom:8px;">Kullanıcılara tıklayarak çıkan eşyalarını görün:</div>
+        <div style="font-size:9.5px; color:#94a3b8; text-align:center; margin-bottom:8px;">Eşya dökümünü görmek için oyuncuya dokunun:</div>
         <div id="podium-list" style="display:flex; flex-direction:column; gap:4px; max-height:180px; overflow-y:auto;"></div>
-        <div id="replay-status-txt" style="text-align:center; font-size:11px; color:var(--neon-gold); margin:6px 0;">Tüm oyuncular tekrar oyna basmalıdır!</div>
+        <div id="replay-status-txt" style="text-align:center; font-size:11px; color:var(--neon-gold); margin:6px 0;">Herkes tekrar oyna basmalıdır!</div>
       </div>
 
       <div style="display:flex; gap:6px;">
-        <button id="btn-replay-pvp" class="btn-start" style="flex:1; background:var(--btn-blue);" onclick="voteReplayPvP()">🔄 Tekrar Oyna (<span id="replay-vote-count">0</span>)</button>
-        <button class="btn-start" style="flex:1; background:var(--danger);" onclick="leavePvPRoom()">🚪 Lobiye Dön</button>
+        <button id="btn-replay-pvp" class="btn-start" style="flex:1; background:var(--btn-blue);" onclick="voteReplayPvP()">🔄 Tekrar (<span id="replay-vote-count">0</span>)</button>
+        <a href="menu.html" class="btn-start" style="flex:1; background:var(--danger); text-align:center; text-decoration:none; padding:10px;" onclick="leavePvPRoom()">🚪 Lobi</a>
       </div>
     </div>
-
   </div>
 
-  <!-- Rakip Eşyaları İnceleme Modalı -->
+  <!-- Eşya İnceleme Modalı -->
   <div id="modal-pvp-inspect" class="modal-overlay">
     <div class="modal-card">
       <h3 id="inspect-player-name" style="color:var(--neon-blue); font-size:13px; margin-bottom:4px;">Oyuncu Eşyaları</h3>
@@ -102,31 +100,39 @@
 
   <script src="app.js"></script>
   <script>
-    let roomCapacity = 2;
-    let totalBoxesPerPlayer = 5;
-    let currentRoomCode = null;
-    let myOpenedCount = 0;
-    let myTotalScore = 0;
-    let myDrops = [];
-    let isMatchPlaying = false;
-    let isSpinningSlot = false;
-    let isMyReady = false;
-    let countdownInt = null;
+    let roomCapacity = 2, totalBoxesPerPlayer = 5, currentRoomCode = null, selectedGameType = 'standard';
+    let myOpenedCount = 0, myTotalScore = 0, myDrops = [], isMatchPlaying = false, isSpinningSlot = false, isMyReady = false, countdownInt = null;
 
-    const PVP_TIERS = [
-      { name: "Tahta Kılıç", p: 2, c: "#fff" },
-      { name: "Demir Balta", p: 6, c: "#38bdf8" },
-      { name: "Gümüş Yüzük", p: 15, c: "#c084fc" },
-      { name: "Ejder Baltası", p: 40, c: "#fb923c" },
-      { name: "Efsane Kılıç", p: 100, c: "#f43f5e" }
-    ];
+    const PVP_TIERS = {
+      standard: [
+        { name: "Tahta Kılıç", p: 2, c: "#fff" }, { name: "Demir Balta", p: 6, c: "#38bdf8" },
+        { name: "Gümüş Yüzük", p: 15, c: "#c084fc" }, { name: "Ejder Baltası", p: 40, c: "#fb923c" }, { name: "Efsane Kılıç", p: 100, c: "#f43f5e" }
+      ],
+      mega: [
+        { name: "Mega Kılıç", p: 15, c: "#fff" }, { name: "Safir Zırh", p: 45, c: "#38bdf8" },
+        { name: "Kutsal Asa", p: 120, c: "#c084fc" }, { name: "Tanrısal Kama", p: 450, c: "#f43f5e" }
+      ],
+      speedrun: [
+        { name: "Hız İksiri", p: 20, c: "#38bdf8" }, { name: "Yıldırım Kristali", p: 60, c: "#fbbf24" }, { name: "Işık Baltası", p: 150, c: "#f43f5e" }
+      ],
+      mines: [
+        { name: "Güvenli Sandık", p: 25, c: "#10b981" }, { name: "Büyük Hazine", p: 80, c: "#fbbf24" }, { name: "Tuzak Sandık", p: -10, c: "#ef4444" }
+      ]
+    };
+
+    function setGameType(type) {
+      selectedGameType = type;
+      ['std', 'mega', 'speed', 'mines'].forEach(k => document.getElementById('m-' + k).style.background = '#13072b');
+      const map = { standard: 'std', mega: 'mega', speedrun: 'speed', mines: 'mines' };
+      document.getElementById('m-' + map[type]).style.background = 'var(--btn-blue)';
+    }
 
     function setRoomSize(num) {
       roomCapacity = num;
       totalBoxesPerPlayer = num === 2 ? 5 : (num === 3 ? 10 : 15);
-      document.getElementById("btn-p2").style.background = num === 2 ? "var(--btn-blue)" : "#0f172a";
-      document.getElementById("btn-p3").style.background = num === 3 ? "var(--btn-blue)" : "#0f172a";
-      document.getElementById("btn-p4").style.background = num === 4 ? "var(--btn-blue)" : "#0f172a";
+      document.getElementById("btn-p2").style.background = num === 2 ? "var(--btn-blue)" : "#13072b";
+      document.getElementById("btn-p3").style.background = num === 3 ? "var(--btn-blue)" : "#13072b";
+      document.getElementById("btn-p4").style.background = num === 4 ? "var(--btn-blue)" : "#13072b";
     }
 
     function createOnlineRoom() {
@@ -143,6 +149,7 @@
         code: code,
         capacity: roomCapacity,
         totalBoxes: totalBoxesPerPlayer,
+        gameType: selectedGameType,
         status: "waiting",
         players: pData
       }).then(() => listenRoom(code));
@@ -168,6 +175,7 @@
 
         currentRoomCode = foundRoom.code;
         totalBoxesPerPlayer = foundRoom.totalBoxes || 5;
+        selectedGameType = foundRoom.gameType || 'standard';
 
         db.ref(`pvp_rooms/${foundKey}/players/${u.uid}`).set({
           uid: u.uid,
@@ -185,7 +193,7 @@
     function listenRoom(code) {
       document.getElementById("pvp-lobby-panel").style.display = "none";
       document.getElementById("pvp-game-panel").style.display = "flex";
-      document.getElementById("pvp-room-tag").innerText = code;
+      document.getElementById("pvp-room-tag").innerText = `${code} (${selectedGameType.toUpperCase()})`;
 
       const u = getActiveUser();
       const chKey = code.replace(/[^a-zA-Z0-9]/g, '_');
@@ -195,13 +203,13 @@
         if (!room) return;
 
         totalBoxesPerPlayer = room.totalBoxes || 5;
+        selectedGameType = room.gameType || 'standard';
         const pList = Object.values(room.players || {});
         const pRow = document.getElementById("pvp-players-row");
         pRow.style.gridTemplateColumns = `repeat(${room.capacity}, 1fr)`;
         pRow.innerHTML = "";
 
-        let readyCount = 0;
-        let replayVotes = 0;
+        let readyCount = 0, replayVotes = 0;
 
         pList.forEach(p => {
           const isMe = p.fullName === `${u.name}${u.tag}`;
@@ -222,13 +230,8 @@
         if (voteBadge) voteBadge.innerText = `${replayVotes}/${room.capacity}`;
 
         if (readyCount < room.capacity && (room.status === "starting" || room.status === "waiting")) {
-          if (countdownInt) {
-            clearInterval(countdownInt);
-            countdownInt = null;
-          }
-          if (room.status === "starting") {
-            db.ref("pvp_rooms/" + chKey).update({ status: "waiting" });
-          }
+          if (countdownInt) { clearInterval(countdownInt); countdownInt = null; }
+          if (room.status === "starting") db.ref("pvp_rooms/" + chKey).update({ status: "waiting" });
           document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${readyCount}/${room.capacity} Hazır)`;
           document.getElementById("pvp-status-badge").style.color = "var(--neon-gold)";
         } 
@@ -236,33 +239,28 @@
           db.ref("pvp_rooms/" + chKey).update({ status: "starting" });
           let cd = 3;
           document.getElementById("pvp-status-badge").innerText = `🔥 Başlıyor: ${cd}s`;
-          
           if (countdownInt) clearInterval(countdownInt);
           countdownInt = setInterval(() => {
             cd--;
             document.getElementById("pvp-status-badge").innerText = `🔥 Başlıyor: ${cd}s`;
             if (cd <= 0) {
-              clearInterval(countdownInt);
-              countdownInt = null;
+              clearInterval(countdownInt); countdownInt = null;
               db.ref("pvp_rooms/" + chKey).update({ status: "playing" });
             }
           }, 1000);
         } else if (room.status === "playing") {
           document.getElementById("pvp-status-badge").innerText = "⚔️ Maç Başladı!";
           document.getElementById("pvp-status-badge").style.color = "var(--neon-green)";
-          document.getElementById("btn-leave-room").disabled = true;
           document.getElementById("btn-ready-pvp").style.display = "none";
           isMatchPlaying = true;
           renderPvPBoxesGrid();
         }
 
-        if (replayVotes === room.capacity && room.status === "finished") {
-          resetPvPRound();
-        }
+        if (replayVotes === room.capacity && room.status === "finished") resetPvPRound();
 
         const allDone = pList.length === room.capacity && pList.every(p => p.opened === totalBoxesPerPlayer);
         if (allDone && room.status === "playing") {
-          document.getElementById("pvp-status-badge").innerText = "🏆 Kazanan Belirlendi!";
+          document.getElementById("pvp-status-badge").innerText = "🏆 Maç Bitti!";
           db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
           setTimeout(() => showPodium(pList), 2500);
         }
@@ -271,6 +269,7 @@
 
     function toggleReadyPvP() {
       isMyReady = !isMyReady;
+      playSound('click');
       const u = getActiveUser();
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
       db.ref(`pvp_rooms/${chKey}/players/${u.uid}/ready`).set(isMyReady);
@@ -300,18 +299,20 @@
 
     function spinSlotForPvP(boxEl) {
       isSpinningSlot = true;
+      playSound('click');
       const track = document.getElementById("pvp-roulette-track");
       const wrap = document.getElementById("pvp-roulette-box");
       track.style.transition = "none";
       track.style.transform = "translateX(0px)";
       track.innerHTML = "";
 
+      const pool = PVP_TIERS[selectedGameType] || PVP_TIERS.standard;
       const totalItems = 25, winIdx = 20;
       let winDrop = null;
       const itemWidth = 75;
 
       for (let i = 0; i < totalItems; i++) {
-        let d = PVP_TIERS[Math.floor(Math.random() * PVP_TIERS.length)];
+        let d = pool[Math.floor(Math.random() * pool.length)];
         if (i === winIdx) winDrop = d;
         track.innerHTML += `
           <div class="roulette-item" style="width:75px; height:75px; border-bottom:3px solid ${d.c};">
@@ -325,9 +326,13 @@
         track.style.transition = "transform 2.5s cubic-bezier(0.12, 0.8, 0.2, 1)";
         const targetX = -(winIdx * itemWidth) + (wrap.offsetWidth / 2) - (itemWidth / 2);
         track.style.transform = `translateX(${targetX}px)`;
+        
+        let tInt = setInterval(() => playSound('tick'), 160);
+        setTimeout(() => clearInterval(tInt), 2200);
       }, 20);
 
       setTimeout(() => {
+        playSound('win');
         myTotalScore += winDrop.p;
         myOpenedCount++;
         myDrops.push(winDrop);
@@ -411,20 +416,12 @@
     }
 
     function resetPvPRound() {
-      myOpenedCount = 0;
-      myTotalScore = 0;
-      myDrops = [];
-      isMyReady = false;
+      myOpenedCount = 0; myTotalScore = 0; myDrops = []; isMyReady = false;
       const u = getActiveUser();
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
 
       db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).update({
-        score: 0,
-        opened: 0,
-        lastDrop: "-",
-        ready: false,
-        wantsReplay: false,
-        drops: []
+        score: 0, opened: 0, lastDrop: "-", ready: false, wantsReplay: false, drops: []
       });
 
       db.ref(`pvp_rooms/${chKey}`).update({ status: "waiting" });
@@ -436,7 +433,7 @@
       document.getElementById("btn-ready-pvp").style.background = "var(--neon-gold)";
       document.getElementById("btn-ready-pvp").style.display = "block";
       document.getElementById("btn-replay-pvp").disabled = false;
-      document.getElementById("btn-replay-pvp").innerHTML = `🔄 Tekrar Oyna (<span id="replay-vote-count">0</span>)`;
+      document.getElementById("btn-replay-pvp").innerHTML = `🔄 Tekrar (<span id="replay-vote-count">0</span>)`;
     }
 
     function leavePvPRoom() {
