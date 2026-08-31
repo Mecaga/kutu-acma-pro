@@ -20,7 +20,7 @@
       border-radius: 50%;
       border: 4px solid var(--neon-purple);
       box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
-      transition: transform 3.5s cubic-bezier(0.15, 0.9, 0.2, 1);
+      transition: transform 3.5s cubic-bezier(0.12, 0.8, 0.15, 1);
     }
     .wheel-pointer {
       position: absolute;
@@ -77,17 +77,17 @@
   <script src="app.js"></script>
   <script>
     const SLICES = [
-      { name: "20 Puan", p: 20, color: "#1e1b4b" },
-      { name: "50 Puan", p: 50, color: "#312e81" },
-      { name: "15 Puan", p: 15, color: "#1e293b" },
-      { name: "100 Puan", p: 100, color: "#4c1d95" },
-      { name: "30 Puan", p: 30, color: "#065f46" },
-      { name: "250 Puan", p: 250, color: "#b45309" },
-      { name: "10 Puan", p: 10, color: "#334155" },
-      { name: "500 Puan", p: 500, color: "#9f1239" }
+      { name: "20 P", p: 20, color: "#1e1b4b" },
+      { name: "50 P", p: 50, color: "#312e81" },
+      { name: "15 P", p: 15, color: "#1e293b" },
+      { name: "100 P", p: 100, color: "#4c1d95" },
+      { name: "30 P", p: 30, color: "#065f46" },
+      { name: "250 P", p: 250, color: "#b45309" },
+      { name: "10 P", p: 10, color: "#334155" },
+      { name: "500 P", p: 500, color: "#9f1239" }
     ];
 
-    let totalScore = 0, remSpins = 5, isSpinning = false, drops = [], currentDeg = 0;
+    let totalScore = 0, remSpins = 5, isSpinning = false, drops = [], currentRotation = 0;
 
     window.onload = drawWheel;
 
@@ -97,12 +97,16 @@
       const num = SLICES.length;
       const arc = (2 * Math.PI) / num;
 
+      ctx.clearRect(0, 0, 300, 300);
+
       for (let i = 0; i < num; i++) {
         const angle = i * arc;
         ctx.beginPath();
         ctx.fillStyle = SLICES[i].color;
+        ctx.strokeStyle = "#ffffff22";
+        ctx.lineWidth = 2;
         ctx.moveTo(150, 150);
-        ctx.arc(150, 150, 150, angle, angle + arc);
+        ctx.arc(150, 150, 148, angle, angle + arc);
         ctx.fill();
         ctx.stroke();
 
@@ -124,17 +128,25 @@
 
       const winIdx = Math.floor(Math.random() * SLICES.length);
       const sliceDeg = 360 / SLICES.length;
-      const targetDeg = (360 * 5) + (360 - (winIdx * sliceDeg) - (sliceDeg / 2)) - 90;
-      currentDeg += targetDeg;
+      
+      // Tepe noktası 270 dereceye denk geldiği için tam merkez hizalaması:
+      const targetSliceCenterDeg = (winIdx * sliceDeg) + (sliceDeg / 2);
+      const desiredAngle = (270 - targetSliceCenterDeg + 360) % 360;
+      
+      const fullRotations = 5 * 360;
+      const currentMod = currentRotation % 360;
+      const delta = (desiredAngle - currentMod + 360) % 360;
+      
+      currentRotation += fullRotations + delta;
 
       const wheelEl = document.getElementById("wheel-canvas");
-      wheelEl.style.transform = `rotate(${currentDeg}deg)`;
+      wheelEl.style.transform = `rotate(${currentRotation}deg)`;
 
       setTimeout(() => {
         const drop = SLICES[winIdx];
         totalScore += drop.p;
         remSpins--;
-        drops.push({ name: drop.name, p: drop.p, c: drop.color });
+        drops.push({ name: `${drop.p} Puan Dilimi`, p: drop.p, c: drop.color });
 
         document.getElementById("lbl-score").innerText = `${totalScore} P`;
         document.getElementById("lbl-spins").innerText = remSpins;
@@ -142,7 +154,7 @@
         isSpinning = false;
 
         if (remSpins <= 0) {
-          setTimeout(showSummary, 600);
+          setTimeout(showSummary, 700);
         } else {
           document.getElementById("btn-spin").disabled = false;
         }
@@ -162,4 +174,3 @@
   </script>
 </body>
 </html>
-
