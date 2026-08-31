@@ -97,7 +97,7 @@
       cursor: pointer;
     }
 
-    /* 3 Saniyelik Kazanan Bildirim Bannerı */
+    /* 3 Saniyelik Kazanan / Bildirim Bannerı */
     #winner-toast-banner {
       display: none;
       position: absolute;
@@ -224,9 +224,9 @@
       </div>
     </div>
 
-    <!-- 3 SANİYELİK KAZANAN DUYURUSU -->
+    <!-- 3 SANİYELİK KAZANAN / BİLDİRİM DUYURUSU -->
     <div id="winner-toast-banner">
-      <div style="font-size:26px; margin-bottom:4px;">👑🏆</div>
+      <div style="font-size:26px; margin-bottom:4px;" id="winner-toast-icon">👑🏆</div>
       <div id="winner-toast-text" style="font-size:15px; font-weight:900; color:var(--neon-gold);">1. OYUNCU KAZANDI!</div>
       <div style="font-size:10px; color:#94a3b8; margin-top:4px;">Sonuç tablosu açılıyor...</div>
     </div>
@@ -273,6 +273,7 @@
     let myOpenedCount = 0, myTotalScore = 0, myDrops = [], isMatchPlaying = false, isSpinningSlot = false, isMyReady = false, countdownInt = null;
     let mySymbol = "X";
     let isResultShowing = false;
+    let initialPlayerCount = 0;
 
     const PVP_TIERS = {
       standard: [
@@ -355,6 +356,7 @@
           lastDrop: "-",
           ready: false,
           wantsReplay: false,
+          leftGame: false,
           drops: [],
           symbol: "X"
         };
@@ -442,6 +444,7 @@
             lastDrop: "-",
             ready: false,
             wantsReplay: false,
+            leftGame: false,
             drops: [],
             symbol: "O"
           }).then(() => {
@@ -488,6 +491,7 @@
           let hakMetin = `${p.opened}/${totalBoxesPerPlayer} Kutu`;
           if (selectedGameType === 'speedrun') hakMetin = `${p.score}/1000 P`;
           if (selectedGameType === 'xox') hakMetin = `Sembol: ${p.symbol || '?'}`;
+          if (p.leftGame) hakMetin = `<span style="color:#ef4444;">Ayrıldı</span>`;
 
           pRow.innerHTML += `
             <div style="background:#070212; border:1px solid ${isMe ? 'var(--neon-gold)' : '#3b1d6e'}; border-radius:6px; padding:4px 2px; text-align:center;">
@@ -501,6 +505,19 @@
 
         const voteBadge = document.getElementById("replay-vote-count");
         if (voteBadge) voteBadge.innerText = `${replayVotes}/${room.capacity}`;
+
+        // OYUNCU AYRILMA KONTROLÜ (Maç oynanırken veya bitmişse)
+        const leftPlayer = pList.find(p => p.leftGame);
+        if (leftPlayer && !isResultShowing && (room.status === "playing" || room.status === "starting")) {
+          isResultShowing = true;
+          isMatchPlaying = false;
+          const remainingPlayer = pList.find(p => !p.leftGame);
+          const winMsg = remainingPlayer ? `🚨 ${leftPlayer.fullName} Oyundan Ayrıldı!\n👑 ${remainingPlayer.fullName} Hükmen Kazandı!` : `🚨 ${leftPlayer.fullName} Oyundan Ayrıldı!`;
+          
+          db.ref("pvp_rooms/" + chKey).update({ status: "finished", winnerText: winMsg });
+          triggerWinnerToastAndPodium(pList, winMsg, "🚨");
+          return;
+        }
 
         if (readyCount < room.capacity && (room.status === "starting" || room.status === "waiting")) {
           if (countdownInt) { clearInterval(countdownInt); countdownInt = null; }
@@ -532,7 +549,7 @@
           startModeGameplay(room);
         }
 
-        // MAÇ BİTTİĞİNDE HER İKİ OYUNCUDA DA ORTAK TETİKLENİR
+        // MAÇ BİTTİĞİNDE HER İKİ OYUNCUDA DA TETİKLENİR
         if (room.status === "finished" && !isResultShowing) {
           isResultShowing = true;
           isMatchPlaying = false;
@@ -667,7 +684,7 @@
       }, 1600);
     }
 
-    /* 2. XOX MOTORU */
+    /* 2. XOX MOTORU (EŞZAMANLI SON HAMLE SENKRONİZASYONU) */
     function renderXOXBoard(room) {
       const u = getUserInfo();
       const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
@@ -690,7 +707,11 @@
 
         cell.onclick = () => {
           if (!isMyTurn || val !== "" || !isMatchPlaying) return;
+          
+          // Anında yerel tahtayı güncelle
           board[idx] = mySymbol;
+          cell.innerText = mySymbol;
+          cell.style.color = mySymbol === "X" ? "var(--neon-blue)" : "var(--neon-gold)";
 
           const pList = Object.keys(room.players || {});
           const nextTurn = pList.find(id => id !== cleanUID) || cleanUID;
@@ -706,7 +727,7 @@
               drops: myDrops
             });
 
-            // Odayı ve son hamleyi güncelle -> Firebase üzerinden iki tarafta da sonuç tetiklenir
+            // Atomik olarak son tahtayı ve bitiş durumunu gönder
             db.ref("pvp_rooms/" + chKey).update({
               xoxBoard: board,
               status: "finished",
@@ -897,10 +918,13 @@
       input.value = "";
     }
 
-    // 3 SANİYELİK KAZANAN DUYURUSU VE PODYUM AÇILIŞI
-    function triggerWinnerToastAndPodium(pList, msg) {
+    // 3 SANİYELİK KAZANAN / AYRILMA DUYURUSU VE PODYUM
+    function triggerWinnerToastAndPodium(pList, msg, icon = "👑🏆") {
       const banner = document.getElementById("winner-toast-banner");
       const bannerTxt = document.getElementById("winner-toast-text");
+      const bannerIcon = document.getElementById("winner-toast-icon");
+      
+      bannerIcon.innerText = icon;
       bannerTxt.innerText = msg;
       banner.style.display = "block";
 
@@ -912,7 +936,13 @@
 
         const u = getUserInfo();
         const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
-        pList.sort((a, b) => b.score - a.score);
+        
+        // Sıralama: Oyundan ayrılanlar en alta düşer, puanı sıfırlanmaz
+        pList.sort((a, b) => {
+          if (a.leftGame) return 1;
+          if (b.leftGame) return -1;
+          return b.score - a.score;
+        });
 
         const podBox = document.getElementById("podium-list");
         podBox.innerHTML = "";
@@ -920,12 +950,22 @@
         pList.forEach((p, idx) => {
           const isMe = p.uid === cleanUID;
           const item = document.createElement("div");
-          item.className = `rank-card ${idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''))}`;
+          let rankClass = "rank-card";
+          if (!p.leftGame) {
+            if (idx === 0) rankClass += " rank-1";
+            else if (idx === 1) rankClass += " rank-2";
+            else if (idx === 2) rankClass += " rank-3";
+          }
+          item.className = rankClass;
           if (isMe) item.style.border = "2px solid var(--neon-gold)";
+
+          const scoreHtml = p.leftGame
+            ? `<b style="color:#ef4444; font-size:11px;">Oyundan Ayrıldı</b>`
+            : `<b style="color:var(--neon-green); font-size:13px;">${p.score} P</b>`;
 
           item.innerHTML = `
             <span><b>${idx+1}.</b> ${p.fullName} ${isMe ? '(SEN)' : ''}</span>
-            <b style="color:var(--neon-green); font-size:13px;">${p.score} P</b>
+            ${scoreHtml}
           `;
           item.onclick = () => openPvPInspect(p);
           podBox.appendChild(item);
@@ -970,7 +1010,7 @@
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
 
       db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
-        score: 0, opened: 0, lastDrop: "-", ready: false, wantsReplay: false, drops: []
+        score: 0, opened: 0, lastDrop: "-", ready: false, wantsReplay: false, leftGame: false, drops: []
       });
 
       db.ref(`pvp_rooms/${chKey}`).update({
@@ -992,15 +1032,21 @@
       document.getElementById("btn-replay-pvp").innerHTML = `🔄 Tekrar (<span id="replay-vote-count">0</span>)`;
     }
 
+    // OYUNDAN AYRILMA (HÜKMEN MAĞLUBİYET İŞARETLEMESİ)
     function leavePvPRoom() {
       if (currentRoomCode) {
         const u = getUserInfo();
         const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
         const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
         if (u) {
-          db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).remove().then(() => {
+          // Oyuncu silinmek yerine ayrıldı olarak işaretlenir (böylece skor tablosunda 'Ayrıldı' yazar)
+          db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
+            leftGame: true,
+            ready: false
+          }).then(() => {
             db.ref(`pvp_rooms/${chKey}/players`).once("value", pSnap => {
-              if (!pSnap.exists() || pSnap.numChildren() === 0) {
+              const allPlayers = Object.values(pSnap.val() || {});
+              if (allPlayers.every(p => p.leftGame)) {
                 db.ref(`pvp_rooms/${chKey}`).remove();
               }
             });
