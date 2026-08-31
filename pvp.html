@@ -23,6 +23,9 @@
     body.theme-xox {
       background: radial-gradient(circle at center, #1e1b4b 0%, #0f0a2a 60%, #04020a 100%);
     }
+    body.theme-battleship {
+      background: radial-gradient(circle at top, #0f172a 0%, #022c43 60%, #01111c 100%);
+    }
 
     /* 3x3 Mayın Tarlası */
     .mines-grid-3x3 {
@@ -78,6 +81,37 @@
       box-shadow: 0 0 8px rgba(168,85,247,0.2);
     }
 
+    /* 4x4 Amiral Battı Izgarası */
+    .sea-board-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      margin: 8px auto;
+      width: 240px;
+      height: 240px;
+    }
+    .sea-cell {
+      background: #082f49;
+      border: 2px solid #0284c7;
+      border-radius: 6px;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(2,132,199,0.3);
+    }
+    .sea-cell.hit {
+      background: #7f1d1d !important;
+      border-color: #ef4444 !important;
+      cursor: default;
+    }
+    .sea-cell.miss {
+      background: #0f172a !important;
+      border-color: #475569 !important;
+      cursor: default;
+    }
+
     .quick-chat-row {
       display: flex;
       gap: 4px;
@@ -97,7 +131,7 @@
       cursor: pointer;
     }
 
-    /* 3 Saniyelik Kazanan / Bildirim Bannerı */
+    /* 3 Saniyelik Kazanan Bildirim Bannerı */
     #winner-toast-banner {
       display: none;
       position: absolute;
@@ -137,7 +171,8 @@
         <button type="button" class="mode-btn" id="m-mega" style="font-size:10px; text-align:center;" onclick="setGameType('mega')">💎 Mega Kasa</button>
         <button type="button" class="mode-btn" id="m-speed" style="font-size:10px; text-align:center;" onclick="setGameType('speedrun')">⚡ 1000P Speedrun</button>
         <button type="button" class="mode-btn" id="m-mines" style="font-size:10px; text-align:center;" onclick="setGameType('mines')">💣 Mayınlı Kasa</button>
-        <button type="button" class="mode-btn" id="m-xox" style="font-size:10px; text-align:center; grid-column:span 2;" onclick="setGameType('xox')">⭕❌ Canlı XOX (Tic-Tac-Toe)</button>
+        <button type="button" class="mode-btn" id="m-xox" style="font-size:10px; text-align:center;" onclick="setGameType('xox')">⭕❌ Canlı XOX</button>
+        <button type="button" class="mode-btn" id="m-battleship" style="font-size:10px; text-align:center;" onclick="setGameType('battleship')">🚢 Amiral Battı</button>
       </div>
 
       <div id="size-select-section" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
@@ -167,7 +202,8 @@
             <span class="chat-chip" onclick="sendQuickAction('🔥 Alev!')">🔥 Alev!</span>
             <span class="chat-chip" onclick="sendQuickAction('😎 Kolay')">😎 Kolay</span>
             <span class="chat-chip" onclick="sendQuickAction('⚡ 1000P Benim!')">⚡ 1000P!</span>
-            <span class="chat-chip" onclick="sendQuickAction('💀 Bomba!')">💀 Bomba!</span>
+            <span class="chat-chip" onclick="sendQuickAction('💀 Mayın!')">💀 Mayın!</span>
+            <span class="chat-chip" onclick="sendQuickAction('🚢 Battın!')">🚢 Battın!</span>
             <span class="chat-chip" onclick="sendQuickAction('👑 GG!')">👑 GG</span>
           </div>
           <div style="display:flex; gap:4px;">
@@ -177,7 +213,7 @@
         </div>
       </div>
 
-      <!-- BEKLEME EKRANI (Maç Başlayana Kadar) -->
+      <!-- BEKLEME EKRANI -->
       <div id="pvp-waiting-box" style="display:block; text-align:center; padding:15px 0;">
         <div style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">Tüm oyuncular hazır verince maç otomatik başlayacaktır.</div>
         <button type="button" id="btn-ready-pvp" class="btn-start" style="background:var(--neon-gold); color:#000; font-weight:900;" onclick="toggleReadyPvP()">⚡ HAZIR VER</button>
@@ -211,6 +247,12 @@
         <div id="xox-zone" style="display:none; flex-direction:column; align-items:center;">
           <div id="lbl-xox-turn" style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">Sıra: Bekleniyor...</div>
           <div class="xox-board-grid" id="xox-board-box"></div>
+        </div>
+
+        <!-- 5. Canlı Amiral Battı Alanı -->
+        <div id="battleship-zone" style="display:none; flex-direction:column; align-items:center;">
+          <div id="lbl-sea-turn" style="font-size:11px; font-weight:bold; color:#38bdf8; margin-bottom:4px;">Hedef: Rakibin 3 Gemisini Batır!</div>
+          <div class="sea-board-grid" id="sea-board-box"></div>
         </div>
 
         <!-- Rulet Alanı -->
@@ -273,7 +315,7 @@
     let myOpenedCount = 0, myTotalScore = 0, myDrops = [], isMatchPlaying = false, isSpinningSlot = false, isMyReady = false, countdownInt = null;
     let mySymbol = "X";
     let isResultShowing = false;
-    let initialPlayerCount = 0;
+    let mySunkShips = 0;
 
     const PVP_TIERS = {
       standard: [
@@ -311,16 +353,16 @@
     function setGameType(type) {
       selectedGameType = type;
       applyTheme(type);
-      ['std', 'mega', 'speed', 'mines', 'xox'].forEach(k => {
+      ['std', 'mega', 'speed', 'mines', 'xox', 'battleship'].forEach(k => {
         const el = document.getElementById('m-' + k);
         if (el) el.style.background = '#13072b';
       });
-      const map = { standard: 'std', mega: 'mega', speedrun: 'speed', mines: 'mines', xox: 'xox' };
+      const map = { standard: 'std', mega: 'mega', speedrun: 'speed', mines: 'mines', xox: 'xox', battleship: 'battleship' };
       const activeEl = document.getElementById('m-' + map[type]);
       if (activeEl) activeEl.style.background = 'var(--btn-blue)';
 
       const sizeSec = document.getElementById("size-select-section");
-      if (type === 'xox') {
+      if (type === 'xox' || type === 'battleship') {
         sizeSec.style.display = 'none';
         roomCapacity = 2;
       } else {
@@ -361,9 +403,16 @@
           symbol: "X"
         };
 
+        // Amiral Battı için rastgele 3 gizli gemi üret (4x4 = 16 kare)
+        const secretShips = [];
+        while(secretShips.length < 3) {
+          let r = Math.floor(Math.random() * 16);
+          if(!secretShips.includes(r)) secretShips.push(r);
+        }
+
         const roomPayload = {
           code: code,
-          capacity: selectedGameType === 'xox' ? 2 : (parseInt(roomCapacity, 10) || 2),
+          capacity: (selectedGameType === 'xox' || selectedGameType === 'battleship') ? 2 : (parseInt(roomCapacity, 10) || 2),
           totalBoxes: parseInt(totalBoxesPerPlayer, 10) || 5,
           gameType: selectedGameType || 'standard',
           status: "waiting",
@@ -371,6 +420,8 @@
           createdAt: Date.now(),
           turn: cleanUID,
           xoxBoard: ["", "", "", "", "", "", "", "", ""],
+          seaShips: secretShips,
+          seaBoard: Array(16).fill(""),
           players: {}
         };
         roomPayload.players[cleanUID] = playerData;
@@ -491,6 +542,7 @@
           let hakMetin = `${p.opened}/${totalBoxesPerPlayer} Kutu`;
           if (selectedGameType === 'speedrun') hakMetin = `${p.score}/1000 P`;
           if (selectedGameType === 'xox') hakMetin = `Sembol: ${p.symbol || '?'}`;
+          if (selectedGameType === 'battleship') hakMetin = `Gemi Avı`;
           if (p.leftGame) hakMetin = `<span style="color:#ef4444;">Ayrıldı</span>`;
 
           pRow.innerHTML += `
@@ -506,17 +558,28 @@
         const voteBadge = document.getElementById("replay-vote-count");
         if (voteBadge) voteBadge.innerText = `${replayVotes}/${room.capacity}`;
 
-        // OYUNCU AYRILMA KONTROLÜ (Maç oynanırken veya bitmişse)
+        // RAKİP AYRILDI MI KONTROLÜ
         const leftPlayer = pList.find(p => p.leftGame);
-        if (leftPlayer && !isResultShowing && (room.status === "playing" || room.status === "starting")) {
-          isResultShowing = true;
-          isMatchPlaying = false;
-          const remainingPlayer = pList.find(p => !p.leftGame);
-          const winMsg = remainingPlayer ? `🚨 ${leftPlayer.fullName} Oyundan Ayrıldı!\n👑 ${remainingPlayer.fullName} Hükmen Kazandı!` : `🚨 ${leftPlayer.fullName} Oyundan Ayrıldı!`;
-          
-          db.ref("pvp_rooms/" + chKey).update({ status: "finished", winnerText: winMsg });
-          triggerWinnerToastAndPodium(pList, winMsg, "🚨");
-          return;
+        if (leftPlayer) {
+          // Ayrılma durumunda tekrar oyna butonunu kilitle
+          const replayBtn = document.getElementById("btn-replay-pvp");
+          if (replayBtn) {
+            replayBtn.disabled = true;
+            replayBtn.style.opacity = "0.4";
+            replayBtn.style.cursor = "not-allowed";
+            replayBtn.innerText = "❌ Rakip Ayrıldı";
+          }
+
+          if (!isResultShowing && (room.status === "playing" || room.status === "starting")) {
+            isResultShowing = true;
+            isMatchPlaying = false;
+            const remainingPlayer = pList.find(p => !p.leftGame);
+            const winMsg = remainingPlayer ? `🚨 ${leftPlayer.fullName} Oyundan Ayrıldı!\n👑 ${remainingPlayer.fullName} Hükmen Kazandı!` : `🚨 ${leftPlayer.fullName} Oyundan Ayrıldı!`;
+            
+            db.ref("pvp_rooms/" + chKey).update({ status: "finished", winnerText: winMsg });
+            triggerWinnerToastAndPodium(pList, winMsg, "🚨");
+            return;
+          }
         }
 
         if (readyCount < room.capacity && (room.status === "starting" || room.status === "waiting")) {
@@ -549,17 +612,19 @@
           startModeGameplay(room);
         }
 
-        // MAÇ BİTTİĞİNDE HER İKİ OYUNCUDA DA TETİKLENİR
+        // MAÇ BİTİŞ SENKRONİZASYONU
         if (room.status === "finished" && !isResultShowing) {
           isResultShowing = true;
           isMatchPlaying = false;
           triggerWinnerToastAndPodium(pList, room.winnerText || "Maç Sona Erdi!");
         }
 
-        if (replayVotes === room.capacity && room.status === "finished") resetPvPRound();
+        if (replayVotes === room.capacity && room.status === "finished") {
+          resetPvPRound();
+        }
 
-        // Standart, Mega & Mayınlı Modda Kutu Bitimi Kontrolü
-        if (selectedGameType !== 'speedrun' && selectedGameType !== 'xox' && room.status === "playing") {
+        // Standart, Mega & Mayınlı Kutu Bitimi
+        if (selectedGameType !== 'speedrun' && selectedGameType !== 'xox' && selectedGameType !== 'battleship' && room.status === "playing") {
           const allDone = pList.length === room.capacity && pList.every(p => p.opened === totalBoxesPerPlayer);
           if (allDone) {
             let sorted = [...pList].sort((a, b) => b.score - a.score);
@@ -588,6 +653,7 @@
         document.getElementById("box-grid-container").style.display = "none";
         document.getElementById("mines-grid-container").style.display = "none";
         document.getElementById("xox-zone").style.display = "none";
+        document.getElementById("battleship-zone").style.display = "none";
         document.getElementById("speedrun-zone").style.display = "block";
         document.getElementById("roulette-wrap-area").style.display = "block";
         document.getElementById("lbl-mode-title").innerText = "⚡ 1000P Speedrun:";
@@ -597,15 +663,27 @@
         document.getElementById("mines-grid-container").style.display = "none";
         document.getElementById("roulette-wrap-area").style.display = "none";
         document.getElementById("speedrun-zone").style.display = "none";
+        document.getElementById("battleship-zone").style.display = "none";
         document.getElementById("xox-zone").style.display = "flex";
         document.getElementById("lbl-mode-title").innerText = "⭕❌ Canlı XOX:";
         document.getElementById("lbl-pvp-progress").innerText = `Sembol: ${mySymbol}`;
         renderXOXBoard(room);
+      } else if (selectedGameType === 'battleship') {
+        document.getElementById("box-grid-container").style.display = "none";
+        document.getElementById("mines-grid-container").style.display = "none";
+        document.getElementById("roulette-wrap-area").style.display = "none";
+        document.getElementById("speedrun-zone").style.display = "none";
+        document.getElementById("xox-zone").style.display = "none";
+        document.getElementById("battleship-zone").style.display = "flex";
+        document.getElementById("lbl-mode-title").innerText = "🚢 Amiral Battı:";
+        document.getElementById("lbl-pvp-progress").innerText = `Batırılan: ${mySunkShips}/3`;
+        renderBattleshipBoard(room);
       } else if (selectedGameType === 'mines') {
         document.getElementById("box-grid-container").style.display = "none";
         document.getElementById("roulette-wrap-area").style.display = "none";
         document.getElementById("speedrun-zone").style.display = "none";
         document.getElementById("xox-zone").style.display = "none";
+        document.getElementById("battleship-zone").style.display = "none";
         document.getElementById("mines-grid-container").style.display = "block";
         document.getElementById("lbl-mode-title").innerText = "💣 3×3 Mayın Tarlası:";
         document.getElementById("lbl-pvp-progress").innerText = `${myOpenedCount} / ${totalBoxesPerPlayer}`;
@@ -614,6 +692,7 @@
         document.getElementById("mines-grid-container").style.display = "none";
         document.getElementById("speedrun-zone").style.display = "none";
         document.getElementById("xox-zone").style.display = "none";
+        document.getElementById("battleship-zone").style.display = "none";
         document.getElementById("box-grid-container").style.display = "block";
         document.getElementById("roulette-wrap-area").style.display = "block";
         document.getElementById("lbl-mode-title").innerText = "📦 Ruletli Kutu Seç:";
@@ -684,7 +763,7 @@
       }, 1600);
     }
 
-    /* 2. XOX MOTORU (EŞZAMANLI SON HAMLE SENKRONİZASYONU) */
+    /* 2. XOX MOTORU (SON HAMLE KORUMALI) */
     function renderXOXBoard(room) {
       const u = getUserInfo();
       const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
@@ -708,7 +787,6 @@
         cell.onclick = () => {
           if (!isMyTurn || val !== "" || !isMatchPlaying) return;
           
-          // Anında yerel tahtayı güncelle
           board[idx] = mySymbol;
           cell.innerText = mySymbol;
           cell.style.color = mySymbol === "X" ? "var(--neon-blue)" : "var(--neon-gold)";
@@ -727,7 +805,6 @@
               drops: myDrops
             });
 
-            // Atomik olarak son tahtayı ve bitiş durumunu gönder
             db.ref("pvp_rooms/" + chKey).update({
               xoxBoard: board,
               status: "finished",
@@ -761,7 +838,87 @@
       return lines.some(([x, y, z]) => b[x] && b[x] === b[y] && b[x] === b[z]);
     }
 
-    /* 3. MAYIN TARLASI MOTORU */
+    /* 3. AMİRAL BATTI MOTORU (4x4 = 16 KARE, 3 GİZLİ GEMİ) */
+    function renderBattleshipBoard(room) {
+      const u = getUserInfo();
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+      const board = room.seaBoard || Array(16).fill("");
+      const ships = room.seaShips || [];
+      const isMyTurn = room.turn === cleanUID;
+      const turnIndicator = document.getElementById("lbl-sea-turn");
+
+      turnIndicator.innerText = isMyTurn ? "👉 Bombalama Sırası Sende!" : "⏳ Rakip Hedef Seçiyor...";
+      turnIndicator.style.color = isMyTurn ? "#38bdf8" : "var(--neon-gold)";
+
+      const container = document.getElementById("sea-board-box");
+      container.innerHTML = "";
+
+      board.forEach((val, idx) => {
+        const cell = document.createElement("div");
+        cell.className = "sea-cell";
+        if (val === "HIT") {
+          cell.className += " hit";
+          cell.innerHTML = "🔥";
+        } else if (val === "MISS") {
+          cell.className += " miss";
+          cell.innerHTML = "💦";
+        } else {
+          cell.innerHTML = "🌊";
+        }
+
+        cell.onclick = () => {
+          if (!isMyTurn || val !== "" || !isMatchPlaying) return;
+
+          const isHit = ships.includes(idx);
+          board[idx] = isHit ? "HIT" : "MISS";
+
+          const pList = Object.keys(room.players || {});
+          const nextTurn = pList.find(id => id !== cleanUID) || cleanUID;
+          const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
+
+          let scoreDelta = 0;
+          let dropName = "";
+
+          if (isHit) {
+            mySunkShips++;
+            scoreDelta = 40;
+            dropName = "🚢 Gemi Vuruldu! (+40P)";
+            myTotalScore += scoreDelta;
+            myDrops.push({ name: "Gemi Batırıldı", p: 40, c: '#f87171' });
+          } else {
+            dropName = "💦 Iska!";
+          }
+
+          document.getElementById("lbl-pvp-progress").innerText = `Batırılan: ${mySunkShips}/3`;
+
+          db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
+            score: myTotalScore,
+            lastDrop: dropName,
+            drops: myDrops
+          });
+
+          // 3 gemi de batırıldı mı kontrolü
+          const totalHits = board.filter(b => b === "HIT").length;
+
+          if (totalHits >= 3) {
+            db.ref("pvp_rooms/" + chKey).update({
+              seaBoard: board,
+              status: "finished",
+              winnerText: `⚓ ${u.name}${u.tag} Tüm Donanmayı Batırdı!`
+            });
+          } else {
+            db.ref("pvp_rooms/" + chKey).update({
+              seaBoard: board,
+              turn: nextTurn
+            });
+          }
+        };
+
+        container.appendChild(cell);
+      });
+    }
+
+    /* 4. MAYIN TARLASI MOTORU */
     function renderMines3x3Grid() {
       const board = document.getElementById("mines-3x3-board");
       if (board.children.length > 0) return;
@@ -828,7 +985,7 @@
       }
     }
 
-    /* 4. NORMAL & MEGA KASA MOTORU */
+    /* 5. NORMAL & MEGA KASA MOTORU */
     function renderPvPBoxesGrid() {
       const grid = document.getElementById("pvp-boxes-grid");
       if (grid.children.length > 0) return;
@@ -937,7 +1094,6 @@
         const u = getUserInfo();
         const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
         
-        // Sıralama: Oyundan ayrılanlar en alta düşer, puanı sıfırlanmaz
         pList.sort((a, b) => {
           if (a.leftGame) return 1;
           if (b.leftGame) return -1;
@@ -1003,11 +1159,18 @@
       document.getElementById("btn-replay-pvp").innerText = "Bekleniyor...";
     }
 
+    // TEKRAR OYNA SIFIRLAMA KORUMASI
     function resetPvPRound() {
-      myOpenedCount = 0; myTotalScore = 0; myDrops = []; isMyReady = false; isResultShowing = false;
+      myOpenedCount = 0; myTotalScore = 0; myDrops = []; isMyReady = false; isResultShowing = false; mySunkShips = 0;
       const u = getUserInfo();
       const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
+
+      const secretShips = [];
+      while(secretShips.length < 3) {
+        let r = Math.floor(Math.random() * 16);
+        if(!secretShips.includes(r)) secretShips.push(r);
+      }
 
       db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
         score: 0, opened: 0, lastDrop: "-", ready: false, wantsReplay: false, leftGame: false, drops: []
@@ -1016,7 +1179,9 @@
       db.ref(`pvp_rooms/${chKey}`).update({
         status: "waiting",
         winnerText: "",
-        xoxBoard: ["", "", "", "", "", "", "", "", ""]
+        xoxBoard: ["", "", "", "", "", "", "", "", ""],
+        seaShips: secretShips,
+        seaBoard: Array(16).fill("")
       });
 
       document.getElementById("pvp-boxes-grid").innerHTML = "";
@@ -1029,17 +1194,17 @@
       document.getElementById("btn-ready-pvp").innerText = "⚡ HAZIR VER";
       document.getElementById("btn-ready-pvp").style.background = "var(--neon-gold)";
       document.getElementById("btn-replay-pvp").disabled = false;
+      document.getElementById("btn-replay-pvp").style.opacity = "1";
+      document.getElementById("btn-replay-pvp").style.cursor = "pointer";
       document.getElementById("btn-replay-pvp").innerHTML = `🔄 Tekrar (<span id="replay-vote-count">0</span>)`;
     }
 
-    // OYUNDAN AYRILMA (HÜKMEN MAĞLUBİYET İŞARETLEMESİ)
     function leavePvPRoom() {
       if (currentRoomCode) {
         const u = getUserInfo();
         const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
         const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
         if (u) {
-          // Oyuncu silinmek yerine ayrıldı olarak işaretlenir (böylece skor tablosunda 'Ayrıldı' yazar)
           db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
             leftGame: true,
             ready: false
