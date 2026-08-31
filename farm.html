@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kasa Çiftliği</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    .farm-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: auto;
+      width: 100%;
+      max-width: 320px;
+    }
+    .farm-plot {
+      background: #1c1306;
+      border: 2px solid #854d0e;
+      border-radius: 10px;
+      height: 95px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: transform 0.1s, border-color 0.2s;
+    }
+    .farm-plot:active { transform: scale(0.96); }
+    .farm-plot.ready {
+      border-color: #22c55e;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+    }
+    .seed-btn {
+      flex: 1;
+      padding: 6px;
+      background: #0f172a;
+      border: 1px solid #3b1d6e;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 9px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .seed-btn.active {
+      border-color: var(--neon-gold);
+      background: #2a1b02;
+    }
+  </style>
+</head>
+<body class="bg-standard">
+  <div class="app-container" style="justify-content:space-between;">
+    <div>
+      <div class="top-header">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger); z-index:999;">‹ Lobi</a>
+        <div style="font-weight:bold; font-size:12px;">🌾 Kasa Çiftliği (Süresiz)</div>
+        <div id="lbl-farm-gold" style="color:var(--neon-gold); font-weight:bold; font-size:12px;">🪙 0</div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:9.5px; color:var(--text-dim); margin-top:2px;">
+        <span>Toplam Hasat Puanı: <b id="lbl-total-pts" style="color:var(--neon-green);">0 P</b></span>
+        <span id="lbl-save-status" style="color:#38bdf8;">☁️ Kaydedildi</span>
+      </div>
+    </div>
+
+    <!-- 6'lı Tarla Alanı -->
+    <div class="farm-grid" id="plots-container"></div>
+
+    <!-- Alt Tohum Seçim ve Aksiyon Paneli -->
+    <div>
+      <div style="font-size:10px; color:var(--text-dim); margin-bottom:4px;">Ekim İçin Tohum Seç:</div>
+      <div style="display:flex; gap:4px; margin-bottom:6px;">
+        <button class="seed-btn active" id="btn-seed-1" onclick="selectSeed(0)">
+          <span>🌱 Tahta Tohum</span>
+          <small style="color:#94a3b8;">10s - Bedava</small>
+        </button>
+        <button class="seed-btn" id="btn-seed-2" onclick="selectSeed(1)">
+          <span>💎 Safir Tohum</span>
+          <small style="color:var(--neon-gold);">30s - 25🪙</small>
+        </button>
+        <button class="seed-btn" id="btn-seed-3" onclick="selectSeed(2)">
+          <span>👑 Efsane Tohum</span>
+          <small style="color:var(--neon-gold);">60s - 75🪙</small>
+        </button>
+      </div>
+      <button class="btn-start" style="background:#0284c7; font-size:11px; padding:8px;" onclick="harvestAllReady()">⚡ Tüm Olgunlaşanları Hasat Et</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const SEEDS = [
+      { id: 'wood', name: 'Tahta Kasa', cost: 0, growTime: 10, pts: 15, goldReward: 10, icon: '📦' },
+      { id: 'sapphire', name: 'Safir Kasa', cost: 25, growTime: 30, pts: 60, goldReward: 40, icon: '💎' },
+      { id: 'legend', name: 'Efsane Kasa', cost: 75, growTime: 60, pts: 200, goldReward: 120, icon: '👑' }
+    ];
+
+    let selectedSeedIdx = 0;
+    let farmState = {
+      gold: 50,
+      totalHarvestPts: 0,
+      plots: [null, null, null, null, null, null] // { seedIdx, plantTime, readyTime }
+    };
+
+    window.onload = () => {
+      loadFarmState();
+      setInterval(updateFarmGrowth, 1000);
+    };
+
+    function selectSeed(idx) {
+      selectedSeedIdx = idx;
+      [0, 1, 2].forEach(i => {
+        document.getElementById(`btn-seed-${i+1}`).classList.toggle('active', i === idx);
+      });
+    }
+
+    function renderPlots() {
+      const container = document.getElementById("plots-container");
+      container.innerHTML = "";
+      const now = Date.now();
+
+      farmState.plots.forEach((p, idx) => {
+        const div = document.createElement("div");
+        div.className = "farm-plot";
+
+        if (!p) {
+          div.innerHTML = `<span style="font-size:18px;">🟫</span><span style="font-size:8.5px; color:#a16207; margin-top:2px;">Boş Tarla</span><small style="font-size:7.5px; color:#64748b;">Dokun & Ek</small>`;
+          div.onclick = () => plantSeed(idx);
+        } else {
+          const remSec = Math.max(0, Math.ceil((p.readyTime - now) / 1000));
+          const seed = SEEDS[p.seedIdx];
+
+          if (remSec === 0) {
+            div.classList.add("ready");
+            div.innerHTML = `<span style="font-size:22px;">${seed.icon}</span><span style="font-size:8.5px; color:#22c55e; font-weight:bold;">HASAT ET!</span><small style="font-size:7.5px; color:var(--neon-gold);">+${seed.pts}P</small>`;
+            div.onclick = () => harvestPlot(idx);
+          } else {
+            div.innerHTML = `<span style="font-size:18px;">🌱</span><span style="font-size:8px; color:#38bdf8;">Büyüyor...</span><b style="font-size:9px; color:#fbbf24;">${remSec}s</b>`;
+            div.onclick = () => {};
+          }
+        }
+        container.appendChild(div);
+      });
+
+      document.getElementById("lbl-farm-gold").innerText = `🪙 ${farmState.gold}`;
+      document.getElementById("lbl-total-pts").innerText = `${farmState.totalHarvestPts} P`;
+    }
+
+    function plantSeed(plotIdx) {
+      const seed = SEEDS[selectedSeedIdx];
+      if (farmState.gold < seed.cost) {
+        return alert("Bu tohumu ekmek için yeterli çiftlik altının yok!");
+      }
+
+      farmState.gold -= seed.cost;
+      const now = Date.now();
+      farmState.plots[plotIdx] = {
+        seedIdx: selectedSeedIdx,
+        plantTime: now,
+        readyTime: now + (seed.growTime * 1000)
+      };
+
+      saveFarmState();
+      renderPlots();
+    }
+
+    function harvestPlot(plotIdx) {
+      const p = farmState.plots[plotIdx];
+      if (!p) return;
+      const seed = SEEDS[p.seedIdx];
+
+      farmState.gold += seed.goldReward;
+      farmState.totalHarvestPts += seed.pts;
+      farmState.plots[plotIdx] = null;
+
+      saveFarmState();
+      renderPlots();
+
+      recordGameScore('farm_mode', 'Kasa Çiftliği', farmState.totalHarvestPts, [{ name: `${seed.name} Hasatı`, p: seed.pts, c: '#22c55e' }], true);
+    }
+
+    function harvestAllReady() {
+      const now = Date.now();
+      let harvested = false;
+
+      farmState.plots.forEach((p, idx) => {
+        if (p && now >= p.readyTime) {
+          const seed = SEEDS[p.seedIdx];
+          farmState.gold += seed.goldReward;
+          farmState.totalHarvestPts += seed.pts;
+          farmState.plots[idx] = null;
+          harvested = true;
+        }
+      });
+
+      if (harvested) {
+        saveFarmState();
+        renderPlots();
+        recordGameScore('farm_mode', 'Kasa Çiftliği', farmState.totalHarvestPts, [{ name: `Toplu Çiftlik Hasatı`, p: farmState.totalHarvestPts, c: '#22c55e' }], true);
+      }
+    }
+
+    function updateFarmGrowth() {
+      renderPlots();
+    }
+
+    function saveFarmState() {
+      localStorage.setItem("kutu_farm_save", JSON.stringify(farmState));
+      const u = getActiveUser();
+      if (u && u.uid && u.uid !== "ADMIN_ROOT") {
+        db.ref(`users/${u.uid}/farm`).set(farmState);
+      }
+      document.getElementById("lbl-save-status").innerText = "☁️ Kaydedildi";
+    }
+
+    function loadFarmState() {
+      const u = getActiveUser();
+      if (u && u.uid && u.uid !== "ADMIN_ROOT") {
+        db.ref(`users/${u.uid}/farm`).once("value", snap => {
+          if (snap.exists()) {
+            farmState = snap.val();
+          } else {
+            const local = localStorage.getItem("kutu_farm_save");
+            if (local) farmState = JSON.parse(local);
+          }
+          renderPlots();
+        });
+      } else {
+        const local = localStorage.getItem("kutu_farm_save");
+        if (local) farmState = JSON.parse(local);
+        renderPlots();
+      }
+    }
+  </script>
+</body>
+</html>
