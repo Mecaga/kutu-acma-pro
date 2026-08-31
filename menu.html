@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <!-- SADE VE TEMİZ 7 AKTİF MODLU IZGARA -->
+    <!-- TÜM OYUN MODLARINI İÇEREN KAYDIRILABİLİR IZGARA -->
     <div class="mode-grid-8" style="grid-template-rows: repeat(4, 1fr); max-height:270px; overflow-y:auto;">
       <div class="mode-card-8 active" onclick="selectGameMode('standard', this, 'normal.html')"><b>⚔️ Normal Kasa</b><span>30s Klasik</span></div>
       <div class="mode-card-8" onclick="selectGameMode('ten_cases', this, 'ten_cases.html')"><b>📦 10 Kutu Modu</b><span>10 Hak</span></div>
@@ -42,6 +42,13 @@
       <div class="mode-card-8" onclick="selectGameMode('speedrun_mode', this, 'speedrun.html')"><b>⚡ Speedrun</b><span>1000P Yarışı</span></div>
       <div class="mode-card-8" onclick="selectGameMode('temple_mode', this, 'temple.html')"><b>🏛️ Gizli Tapınak</b><span>5 Katlı Zindan</span></div>
       <div class="mode-card-8" onclick="selectGameMode('double_mode', this, 'double.html')"><b>🎰 Çift Rulet</b><span>Eşya + Çarpan</span></div>
+
+      <!-- YENİ EKLENEN 5 OYUN MODU -->
+      <div class="mode-card-8" onclick="selectGameMode('wheel_mode', this, 'wheel.html')"><b>🎡 Çarkıfelek</b><span>5 Çevirme Hakkı</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('memory_mode', this, 'memory.html')"><b>🃏 Kart Eşle</b><span>4 Çift Eşleştir</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('scratch_mode', this, 'scratch.html')"><b>🪙 Kazı Kazan</b><span>3 Altın Kart Kazı</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('predict_mode', this, 'predict.html')"><b>🔮 Kasa Tahmin</b><span>Renk Seç (x2-x5)</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('merge_mode', this, 'merge.html')"><b>♾️ Birleştirme</b><span>Süresiz Merge</span></div>
     </div>
 
     <div>
@@ -107,17 +114,21 @@
   <div id="modal-guide" class="modal-overlay">
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-blue); text-align:center; margin-bottom:6px;">ℹ️ Mod Rehberi</div>
-      <div style="font-size:10px; color:#cbd5e1; line-height:1.6; max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
+      <div style="font-size:10px; color:#cbd5e1; line-height:1.6; max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
         <div><b>⚔️ Normal Kasa:</b> 30s klasik kasa açma yarışı.</div>
-        <div><b>📦 10 Kutu:</b> Süresiz tam 10 kutu açma hakkı.</div>
-        <div><b>🧺 Tut & Aç:</b> Sepetle düşen kutuları tam ortada yakala ve rulette aç!</div>
-        <div><b>🎯 Yakala & Aç:</b> 20s düşen kutuları toplayıp CS ruletinde aç.</div>
-        <div><b>💣 Mayınlı Kasa:</b> 9 kutuda 1 mayın; bombaya basarsan puanlar sıfırlanır.</div>
+        <div><b>📦 10 Kutu:</b> Süresiz 10 kutu açma hakkı.</div>
+        <div><b>🧺 Tut & Aç:</b> Sepetle düşen kutuları toplayıp rulette aç.</div>
+        <div><b>🎯 Yakala & Aç:</b> 20s düşen kutuları topla.</div>
+        <div><b>💣 Mayınlı Kasa:</b> 9 kutudan mayına basmadan ödül topla.</div>
         <div><b>💎 Mega Kasa:</b> 45s yüksek ödüllü dengeli kasa.</div>
         <div><b>⚡ Speedrun:</b> En hızlı sürede 1000 puana ulaş!</div>
-        <div><b>🏛️ Gizli Tapınak:</b> 5 katlı kapı bulmacası; doğru kapıları bul ve 1000P'yi kap.</div>
-        <div><b>🎰 Çift Rulet:</b> Aynı anda eşya ve x1-x10 çarpan kazan.</div>
-        <div><b>⚔️ 1v1 PvP:</b> Canlı rakiple hazır verip sandık düellosu yap.</div>
+        <div><b>🏛️ Gizli Tapınak:</b> 5 katlı kapı bulmacası.</div>
+        <div><b>🎰 Çift Rulet:</b> Eşya ve x1-x10 çarpan kazan.</div>
+        <div><b>🎡 Çarkıfelek:</b> 5 hak ile çarkı çevirip büyük ödülü yakala.</div>
+        <div><b>🃏 Kart Eşle:</b> 4 çift aynı kartı en az hamlede eşleştir.</div>
+        <div><b>🪙 Kazı Kazan:</b> 6 altın karttan 3 tanesini kazı.</div>
+        <div><b>🔮 Kasa Tahmin:</b> Gelecek kasanın rengini tahmin et (x2-x5).</div>
+        <div><b>♾️ Birleştirme:</b> Aynı seviyedeki blokları birleştirip en üst kademeye ulaş.</div>
       </div>
       <button class="btn-close" onclick="document.getElementById('modal-guide').style.display='none'">Kapat</button>
     </div>
@@ -137,7 +148,12 @@
       mega_mode: { bg: "bg-mega_mode", title: "MEGA KASA", tiers: [{name:"Mega Classic (%60)",pts:"10-30P",c:"#fff"},{name:"Mega Super (%28)",pts:"40-90P",c:"#38bdf8"},{name:"Mega Ultra (%10)",pts:"120-280P",c:"#c084fc"},{name:"Efsanevi (%2)",pts:"500-1500P",c:"#f43f5e"}] },
       speedrun_mode: { bg: "bg-speedrun_mode", title: "SPEEDRUN YARIŞI", tiers: [{name:"Hızlı Kasa",pts:"20-60P",c:"#38bdf8"},{name:"Hedef",pts:"En Hızlı 1000P!",c:"#f43f5e"}] },
       temple_mode: { bg: "bg-temple_mode", title: "GİZLİ TAPINAK", tiers: [{name:"5. Kat Büyük Ödül",pts:"1000P",c:"#fbbf24"},{name:"Ara Katlar",pts:"50-500P",c:"#10b981"}] },
-      double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] }
+      double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] },
+      wheel_mode: { bg: "bg-standard", title: "ŞANSLI ÇARKI FELEK", tiers: [{name:"Büyük Dilim (%12.5)",pts:"500P",c:"#f43f5e"},{name:"Orta Dilim (%25)",pts:"100-250P",c:"#fbbf24"},{name:"Küçük Dilim (%62.5)",pts:"10-50P",c:"#38bdf8"}] },
+      memory_mode: { bg: "bg-standard", title: "KART EŞLEŞTİRME", tiers: [{name:"4 Çift Kart",pts:"Her Eşleşme 75P",c:"#10b981"},{name:"Toplam Ödül",pts:"300P",c:"#fbbf24"}] },
+      scratch_mode: { bg: "bg-standard", title: "ALTIN KAZI KAZAN", tiers: [{name:"6 Karttan 3 Seçim",pts:"15 - 400P",c:"#fbbf24"},{name:"Büyük İkramiye",pts:"400P",c:"#f43f5e"}] },
+      predict_mode: { bg: "bg-standard", title: "KASA RENK TAHMİNİ", tiers: [{name:"Mavi Kasa (%50)",pts:"x2 Katı (80P)",c:"#38bdf8"},{name:"Mor Kasa (%35)",pts:"x3 Katı (120P)",c:"#c084fc"},{name:"Kırmızı Kasa (%15)",pts:"x5 Katı (200P)",c:"#f43f5e"}] },
+      merge_mode: { bg: "bg-standard", title: "SÜRESİZ BİRLEŞTİRME", tiers: [{name:"Kademe 1-3",pts:"2 - 18P",c:"#94a3b8"},{name:"Kademe 4-5",pts:"50 - 150P",c:"#10b981"},{name:"Tanrısal Kademe",pts:"1200P",c:"#f43f5e"}] }
     };
 
     window.onload = () => {
@@ -222,7 +238,6 @@
     }
 
     function loadAnnouncements() {
-      const u = getActiveUser();
       db.ref("announcements").on("value", snap => {
         const feed = document.getElementById("announcements-feed");
         feed.innerHTML = "";
