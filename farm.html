@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Mega Kasa Çiftliği 2026</title>
+  <title>Mega Kasa Çiftliği Pro</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -21,39 +21,37 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      max-width: 460px;
+      max-width: 480px;
       margin: 0 auto;
       position: relative;
     }
     
-    /* 1. ÜST ÇAKILI PANEL (Tıklanma Garantili) */
+    /* 1. ÜST ÇAKILI PANEL */
     .farm-sticky-top {
-      position: sticky;
-      top: 0;
+      flex-shrink: 0;
       z-index: 9999;
       background: #090d1a;
       border-bottom: 2px solid #1e293b;
-      padding: 6px;
+      padding: 5px 8px;
       display: flex;
       flex-direction: column;
       gap: 3px;
     }
 
-    /* 2. ORTA KAYDIRILABİLİR ALAN */
+    /* 2. ORTA KAYDIRILABİLİR İÇERİK */
     .farm-scroll-content {
       flex: 1;
       overflow-y: scroll;
       -webkit-overflow-scrolling: touch;
-      padding: 6px;
+      padding: 4px;
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
 
-    /* 3. ALT ÇAKILI DOCK (Tıklanma Garantili) */
+    /* 3. ALT ÇAKILI VE SABİT BOYUTLU DOCK */
     .farm-sticky-bottom {
-      position: sticky;
-      bottom: 0;
+      flex-shrink: 0;
       z-index: 9999;
       background: #090d1a;
       border-top: 2px solid #1e293b;
@@ -61,44 +59,54 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      height: 110px; /* Sabit Yükseklik - Zıplama Yapmaz */
       box-shadow: 0 -6px 20px rgba(0,0,0,0.9);
     }
 
-    /* 15 Parselli Tarla (3x5) */
-    .farm-grid-15 {
+    /* 30 Parselli Kompakt Tarla (5 Sütun x 6 Satır) */
+    .farm-grid-30 {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 3px;
       width: 100%;
     }
-    .farm-plot {
+    .farm-plot-mini {
       background: #1c1306;
-      border: 2px solid #854d0e;
-      border-radius: 8px;
-      height: 70px;
+      border: 1px solid #854d0e;
+      border-radius: 5px;
+      height: 48px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       user-select: none;
+      font-size: 7.5px;
       position: relative;
     }
-    .farm-plot:active { transform: scale(0.95); }
-    .farm-plot.locked { background: #0c0a09; border-color: #44403c; opacity: 0.6; }
-    .farm-plot.ready { border-color: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
-    .farm-plot.pest { border-color: #ef4444; animation: shake 0.4s infinite; }
+    .farm-plot-mini:active { transform: scale(0.94); }
+    .farm-plot-mini.locked { background: #0c0a09; border-color: #332a22; opacity: 0.5; }
+    .farm-plot-mini.ready { border-color: #22c55e; background: #062e16; box-shadow: 0 0 4px #22c55e; }
+    .farm-plot-mini.pest { border-color: #ef4444; animation: shake 0.3s infinite; }
 
-    .facilities-grid-4 {
+    /* 3 Satırlı Sağa-Sola Kayan Tesis Tablosu (3xX) */
+    .facilities-scroll-3row {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(3, 38px);
+      grid-auto-flow: column;
+      grid-auto-columns: 130px;
       gap: 4px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
     }
-    .fac-box {
+    .facilities-scroll-3row::-webkit-scrollbar { display: none; }
+    
+    .facility-chip-card {
       background: #0f172a;
       border: 1px solid #334155;
       border-radius: 6px;
-      padding: 4px;
+      padding: 2px 5px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -116,10 +124,8 @@
       cursor: pointer;
       font-weight: bold;
     }
-    .dock-tab-btn.active {
-      background: #4338ca;
-      border-color: var(--neon-gold);
-    }
+    .dock-tab-btn.active { background: #4338ca; border-color: var(--neon-gold); }
+
     .seed-btn-chip {
       padding: 3px 1px;
       background: #0f172a;
@@ -129,92 +135,109 @@
       font-size: 7px;
       cursor: pointer;
       text-align: center;
+      height: 32px;
     }
-    .seed-btn-chip.active {
-      border-color: var(--neon-gold);
-      background: #2a1b02;
-    }
+    .seed-btn-chip.active { border-color: var(--neon-gold); background: #2a1b02; }
   </style>
 </head>
 <body>
   <div class="farm-app-layout">
     
-    <!-- 1. ÜST ÇAKILI BAŞLIK & KAYNAKLAR -->
+    <!-- 1. ÜST SABİT PANEL -->
     <div class="farm-sticky-top">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <button type="button" class="icon-btn" style="border-color:var(--danger); padding:3px 8px; font-size:10px; cursor:pointer;" onclick="location.href='menu.html'">‹ Lobiye Dön</button>
+        <button type="button" class="icon-btn" style="border-color:var(--danger); padding:2px 6px; font-size:9.5px;" onclick="location.href='menu.html'">‹ Lobi</button>
         <div style="font-weight:900; font-size:11px; color:#38bdf8;">🌾 Mega Çiftlik 2026</div>
-        <div id="lbl-farm-gold" style="color:var(--neon-gold); font-weight:bold; font-size:11px;">🪙 150</div>
+        <div id="lbl-farm-gold" style="color:var(--neon-gold); font-weight:bold; font-size:11px;">🪙 250</div>
       </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#070a13; padding:2px 5px; border-radius:4px; font-size:7.5px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#070a13; padding:2px 4px; border-radius:4px; font-size:7.5px;">
         <span>⭐ Lv.<b id="lbl-farm-lvl">1</b> (<span id="lbl-farm-xp">0/100</span>)</span>
         <span id="lbl-weather-tag" style="color:#fbbf24;">☀️ Güneşli</span>
         <span>📈 Borsa: <b id="lbl-market-mult" style="color:var(--neon-green);">x1.0</b></span>
-        <span>💧 Su: <b id="lbl-water-tank">15/15</b></span>
+        <span>💧 Su: <b id="lbl-water-tank">20/20</b></span>
       </div>
     </div>
 
-    <!-- 2. ORTA KAYDIRILABİLİR ÇİFTLİK VE ÜRETİM ALANI -->
+    <!-- 2. ORTA SCROLL ALANI -->
     <div class="farm-scroll-content">
       
-      <!-- 15 Parselli Tarla -->
-      <div class="farm-grid-15" id="plots-container"></div>
+      <!-- 30'lu Kompakt Tarla -->
+      <div style="font-size:8.5px; color:#94a3b8; font-weight:bold;">🌱 Tarla Parselleri (5x6 = 30 Parsel):</div>
+      <div class="farm-grid-30" id="plots-container"></div>
 
-      <!-- 8'li Gelişmiş Tesis Izgarası -->
-      <div class="facilities-grid-4">
-        <div class="fac-box">
-          <div style="display:flex; align-items:center; gap:2px;"><span style="font-size:13px;">🐔</span><div><b>Kümes</b><div id="lbl-coop-txt">20s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 4px; font-size:7px; background:#065f46;" onclick="collectFacility('coop')">Topla</button>
+      <!-- 3 Satırlı Kayan Tesis Paneli (3 x X) -->
+      <div style="font-size:8.5px; color:#38bdf8; font-weight:bold; margin-top:2px;">🏭 Üretim Tesisleri (Yana Kaydır ➔):</div>
+      <div class="facilities-scroll-3row">
+        <!-- Satır 1-3 Arası Otomatik Dizilen 12 Tesis -->
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>🐔</span><div><b>Kümes</b><div id="lbl-coop-txt">20s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#065f46;" onclick="collectFacility('coop')">Al</button>
         </div>
-        <div class="fac-box">
-          <div style="display:flex; align-items:center; gap:2px;"><span style="font-size:13px;">🐄</span><div><b>Ahır</b><div id="lbl-barn-txt">40s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 4px; font-size:7px; background:#065f46;" onclick="collectFacility('barn')">Topla</button>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>🐄</span><div><b>Ahır</b><div id="lbl-barn-txt">40s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#065f46;" onclick="collectFacility('barn')">Al</button>
         </div>
-        <div class="fac-box">
-          <div style="display:flex; align-items:center; gap:2px;"><span style="font-size:13px;">🐝</span><div><b>Kovan</b><div id="lbl-hive-txt">30s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 4px; font-size:7px; background:#065f46;" onclick="collectFacility('hive')">Bal Al</button>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>🐝</span><div><b>Kovan</b><div id="lbl-hive-txt">30s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#065f46;" onclick="collectFacility('hive')">Al</button>
         </div>
-        <div class="fac-box">
-          <div style="display:flex; align-items:center; gap:2px;"><span style="font-size:13px;">🐟</span><div><b>Gölet</b><div id="lbl-pond-txt">50s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 4px; font-size:7px; background:#065f46;" onclick="collectFacility('pond')">Tut</button>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>🐟</span><div><b>Gölet</b><div id="lbl-pond-txt">50s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#065f46;" onclick="collectFacility('pond')">Al</button>
         </div>
-        <div class="fac-box">
-          <div style="display:flex; align-items:center; gap:2px;"><span style="font-size:13px;">🏭</span><div><b>Değirmen</b><div id="lbl-mill-txt">60s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 4px; font-size:7px; background:#4338ca;" onclick="collectFacility('mill')">Un Al</button>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>🏭</span><div><b>Değirmen</b><div id="lbl-mill-txt">60s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#4338ca;" onclick="collectFacility('mill')">Al</button>
         </div>
-        <div class="fac-box">
-          <div style="display:flex; align-items:center; gap:2px;"><span style="font-size:13px;">💎</span><div><b>Maden</b><div id="lbl-mine-txt">90s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 4px; font-size:7px; background:#b45309;" onclick="collectFacility('mine')">Kaz</button>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>💎</span><div><b>Maden</b><div id="lbl-mine-txt">90s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#b45309;" onclick="collectFacility('mine')">Al</button>
         </div>
-        <div class="fac-box">
-          <div style="display:flex; align-items:center; gap:2px;"><span style="font-size:13px;">🌲</span><div><b>Orman</b><div id="lbl-wood-txt">75s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 4px; font-size:7px; background:#15803d;" onclick="collectFacility('wood')">Kes</button>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>🌲</span><div><b>Orman</b><div id="lbl-wood-txt">75s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#15803d;" onclick="collectFacility('wood')">Al</button>
         </div>
-        <div class="fac-box">
-          <div style="display:flex; align-items:center; gap:2px;"><span style="font-size:13px;">🍄</span><div><b>Mahzen</b><div id="lbl-mush-txt">45s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 4px; font-size:7px; background:#831843;" onclick="collectFacility('mush')">Topla</button>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>🍄</span><div><b>Mahzen</b><div id="lbl-mush-txt">45s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#831843;" onclick="collectFacility('mush')">Al</button>
+        </div>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>🧀</span><div><b>Mandıra</b><div id="lbl-cheese-txt">60s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#eab308; color:#000;" onclick="collectFacility('cheese')">Al</button>
+        </div>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>🐑</span><div><b>Yünlük</b><div id="lbl-wool-txt">45s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#0284c7;" onclick="collectFacility('wool')">Al</button>
+        </div>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>🍎</span><div><b>Bahçe</b><div id="lbl-orchard-txt">35s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#16a34a;" onclick="collectFacility('orchard')">Al</button>
+        </div>
+        <div class="facility-chip-card">
+          <div style="display:flex; align-items:center; gap:3px;"><span>☕</span><div><b>Kahve</b><div id="lbl-coffee-txt">80s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#78350f;" onclick="collectFacility('coffee')">Al</button>
         </div>
       </div>
 
-      <!-- Kamyon & Görevler -->
-      <div style="background:#0f172a; padding:4px; border-radius:6px; border:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; font-size:8px;">
-        <div><b style="color:var(--neon-gold);">🚚 Kasaba Siparişi:</b> <span id="lbl-truck-txt">3 Safir Kasa Teslim Et</span></div>
-        <button type="button" class="icon-btn" style="padding:2px 4px; font-size:7.5px; background:#0284c7;" onclick="deliverTruckOrder()">Yolla (+180🪙)</button>
+      <!-- Kamyon ve Festival -->
+      <div style="background:#0f172a; padding:3px 5px; border-radius:5px; border:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; font-size:7.5px;">
+        <div><b style="color:var(--neon-gold);">🚚 Sipariş:</b> <span id="lbl-truck-txt">3 Safir Kasa</span></div>
+        <button type="button" class="icon-btn" style="padding:1px 4px; font-size:7px; background:#0284c7;" onclick="deliverTruckOrder()">Yolla (+200🪙)</button>
       </div>
 
-      <button type="button" class="btn-start" style="background:linear-gradient(90deg, #db2777, #f43f5e); font-size:8.5px; padding:4px;" onclick="startFestival()">🎉 1 Dk Festival Başlat (80🪙 - 3X Kazanç)</button>
+      <button type="button" class="btn-start" style="background:linear-gradient(90deg, #db2777, #f43f5e); font-size:8px; padding:3px; margin:0;" onclick="startFestival()">🎉 1 Dk Çiftlik Festivali (80🪙 - 3X Gelir)</button>
     </div>
 
-    <!-- 3. ALT ÇAKILI DOCK MENÜSÜ -->
+    <!-- 3. ALT SABİT DOCK (ASLA BÜYÜYÜP KÜÇÜLMEZ) -->
     <div class="farm-sticky-bottom">
       <div style="display:flex; gap:3px;">
         <button type="button" class="dock-tab-btn active" id="tab-btn-seeds" onclick="switchDockTab('seeds')">🌱 Tohumlar</button>
-        <button type="button" class="dock-tab-btn" id="tab-btn-tools" onclick="switchDockTab('tools')">🛠️ Alet & Bakım</button>
+        <button type="button" class="dock-tab-btn" id="tab-btn-tools" onclick="switchDockTab('tools')">🛠️ Aletler</button>
         <button type="button" class="dock-tab-btn" id="tab-btn-tractor" onclick="switchDockTab('tractor')">🚜 Traktör & Su</button>
       </div>
 
-      <!-- Panel 1: 8 Farklı Tohum -->
-      <div id="dock-panel-seeds" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:2px;">
+      <!-- Panel 1: Tohumlar -->
+      <div id="dock-panel-seeds" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:2px; height:60px;">
         <button type="button" class="seed-btn-chip active" id="btn-seed-0" onclick="selectSeed(0)">🌱Tahta<br><small>10s</small></button>
         <button type="button" class="seed-btn-chip" id="btn-seed-1" onclick="selectSeed(1)">⚔️Demir<br><small>20s</small></button>
         <button type="button" class="seed-btn-chip" id="btn-seed-2" onclick="selectSeed(2)">💎Safir<br><small>35s</small></button>
@@ -226,18 +249,18 @@
       </div>
 
       <!-- Panel 2: Aletler -->
-      <div id="dock-panel-tools" style="display:none; gap:2px; display:none; grid-template-columns: repeat(4, 1fr);">
-        <button type="button" class="icon-btn" style="background:#0284c7; font-size:7.5px; padding:3px;" onclick="fillWaterTank()">💧 Su Al (10🪙)</button>
-        <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7.5px; padding:3px;" onclick="buySuperFertilizer()">🧪 Gübre (20🪙)</button>
-        <button type="button" class="icon-btn" style="background:#b45309; font-size:7.5px; padding:3px;" onclick="installScarecrow()">🛡️ Korkuluk (50🪙)</button>
-        <button type="button" class="icon-btn" style="background:#065f46; font-size:7.5px; padding:3px;" onclick="buyRainBomb()">🌧️ Yağmur (40🪙)</button>
+      <div id="dock-panel-tools" style="display:none; grid-template-columns: repeat(4, 1fr); gap:2px; height:60px;">
+        <button type="button" class="icon-btn" style="background:#0284c7; font-size:7px; padding:2px;" onclick="fillWaterTank()">💧 Su Al<br>(10🪙)</button>
+        <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px;" onclick="buySuperFertilizer()">🧪 Gübre<br>(20🪙)</button>
+        <button type="button" class="icon-btn" style="background:#b45309; font-size:7px; padding:2px;" onclick="installScarecrow()">🛡️ Korkuluk<br>(50🪙)</button>
+        <button type="button" class="icon-btn" style="background:#065f46; font-size:7px; padding:2px;" onclick="buyRainBomb()">🌧️ Yağmur<br>(40🪙)</button>
       </div>
 
-      <!-- Panel 3: Traktör & Kombolar -->
-      <div id="dock-panel-tractor" style="display:none; gap:3px;">
-        <button type="button" class="icon-btn" style="flex:1; background:#15803d; font-size:7.5px; padding:4px;" onclick="tractorPlantAll()">🚜 Toplu Ek</button>
-        <button type="button" class="icon-btn" style="flex:1; background:#b91c1c; font-size:7.5px; padding:4px;" onclick="tractorHarvestAll()">⚡ Toplu Hasat</button>
-        <button type="button" class="icon-btn" style="flex:1; background:#4338ca; font-size:7.5px; padding:4px;" onclick="waterAllPlots()">💦 Toplu Sula (5💧)</button>
+      <!-- Panel 3: Traktör -->
+      <div id="dock-panel-tractor" style="display:none; display:none; gap:3px; height:60px; align-items:center;">
+        <button type="button" class="icon-btn" style="flex:1; height:100%; background:#15803d; font-size:8px;" onclick="tractorPlantAll()">🚜 Boş Tarlalara<br>Toplu Ek</button>
+        <button type="button" class="icon-btn" style="flex:1; height:100%; background:#b91c1c; font-size:8px;" onclick="tractorHarvestAll()">⚡ Hazır Olanları<br>Toplu Hasat Et</button>
+        <button type="button" class="icon-btn" style="flex:1; height:100%; background:#4338ca; font-size:8px;" onclick="waterAllPlots()">💦 Tümünü Sula<br>(5 Su)</button>
       </div>
     </div>
 
@@ -263,13 +286,13 @@
     let festivalEndTime = 0;
 
     let farmState = {
-      gold: 150,
+      gold: 250,
       xp: 0,
       lvl: 1,
       totalHarvestPts: 0,
-      water: 15,
-      unlockedPlots: 6, // 15'e kadar açılır
-      plots: Array(15).fill(null),
+      water: 20,
+      unlockedPlots: 10, // 30'a kadar açılır
+      plots: Array(30).fill(null),
       coopReady: Date.now() + 20000,
       barnReady: Date.now() + 40000,
       hiveReady: Date.now() + 30000,
@@ -278,6 +301,10 @@
       mineReady: Date.now() + 90000,
       woodReady: Date.now() + 75000,
       mushReady: Date.now() + 45000,
+      cheeseReady: Date.now() + 60000,
+      woolReady: Date.now() + 45000,
+      orchardReady: Date.now() + 35000,
+      coffeeReady: Date.now() + 80000,
       sapphireHarvestCount: 0
     };
 
@@ -313,19 +340,19 @@
 
       farmState.plots.forEach((p, idx) => {
         const div = document.createElement("div");
-        div.className = "farm-plot";
+        div.className = "farm-plot-mini";
 
         if (idx >= farmState.unlockedPlots) {
           div.className += " locked";
-          const cost = (idx + 1) * 60;
-          div.innerHTML = `<span>🔒</span><b style="font-size:7px; color:var(--neon-gold);">${cost}🪙</b>`;
+          const cost = (idx + 1) * 35;
+          div.innerHTML = `<span>🔒</span><b style="font-size:6px; color:var(--neon-gold);">${cost}🪙</b>`;
           div.onclick = () => unlockPlot(idx, cost);
         } else if (!p) {
-          div.innerHTML = `<span style="font-size:13px;">🟫</span><small style="font-size:6.5px; color:#a16207;">Boş</small>`;
+          div.innerHTML = `<span style="font-size:10px;">🟫</span><small style="font-size:5.5px; color:#a16207;">Boş</small>`;
           div.onclick = () => plantSeed(idx);
         } else if (p.pest) {
           div.className += " pest";
-          div.innerHTML = `<span style="font-size:14px;">🐛</span><b style="font-size:6.5px; color:#ef4444;">TEMİZLE!</b>`;
+          div.innerHTML = `<span style="font-size:11px;">🐛</span><b style="font-size:5.5px; color:#ef4444;">TEMİZLE!</b>`;
           div.onclick = () => clearPest(idx);
         } else {
           const remSec = Math.max(0, Math.ceil((p.readyTime - now) / 1000));
@@ -333,13 +360,13 @@
 
           if (remSec === 0) {
             div.className += " ready";
-            div.innerHTML = `<span style="font-size:15px;">${seed.icon}</span><b style="font-size:6.5px; color:#22c55e;">TOPLA!</b>`;
+            div.innerHTML = `<span style="font-size:12px;">${seed.icon}</span><b style="font-size:5.5px; color:#22c55e;">TOPLA!</b>`;
             div.onclick = () => harvestPlot(idx);
           } else {
             div.innerHTML = `
-              <span style="font-size:11px;">🌱</span>
-              <b style="font-size:7px; color:#fbbf24;">${remSec}s</b>
-              ${!p.watered ? `<button type="button" class="icon-btn" style="padding:1px 2px; font-size:6px; background:#0284c7; margin-top:1px;" onclick="event.stopPropagation(); waterPlot(${idx});">💧 Sula</button>` : `<small style="font-size:5.5px; color:#38bdf8;">Sulandı</small>`}
+              <span style="font-size:9px;">🌱</span>
+              <b style="font-size:6px; color:#fbbf24;">${remSec}s</b>
+              ${!p.watered ? `<button type="button" class="icon-btn" style="padding:0px 2px; font-size:5px; background:#0284c7; margin-top:1px;" onclick="event.stopPropagation(); waterPlot(${idx});">💧</button>` : `<small style="font-size:5px; color:#38bdf8;">✓</small>`}
             `;
             div.onclick = () => {};
           }
@@ -350,7 +377,7 @@
       document.getElementById("lbl-farm-gold").innerText = `🪙 ${farmState.gold}`;
       document.getElementById("lbl-farm-lvl").innerText = farmState.lvl;
       document.getElementById("lbl-farm-xp").innerText = `${farmState.xp}/${farmState.lvl * 120}`;
-      document.getElementById("lbl-water-tank").innerText = `${farmState.water}/15`;
+      document.getElementById("lbl-water-tank").innerText = `${farmState.water}/20`;
     }
 
     function plantSeed(plotIdx) {
@@ -372,7 +399,7 @@
     }
 
     function waterPlot(plotIdx) {
-      if (farmState.water <= 0) return alert("Su tankınız boş! Aletler sekmesinden doldurun.");
+      if (farmState.water <= 0) return alert("Su tankınız boş! Aletlerden doldurun.");
       const p = farmState.plots[plotIdx];
       if (!p || p.watered) return;
 
@@ -460,55 +487,45 @@
       if (farmState.gold < cost) return alert(`Açmak için ${cost} altın gerekiyor!`);
       farmState.gold -= cost;
       farmState.unlockedPlots++;
-      addXP(60);
+      addXP(40);
       saveFarmData();
       renderPlots();
     }
 
     function collectFacility(type) {
       const now = Date.now();
-      if (type === 'coop') {
-        if (now < farmState.coopReady) return alert("Yumurtalar henüz hazır değil!");
-        farmState.gold += 25; addXP(20); farmState.coopReady = now + 20000;
-        alert("🥚 Altın Yumurtalar toplandı! (+25🪙)");
-      } else if (type === 'barn') {
-        if (now < farmState.barnReady) return alert("Süt henüz hazır değil!");
-        farmState.gold += 50; addXP(35); farmState.barnReady = now + 40000;
-        alert("🥛 Taze Süt sağıldı! (+50🪙)");
-      } else if (type === 'hive') {
-        if (now < farmState.hiveReady) return alert("Bal peteği henüz dolmadı!");
-        farmState.gold += 35; addXP(25); farmState.hiveReady = now + 30000;
-        alert("🍯 Şifalı Bal alındı! (+35🪙)");
-      } else if (type === 'pond') {
-        if (now < farmState.pondReady) return alert("Balıklar henüz büyümedi!");
-        farmState.gold += 65; addXP(45); farmState.pondReady = now + 50000;
-        alert("🐟 Efsanevi Balık tutuldu! (+65🪙)");
-      } else if (type === 'mill') {
-        if (now < farmState.millReady) return alert("Değirmen henüz öğütmedi!");
-        farmState.gold += 80; addXP(55); farmState.millReady = now + 60000;
-        alert("🌾 Altın Un üretildi! (+80🪙)");
-      } else if (type === 'mine') {
-        if (now < farmState.mineReady) return alert("Maden damarı hazır değil!");
-        farmState.gold += 120; addXP(80); farmState.mineReady = now + 90000;
-        alert("💎 Safir Cevheri çıkarıldı! (+120🪙)");
-      } else if (type === 'wood') {
-        if (now < farmState.woodReady) return alert("Ağaçlar henüz büyümedi!");
-        farmState.gold += 90; addXP(60); farmState.woodReady = now + 75000;
-        alert("🌲 Kereste Odunu kesildi! (+90🪙)");
-      } else if (type === 'mush') {
-        if (now < farmState.mushReady) return alert("Mantarlar henüz olgunlaşmadı!");
-        farmState.gold += 60; addXP(40); farmState.mushReady = now + 45000;
-        alert("🍄 Karanlık Mantar toplandı! (+60🪙)");
-      }
+      const facMap = {
+        coop: { t: 'coopReady', cd: 20000, g: 25, xp: 20, name: 'Altın Yumurta' },
+        barn: { t: 'barnReady', cd: 40000, g: 50, xp: 35, name: 'Taze Süt' },
+        hive: { t: 'hiveReady', cd: 30000, g: 35, xp: 25, name: 'Şifalı Bal' },
+        pond: { t: 'pondReady', cd: 50000, g: 65, xp: 45, name: 'Efsane Balık' },
+        mill: { t: 'millReady', cd: 60000, g: 80, xp: 55, name: 'Altın Un' },
+        mine: { t: 'mineReady', cd: 90000, g: 120, xp: 80, name: 'Safir Madeni' },
+        wood: { t: 'woodReady', cd: 75000, g: 90, xp: 60, name: 'Kereste' },
+        mush: { t: 'mushReady', cd: 45000, g: 60, xp: 40, name: 'Mantar' },
+        cheese: { t: 'cheeseReady', cd: 60000, g: 95, xp: 65, name: 'Gurme Peynir' },
+        wool: { t: 'woolReady', cd: 45000, g: 70, xp: 50, name: 'Altın Yün' },
+        orchard: { t: 'orchardReady', cd: 35000, g: 55, xp: 35, name: 'Altın Elma' },
+        coffee: { t: 'coffeeReady', cd: 80000, g: 110, xp: 75, name: 'Kahve Çekirdeği' }
+      };
+
+      const item = facMap[type];
+      if (!item) return;
+
+      if (now < farmState[item.t]) return alert(`${item.name} henüz hazır değil!`);
+      farmState.gold += item.g;
+      addXP(item.xp);
+      farmState[item.t] = now + item.cd;
       saveFarmData();
+      alert(`✨ ${item.name} toplandı! (+${item.g}🪙, +${item.xp} XP)`);
     }
 
     function deliverTruckOrder() {
       if (farmState.sapphireHarvestCount >= 3) {
-        farmState.gold += 180;
-        addXP(300);
+        farmState.gold += 200;
+        addXP(350);
         farmState.sapphireHarvestCount = 0;
-        alert("🚚 Kasaba siparişi teslim edildi! +180🪙 ve +300 XP!");
+        alert("🚚 Kasaba siparişi teslim edildi! +200🪙 ve +350 XP!");
         saveFarmData();
       } else {
         alert(`Sipariş tamamlanmadı! Hasat edilen Safir: ${farmState.sapphireHarvestCount}/3`);
@@ -526,7 +543,7 @@
     function fillWaterTank() {
       if (farmState.gold < 10) return alert("10 altın gerekiyor!");
       farmState.gold -= 10;
-      farmState.water = 15;
+      farmState.water = 20;
       saveFarmData();
       renderPlots();
     }
@@ -544,7 +561,7 @@
       farmState.gold -= 50;
       hasScarecrow = true;
       saveFarmData();
-      alert("🛡️ Lazerli Korkuluk kuruldu! Zararlılar engellendi.");
+      alert("🛡️ Korkuluk kuruldu! Zararlılar engellendi.");
     }
 
     function buyRainBomb() {
@@ -575,8 +592,8 @@
       if (farmState.xp >= req) {
         farmState.xp -= req;
         farmState.lvl++;
-        farmState.gold += (farmState.lvl * 60);
-        alert(`🎉 TEBRİKLER! Çiftlik Seviye ${farmState.lvl} oldu! Bonus +${farmState.lvl * 60} Altın kazandınız!`);
+        farmState.gold += (farmState.lvl * 50);
+        alert(`🎉 TEBRİKLER! Çiftlik Seviye ${farmState.lvl} oldu! Bonus +${farmState.lvl * 50} Altın kazandınız!`);
       }
     }
 
@@ -588,49 +605,46 @@
         if (planted.length > 0) planted[Math.floor(Math.random() * planted.length)].pest = true;
       }
 
-      const coopRem = Math.max(0, Math.ceil((farmState.coopReady - now) / 1000));
-      const barnRem = Math.max(0, Math.ceil((farmState.barnReady - now) / 1000));
-      const hiveRem = Math.max(0, Math.ceil((farmState.hiveReady - now) / 1000));
-      const pondRem = Math.max(0, Math.ceil((farmState.pondReady - now) / 1000));
-      const millRem = Math.max(0, Math.ceil((farmState.millReady - now) / 1000));
-      const mineRem = Math.max(0, Math.ceil((farmState.mineReady - now) / 1000));
-      const woodRem = Math.max(0, Math.ceil((farmState.woodReady - now) / 1000));
-      const mushRem = Math.max(0, Math.ceil((farmState.mushReady - now) / 1000));
-
-      const setTxt = (id, rem, icon) => {
+      const setTxt = (id, targetTime, icon) => {
         const el = document.getElementById(id);
-        if (el) el.innerText = rem === 0 ? `${icon} Hazır!` : `${rem}s`;
+        if (!el) return;
+        const rem = Math.max(0, Math.ceil((targetTime - now) / 1000));
+        el.innerText = rem === 0 ? `${icon} Hazır!` : `${rem}s`;
       };
 
-      setTxt("lbl-coop-txt", coopRem, "🥚");
-      setTxt("lbl-barn-txt", barnRem, "🥛");
-      setTxt("lbl-hive-txt", hiveRem, "🍯");
-      setTxt("lbl-pond-txt", pondRem, "🐟");
-      setTxt("lbl-mill-txt", millRem, "🌾");
-      setTxt("lbl-mine-txt", mineRem, "💎");
-      setTxt("lbl-wood-txt", woodRem, "🌲");
-      setTxt("lbl-mush-txt", mushRem, "🍄");
+      setTxt("lbl-coop-txt", farmState.coopReady, "🥚");
+      setTxt("lbl-barn-txt", farmState.barnReady, "🥛");
+      setTxt("lbl-hive-txt", farmState.hiveReady, "🍯");
+      setTxt("lbl-pond-txt", farmState.pondReady, "🐟");
+      setTxt("lbl-mill-txt", farmState.millReady, "🌾");
+      setTxt("lbl-mine-txt", farmState.mineReady, "💎");
+      setTxt("lbl-wood-txt", farmState.woodReady, "🌲");
+      setTxt("lbl-mush-txt", farmState.mushReady, "🍄");
+      setTxt("lbl-cheese-txt", farmState.cheeseReady, "🧀");
+      setTxt("lbl-wool-txt", farmState.woolReady, "🐑");
+      setTxt("lbl-orchard-txt", farmState.orchardReady, "🍎");
+      setTxt("lbl-coffee-txt", farmState.coffeeReady, "☕");
 
       renderPlots();
     }
 
     function saveFarmData() {
-      localStorage.setItem("kutu_farm_god_save", JSON.stringify(farmState));
+      localStorage.setItem("kutu_farm_ultra30_save", JSON.stringify(farmState));
       const u = getActiveUser();
       if (u && u.uid && u.uid !== "ADMIN_ROOT") {
-        db.ref(`users/${u.uid}/farm_god`).set(farmState);
+        db.ref(`users/${u.uid}/farm_ultra30`).set(farmState);
       }
     }
 
     function loadFarmData() {
-      const local = localStorage.getItem("kutu_farm_god_save");
+      const local = localStorage.getItem("kutu_farm_ultra30_save");
       if (local) {
         try { farmState = Object.assign(farmState, JSON.parse(local)); } catch (e) {}
       }
 
       const u = getActiveUser();
       if (u && u.uid && u.uid !== "ADMIN_ROOT") {
-        db.ref(`users/${u.uid}/farm_god`).once("value", snap => {
+        db.ref(`users/${u.uid}/farm_ultra30`).once("value", snap => {
           if (snap.exists()) {
             farmState = Object.assign(farmState, snap.val());
           }
