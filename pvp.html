@@ -121,10 +121,12 @@
       <!-- BEKLEME & GEMİ YERLEŞTİRME EKRANI -->
       <div id="pvp-waiting-box" style="display:block; text-align:center; padding:6px 0;">
         <div id="battleship-setup-zone" style="display:none; flex-direction:column; align-items:center;">
-          <div style="font-size:10px; color:#38bdf8; font-weight:bold;">⚓ Gemilerini Seçilen 20 Kareye Yerleştir:</div>
-          <div style="font-size:8px; color:#94a3b8; margin-bottom:3px;">1x[1×3], 1x[2×2], 2x[1×2], 1x[2×3], 3x[1×1] = Toplam 20 Kare</div>
+          <div style="display:flex; gap:6px; align-items:center; margin-bottom:4px;">
+            <span id="current-ship-txt" style="font-size:10px; color:var(--neon-gold); font-weight:bold;">Yerleştir: 3'lük Gemi (1x3)</span>
+            <button type="button" class="icon-btn" id="btn-ship-orient" style="font-size:9px; padding:2px 6px; background:#1e293b;" onclick="toggleOrientation()">Yön: Yatay ↔</button>
+          </div>
           <div class="sea-grid-7x7" id="setup-grid-box"></div>
-          <div id="setup-count-lbl" style="font-size:10px; color:var(--neon-gold); font-weight:bold; margin:3px 0;">Seçilen: 0 / 20 Kare</div>
+          <button type="button" class="icon-btn" style="font-size:9px; border-color:var(--danger); margin-top:2px;" onclick="resetShipPlacement()">🔄 Gemileri Sıfırla</button>
         </div>
         <div id="standard-waiting-msg" style="font-size:11px; color:var(--text-dim); margin-bottom:6px;">Tüm oyuncular hazır verince maç başlar.</div>
         <button type="button" id="btn-ready-pvp" class="btn-start" style="background:var(--neon-gold); color:#000; font-weight:900;" onclick="toggleReadyPvP()">⚡ HAZIR VER</button>
@@ -153,7 +155,7 @@
         </div>
         <!-- 5. Canlı Amiral Battı Alanı -->
         <div id="battleship-play-zone" style="display:none; flex-direction:column; align-items:center;">
-          <div id="lbl-sea-turn" style="font-size:11px; font-weight:bold; color:#38bdf8; margin-bottom:2px;">Hedef: Rakibin 20 Karelik Donanmasını Batır!</div>
+          <div id="lbl-sea-turn" style="font-size:11px; font-weight:bold; color:#38bdf8; margin-bottom:2px;">Hedef: Rakibin 10 Karelik Donanmasını Batır!</div>
           <div class="sea-grid-7x7" id="sea-attack-grid"></div>
         </div>
         <!-- Rulet Alanı -->
@@ -215,7 +217,19 @@
     let myOpenedCount = 0, myTotalScore = 0, myDrops = [], isMatchPlaying = false, isSpinningSlot = false, isMyReady = false, countdownInt = null;
     let mySymbol = "X";
     let isResultShowing = false;
-    let myCustomShips = []; // 20 Karelik donanma
+
+    // AMİRAL BATTI GEMİ DİZME TANIMLARI (1x3, 2x2, 3x1 = 10 Kare)
+    const FLEET_SETUP = [
+      { name: "3'lük Gemi (1x3)", size: 3 },
+      { name: "2'lik Gemi #1 (1x2)", size: 2 },
+      { name: "2'lik Gemi #2 (1x2)", size: 2 },
+      { name: "1'lik Gemi #1 (1x1)", size: 1 },
+      { name: "1'lik Gemi #2 (1x1)", size: 1 },
+      { name: "1'lik Gemi #3 (1x1)", size: 1 }
+    ];
+    let currentShipIndex = 0;
+    let isVertical = false;
+    let myPlacedShipCells = []; // Toplam 10 kare
 
     const PVP_TIERS = {
       standard: [{ name: "Tahta Kılıç", p: 2, c: "#fff" }, { name: "Demir Balta", p: 6, c: "#38bdf8" }, { name: "Gümüş Yüzük", p: 15, c: "#c084fc" }, { name: "Ejder Baltası", p: 40, c: "#fb923c" }, { name: "Efsane Kılıç", p: 100, c: "#f43f5e" }],
@@ -411,7 +425,7 @@
           let hakMetin = `${p.opened}/${totalBoxesPerPlayer} Kutu`;
           if (selectedGameType === 'speedrun') hakMetin = `${p.score}/1000 P`;
           if (selectedGameType === 'xox') hakMetin = `Sembol: ${p.symbol || '?'}`;
-          if (selectedGameType === 'battleship') hakMetin = `Donanma: 20 Kare`;
+          if (selectedGameType === 'battleship') hakMetin = `Donanma: 10 Kare`;
           if (p.leftGame) hakMetin = `<span style="color:#ef4444;">Ayrıldı</span>`;
 
           pRow.innerHTML += `
@@ -497,8 +511,21 @@
           triggerWinnerToastAndPodium(pList, room.winnerText || "Maç Sona Erdi!");
         }
 
+        // TEKRAR OYNA - HER İKİ OYUNCU ONAYLADIĞINDA SIFIRLA
         if (replayVotes === room.capacity && room.status === "finished") {
-          resetPvPRound();
+          db.ref("pvp_rooms/" + chKey).update({
+            status: "waiting",
+            winnerText: "",
+            xoxBoard: ["", "", "", "", "", "", "", "", ""],
+            seaAttacks: {}
+          }).then(() => {
+            pList.forEach(p => {
+              db.ref(`pvp_rooms/${chKey}/players/${p.uid}`).update({
+                score: 0, opened: 0, lastDrop: "-", ready: false, wantsReplay: false, ships: [], drops: []
+              });
+            });
+            resetLocalState();
+          });
         }
 
         // Standart, Mega & Mayınlı Kutu Bitimi
@@ -513,7 +540,37 @@
       });
     }
 
-    // MANUEL AMİRAL BATTI GEMİ YERLEŞTİRME (20 KARE)
+    // BÜTÜNLEŞİK GEMİ DİZME & BİTİŞİKLİK (MESAFE) KONTROLÜ
+    function toggleOrientation() {
+      isVertical = !isVertical;
+      document.getElementById("btn-ship-orient").innerText = isVertical ? "Yön: Dikey ↕" : "Yön: Yatay ↔";
+    }
+
+    function resetShipPlacement() {
+      if (isMyReady) return;
+      currentShipIndex = 0;
+      myPlacedShipCells = [];
+      document.getElementById("current-ship-txt").innerText = `Yerleştir: ${FLEET_SETUP[0].name}`;
+      const box = document.getElementById("setup-grid-box");
+      box.querySelectorAll(".sea-cell-7x7").forEach(c => {
+        c.classList.remove("placed");
+        c.innerText = "🌊";
+      });
+    }
+
+    function isCellNearAnyShip(row, col) {
+      // Çevresindeki 8 komşu karede başka gemi var mı kontrolü
+      for (let r = row - 1; r <= row + 1; r++) {
+        for (let c = col - 1; c <= col + 1; c++) {
+          if (r >= 0 && r < 7 && c >= 0 && c < 7) {
+            const checkIdx = r * 7 + c;
+            if (myPlacedShipCells.includes(checkIdx)) return true;
+          }
+        }
+      }
+      return false;
+    }
+
     function renderBattleshipSetupGrid() {
       const box = document.getElementById("setup-grid-box");
       if (box.children.length > 0) return;
@@ -525,27 +582,49 @@
         cell.innerText = "🌊";
 
         cell.onclick = () => {
-          if (isMyReady) return;
-          const idx = myCustomShips.indexOf(i);
-          if (idx > -1) {
-            myCustomShips.splice(idx, 1);
-            cell.classList.remove("placed");
-            cell.innerText = "🌊";
-          } else {
-            if (myCustomShips.length >= 20) return alert("Zaten 20 karelik donanmanı yerleştirdin!");
-            myCustomShips.push(i);
-            cell.classList.add("placed");
-            cell.innerText = "🚢";
+          if (isMyReady || currentShipIndex >= FLEET_SETUP.length) return;
+
+          const ship = FLEET_SETUP[currentShipIndex];
+          const row = Math.floor(i / 7);
+          const col = i % 7;
+          const targetCells = [];
+
+          for (let s = 0; s < ship.size; s++) {
+            const r = isVertical ? row + s : row;
+            const c = isVertical ? col : col + s;
+            if (r >= 7 || c >= 7) return alert("Gemi harita sınırını aşıyor!");
+            
+            const cellIndex = r * 7 + c;
+            if (isCellNearAnyShip(r, c)) return alert("Gemileri birbirine bu kadar yakın/bitişik koyamazsın! Aralarında en az 1 kare boşluk olmalı.");
+            targetCells.push(cellIndex);
           }
-          document.getElementById("setup-count-lbl").innerText = `Seçilen: ${myCustomShips.length} / 20 Kare`;
+
+          // Gemiyi yerleştir
+          targetCells.forEach(idx => {
+            myPlacedShipCells.push(idx);
+            const targetEl = box.children[idx];
+            if (targetEl) {
+              targetEl.classList.add("placed");
+              targetEl.innerText = "🚢";
+            }
+          });
+
+          currentShipIndex++;
+          if (currentShipIndex < FLEET_SETUP.length) {
+            document.getElementById("current-ship-txt").innerText = `Yerleştir: ${FLEET_SETUP[currentShipIndex].name}`;
+          } else {
+            document.getElementById("current-ship-txt").innerText = "✅ Tüm Donanma Kurallara Uygun Dizildi!";
+            document.getElementById("current-ship-txt").style.color = "var(--neon-green)";
+          }
         };
+
         box.appendChild(cell);
       }
     }
 
     function toggleReadyPvP() {
-      if (selectedGameType === 'battleship' && !isMyReady && myCustomShips.length !== 20) {
-        return alert("Lütfen haritada tam 20 karelik gemi donanmanı seç!");
+      if (selectedGameType === 'battleship' && !isMyReady && myPlacedShipCells.length !== 10) {
+        return alert("Lütfen haritada tüm 6 gemini (toplam 10 kare) kurallara uygun yerleştir!");
       }
 
       isMyReady = !isMyReady;
@@ -554,7 +633,7 @@
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
       
       const payload = { ready: isMyReady };
-      if (selectedGameType === 'battleship') payload.ships = myCustomShips;
+      if (selectedGameType === 'battleship') payload.ships = myPlacedShipCells;
 
       db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update(payload);
       document.getElementById("btn-ready-pvp").innerText = isMyReady ? "✅ HAZIR GERİ AL" : "⚡ HAZIR VER";
@@ -626,7 +705,6 @@
       const container = document.getElementById("sea-attack-grid");
       container.innerHTML = "";
 
-      // Rakibin gemilerini ve benim saldırı haritamı al
       const pList = Object.keys(room.players || {});
       const opponentUID = pList.find(id => id !== cleanUID) || cleanUID;
       const opponentShips = room.players[opponentUID]?.ships || [];
@@ -671,7 +749,6 @@
           const attackPayload = {};
           attackPayload[`seaAttacks/${cleanUID}`] = myAttacks;
 
-          // Vuran oyuncu tekrar vurur; ıska geçen sırayı devreder
           if (!isHit) attackPayload["turn"] = opponentUID;
 
           db.ref(`pvp_rooms/${chKey}`).update(attackPayload);
@@ -681,8 +758,8 @@
             drops: myDrops
           });
 
-          // 20 karenin hepsi vuruldu mu?
-          if (myAttacks.filter(a => a === "HIT").length >= 20) {
+          // 10 karenin hepsi vuruldu mu?
+          if (myAttacks.filter(a => a === "HIT").length >= 10) {
             db.ref("pvp_rooms/" + chKey).update({
               status: "finished",
               winnerText: `⚓ ${u.name}${u.tag} Düşman Donanmasını Tamamen Yok Etti!`
@@ -693,7 +770,7 @@
         container.appendChild(cell);
       });
 
-      document.getElementById("lbl-pvp-progress").innerText = `İsabet: ${totalHits}/20 Kare`;
+      document.getElementById("lbl-pvp-progress").innerText = `İsabet: ${totalHits}/10 Kare`;
     }
 
     /* 2. SPEEDRUN OYUN MOTORU (1.5s Ruletli 1000P Yarışı) */
@@ -749,7 +826,7 @@
       }, 1600);
     }
 
-    /* 3. XOX MOTORU */
+    /* 3. XOX MOTORU (SON HAMLE KORUMALI) */
     function renderXOXBoard(room) {
       const u = getUserInfo();
       const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
@@ -1011,25 +1088,15 @@
       document.getElementById("btn-replay-pvp").innerText = "Bekleniyor...";
     }
 
-    // TAM VE HATASIZ TEKRAR OYNA SIFIRLAMASI
-    function resetPvPRound() {
-      myOpenedCount = 0; myTotalScore = 0; myDrops = []; isMyReady = false; isResultShowing = false;
-      myCustomShips = [];
-
-      const u = getUserInfo();
-      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
-      const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
-
-      db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
-        score: 0, opened: 0, lastDrop: "-", ready: false, wantsReplay: false, leftGame: false, ships: [], drops: []
-      });
-
-      db.ref(`pvp_rooms/${chKey}`).update({
-        status: "waiting",
-        winnerText: "",
-        xoxBoard: ["", "", "", "", "", "", "", "", ""],
-        seaAttacks: {}
-      });
+    // YEREL STATE TEMİZLEME
+    function resetLocalState() {
+      myOpenedCount = 0;
+      myTotalScore = 0;
+      myDrops = [];
+      isMyReady = false;
+      isResultShowing = false;
+      currentShipIndex = 0;
+      myPlacedShipCells = [];
 
       document.getElementById("pvp-boxes-grid").innerHTML = "";
       document.getElementById("mines-3x3-board").innerHTML = "";
