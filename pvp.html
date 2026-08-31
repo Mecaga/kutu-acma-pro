@@ -18,38 +18,35 @@
       </div>
     </div>
 
-    <!-- 1. ODA KURMA & KATILMA PANELİ -->
     <div id="pvp-lobby-panel" style="display:flex; flex-direction:column; gap:6px; flex:1; justify-content:center;">
       <div style="font-size:10px; color:var(--text-dim); text-align:center;">1. Oyun Modunu Seç:</div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
-        <button class="mode-btn" id="m-xox" style="background:var(--btn-blue); font-size:10px; text-align:center;" onclick="setGameType('xox')">⭕❌ Canlı XOX</button>
-        <button class="mode-btn" id="m-std" style="font-size:10px; text-align:center;" onclick="setGameType('standard')">⚔️ Kasa Kapışması</button>
-        <button class="mode-btn" id="m-mega" style="font-size:10px; text-align:center;" onclick="setGameType('mega')">💎 Mega Kasa</button>
-        <button class="mode-btn" id="m-mines" style="font-size:10px; text-align:center;" onclick="setGameType('mines')">💣 Mayın Düellosu</button>
+        <button type="button" class="mode-btn" id="m-xox" style="background:var(--btn-blue); font-size:10px; text-align:center;" onclick="setGameType('xox')">⭕❌ Canlı XOX</button>
+        <button type="button" class="mode-btn" id="m-std" style="font-size:10px; text-align:center;" onclick="setGameType('standard')">⚔️ Kasa Kapışması</button>
+        <button type="button" class="mode-btn" id="m-mega" style="font-size:10px; text-align:center;" onclick="setGameType('mega')">💎 Mega Kasa</button>
+        <button type="button" class="mode-btn" id="m-mines" style="font-size:10px; text-align:center;" onclick="setGameType('mines')">💣 Mayın Düellosu</button>
       </div>
 
       <div id="size-select-section" style="display:none; flex-direction:column; gap:4px; margin-top:4px;">
         <div style="font-size:10px; color:var(--text-dim); text-align:center;">2. Oyuncu Sayısı:</div>
         <div style="display:flex; gap:4px;">
-          <button class="mode-btn" id="btn-p2" style="flex:1; background:var(--btn-blue); text-align:center;" onclick="setRoomSize(2)">1v1</button>
-          <button class="mode-btn" id="btn-p3" style="flex:1; text-align:center;" onclick="setRoomSize(3)">3 Kişi</button>
-          <button class="mode-btn" id="btn-p4" style="flex:1; text-align:center;" onclick="setRoomSize(4)">4 Kişi</button>
+          <button type="button" class="mode-btn" id="btn-p2" style="flex:1; background:var(--btn-blue); text-align:center;" onclick="setRoomSize(2)">1v1</button>
+          <button type="button" class="mode-btn" id="btn-p3" style="flex:1; text-align:center;" onclick="setRoomSize(3)">3 Kişi</button>
+          <button type="button" class="mode-btn" id="btn-p4" style="flex:1; text-align:center;" onclick="setRoomSize(4)">4 Kişi</button>
         </div>
       </div>
 
-      <button id="btn-create-room" class="btn-start" style="background:linear-gradient(90deg, #9333ea, #c084fc); margin-top:10px;" onclick="createOnlineRoom()">🔥 4 Haneli Oda Kur</button>
+      <button type="button" id="btn-create-room" class="btn-start" style="background:linear-gradient(90deg, #9333ea, #c084fc); margin-top:10px;" onclick="createOnlineRoom()">🔥 4 Haneli Oda Kur</button>
 
       <div style="display:flex; gap:4px; margin-top:8px;">
         <input type="number" id="in-room-code" class="input-field" style="margin:0; font-size:13px; letter-spacing:2px; font-weight:bold;" placeholder="4 Haneli Kod (Örn: 4821)" maxlength="4">
-        <button id="btn-join-room" class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="joinOnlineRoom()">Odaya Katıl</button>
+        <button type="button" id="btn-join-room" class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="joinOnlineRoom()">Odaya Katıl</button>
       </div>
     </div>
 
-    <!-- 2. OYUN ALANI -->
     <div id="pvp-game-panel" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
       <div style="display:grid; gap:4px; margin-bottom:4px;" id="pvp-players-row"></div>
 
-      <!-- Kasa Kapışması Arayüzü -->
       <div id="case-mode-container">
         <div style="margin:4px 0;">
           <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:2px;">
@@ -65,16 +62,14 @@
         </div>
       </div>
 
-      <!-- Canlı XOX Arayüzü -->
       <div id="xox-mode-container" style="display:none; flex-direction:column; align-items:center; justify-content:center; flex:1;">
         <div id="xox-turn-indicator" style="font-size:12px; font-weight:bold; color:var(--neon-gold); margin-bottom:8px;">Sıra: Bekleniyor...</div>
         <div id="xox-board" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; width:220px; height:220px;"></div>
       </div>
 
-      <button id="btn-ready-pvp" class="btn-start" style="background:var(--neon-gold); color:#000; font-weight:900; margin-top:6px;" onclick="toggleReadyPvP()">⚡ HAZIR VER</button>
+      <button type="button" id="btn-ready-pvp" class="btn-start" style="background:var(--neon-gold); color:#000; font-weight:900; margin-top:6px;" onclick="toggleReadyPvP()">⚡ HAZIR VER</button>
     </div>
 
-    <!-- 3. SONUÇ PANELİ -->
     <div id="pvp-podium-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:2px solid var(--neon-purple); justify-content:space-between;">
       <div>
         <div style="font-size:15px; font-weight:900; color:var(--neon-gold); text-align:center; margin-bottom:4px;">🏆 MAÇ BİTTİ</div>
@@ -83,23 +78,29 @@
       </div>
 
       <div style="display:flex; gap:6px;">
-        <button id="btn-replay-pvp" class="btn-start" style="flex:1; background:var(--btn-blue);" onclick="voteReplayPvP()">🔄 Tekrar Oyna (<span id="replay-vote-count">0</span>)</button>
+        <button type="button" id="btn-replay-pvp" class="btn-start" style="flex:1; background:var(--btn-blue);" onclick="voteReplayPvP()">🔄 Tekrar Oyna (<span id="replay-vote-count">0</span>)</button>
         <a href="menu.html" class="btn-start" style="flex:1; background:var(--danger); text-align:center; text-decoration:none; padding:10px;" onclick="leavePvPRoom()">🚪 Çıkış</a>
       </div>
     </div>
   </div>
 
+  <script src="app.js"></script>
+
   <script>
-    // BAĞIMSIZ FIREBASE KURULUMU
-    const fbConfig = {
+    // 1. TAM VE EKSİKSİZ FIREBASE YAPILANDIRMASI
+    const firebaseConfig = {
       apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
       authDomain: "kutu-acma-pro.firebaseapp.com",
+      databaseURL: "https://kutu-acma-pro-default-rtdb.firebaseio.com",
       projectId: "kutu-acma-pro",
       storageBucket: "kutu-acma-pro.firebasestorage.app",
       messagingSenderId: "483395048462",
       appId: "1:483395048462:web:450f18178e682a4a2f985f"
     };
-    if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.database();
 
     let roomCapacity = 2, totalBoxesPerPlayer = 5, currentRoomCode = null, selectedGameType = 'xox';
@@ -120,16 +121,21 @@
       ]
     };
 
-    function getLocalUser() {
+    // OTURUM BİLGİSİNİ AL (app.js / localStorage / fallback)
+    function getUserInfo() {
+      if (typeof getActiveUser === "function") {
+        const u = getActiveUser();
+        if (u && u.uid) return u;
+      }
       try {
         const s = localStorage.getItem("kutu_active_session");
         if (s) return JSON.parse(s);
       } catch (e) {}
 
-      let guestUID = localStorage.getItem("kutu_guest_uid");
+      let guestUID = localStorage.getItem("kutu_pvp_uid");
       if (!guestUID) {
         guestUID = "U" + Math.floor(1000 + Math.random() * 9000);
-        localStorage.setItem("kutu_guest_uid", guestUID);
+        localStorage.setItem("kutu_pvp_uid", guestUID);
       }
       return { uid: guestUID, name: "Oyuncu", tag: "#" + guestUID.substring(1) };
     }
@@ -161,8 +167,13 @@
       });
     }
 
+    // ODA KUR BUTONU
     function createOnlineRoom() {
-      const u = getLocalUser();
+      const btn = document.getElementById("btn-create-room");
+      btn.disabled = true;
+      btn.innerText = "⏳ Oda Kuruluyor...";
+
+      const u = getUserInfo();
       const code = String(Math.floor(1000 + Math.random() * 9000));
       currentRoomCode = code;
 
@@ -190,56 +201,68 @@
 
       db.ref("pvp_rooms/" + code).set(roomData)
         .then(() => {
+          btn.disabled = false;
+          btn.innerText = "🔥 4 Haneli Oda Kur";
           listenRoom(code);
         })
         .catch(err => {
-          alert("Oda oluşturulamadı: " + err.message);
+          btn.disabled = false;
+          btn.innerText = "🔥 4 Haneli Oda Kur";
+          alert("Hata: " + err.message);
         });
     }
 
+    // ODAYA KATIL BUTONU
     function joinOnlineRoom() {
       const inputCode = document.getElementById("in-room-code").value.trim();
       if (!inputCode || inputCode.length !== 4) return alert("Lütfen 4 haneli oda numarasını giriniz!");
 
-      const u = getLocalUser();
+      const u = getUserInfo();
+      const btn = document.getElementById("btn-join-room");
+      btn.innerText = "Giriş...";
 
-      db.ref("pvp_rooms/" + inputCode).once("value", snap => {
-        const room = snap.val();
-        if (!room) return alert("Böyle bir oda bulunamadı!");
+      db.ref("pvp_rooms/" + inputCode).once("value")
+        .then(snap => {
+          btn.innerText = "Odaya Katıl";
+          const room = snap.val();
+          if (!room) return alert("Oda bulunamadı! Numarayı kontrol edin.");
 
-        const players = room.players || {};
-        const count = Object.keys(players).length;
+          const players = room.players || {};
+          const count = Object.keys(players).length;
 
-        if (count >= room.capacity && !players[u.uid]) {
-          return alert("Oda tamamen dolmuş!");
-        }
+          if (count >= room.capacity && !players[u.uid]) {
+            return alert("Oda tamamen dolmuş!");
+          }
 
-        currentRoomCode = room.code;
-        selectedGameType = room.gameType || 'xox';
-        totalBoxesPerPlayer = room.totalBoxes || 5;
+          currentRoomCode = room.code;
+          selectedGameType = room.gameType || 'xox';
+          totalBoxesPerPlayer = room.totalBoxes || 5;
 
-        db.ref(`pvp_rooms/${inputCode}/players/${u.uid}`).update({
-          uid: u.uid,
-          fullName: `${u.name}${u.tag}`,
-          score: 0,
-          opened: 0,
-          ready: false,
-          wantsReplay: false,
-          symbol: "O"
-        }).then(() => {
-          listenRoom(inputCode);
-        }).catch(err => {
-          alert("Odaya girilemedi: " + err.message);
+          return db.ref(`pvp_rooms/${inputCode}/players/${u.uid}`).update({
+            uid: u.uid,
+            fullName: `${u.name}${u.tag}`,
+            score: 0,
+            opened: 0,
+            ready: false,
+            wantsReplay: false,
+            symbol: "O"
+          }).then(() => {
+            listenRoom(inputCode);
+          });
+        })
+        .catch(err => {
+          btn.innerText = "Odaya Katıl";
+          alert("Bağlantı Hatası: " + err.message);
         });
-      });
     }
 
+    // ODA CANLI DİNLEME
     function listenRoom(code) {
       document.getElementById("pvp-lobby-panel").style.display = "none";
       document.getElementById("pvp-game-panel").style.display = "flex";
       document.getElementById("pvp-room-tag").innerText = `Oda #${code} (${selectedGameType.toUpperCase()})`;
 
-      const u = getLocalUser();
+      const u = getUserInfo();
 
       if (selectedGameType === 'xox') {
         document.getElementById("case-mode-container").style.display = "none";
@@ -300,14 +323,14 @@
 
     function toggleReadyPvP() {
       isMyReady = !isMyReady;
-      const u = getLocalUser();
+      const u = getUserInfo();
       db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}/ready`).set(isMyReady);
       document.getElementById("btn-ready-pvp").innerText = isMyReady ? "✅ HAZIR GERİ AL" : "⚡ HAZIR VER";
       document.getElementById("btn-ready-pvp").style.background = isMyReady ? "var(--neon-green)" : "var(--neon-gold)";
     }
 
     function renderXOXBoard(room) {
-      const u = getLocalUser();
+      const u = getUserInfo();
       const board = room.xoxBoard || ["", "", "", "", "", "", "", "", ""];
       const isMyTurn = room.turn === u.uid;
       const indicator = document.getElementById("xox-turn-indicator");
@@ -319,6 +342,7 @@
 
       board.forEach((val, idx) => {
         const cell = document.createElement("button");
+        cell.type = "button";
         cell.className = "icon-btn";
         cell.style.cssText = "width:100%; height:100%; font-size:26px; font-weight:900; border:2px solid #3b1d6e; background:#070212;";
         cell.innerText = val;
@@ -419,7 +443,7 @@
         boxEl.style.background = "#070212";
         boxEl.innerHTML = `<span style="color:${winDrop.c}; font-size:6px;">${winDrop.name}</span><b style="color:var(--neon-green); font-size:8px;">+${winDrop.p}P</b>`;
 
-        const u = getLocalUser();
+        const u = getUserInfo();
         db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}`).update({
           score: myTotalScore,
           opened: myOpenedCount
@@ -440,14 +464,14 @@
     }
 
     function voteReplayPvP() {
-      const u = getLocalUser();
+      const u = getUserInfo();
       db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}/wantsReplay`).set(true);
       document.getElementById("btn-replay-pvp").disabled = true;
     }
 
     function resetPvPRound() {
       myOpenedCount = 0; myTotalScore = 0; isMyReady = false;
-      const u = getLocalUser();
+      const u = getUserInfo();
 
       db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}`).update({
         score: 0, opened: 0, ready: false, wantsReplay: false
@@ -468,7 +492,7 @@
 
     function leavePvPRoom() {
       if (currentRoomCode) {
-        const u = getLocalUser();
+        const u = getUserInfo();
         db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}`).remove().then(() => {
           db.ref(`pvp_rooms/${currentRoomCode}/players`).once("value", snap => {
             if (!snap.exists() || snap.numChildren() === 0) {
