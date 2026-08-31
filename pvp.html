@@ -28,7 +28,7 @@
         <button type="button" class="mode-btn" id="m-mines" style="font-size:10px; text-align:center;" onclick="setGameType('mines')">💣 Mayınlı Kasa</button>
       </div>
 
-      <div style="font-size:10px; color:var(--text-dim); text-align:center; margin-top:4px;">2. Oyuncu Sayısı & Kutu:</div>
+      <div style="font-size:10px; color:var(--text-dim); text-align:center; margin-top:4px;">2. Oyuncu Sayısı:</div>
       <div style="display:flex; gap:4px;">
         <button type="button" class="mode-btn" id="btn-p2" style="flex:1; background:var(--btn-blue); color:#fff; text-align:center;" onclick="setRoomSize(2)">1v1<br><small>(5 Kutu)</small></button>
         <button type="button" class="mode-btn" id="btn-p3" style="flex:1; text-align:center;" onclick="setRoomSize(3)">1v1v1<br><small>(10 Kutu)</small></button>
@@ -99,16 +99,20 @@
   </div>
 
   <script>
-    // Firebase Bağlantısı
+    // 1. TAM FIREBASE TANIMI
     const firebaseConfig = {
       apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
       authDomain: "kutu-acma-pro.firebaseapp.com",
+      databaseURL: "https://kutu-acma-pro-default-rtdb.firebaseio.com",
       projectId: "kutu-acma-pro",
       storageBucket: "kutu-acma-pro.firebasestorage.app",
       messagingSenderId: "483395048462",
       appId: "1:483395048462:web:450f18178e682a4a2f985f"
     };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.database();
 
     let roomCapacity = 2, totalBoxesPerPlayer = 5, currentRoomCode = null, selectedGameType = 'standard';
@@ -165,33 +169,63 @@
     }
 
     function createOnlineRoom() {
-      const u = getUserInfo();
-      const code = `pvp#${Math.floor(1000 + Math.random() * 9000)}`;
-      currentRoomCode = code;
-      const chKey = code.replace(/[^a-zA-Z0-9]/g, '_');
+      const btn = document.getElementById("btn-create-room");
+      btn.disabled = true;
+      btn.innerText = "⏳ Oda Kuruluyor...";
 
-      const pData = {};
-      pData[u.uid] = {
-        uid: u.uid,
-        fullName: `${u.name}${u.tag}`,
-        score: 0,
-        opened: 0,
-        lastDrop: "-",
-        ready: false,
-        wantsReplay: false,
-        drops: []
-      };
+      try {
+        const u = getUserInfo();
+        const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+        const code = `pvp#${Math.floor(1000 + Math.random() * 9000)}`;
+        currentRoomCode = code;
+        const chKey = code.replace(/[^a-zA-Z0-9]/g, '_');
 
-      db.ref("pvp_rooms/" + chKey).set({
-        code: code,
-        capacity: roomCapacity,
-        totalBoxes: totalBoxesPerPlayer,
-        gameType: selectedGameType,
-        status: "waiting",
-        players: pData
-      }).then(() => {
-        listenRoom(code);
-      }).catch(err => alert("Oda kurulamadı: " + err.message));
+        const playerData = {
+          uid: cleanUID,
+          fullName: `${u.name || 'Oyuncu'}${u.tag || '#0000'}`,
+          score: 0,
+          opened: 0,
+          lastDrop: "-",
+          ready: false,
+          wantsReplay: false,
+          drops: []
+        };
+
+        const roomPayload = {
+          code: code,
+          capacity: parseInt(roomCapacity, 10) || 2,
+          totalBoxes: parseInt(totalBoxesPerPlayer, 10) || 5,
+          gameType: selectedGameType || 'standard',
+          status: "waiting",
+          createdAt: Date.now(),
+          players: {}
+        };
+        roomPayload.players[cleanUID] = playerData;
+
+        const timeout = setTimeout(() => {
+          btn.disabled = false;
+          btn.innerText = "🔥 Oda Kur";
+          alert("Firebase bağlantısı zaman aşımına uğradı! Lütfen Firebase Realtime Database kurallarınızı kontrol edin.");
+        }, 6000);
+
+        db.ref("pvp_rooms/" + chKey).set(roomPayload)
+          .then(() => {
+            clearTimeout(timeout);
+            btn.disabled = false;
+            btn.innerText = "🔥 Oda Kur";
+            listenRoom(code);
+          })
+          .catch(err => {
+            clearTimeout(timeout);
+            btn.disabled = false;
+            btn.innerText = "🔥 Oda Kur";
+            alert("Firebase Hatası: " + err.message);
+          });
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerText = "🔥 Oda Kur";
+        alert("Sistem Hatası: " + err.message);
+      }
     }
 
     function joinOnlineRoom() {
@@ -203,47 +237,56 @@
       }
 
       const u = getUserInfo();
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+      const btn = document.getElementById("btn-join-room");
+      btn.innerText = "Giriş...";
 
-      db.ref("pvp_rooms").once("value", snap => {
-        if (!snap.exists()) return alert("Aktif bir oda bulunamadı!");
+      db.ref("pvp_rooms").once("value")
+        .then(snap => {
+          btn.innerText = "Katıl";
+          if (!snap.exists()) return alert("Aktif bir oda bulunamadı!");
 
-        let foundKey = null;
-        let foundRoom = null;
+          let foundKey = null;
+          let foundRoom = null;
 
-        snap.forEach(c => {
-          const val = c.val();
-          if (val && val.code && val.code.toLowerCase() === inputCode.toLowerCase()) {
-            foundKey = c.key;
-            foundRoom = val;
+          snap.forEach(c => {
+            const val = c.val();
+            if (val && val.code && val.code.toLowerCase() === inputCode.toLowerCase()) {
+              foundKey = c.key;
+              foundRoom = val;
+            }
+          });
+
+          if (!foundRoom) return alert("Böyle bir oda bulunamadı!");
+
+          const players = foundRoom.players || {};
+          const currentCount = Object.keys(players).length;
+
+          if (currentCount >= foundRoom.capacity && !players[cleanUID]) {
+            return alert("Bu oda tamamen dolmuş!");
           }
+
+          currentRoomCode = foundRoom.code;
+          totalBoxesPerPlayer = foundRoom.totalBoxes || 5;
+          selectedGameType = foundRoom.gameType || 'standard';
+
+          return db.ref(`pvp_rooms/${foundKey}/players/${cleanUID}`).update({
+            uid: cleanUID,
+            fullName: `${u.name || 'Oyuncu'}${u.tag || '#0000'}`,
+            score: 0,
+            opened: 0,
+            lastDrop: "-",
+            ready: false,
+            wantsReplay: false,
+            drops: []
+          }).then(() => {
+            listenRoom(foundRoom.code);
+          });
+        })
+        .catch(err => {
+          btn.innerText = "Katıl";
+          alert("Odaya girilemedi: " + err.message);
         });
-
-        if (!foundRoom) return alert("Böyle bir oda bulunamadı!");
-
-        const players = foundRoom.players || {};
-        const currentCount = Object.keys(players).length;
-
-        if (currentCount >= foundRoom.capacity && !players[u.uid]) {
-          return alert("Bu oda tamamen dolmuş!");
-        }
-
-        currentRoomCode = foundRoom.code;
-        totalBoxesPerPlayer = foundRoom.totalBoxes || 5;
-        selectedGameType = foundRoom.gameType || 'standard';
-
-        db.ref(`pvp_rooms/${foundKey}/players/${u.uid}`).update({
-          uid: u.uid,
-          fullName: `${u.name}${u.tag}`,
-          score: 0,
-          opened: 0,
-          lastDrop: "-",
-          ready: false,
-          wantsReplay: false,
-          drops: []
-        }).then(() => {
-          listenRoom(foundRoom.code);
-        }).catch(err => alert("Odaya girilemedi: " + err.message));
-      });
     }
 
     function listenRoom(code) {
@@ -252,6 +295,7 @@
       document.getElementById("pvp-room-tag").innerText = `${code} (${selectedGameType.toUpperCase()})`;
 
       const u = getUserInfo();
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       const chKey = code.replace(/[^a-zA-Z0-9]/g, '_');
 
       db.ref("pvp_rooms/" + chKey).on("value", snap => {
@@ -268,7 +312,7 @@
         let readyCount = 0, replayVotes = 0;
 
         pList.forEach(p => {
-          const isMe = u && p.fullName === `${u.name}${u.tag}`;
+          const isMe = p.uid === cleanUID;
           if (p.ready) readyCount++;
           if (p.wantsReplay) replayVotes++;
 
@@ -326,8 +370,9 @@
     function toggleReadyPvP() {
       isMyReady = !isMyReady;
       const u = getUserInfo();
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
-      db.ref(`pvp_rooms/${chKey}/players/${u.uid}/ready`).set(isMyReady);
+      db.ref(`pvp_rooms/${chKey}/players/${cleanUID}/ready`).set(isMyReady);
       document.getElementById("btn-ready-pvp").innerText = isMyReady ? "✅ HAZIR GERİ AL" : "⚡ HAZIR VER";
       document.getElementById("btn-ready-pvp").style.background = isMyReady ? "var(--neon-green)" : "var(--neon-gold)";
     }
@@ -392,8 +437,9 @@
         boxEl.innerHTML = `<span style="color:${winDrop.c}; font-size:6px;">${winDrop.name}</span><b style="color:var(--neon-green); font-size:8px;">+${winDrop.p}P</b>`;
 
         const u = getUserInfo();
+        const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
         const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
-        db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).update({
+        db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
           score: myTotalScore,
           opened: myOpenedCount,
           lastDrop: `+${winDrop.p}P (${winDrop.name})`,
@@ -406,9 +452,10 @@
 
     function sendQuickAction(txt) {
       const u = getUserInfo();
-      if (!currentRoomCode || !u) return;
+      if (!currentRoomCode) return;
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
-      db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).update({ lastDrop: txt });
+      db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({ lastDrop: txt });
     }
 
     function showPodium(pList) {
@@ -416,13 +463,14 @@
       document.getElementById("pvp-podium-panel").style.display = "flex";
 
       const u = getUserInfo();
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       pList.sort((a, b) => b.score - a.score);
 
       const podBox = document.getElementById("podium-list");
       podBox.innerHTML = "";
 
       pList.forEach((p, idx) => {
-        const isMe = u && p.fullName === `${u.name}${u.tag}`;
+        const isMe = p.uid === cleanUID;
         const item = document.createElement("div");
         item.className = `rank-card ${idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''))}`;
         if (isMe) item.style.border = "2px solid var(--neon-gold)";
@@ -459,8 +507,9 @@
 
     function voteReplayPvP() {
       const u = getUserInfo();
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
-      db.ref(`pvp_rooms/${chKey}/players/${u.uid}/wantsReplay`).set(true);
+      db.ref(`pvp_rooms/${chKey}/players/${cleanUID}/wantsReplay`).set(true);
       document.getElementById("btn-replay-pvp").disabled = true;
       document.getElementById("btn-replay-pvp").innerText = "Bekleniyor...";
     }
@@ -468,9 +517,10 @@
     function resetPvPRound() {
       myOpenedCount = 0; myTotalScore = 0; myDrops = []; isMyReady = false;
       const u = getUserInfo();
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
 
-      db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).update({
+      db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
         score: 0, opened: 0, lastDrop: "-", ready: false, wantsReplay: false, drops: []
       });
 
@@ -489,9 +539,10 @@
     function leavePvPRoom() {
       if (currentRoomCode) {
         const u = getUserInfo();
+        const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
         const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
         if (u) {
-          db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).remove().then(() => {
+          db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).remove().then(() => {
             db.ref(`pvp_rooms/${chKey}/players`).once("value", pSnap => {
               if (!pSnap.exists() || pSnap.numChildren() === 0) {
                 db.ref(`pvp_rooms/${chKey}`).remove();
