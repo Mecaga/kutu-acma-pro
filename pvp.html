@@ -18,6 +18,7 @@
       </div>
     </div>
 
+    <!-- 1. ODA KURMA & KATILMA PANELİ -->
     <div id="pvp-lobby-panel" style="display:flex; flex-direction:column; gap:6px; flex:1; justify-content:center;">
       <div style="font-size:10px; color:var(--text-dim); text-align:center;">1. Oyun Modunu Seç:</div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
@@ -44,9 +45,11 @@
       </div>
     </div>
 
+    <!-- 2. OYUN ALANI -->
     <div id="pvp-game-panel" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
       <div style="display:grid; gap:4px; margin-bottom:4px;" id="pvp-players-row"></div>
 
+      <!-- Kasa Kapışması Arayüzü -->
       <div id="case-mode-container">
         <div style="margin:4px 0;">
           <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:2px;">
@@ -62,15 +65,16 @@
         </div>
       </div>
 
+      <!-- Canlı XOX Arayüzü -->
       <div id="xox-mode-container" style="display:none; flex-direction:column; align-items:center; justify-content:center; flex:1;">
         <div id="xox-turn-indicator" style="font-size:12px; font-weight:bold; color:var(--neon-gold); margin-bottom:8px;">Sıra: Bekleniyor...</div>
-        <div id="xox-board" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; width:220px; height:220px;">
-          </div>
+        <div id="xox-board" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; width:220px; height:220px;"></div>
       </div>
 
       <button id="btn-ready-pvp" class="btn-start" style="background:var(--neon-gold); color:#000; font-weight:900; margin-top:6px;" onclick="toggleReadyPvP()">⚡ HAZIR VER</button>
     </div>
 
+    <!-- 3. SONUÇ PANELİ -->
     <div id="pvp-podium-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:2px solid var(--neon-purple); justify-content:space-between;">
       <div>
         <div style="font-size:15px; font-weight:900; color:var(--neon-gold); text-align:center; margin-bottom:4px;">🏆 MAÇ BİTTİ</div>
@@ -85,11 +89,22 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
   <script>
+    // BAĞIMSIZ FIREBASE KURULUMU
+    const fbConfig = {
+      apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
+      authDomain: "kutu-acma-pro.firebaseapp.com",
+      projectId: "kutu-acma-pro",
+      storageBucket: "kutu-acma-pro.firebasestorage.app",
+      messagingSenderId: "483395048462",
+      appId: "1:483395048462:web:450f18178e682a4a2f985f"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+    const db = firebase.database();
+
     let roomCapacity = 2, totalBoxesPerPlayer = 5, currentRoomCode = null, selectedGameType = 'xox';
-    let myOpenedCount = 0, myTotalScore = 0, myDrops = [], isMatchPlaying = false, isSpinningSlot = false, isMyReady = false, countdownInt = null;
-    let mySymbol = null; // 'X' veya 'O'
+    let myOpenedCount = 0, myTotalScore = 0, isMatchPlaying = false, isSpinningSlot = false, isMyReady = false;
+    let mySymbol = "X";
 
     const PVP_TIERS = {
       standard: [
@@ -105,14 +120,18 @@
       ]
     };
 
-    function getUserDataSafe() {
-      let u = getActiveUser();
-      if (!u) {
-        let tempUID = localStorage.getItem("kutu_temp_uid") || ("GUEST_" + Math.floor(1000 + Math.random() * 9000));
-        localStorage.setItem("kutu_temp_uid", tempUID);
-        u = { uid: tempUID, name: "Oyuncu", tag: "#" + tempUID.substring(6) };
+    function getLocalUser() {
+      try {
+        const s = localStorage.getItem("kutu_active_session");
+        if (s) return JSON.parse(s);
+      } catch (e) {}
+
+      let guestUID = localStorage.getItem("kutu_guest_uid");
+      if (!guestUID) {
+        guestUID = "U" + Math.floor(1000 + Math.random() * 9000);
+        localStorage.setItem("kutu_guest_uid", guestUID);
       }
-      return u;
+      return { uid: guestUID, name: "Oyuncu", tag: "#" + guestUID.substring(1) };
     }
 
     function setGameType(type) {
@@ -137,12 +156,13 @@
       roomCapacity = num;
       totalBoxesPerPlayer = num === 2 ? 5 : (num === 3 ? 10 : 15);
       [2, 3, 4].forEach(n => {
-        document.getElementById(`btn-p${n}`).style.background = n === num ? "var(--btn-blue)" : "#13072b";
+        const b = document.getElementById(`btn-p${n}`);
+        if (b) b.style.background = n === num ? "var(--btn-blue)" : "#13072b";
       });
     }
 
     function createOnlineRoom() {
-      const u = getUserDataSafe();
+      const u = getLocalUser();
       const code = String(Math.floor(1000 + Math.random() * 9000));
       currentRoomCode = code;
 
@@ -152,14 +172,12 @@
         fullName: `${u.name}${u.tag}`,
         score: 0,
         opened: 0,
-        lastDrop: "-",
         ready: false,
         wantsReplay: false,
-        drops: [],
         symbol: "X"
       };
 
-      const roomPayload = {
+      const roomData = {
         code: code,
         capacity: selectedGameType === 'xox' ? 2 : roomCapacity,
         totalBoxes: totalBoxesPerPlayer,
@@ -170,54 +188,58 @@
         players: pData
       };
 
-      db.ref("pvp_rooms/" + code).set(roomPayload)
-        .then(() => listenRoom(code))
-        .catch(err => alert("Oda açılamadı: " + err.message));
+      db.ref("pvp_rooms/" + code).set(roomData)
+        .then(() => {
+          listenRoom(code);
+        })
+        .catch(err => {
+          alert("Oda oluşturulamadı: " + err.message);
+        });
     }
 
     function joinOnlineRoom() {
       const inputCode = document.getElementById("in-room-code").value.trim();
-      if (!inputCode || inputCode.length < 4) return alert("Lütfen 4 haneli oda numarasını yazın!");
+      if (!inputCode || inputCode.length !== 4) return alert("Lütfen 4 haneli oda numarasını giriniz!");
 
-      const u = getUserDataSafe();
+      const u = getLocalUser();
 
       db.ref("pvp_rooms/" + inputCode).once("value", snap => {
         const room = snap.val();
-        if (!room) return alert("Oda bulunamadı! Numarayı doğru girdiğinizden emin olun.");
+        if (!room) return alert("Böyle bir oda bulunamadı!");
 
         const players = room.players || {};
         const count = Object.keys(players).length;
 
         if (count >= room.capacity && !players[u.uid]) {
-          return alert("Oda tamamen dolu!");
+          return alert("Oda tamamen dolmuş!");
         }
 
         currentRoomCode = room.code;
         selectedGameType = room.gameType || 'xox';
         totalBoxesPerPlayer = room.totalBoxes || 5;
 
-        const assignedSymbol = count === 0 ? "X" : "O";
-
         db.ref(`pvp_rooms/${inputCode}/players/${u.uid}`).update({
           uid: u.uid,
           fullName: `${u.name}${u.tag}`,
           score: 0,
           opened: 0,
-          lastDrop: "-",
           ready: false,
           wantsReplay: false,
-          drops: [],
-          symbol: assignedSymbol
-        }).then(() => listenRoom(inputCode));
+          symbol: "O"
+        }).then(() => {
+          listenRoom(inputCode);
+        }).catch(err => {
+          alert("Odaya girilemedi: " + err.message);
+        });
       });
     }
 
     function listenRoom(code) {
       document.getElementById("pvp-lobby-panel").style.display = "none";
       document.getElementById("pvp-game-panel").style.display = "flex";
-      document.getElementById("pvp-room-tag").innerText = `Oda: #${code} (${selectedGameType.toUpperCase()})`;
+      document.getElementById("pvp-room-tag").innerText = `Oda #${code} (${selectedGameType.toUpperCase()})`;
 
-      const u = getUserDataSafe();
+      const u = getLocalUser();
 
       if (selectedGameType === 'xox') {
         document.getElementById("case-mode-container").style.display = "none";
@@ -240,13 +262,13 @@
 
         pList.forEach(p => {
           const isMe = p.uid === u.uid;
-          if (isMe) mySymbol = p.symbol || (pList[0].uid === u.uid ? "X" : "O");
+          if (isMe) mySymbol = p.symbol || "X";
           if (p.ready) readyCount++;
           if (p.wantsReplay) replayVotes++;
 
           pRow.innerHTML += `
             <div style="background:#070212; border:1px solid ${isMe ? 'var(--neon-gold)' : '#3b1d6e'}; border-radius:6px; padding:4px 2px; text-align:center;">
-              <div style="font-size:8.5px; font-weight:bold; color:${isMe ? 'var(--neon-gold)' : '#fff'};">${p.fullName} ${selectedGameType==='xox' ? `(${p.symbol||'?'})` : ''}</div>
+              <div style="font-size:8px; font-weight:bold; color:${isMe ? 'var(--neon-gold)' : '#fff'};">${p.fullName} (${p.symbol || '?'})</div>
               <div style="font-size:13px; font-weight:bold; color:var(--neon-green);">${p.score} P</div>
               <div style="font-size:8px; color:${p.ready ? 'var(--neon-green)' : '#94a3b8'};">${p.ready ? '⚡ HAZIR' : 'Bekliyor'}</div>
             </div>
@@ -256,7 +278,6 @@
         const voteBadge = document.getElementById("replay-vote-count");
         if (voteBadge) voteBadge.innerText = `${replayVotes}/${room.capacity}`;
 
-        // Hazır Durum Kontrolü
         if (readyCount < room.capacity && room.status === "waiting") {
           document.getElementById("pvp-status-badge").innerText = `⏳ Bekleniyor (${readyCount}/${room.capacity})`;
         } else if (readyCount === room.capacity && room.status === "waiting") {
@@ -279,19 +300,18 @@
 
     function toggleReadyPvP() {
       isMyReady = !isMyReady;
-      const u = getUserDataSafe();
+      const u = getLocalUser();
       db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}/ready`).set(isMyReady);
       document.getElementById("btn-ready-pvp").innerText = isMyReady ? "✅ HAZIR GERİ AL" : "⚡ HAZIR VER";
       document.getElementById("btn-ready-pvp").style.background = isMyReady ? "var(--neon-green)" : "var(--neon-gold)";
     }
 
-    /* === XOX OYUN MOTORU === */
     function renderXOXBoard(room) {
-      const u = getUserDataSafe();
+      const u = getLocalUser();
       const board = room.xoxBoard || ["", "", "", "", "", "", "", "", ""];
       const isMyTurn = room.turn === u.uid;
       const indicator = document.getElementById("xox-turn-indicator");
-      indicator.innerText = isMyTurn ? "👉 Sıra Sende!" : "⏳ Rakibin Hamlesi Bekleniyor...";
+      indicator.innerText = isMyTurn ? "👉 Sıra Sende!" : "⏳ Rakibin Hamlesi...";
       indicator.style.color = isMyTurn ? "var(--neon-green)" : "var(--neon-gold)";
 
       const container = document.getElementById("xox-board");
@@ -300,7 +320,7 @@
       board.forEach((val, idx) => {
         const cell = document.createElement("button");
         cell.className = "icon-btn";
-        cell.style.cssText = "width:100%; height:100%; font-size:24px; font-weight:900; border:2px solid #3b1d6e; background:#070212;";
+        cell.style.cssText = "width:100%; height:100%; font-size:26px; font-weight:900; border:2px solid #3b1d6e; background:#070212;";
         cell.innerText = val;
         if (val === "X") cell.style.color = "var(--neon-blue)";
         if (val === "O") cell.style.color = "var(--neon-gold)";
@@ -309,23 +329,20 @@
           if (!isMyTurn || val !== "" || !isMatchPlaying) return;
           board[idx] = mySymbol;
           
-          const pList = Object.keys(room.players);
-          const nextTurn = pList.find(id => id !== u.uid);
+          const pList = Object.keys(room.players || {});
+          const nextTurn = pList.find(id => id !== u.uid) || u.uid;
 
-          const win = checkXOXWinner(board);
-          if (win) {
+          if (checkXOXWinner(board)) {
             db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}/score`).set(100);
             db.ref(`pvp_rooms/${currentRoomCode}`).update({
               xoxBoard: board,
-              status: "finished",
-              winnerName: u.name + u.tag
+              status: "finished"
             });
             showResultPanel(`${u.name}${u.tag} KAZANDI! 🎉`);
           } else if (board.every(b => b !== "")) {
             db.ref(`pvp_rooms/${currentRoomCode}`).update({
               xoxBoard: board,
-              status: "finished",
-              winnerName: "Berabere"
+              status: "finished"
             });
             showResultPanel("DOSTLUK KAZANDI! (BERABERE) 🤝");
           } else {
@@ -348,7 +365,6 @@
       return lines.some(([x, y, z]) => b[x] && b[x] === b[y] && b[x] === b[z]);
     }
 
-    /* === KASA OYUN MOTORU === */
     function renderPvPBoxesGrid() {
       const grid = document.getElementById("pvp-boxes-grid");
       if (grid.children.length > 0) return;
@@ -403,7 +419,7 @@
         boxEl.style.background = "#070212";
         boxEl.innerHTML = `<span style="color:${winDrop.c}; font-size:6px;">${winDrop.name}</span><b style="color:var(--neon-green); font-size:8px;">+${winDrop.p}P</b>`;
 
-        const u = getUserDataSafe();
+        const u = getLocalUser();
         db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}`).update({
           score: myTotalScore,
           opened: myOpenedCount
@@ -424,14 +440,14 @@
     }
 
     function voteReplayPvP() {
-      const u = getUserDataSafe();
+      const u = getLocalUser();
       db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}/wantsReplay`).set(true);
       document.getElementById("btn-replay-pvp").disabled = true;
     }
 
     function resetPvPRound() {
       myOpenedCount = 0; myTotalScore = 0; isMyReady = false;
-      const u = getUserDataSafe();
+      const u = getLocalUser();
 
       db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}`).update({
         score: 0, opened: 0, ready: false, wantsReplay: false
@@ -452,7 +468,7 @@
 
     function leavePvPRoom() {
       if (currentRoomCode) {
-        const u = getUserDataSafe();
+        const u = getLocalUser();
         db.ref(`pvp_rooms/${currentRoomCode}/players/${u.uid}`).remove().then(() => {
           db.ref(`pvp_rooms/${currentRoomCode}/players`).once("value", snap => {
             if (!snap.exists() || snap.numChildren() === 0) {
