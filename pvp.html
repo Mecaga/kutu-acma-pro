@@ -24,7 +24,7 @@
       background: radial-gradient(circle at center, #1e1b4b 0%, #0f0a2a 60%, #04020a 100%);
     }
 
-    /* 3x3 Mayın Tarlası Izgarası */
+    /* 3x3 Mayın Tarlası */
     .mines-grid-3x3 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -120,11 +120,11 @@
       </div>
 
       <div id="size-select-section" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
-        <div style="font-size:10px; color:var(--text-dim); text-align:center;">2. Oyuncu Sayısı:</div>
+        <div style="font-size:10px; color:var(--text-dim); text-align:center;">2. Kişi Sayısı & Kutu Hakları:</div>
         <div style="display:flex; gap:4px;">
-          <button type="button" class="mode-btn" id="btn-p2" style="flex:1; background:var(--btn-blue); color:#fff; text-align:center;" onclick="setRoomSize(2)">1v1</button>
-          <button type="button" class="mode-btn" id="btn-p3" style="flex:1; text-align:center;" onclick="setRoomSize(3)">3 Kişi</button>
-          <button type="button" class="mode-btn" id="btn-p4" style="flex:1; text-align:center;" onclick="setRoomSize(4)">4 Kişi</button>
+          <button type="button" class="mode-btn" id="btn-p2" style="flex:1; background:var(--btn-blue); color:#fff; text-align:center;" onclick="setRoomSize(2)">2 Kişi<br><small>(5 Kutu)</small></button>
+          <button type="button" class="mode-btn" id="btn-p3" style="flex:1; text-align:center;" onclick="setRoomSize(3)">3 Kişi<br><small>(10 Kutu)</small></button>
+          <button type="button" class="mode-btn" id="btn-p4" style="flex:1; text-align:center;" onclick="setRoomSize(4)">4 Kişi<br><small>(15 Kutu)</small></button>
         </div>
       </div>
 
@@ -148,7 +148,7 @@
             <span class="chat-chip" onclick="sendQuickAction('🔥 Alev!')">🔥 Alev!</span>
             <span class="chat-chip" onclick="sendQuickAction('😎 Kolay')">😎 Kolay</span>
             <span class="chat-chip" onclick="sendQuickAction('⚡ 1000P Benim!')">⚡ 1000P!</span>
-            <span class="chat-chip" onclick="sendQuickAction('💀 Bomba!')">💀 Bomba!</span>
+            <span class="chat-chip" onclick="sendQuickAction('💀 Mayın!')">💀 Mayın!</span>
             <span class="chat-chip" onclick="sendQuickAction('👑 GG!')">👑 GG</span>
           </div>
           <div style="display:flex; gap:4px;">
@@ -182,10 +182,10 @@
           <div class="mines-grid-3x3" id="mines-3x3-board"></div>
         </div>
 
-        <!-- 3. Canlı 1.000 Puan Speedrun Alanı -->
-        <div id="speedrun-zone" style="display:none; text-align:center; padding:10px 0;">
-          <div style="font-size:11px; color:#38bdf8; margin-bottom:6px;">Hedef: İlk 1.000 Puana Ulaşan Kazanır!</div>
-          <button type="button" class="btn-start" style="background:linear-gradient(90deg, #0284c7, #38bdf8); font-size:14px; padding:16px;" onclick="clickSpeedrunPVP()">⚡ HIZLI AÇ (+20-60P)</button>
+        <!-- 3. Speedrun Alanı (Ruletli 1000P Yarışı) -->
+        <div id="speedrun-zone" style="display:none; text-align:center; margin-bottom:4px;">
+          <div style="font-size:11px; color:#38bdf8; margin-bottom:4px;">⚡ En hızlı 1.000 puana ulaşan kazanır!</div>
+          <button type="button" id="btn-spin-speedrun" class="btn-start" style="background:#db2777; font-size:13px;" onclick="spinSpeedrunPVP()">⚡ HIZLI KASA AÇ (1.5s)</button>
         </div>
 
         <!-- 4. Canlı XOX Alanı -->
@@ -194,7 +194,7 @@
           <div class="xox-board-grid" id="xox-board-box"></div>
         </div>
 
-        <!-- Rulet Alanı (Normal & Mega) -->
+        <!-- Rulet Alanı (Normal, Mega ve Speedrun için) -->
         <div id="roulette-wrap-area" style="display:none;">
           <div class="roulette-container" id="pvp-roulette-box">
             <div class="roulette-needle"></div>
@@ -255,6 +255,10 @@
       mega: [
         { name: "Mega Kılıç", p: 25, c: "#fff" }, { name: "Safir Zırh", p: 75, c: "#38bdf8" },
         { name: "Kutsal Asa", p: 200, c: "#c084fc" }, { name: "Tanrısal Kama", p: 600, c: "#f43f5e" }
+      ],
+      speedrun: [
+        { name: "Hızlı Kasa", p: 30, c: "#38bdf8" }, { name: "Süper Destek", p: 90, c: "#fbbf24" },
+        { name: "Büyük İtici", p: 280, c: "#f43f5e" }
       ]
     };
 
@@ -298,6 +302,7 @@
 
     function setRoomSize(num) {
       roomCapacity = num;
+      // 2 Kişi = 5 Kutu, 3 Kişi = 10 Kutu, 4 Kişi = 15 Kutu
       totalBoxesPerPlayer = num === 2 ? 5 : (num === 3 ? 10 : 15);
       document.getElementById("btn-p2").style.background = num === 2 ? "var(--btn-blue)" : "#13072b";
       document.getElementById("btn-p3").style.background = num === 3 ? "var(--btn-blue)" : "#13072b";
@@ -453,7 +458,7 @@
           if (p.ready) readyCount++;
           if (p.wantsReplay) replayVotes++;
 
-          let hakMetin = `${p.opened}/${totalBoxesPerPlayer} Hak`;
+          let hakMetin = `${p.opened}/${totalBoxesPerPlayer} Kutu`;
           if (selectedGameType === 'speedrun') hakMetin = `${p.score}/1000 P`;
           if (selectedGameType === 'xox') hakMetin = `Sembol: ${p.symbol || '?'}`;
 
@@ -527,10 +532,10 @@
       if (selectedGameType === 'speedrun') {
         document.getElementById("box-grid-container").style.display = "none";
         document.getElementById("mines-grid-container").style.display = "none";
-        document.getElementById("roulette-wrap-area").style.display = "none";
         document.getElementById("xox-zone").style.display = "none";
         document.getElementById("speedrun-zone").style.display = "block";
-        document.getElementById("lbl-mode-title").innerText = "⚡ 1000P Yarışı:";
+        document.getElementById("roulette-wrap-area").style.display = "block";
+        document.getElementById("lbl-mode-title").innerText = "⚡ 1000P Speedrun:";
         document.getElementById("lbl-pvp-progress").innerText = `${myTotalScore} / 1000 P`;
       } else if (selectedGameType === 'xox') {
         document.getElementById("box-grid-container").style.display = "none";
@@ -539,7 +544,7 @@
         document.getElementById("speedrun-zone").style.display = "none";
         document.getElementById("xox-zone").style.display = "flex";
         document.getElementById("lbl-mode-title").innerText = "⭕❌ Canlı XOX:";
-        document.getElementById("lbl-pvp-progress").innerText = `Sen: ${mySymbol}`;
+        document.getElementById("lbl-pvp-progress").innerText = `Sembol: ${mySymbol}`;
         renderXOXBoard(room);
       } else if (selectedGameType === 'mines') {
         document.getElementById("box-grid-container").style.display = "none";
@@ -562,33 +567,67 @@
       }
     }
 
-    /* 1. SPEEDRUN OYUN MOTORU (İLK 1000 PUAN YAPAN KAZANIR) */
-    function clickSpeedrunPVP() {
-      if (!isMatchPlaying || myTotalScore >= 1000) return;
+    /* 1. SPEEDRUN OYUN MOTORU (1.5s Ruletli 1000P Yarışı) */
+    function spinSpeedrunPVP() {
+      if (!isMatchPlaying || isSpinningSlot || myTotalScore >= 1000) return;
+      isSpinningSlot = true;
+      document.getElementById("btn-spin-speedrun").disabled = true;
 
-      const pts = Math.floor(Math.random() * 41) + 20; // 20-60 Puan
-      myTotalScore += pts;
-      myDrops.push({ name: `Hızlı Tık (+${pts}P)`, p: pts, c: '#38bdf8' });
+      const track = document.getElementById("pvp-roulette-track");
+      const wrap = document.getElementById("pvp-roulette-box");
+      track.style.transition = "none";
+      track.style.transform = "translateX(0px)";
+      track.innerHTML = "";
 
-      document.getElementById("lbl-pvp-progress").innerText = `${Math.min(1000, myTotalScore)} / 1000 P`;
+      const pool = PVP_TIERS.speedrun;
+      const totalItems = 25, winIdx = 20;
+      let winDrop = null;
+      const itemWidth = 75;
 
-      const u = getUserInfo();
-      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
-      const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
-
-      db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
-        score: myTotalScore,
-        lastDrop: `⚡ +${pts}P`,
-        drops: myDrops
-      });
-
-      if (myTotalScore >= 1000) {
-        db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
-        db.ref("pvp_rooms/" + chKey + "/players").once("value", snap => {
-          const list = Object.values(snap.val() || {});
-          showPodium(list, `🏆 ${u.name}${u.tag} 1000 Puana İlk Ulaştı!`);
-        });
+      for (let i = 0; i < totalItems; i++) {
+        let d = pool[Math.floor(Math.random() * pool.length)];
+        if (i === winIdx) winDrop = d;
+        track.innerHTML += `
+          <div class="roulette-item" style="width:75px; height:75px; border-bottom:3px solid ${d.c};">
+            <span style="color:${d.c}; font-size:8px; font-weight:bold;">${d.name}</span>
+            <span style="color:var(--neon-green); font-size:9px;">+${d.p}P</span>
+          </div>
+        `;
       }
+
+      setTimeout(() => {
+        track.style.transition = "transform 1.5s cubic-bezier(0.12, 0.8, 0.2, 1)";
+        const targetX = -(winIdx * itemWidth) + (wrap.offsetWidth / 2) - (itemWidth / 2);
+        track.style.transform = `translateX(${targetX}px)`;
+      }, 20);
+
+      setTimeout(() => {
+        myTotalScore += winDrop.p;
+        myDrops.push(winDrop);
+        document.getElementById("lbl-pvp-progress").innerText = `${Math.min(1000, myTotalScore)} / 1000 P`;
+
+        const u = getUserInfo();
+        const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+        const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
+
+        db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
+          score: myTotalScore,
+          lastDrop: `⚡ +${winDrop.p}P (${winDrop.name})`,
+          drops: myDrops
+        });
+
+        isSpinningSlot = false;
+
+        if (myTotalScore >= 1000) {
+          db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
+          db.ref("pvp_rooms/" + chKey + "/players").once("value", snap => {
+            const list = Object.values(snap.val() || {});
+            showPodium(list, `🏆 ${u.name}${u.tag} 1000 Puana İlk Ulaştı!`);
+          });
+        } else {
+          document.getElementById("btn-spin-speedrun").disabled = false;
+        }
+      }, 1600);
     }
 
     /* 2. XOX MOTORU */
