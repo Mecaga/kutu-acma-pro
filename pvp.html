@@ -35,11 +35,11 @@
         <button class="mode-btn" id="btn-p4" style="flex:1; text-align:center;" onclick="setRoomSize(4)">1v1v1v1<br><small>(15 Kutu)</small></button>
       </div>
 
-      <button class="btn-start" style="background:linear-gradient(90deg, #9333ea, #c084fc); margin-top:6px;" onclick="createOnlineRoom()">🔥 Oda Kur</button>
+      <button id="btn-create-room" class="btn-start" style="background:linear-gradient(90deg, #9333ea, #c084fc); margin-top:6px;" onclick="createOnlineRoom()">🔥 Oda Kur</button>
 
       <div style="display:flex; gap:4px; margin-top:8px;">
-        <input type="text" id="in-room-code" class="input-field" style="margin:0; font-size:11px;" placeholder="Oda Kodu (Örn: pvp#1234)">
-        <button class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="joinOnlineRoom()">Katıl</button>
+        <input type="text" id="in-room-code" class="input-field" style="margin:0; font-size:11px;" placeholder="Oda Kodu (Örn: pvp#1234 veya 1234)">
+        <button id="btn-join-room" class="icon-btn" style="background:var(--neon-green); white-space:nowrap;" onclick="joinOnlineRoom()">Katıl</button>
       </div>
     </div>
 
@@ -122,9 +122,13 @@
 
     function setGameType(type) {
       selectedGameType = type;
-      ['std', 'mega', 'speed', 'mines'].forEach(k => document.getElementById('m-' + k).style.background = '#13072b');
+      ['std', 'mega', 'speed', 'mines'].forEach(k => {
+        const el = document.getElementById('m-' + k);
+        if (el) el.style.background = '#13072b';
+      });
       const map = { standard: 'std', mega: 'mega', speedrun: 'speed', mines: 'mines' };
-      document.getElementById('m-' + map[type]).style.background = 'var(--btn-blue)';
+      const activeEl = document.getElementById('m-' + map[type]);
+      if (activeEl) activeEl.style.background = 'var(--btn-blue)';
     }
 
     function setRoomSize(num) {
@@ -137,13 +141,23 @@
 
     function createOnlineRoom() {
       const u = getActiveUser();
-      if (!u) return;
+      if (!u) return alert("Lütfen önce giriş yapın!");
+
       const code = `pvp#${Math.floor(1000 + Math.random() * 9000)}`;
       currentRoomCode = code;
       const chKey = code.replace(/[^a-zA-Z0-9]/g, '_');
 
       const pData = {};
-      pData[u.uid] = { uid: u.uid, fullName: `${u.name}${u.tag}`, score: 0, opened: 0, lastDrop: "-", ready: false, wantsReplay: false, drops: [] };
+      pData[u.uid] = {
+        uid: u.uid,
+        fullName: `${u.name}${u.tag}`,
+        score: 0,
+        opened: 0,
+        lastDrop: "-",
+        ready: false,
+        wantsReplay: false,
+        drops: []
+      };
 
       db.ref("pvp_rooms/" + chKey).set({
         code: code,
@@ -152,32 +166,49 @@
         gameType: selectedGameType,
         status: "waiting",
         players: pData
-      }).then(() => listenRoom(code));
+      }).then(() => {
+        listenRoom(code);
+      }).catch(err => alert("Oda kurulamadı: " + err.message));
     }
 
     function joinOnlineRoom() {
-      const inputCode = document.getElementById("in-room-code").value.trim();
+      let inputCode = document.getElementById("in-room-code").value.trim();
       if (!inputCode) return alert("Oda kodu giriniz!");
+      if (!inputCode.startsWith("pvp#") && !isNaN(inputCode)) {
+        inputCode = `pvp#${inputCode}`;
+      }
+
       const u = getActiveUser();
+      if (!u) return alert("Lütfen önce giriş yapın!");
 
       db.ref("pvp_rooms").once("value", snap => {
-        let foundKey = null, foundRoom = null;
+        if (!snap.exists()) return alert("Aktif bir oda bulunamadı!");
+
+        let foundKey = null;
+        let foundRoom = null;
+
         snap.forEach(c => {
-          if (c.val().code && c.val().code.toLowerCase() === inputCode.toLowerCase()) {
+          const val = c.val();
+          if (val && val.code && val.code.toLowerCase() === inputCode.toLowerCase()) {
             foundKey = c.key;
-            foundRoom = c.val();
+            foundRoom = val;
           }
         });
 
         if (!foundRoom) return alert("Böyle bir oda bulunamadı!");
-        const currentCount = Object.keys(foundRoom.players || {}).length;
-        if (currentCount >= foundRoom.capacity) return alert("Bu oda tamamen dolmuş!");
+
+        const players = foundRoom.players || {};
+        const currentCount = Object.keys(players).length;
+
+        if (currentCount >= foundRoom.capacity && !players[u.uid]) {
+          return alert("Bu oda tamamen dolmuş!");
+        }
 
         currentRoomCode = foundRoom.code;
         totalBoxesPerPlayer = foundRoom.totalBoxes || 5;
         selectedGameType = foundRoom.gameType || 'standard';
 
-        db.ref(`pvp_rooms/${foundKey}/players/${u.uid}`).set({
+        db.ref(`pvp_rooms/${foundKey}/players/${u.uid}`).update({
           uid: u.uid,
           fullName: `${u.name}${u.tag}`,
           score: 0,
@@ -186,7 +217,9 @@
           ready: false,
           wantsReplay: false,
           drops: []
-        }).then(() => listenRoom(foundRoom.code));
+        }).then(() => {
+          listenRoom(foundRoom.code);
+        }).catch(err => alert("Odaya girilemedi: " + err.message));
       });
     }
 
@@ -212,7 +245,7 @@
         let readyCount = 0, replayVotes = 0;
 
         pList.forEach(p => {
-          const isMe = p.fullName === `${u.name}${u.tag}`;
+          const isMe = u && p.fullName === `${u.name}${u.tag}`;
           if (p.ready) readyCount++;
           if (p.wantsReplay) replayVotes++;
 
@@ -262,14 +295,14 @@
         if (allDone && room.status === "playing") {
           document.getElementById("pvp-status-badge").innerText = "🏆 Maç Bitti!";
           db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
-          setTimeout(() => showPodium(pList), 2500);
+          setTimeout(() => showPodium(pList), 2000);
         }
       });
     }
 
     function toggleReadyPvP() {
       isMyReady = !isMyReady;
-      playSound('click');
+      if (typeof playSound === "function") playSound('click');
       const u = getActiveUser();
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
       db.ref(`pvp_rooms/${chKey}/players/${u.uid}/ready`).set(isMyReady);
@@ -299,7 +332,7 @@
 
     function spinSlotForPvP(boxEl) {
       isSpinningSlot = true;
-      playSound('click');
+      if (typeof playSound === "function") playSound('click');
       const track = document.getElementById("pvp-roulette-track");
       const wrap = document.getElementById("pvp-roulette-box");
       track.style.transition = "none";
@@ -327,12 +360,14 @@
         const targetX = -(winIdx * itemWidth) + (wrap.offsetWidth / 2) - (itemWidth / 2);
         track.style.transform = `translateX(${targetX}px)`;
         
-        let tInt = setInterval(() => playSound('tick'), 160);
-        setTimeout(() => clearInterval(tInt), 2200);
+        if (typeof playSound === "function") {
+          let tInt = setInterval(() => playSound('tick'), 160);
+          setTimeout(() => clearInterval(tInt), 2200);
+        }
       }, 20);
 
       setTimeout(() => {
-        playSound('win');
+        if (typeof playSound === "function") playSound('win');
         myTotalScore += winDrop.p;
         myOpenedCount++;
         myDrops.push(winDrop);
@@ -356,7 +391,7 @@
 
     function sendQuickAction(txt) {
       const u = getActiveUser();
-      if (!currentRoomCode) return;
+      if (!currentRoomCode || !u) return;
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
       db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).update({ lastDrop: txt });
     }
@@ -372,7 +407,7 @@
       podBox.innerHTML = "";
 
       pList.forEach((p, idx) => {
-        const isMe = p.fullName === `${u.name}${u.tag}`;
+        const isMe = u && p.fullName === `${u.name}${u.tag}`;
         const item = document.createElement("div");
         item.className = `rank-card ${idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''))}`;
         if (isMe) item.style.border = "2px solid var(--neon-gold)";
@@ -440,15 +475,16 @@
       if (currentRoomCode) {
         const u = getActiveUser();
         const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
-        db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).remove().then(() => {
-          db.ref(`pvp_rooms/${chKey}/players`).once("value", pSnap => {
-            if (!pSnap.exists() || pSnap.numChildren() === 0) {
-              db.ref(`pvp_rooms/${chKey}`).remove();
-            }
+        if (u) {
+          db.ref(`pvp_rooms/${chKey}/players/${u.uid}`).remove().then(() => {
+            db.ref(`pvp_rooms/${chKey}/players`).once("value", pSnap => {
+              if (!pSnap.exists() || pSnap.numChildren() === 0) {
+                db.ref(`pvp_rooms/${chKey}`).remove();
+              }
+            });
           });
-        });
+        }
       }
-      window.location.href = "menu.html";
     }
   </script>
 </body>
