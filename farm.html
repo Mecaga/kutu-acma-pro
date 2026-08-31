@@ -2,68 +2,80 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Mega Kasa Çiftliği Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mega Kasa Çiftliği</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
-    * { box-sizing: border-box; touch-action: manipulation; }
-    html, body {
-      height: 100%;
+    *, *::before, *::after {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      touch-action: manipulation;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
       overflow: hidden;
       background: #020617;
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: #fff;
     }
     .farm-app-layout {
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      max-width: 480px;
+      height: 100dvh;
+      width: 100%;
+      max-width: 440px;
       margin: 0 auto;
+      background: #030712;
+      overflow: hidden;
       position: relative;
     }
     
-    /* 1. ÜST ÇAKILI PANEL */
-    .farm-sticky-top {
+    /* 1. ÜST SABİT PANEL */
+    .farm-top-bar {
       flex-shrink: 0;
-      z-index: 9999;
       background: #090d1a;
       border-bottom: 2px solid #1e293b;
-      padding: 5px 8px;
+      padding: 6px 8px;
       display: flex;
       flex-direction: column;
       gap: 3px;
+      z-index: 1000;
     }
 
-    /* 2. ORTA KAYDIRILABİLİR İÇERİK */
-    .farm-scroll-content {
+    /* 2. ORTA ESNEK KAYDIRILABİLİR ALAN */
+    .farm-scroll-area {
       flex: 1;
-      overflow-y: scroll;
-      -webkit-overflow-scrolling: touch;
-      padding: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    /* 3. ALT ÇAKILI VE SABİT BOYUTLU DOCK */
-    .farm-sticky-bottom {
-      flex-shrink: 0;
-      z-index: 9999;
-      background: #090d1a;
-      border-top: 2px solid #1e293b;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
       padding: 6px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      height: 110px; /* Sabit Yükseklik - Zıplama Yapmaz */
-      box-shadow: 0 -6px 20px rgba(0,0,0,0.9);
+      gap: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .farm-scroll-area::-webkit-scrollbar { width: 3px; }
+    .farm-scroll-area::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
+
+    /* 3. ALT SABİT DOCK */
+    .farm-bottom-dock {
+      flex-shrink: 0;
+      background: #090d1a;
+      border-top: 2px solid #1e293b;
+      padding: 5px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      z-index: 1000;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.8);
     }
 
-    /* 30 Parselli Kompakt Tarla (5 Sütun x 6 Satır) */
+    /* 30 Parselli Kompakt Tarla (5 Sütun) */
     .farm-grid-30 {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -74,27 +86,26 @@
       background: #1c1306;
       border: 1px solid #854d0e;
       border-radius: 5px;
-      height: 48px;
+      height: 44px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       user-select: none;
-      font-size: 7.5px;
-      position: relative;
+      font-size: 7px;
     }
     .farm-plot-mini:active { transform: scale(0.94); }
     .farm-plot-mini.locked { background: #0c0a09; border-color: #332a22; opacity: 0.5; }
     .farm-plot-mini.ready { border-color: #22c55e; background: #062e16; box-shadow: 0 0 4px #22c55e; }
     .farm-plot-mini.pest { border-color: #ef4444; animation: shake 0.3s infinite; }
 
-    /* 3 Satırlı Sağa-Sola Kayan Tesis Tablosu (3xX) */
+    /* 3 Satırlı Sağa-Sola Kayan Tesis Izgarası */
     .facilities-scroll-3row {
       display: grid;
-      grid-template-rows: repeat(3, 38px);
+      grid-template-rows: repeat(3, 34px);
       grid-auto-flow: column;
-      grid-auto-columns: 130px;
+      grid-auto-columns: 120px;
       gap: 4px;
       overflow-x: auto;
       padding-bottom: 2px;
@@ -106,16 +117,16 @@
       background: #0f172a;
       border: 1px solid #334155;
       border-radius: 6px;
-      padding: 2px 5px;
+      padding: 2px 4px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 8px;
+      font-size: 7.5px;
     }
 
     .dock-tab-btn {
       flex: 1;
-      padding: 4px;
+      padding: 3px;
       background: #1e1b4b;
       border: 1px solid #4338ca;
       color: #fff;
@@ -127,15 +138,15 @@
     .dock-tab-btn.active { background: #4338ca; border-color: var(--neon-gold); }
 
     .seed-btn-chip {
-      padding: 3px 1px;
+      padding: 2px 1px;
       background: #0f172a;
       border: 1px solid #334155;
       border-radius: 4px;
       color: #fff;
-      font-size: 7px;
+      font-size: 6.5px;
       cursor: pointer;
       text-align: center;
-      height: 32px;
+      height: 28px;
     }
     .seed-btn-chip.active { border-color: var(--neon-gold); background: #2a1b02; }
   </style>
@@ -143,14 +154,14 @@
 <body>
   <div class="farm-app-layout">
     
-    <!-- 1. ÜST SABİT PANEL -->
-    <div class="farm-sticky-top">
+    <!-- 1. ÜST ÇAKILI PANEL -->
+    <div class="farm-top-bar">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <button type="button" class="icon-btn" style="border-color:var(--danger); padding:2px 6px; font-size:9.5px;" onclick="location.href='menu.html'">‹ Lobi</button>
+        <button type="button" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; cursor:pointer;" onclick="location.href='menu.html'">‹ Lobi</button>
         <div style="font-weight:900; font-size:11px; color:#38bdf8;">🌾 Mega Çiftlik 2026</div>
         <div id="lbl-farm-gold" style="color:var(--neon-gold); font-weight:bold; font-size:11px;">🪙 250</div>
       </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#070a13; padding:2px 4px; border-radius:4px; font-size:7.5px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#070a13; padding:2px 5px; border-radius:4px; font-size:7.5px;">
         <span>⭐ Lv.<b id="lbl-farm-lvl">1</b> (<span id="lbl-farm-xp">0/100</span>)</span>
         <span id="lbl-weather-tag" style="color:#fbbf24;">☀️ Güneşli</span>
         <span>📈 Borsa: <b id="lbl-market-mult" style="color:var(--neon-green);">x1.0</b></span>
@@ -158,64 +169,63 @@
       </div>
     </div>
 
-    <!-- 2. ORTA SCROLL ALANI -->
-    <div class="farm-scroll-content">
+    <!-- 2. ORTA KAYDIRILABİLİR İÇERİK -->
+    <div class="farm-scroll-area">
       
       <!-- 30'lu Kompakt Tarla -->
-      <div style="font-size:8.5px; color:#94a3b8; font-weight:bold;">🌱 Tarla Parselleri (5x6 = 30 Parsel):</div>
+      <div style="font-size:8px; color:#94a3b8; font-weight:bold;">🌱 Tarla Parselleri (5x6 = 30 Parsel):</div>
       <div class="farm-grid-30" id="plots-container"></div>
 
       <!-- 3 Satırlı Kayan Tesis Paneli (3 x X) -->
-      <div style="font-size:8.5px; color:#38bdf8; font-weight:bold; margin-top:2px;">🏭 Üretim Tesisleri (Yana Kaydır ➔):</div>
+      <div style="font-size:8px; color:#38bdf8; font-weight:bold; margin-top:2px;">🏭 Tesisler & Hayvanlar (Yana Kaydır ➔):</div>
       <div class="facilities-scroll-3row">
-        <!-- Satır 1-3 Arası Otomatik Dizilen 12 Tesis -->
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>🐔</span><div><b>Kümes</b><div id="lbl-coop-txt">20s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#065f46;" onclick="collectFacility('coop')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>🐔</span><div><b>Kümes</b><div id="lbl-coop-txt">20s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#065f46;" onclick="collectFacility('coop')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>🐄</span><div><b>Ahır</b><div id="lbl-barn-txt">40s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#065f46;" onclick="collectFacility('barn')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>🐄</span><div><b>Ahır</b><div id="lbl-barn-txt">40s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#065f46;" onclick="collectFacility('barn')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>🐝</span><div><b>Kovan</b><div id="lbl-hive-txt">30s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#065f46;" onclick="collectFacility('hive')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>🐝</span><div><b>Kovan</b><div id="lbl-hive-txt">30s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#065f46;" onclick="collectFacility('hive')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>🐟</span><div><b>Gölet</b><div id="lbl-pond-txt">50s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#065f46;" onclick="collectFacility('pond')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>🐟</span><div><b>Gölet</b><div id="lbl-pond-txt">50s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#065f46;" onclick="collectFacility('pond')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>🏭</span><div><b>Değirmen</b><div id="lbl-mill-txt">60s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#4338ca;" onclick="collectFacility('mill')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>🏭</span><div><b>Değirmen</b><div id="lbl-mill-txt">60s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#4338ca;" onclick="collectFacility('mill')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>💎</span><div><b>Maden</b><div id="lbl-mine-txt">90s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#b45309;" onclick="collectFacility('mine')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>💎</span><div><b>Maden</b><div id="lbl-mine-txt">90s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#b45309;" onclick="collectFacility('mine')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>🌲</span><div><b>Orman</b><div id="lbl-wood-txt">75s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#15803d;" onclick="collectFacility('wood')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>🌲</span><div><b>Orman</b><div id="lbl-wood-txt">75s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#15803d;" onclick="collectFacility('wood')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>🍄</span><div><b>Mahzen</b><div id="lbl-mush-txt">45s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#831843;" onclick="collectFacility('mush')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>🍄</span><div><b>Mahzen</b><div id="lbl-mush-txt">45s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#831843;" onclick="collectFacility('mush')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>🧀</span><div><b>Mandıra</b><div id="lbl-cheese-txt">60s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#eab308; color:#000;" onclick="collectFacility('cheese')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>🧀</span><div><b>Mandıra</b><div id="lbl-cheese-txt">60s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#eab308; color:#000;" onclick="collectFacility('cheese')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>🐑</span><div><b>Yünlük</b><div id="lbl-wool-txt">45s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#0284c7;" onclick="collectFacility('wool')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>🐑</span><div><b>Yünlük</b><div id="lbl-wool-txt">45s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#0284c7;" onclick="collectFacility('wool')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>🍎</span><div><b>Bahçe</b><div id="lbl-orchard-txt">35s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#16a34a;" onclick="collectFacility('orchard')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>🍎</span><div><b>Bahçe</b><div id="lbl-orchard-txt">35s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#16a34a;" onclick="collectFacility('orchard')">Al</button>
         </div>
         <div class="facility-chip-card">
-          <div style="display:flex; align-items:center; gap:3px;"><span>☕</span><div><b>Kahve</b><div id="lbl-coffee-txt">80s</div></div></div>
-          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6.5px; background:#78350f;" onclick="collectFacility('coffee')">Al</button>
+          <div style="display:flex; align-items:center; gap:2px;"><span>☕</span><div><b>Kahve</b><div id="lbl-coffee-txt">80s</div></div></div>
+          <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:#78350f;" onclick="collectFacility('coffee')">Al</button>
         </div>
       </div>
 
@@ -228,16 +238,16 @@
       <button type="button" class="btn-start" style="background:linear-gradient(90deg, #db2777, #f43f5e); font-size:8px; padding:3px; margin:0;" onclick="startFestival()">🎉 1 Dk Çiftlik Festivali (80🪙 - 3X Gelir)</button>
     </div>
 
-    <!-- 3. ALT SABİT DOCK (ASLA BÜYÜYÜP KÜÇÜLMEZ) -->
-    <div class="farm-sticky-bottom">
+    <!-- 3. ALT SABİT DOCK -->
+    <div class="farm-bottom-dock">
       <div style="display:flex; gap:3px;">
         <button type="button" class="dock-tab-btn active" id="tab-btn-seeds" onclick="switchDockTab('seeds')">🌱 Tohumlar</button>
         <button type="button" class="dock-tab-btn" id="tab-btn-tools" onclick="switchDockTab('tools')">🛠️ Aletler</button>
-        <button type="button" class="dock-tab-btn" id="tab-btn-tractor" onclick="switchDockTab('tractor')">🚜 Traktör & Su</button>
+        <button type="button" class="dock-tab-btn" id="tab-btn-tractor" onclick="switchDockTab('tractor')">🚜 Traktör</button>
       </div>
 
       <!-- Panel 1: Tohumlar -->
-      <div id="dock-panel-seeds" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:2px; height:60px;">
+      <div id="dock-panel-seeds" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:2px;">
         <button type="button" class="seed-btn-chip active" id="btn-seed-0" onclick="selectSeed(0)">🌱Tahta<br><small>10s</small></button>
         <button type="button" class="seed-btn-chip" id="btn-seed-1" onclick="selectSeed(1)">⚔️Demir<br><small>20s</small></button>
         <button type="button" class="seed-btn-chip" id="btn-seed-2" onclick="selectSeed(2)">💎Safir<br><small>35s</small></button>
@@ -249,7 +259,7 @@
       </div>
 
       <!-- Panel 2: Aletler -->
-      <div id="dock-panel-tools" style="display:none; grid-template-columns: repeat(4, 1fr); gap:2px; height:60px;">
+      <div id="dock-panel-tools" style="display:none; grid-template-columns: repeat(4, 1fr); gap:2px;">
         <button type="button" class="icon-btn" style="background:#0284c7; font-size:7px; padding:2px;" onclick="fillWaterTank()">💧 Su Al<br>(10🪙)</button>
         <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px;" onclick="buySuperFertilizer()">🧪 Gübre<br>(20🪙)</button>
         <button type="button" class="icon-btn" style="background:#b45309; font-size:7px; padding:2px;" onclick="installScarecrow()">🛡️ Korkuluk<br>(50🪙)</button>
@@ -257,10 +267,10 @@
       </div>
 
       <!-- Panel 3: Traktör -->
-      <div id="dock-panel-tractor" style="display:none; display:none; gap:3px; height:60px; align-items:center;">
-        <button type="button" class="icon-btn" style="flex:1; height:100%; background:#15803d; font-size:8px;" onclick="tractorPlantAll()">🚜 Boş Tarlalara<br>Toplu Ek</button>
-        <button type="button" class="icon-btn" style="flex:1; height:100%; background:#b91c1c; font-size:8px;" onclick="tractorHarvestAll()">⚡ Hazır Olanları<br>Toplu Hasat Et</button>
-        <button type="button" class="icon-btn" style="flex:1; height:100%; background:#4338ca; font-size:8px;" onclick="waterAllPlots()">💦 Tümünü Sula<br>(5 Su)</button>
+      <div id="dock-panel-tractor" style="display:none; gap:3px;">
+        <button type="button" class="icon-btn" style="flex:1; background:#15803d; font-size:7.5px; padding:4px;" onclick="tractorPlantAll()">🚜 Toplu Ek</button>
+        <button type="button" class="icon-btn" style="flex:1; background:#b91c1c; font-size:7.5px; padding:4px;" onclick="tractorHarvestAll()">⚡ Toplu Hasat</button>
+        <button type="button" class="icon-btn" style="flex:1; background:#4338ca; font-size:7.5px; padding:4px;" onclick="waterAllPlots()">💦 Toplu Sula (5💧)</button>
       </div>
     </div>
 
@@ -291,7 +301,7 @@
       lvl: 1,
       totalHarvestPts: 0,
       water: 20,
-      unlockedPlots: 10, // 30'a kadar açılır
+      unlockedPlots: 10,
       plots: Array(30).fill(null),
       coopReady: Date.now() + 20000,
       barnReady: Date.now() + 40000,
@@ -561,7 +571,7 @@
       farmState.gold -= 50;
       hasScarecrow = true;
       saveFarmData();
-      alert("🛡️ Korkuluk kuruldu! Zararlılar engellendi.");
+      alert("🛡️ Lazerli Korkuluk kuruldu! Zararlılar engellendi.");
     }
 
     function buyRainBomb() {
@@ -629,22 +639,22 @@
     }
 
     function saveFarmData() {
-      localStorage.setItem("kutu_farm_ultra30_save", JSON.stringify(farmState));
+      localStorage.setItem("kutu_farm_fixed_layout_save", JSON.stringify(farmState));
       const u = getActiveUser();
       if (u && u.uid && u.uid !== "ADMIN_ROOT") {
-        db.ref(`users/${u.uid}/farm_ultra30`).set(farmState);
+        db.ref(`users/${u.uid}/farm_fixed_layout`).set(farmState);
       }
     }
 
     function loadFarmData() {
-      const local = localStorage.getItem("kutu_farm_ultra30_save");
+      const local = localStorage.getItem("kutu_farm_fixed_layout_save");
       if (local) {
         try { farmState = Object.assign(farmState, JSON.parse(local)); } catch (e) {}
       }
 
       const u = getActiveUser();
       if (u && u.uid && u.uid !== "ADMIN_ROOT") {
-        db.ref(`users/${u.uid}/farm_ultra30`).once("value", snap => {
+        db.ref(`users/${u.uid}/farm_fixed_layout`).once("value", snap => {
           if (snap.exists()) {
             farmState = Object.assign(farmState, snap.val());
           }
