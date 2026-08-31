@@ -8,23 +8,20 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
-    /* MODLARA ÖZEL ŞEKİLLİ DİNAMİK ARKA PLANLAR */
     body.theme-standard {
       background: radial-gradient(circle at top, #1e0836 0%, #090214 70%, #000 100%);
-      background-size: 100% 100%;
     }
     body.theme-mega {
-      background: radial-gradient(circle at center, #2e1d00 0%, #170e00 50%, #050300 100%),
-                  repeating-linear-gradient(45deg, rgba(251,191,36,0.03) 0px, rgba(251,191,36,0.03) 10px, transparent 10px, transparent 20px);
+      background: radial-gradient(circle at center, #2e1d00 0%, #170e00 50%, #050300 100%);
     }
     body.theme-speedrun {
-      background: radial-gradient(circle at top, #06283d 0%, #03131e 60%, #01080d 100%),
-                  repeating-linear-gradient(-45deg, rgba(56,189,248,0.04) 0px, rgba(56,189,248,0.04) 15px, transparent 15px, transparent 30px);
+      background: radial-gradient(circle at top, #06283d 0%, #03131e 60%, #01080d 100%);
     }
     body.theme-mines {
-      background: radial-gradient(circle at bottom, #3b0a0a 0%, #170303 60%, #080000 100%),
-                  radial-gradient(circle, rgba(239,68,68,0.08) 1px, transparent 1px);
-      background-size: 100% 100%, 16px 16px;
+      background: radial-gradient(circle at bottom, #3b0a0a 0%, #170303 60%, #080000 100%);
+    }
+    body.theme-xox {
+      background: radial-gradient(circle at center, #1e1b4b 0%, #0f0a2a 60%, #04020a 100%);
     }
 
     /* 3x3 Mayın Tarlası Izgarası */
@@ -47,10 +44,6 @@
       font-size: 18px;
       cursor: pointer;
       box-shadow: 0 0 10px rgba(239,68,68,0.2);
-      transition: transform 0.1s, background 0.2s;
-    }
-    .mine-cell:active {
-      transform: scale(0.94);
     }
     .mine-cell.revealed-safe {
       background: #064e3b !important;
@@ -60,11 +53,31 @@
     .mine-cell.revealed-bomb {
       background: #7f1d1d !important;
       border-color: #f87171 !important;
-      animation: shake 0.3s ease;
       cursor: default;
     }
 
-    /* Hızlı Mesajlaşma Balonları */
+    /* 3x3 XOX Tahtası */
+    .xox-board-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin: 10px auto;
+      width: 220px;
+      height: 220px;
+    }
+    .xox-cell {
+      background: #070212;
+      border: 2px solid var(--neon-purple);
+      border-radius: 8px;
+      font-size: 28px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(168,85,247,0.2);
+    }
+
     .quick-chat-row {
       display: flex;
       gap: 4px;
@@ -95,20 +108,24 @@
       </div>
     </div>
 
+    <!-- 1. ODA KURMA & KATILMA MENÜSÜ -->
     <div id="pvp-lobby-panel" style="display:flex; flex-direction:column; gap:6px; flex:1; justify-content:center;">
       <div style="font-size:10px; color:var(--text-dim); text-align:center;">1. Kapışma Modunu Seç:</div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
         <button type="button" class="mode-btn" id="m-std" style="background:var(--btn-blue); font-size:10px; text-align:center;" onclick="setGameType('standard')">⚔️ Normal Kasa</button>
         <button type="button" class="mode-btn" id="m-mega" style="font-size:10px; text-align:center;" onclick="setGameType('mega')">💎 Mega Kasa</button>
-        <button type="button" class="mode-btn" id="m-speed" style="font-size:10px; text-align:center;" onclick="setGameType('speedrun')">⚡ Speedrun</button>
-        <button type="button" class="mode-btn" id="m-mines" style="font-size:10px; text-align:center;" onclick="setGameType('mines')">💣 Mayınlı Kasa (3×3)</button>
+        <button type="button" class="mode-btn" id="m-speed" style="font-size:10px; text-align:center;" onclick="setGameType('speedrun')">⚡ 1000P Speedrun</button>
+        <button type="button" class="mode-btn" id="m-mines" style="font-size:10px; text-align:center;" onclick="setGameType('mines')">💣 Mayınlı Kasa</button>
+        <button type="button" class="mode-btn" id="m-xox" style="font-size:10px; text-align:center; grid-column:span 2;" onclick="setGameType('xox')">⭕❌ Canlı XOX (Tic-Tac-Toe)</button>
       </div>
 
-      <div style="font-size:10px; color:var(--text-dim); text-align:center; margin-top:4px;">2. Oyuncu Sayısı:</div>
-      <div style="display:flex; gap:4px;">
-        <button type="button" class="mode-btn" id="btn-p2" style="flex:1; background:var(--btn-blue); color:#fff; text-align:center;" onclick="setRoomSize(2)">1v1<br><small>(5 Hak)</small></button>
-        <button type="button" class="mode-btn" id="btn-p3" style="flex:1; text-align:center;" onclick="setRoomSize(3)">1v1v1<br><small>(10 Hak)</small></button>
-        <button type="button" class="mode-btn" id="btn-p4" style="flex:1; text-align:center;" onclick="setRoomSize(4)">1v1v1v1<br><small>(15 Hak)</small></button>
+      <div id="size-select-section" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+        <div style="font-size:10px; color:var(--text-dim); text-align:center;">2. Oyuncu Sayısı:</div>
+        <div style="display:flex; gap:4px;">
+          <button type="button" class="mode-btn" id="btn-p2" style="flex:1; background:var(--btn-blue); color:#fff; text-align:center;" onclick="setRoomSize(2)">1v1</button>
+          <button type="button" class="mode-btn" id="btn-p3" style="flex:1; text-align:center;" onclick="setRoomSize(3)">3 Kişi</button>
+          <button type="button" class="mode-btn" id="btn-p4" style="flex:1; text-align:center;" onclick="setRoomSize(4)">4 Kişi</button>
+        </div>
       </div>
 
       <button type="button" id="btn-create-room" class="btn-start" style="background:linear-gradient(90deg, #9333ea, #c084fc); margin-top:6px;" onclick="createOnlineRoom()">🔥 Oda Kur</button>
@@ -119,16 +136,19 @@
       </div>
     </div>
 
+    <!-- 2. CANLI MAÇ & ODA ALANI -->
     <div id="pvp-game-panel" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
       <div>
+        <!-- Oyuncuların Skor Kartları -->
         <div style="display:grid; gap:4px; margin-bottom:6px;" id="pvp-players-row"></div>
 
+        <!-- Canlı Sohbet & Reaksiyon Çubuğu -->
         <div style="background:#0c0418; padding:5px; border-radius:6px; border:1px solid #3b1d6e; margin-bottom:6px;">
           <div class="quick-chat-row" style="margin-bottom:4px;">
-            <span class="chat-chip" onclick="sendQuickAction('🔥 Alev Aldım!')">🔥 Alev Aldım!</span>
-            <span class="chat-chip" onclick="sendQuickAction('😎 Kolaydı')">😎 Kolaydı</span>
-            <span class="chat-chip" onclick="sendQuickAction('💀 Mayına Bastım!')">💀 Mayın!</span>
-            <span class="chat-chip" onclick="sendQuickAction('⚡ Yetişemezsin!')">⚡ Yetiş!</span>
+            <span class="chat-chip" onclick="sendQuickAction('🔥 Alev!')">🔥 Alev!</span>
+            <span class="chat-chip" onclick="sendQuickAction('😎 Kolay')">😎 Kolay</span>
+            <span class="chat-chip" onclick="sendQuickAction('⚡ 1000P Benim!')">⚡ 1000P!</span>
+            <span class="chat-chip" onclick="sendQuickAction('💀 Bomba!')">💀 Bomba!</span>
             <span class="chat-chip" onclick="sendQuickAction('👑 GG!')">👑 GG</span>
           </div>
           <div style="display:flex; gap:4px;">
@@ -138,11 +158,13 @@
         </div>
       </div>
 
+      <!-- BEKLEME EKRANI (Maç Başlayana Kadar) -->
       <div id="pvp-waiting-box" style="display:block; text-align:center; padding:15px 0;">
         <div style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">Tüm oyuncular hazır verince maç otomatik başlayacaktır.</div>
         <button type="button" id="btn-ready-pvp" class="btn-start" style="background:var(--neon-gold); color:#000; font-weight:900;" onclick="toggleReadyPvP()">⚡ HAZIR VER</button>
       </div>
 
+      <!-- OYUN ALANI (MAÇ BAŞLAYINCA AÇILIR) -->
       <div id="pvp-play-zone" style="display:none; flex-direction:column; justify-content:space-between; flex:1;">
         
         <div style="display:flex; justify-content:space-between; font-size:10px; margin:4px 0;">
@@ -150,15 +172,29 @@
           <span style="color:var(--neon-gold); font-weight:bold;" id="lbl-pvp-progress">0 / 5</span>
         </div>
 
+        <!-- 1. Normal & Mega Kasa Kutuları -->
         <div id="box-grid-container" style="display:none;">
           <div class="pvp-grid-boxes" id="pvp-boxes-grid"></div>
         </div>
 
+        <!-- 2. 3x3 Mayın Tarlası -->
         <div id="mines-grid-container" style="display:none;">
-          <div style="font-size:9px; color:#f87171; text-align:center;">⚠️ 3×3 Alanda Mayınlara Basmadan Elmasları Topla!</div>
           <div class="mines-grid-3x3" id="mines-3x3-board"></div>
         </div>
 
+        <!-- 3. Canlı 1.000 Puan Speedrun Alanı -->
+        <div id="speedrun-zone" style="display:none; text-align:center; padding:10px 0;">
+          <div style="font-size:11px; color:#38bdf8; margin-bottom:6px;">Hedef: İlk 1.000 Puana Ulaşan Kazanır!</div>
+          <button type="button" class="btn-start" style="background:linear-gradient(90deg, #0284c7, #38bdf8); font-size:14px; padding:16px;" onclick="clickSpeedrunPVP()">⚡ HIZLI AÇ (+20-60P)</button>
+        </div>
+
+        <!-- 4. Canlı XOX Alanı -->
+        <div id="xox-zone" style="display:none; flex-direction:column; align-items:center;">
+          <div id="lbl-xox-turn" style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">Sıra: Bekleniyor...</div>
+          <div class="xox-board-grid" id="xox-board-box"></div>
+        </div>
+
+        <!-- Rulet Alanı (Normal & Mega) -->
         <div id="roulette-wrap-area" style="display:none;">
           <div class="roulette-container" id="pvp-roulette-box">
             <div class="roulette-needle"></div>
@@ -169,12 +205,12 @@
       </div>
     </div>
 
+    <!-- 3. PODYUM & SONUÇLAR -->
     <div id="pvp-podium-panel" style="display:none; flex-direction:column; flex:1; background:#120826; padding:12px; border-radius:8px; border:2px solid var(--neon-purple); justify-content:space-between;">
       <div>
-        <div style="font-size:15px; font-weight:900; color:var(--neon-gold); text-align:center; margin-bottom:4px;">🏆 MAÇ BİTTİ - SIRALAMA</div>
-        <div style="font-size:9.5px; color:#94a3b8; text-align:center; margin-bottom:8px;">Detayları görmek için oyuncuya dokunun:</div>
+        <div style="font-size:15px; font-weight:900; color:var(--neon-gold); text-align:center; margin-bottom:4px;">🏆 MAÇ BİTTİ</div>
+        <div id="podium-result-msg" style="font-size:13px; font-weight:bold; text-align:center; color:#fff; margin-bottom:8px;"></div>
         <div id="podium-list" style="display:flex; flex-direction:column; gap:4px; max-height:180px; overflow-y:auto;"></div>
-        <div id="replay-status-txt" style="text-align:center; font-size:11px; color:var(--neon-gold); margin:6px 0;">Herkes tekrar oyna basmalıdır!</div>
       </div>
 
       <div style="display:flex; gap:6px;">
@@ -184,6 +220,7 @@
     </div>
   </div>
 
+  <!-- Eşya İnceleme Modalı -->
   <div id="modal-pvp-inspect" class="modal-overlay">
     <div class="modal-card">
       <h3 id="inspect-player-name" style="color:var(--neon-blue); font-size:13px; margin-bottom:4px;">Oyuncu Eşyaları</h3>
@@ -193,7 +230,6 @@
   </div>
 
   <script>
-    // Firebase Yapılandırması
     const firebaseConfig = {
       apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
       authDomain: "kutu-acma-pro.firebaseapp.com",
@@ -209,8 +245,8 @@
 
     let roomCapacity = 2, totalBoxesPerPlayer = 5, currentRoomCode = null, selectedGameType = 'standard';
     let myOpenedCount = 0, myTotalScore = 0, myDrops = [], isMatchPlaying = false, isSpinningSlot = false, isMyReady = false, countdownInt = null;
+    let mySymbol = "X";
 
-    // Mod Eşya Havuzları
     const PVP_TIERS = {
       standard: [
         { name: "Tahta Kılıç", p: 2, c: "#fff" }, { name: "Demir Balta", p: 6, c: "#38bdf8" },
@@ -219,10 +255,6 @@
       mega: [
         { name: "Mega Kılıç", p: 25, c: "#fff" }, { name: "Safir Zırh", p: 75, c: "#38bdf8" },
         { name: "Kutsal Asa", p: 200, c: "#c084fc" }, { name: "Tanrısal Kama", p: 600, c: "#f43f5e" }
-      ],
-      speedrun: [
-        { name: "Hız Taşı", p: 10, c: "#fff" }, { name: "Yıldırım", p: 25, c: "#38bdf8" },
-        { name: "Işık Baltası", p: 50, c: "#fbbf24" }, { name: "Zaman Bükücü", p: 120, c: "#f43f5e" }
       ]
     };
 
@@ -247,13 +279,21 @@
     function setGameType(type) {
       selectedGameType = type;
       applyTheme(type);
-      ['std', 'mega', 'speed', 'mines'].forEach(k => {
+      ['std', 'mega', 'speed', 'mines', 'xox'].forEach(k => {
         const el = document.getElementById('m-' + k);
         if (el) el.style.background = '#13072b';
       });
-      const map = { standard: 'std', mega: 'mega', speedrun: 'speed', mines: 'mines' };
+      const map = { standard: 'std', mega: 'mega', speedrun: 'speed', mines: 'mines', xox: 'xox' };
       const activeEl = document.getElementById('m-' + map[type]);
       if (activeEl) activeEl.style.background = 'var(--btn-blue)';
+
+      const sizeSec = document.getElementById("size-select-section");
+      if (type === 'xox') {
+        sizeSec.style.display = 'none';
+        roomCapacity = 2;
+      } else {
+        sizeSec.style.display = 'flex';
+      }
     }
 
     function setRoomSize(num) {
@@ -284,16 +324,19 @@
           lastDrop: "-",
           ready: false,
           wantsReplay: false,
-          drops: []
+          drops: [],
+          symbol: "X"
         };
 
         const roomPayload = {
           code: code,
-          capacity: parseInt(roomCapacity, 10) || 2,
+          capacity: selectedGameType === 'xox' ? 2 : (parseInt(roomCapacity, 10) || 2),
           totalBoxes: parseInt(totalBoxesPerPlayer, 10) || 5,
           gameType: selectedGameType || 'standard',
           status: "waiting",
           createdAt: Date.now(),
+          turn: cleanUID,
+          xoxBoard: ["", "", "", "", "", "", "", "", ""],
           players: {}
         };
         roomPayload.players[cleanUID] = playerData;
@@ -367,7 +410,8 @@
             lastDrop: "-",
             ready: false,
             wantsReplay: false,
-            drops: []
+            drops: [],
+            symbol: "O"
           }).then(() => {
             listenRoom(foundRoom.code);
           });
@@ -405,15 +449,20 @@
 
         pList.forEach(p => {
           const isMe = p.uid === cleanUID;
+          if (isMe) mySymbol = p.symbol || "X";
           if (p.ready) readyCount++;
           if (p.wantsReplay) replayVotes++;
+
+          let hakMetin = `${p.opened}/${totalBoxesPerPlayer} Hak`;
+          if (selectedGameType === 'speedrun') hakMetin = `${p.score}/1000 P`;
+          if (selectedGameType === 'xox') hakMetin = `Sembol: ${p.symbol || '?'}`;
 
           pRow.innerHTML += `
             <div style="background:#070212; border:1px solid ${isMe ? 'var(--neon-gold)' : '#3b1d6e'}; border-radius:6px; padding:4px 2px; text-align:center;">
               <div style="font-size:8px; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:${isMe ? 'var(--neon-gold)' : '#fff'};">${p.fullName}</div>
               <div style="font-size:14px; font-weight:bold; color:var(--neon-green); margin:1px 0;">${p.score} P</div>
               <div style="font-size:8px; color:#38bdf8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.lastDrop}</div>
-              <div style="font-size:7px; color:${p.ready ? 'var(--neon-green)' : '#94a3b8'};">${p.ready ? '⚡ HAZIR' : `${p.opened}/${totalBoxesPerPlayer} Hak`}</div>
+              <div style="font-size:7px; color:${p.ready ? 'var(--neon-green)' : '#94a3b8'};">${p.ready ? '⚡ HAZIR' : hakMetin}</div>
             </div>
           `;
         });
@@ -421,7 +470,6 @@
         const voteBadge = document.getElementById("replay-vote-count");
         if (voteBadge) voteBadge.innerText = `${replayVotes}/${room.capacity}`;
 
-        // Lobi / Bekleme Durumları
         if (readyCount < room.capacity && (room.status === "starting" || room.status === "waiting")) {
           if (countdownInt) { clearInterval(countdownInt); countdownInt = null; }
           if (room.status === "starting") db.ref("pvp_rooms/" + chKey).update({ status: "waiting" });
@@ -449,16 +497,18 @@
           document.getElementById("pvp-waiting-box").style.display = "none";
           document.getElementById("pvp-play-zone").style.display = "flex";
           isMatchPlaying = true;
-          startModeGameplay();
+          startModeGameplay(room);
         }
 
         if (replayVotes === room.capacity && room.status === "finished") resetPvPRound();
 
-        const allDone = pList.length === room.capacity && pList.every(p => p.opened === totalBoxesPerPlayer);
-        if (allDone && room.status === "playing") {
-          document.getElementById("pvp-status-badge").innerText = "🏆 Maç Bitti!";
-          db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
-          setTimeout(() => showPodium(pList), 1800);
+        if (selectedGameType !== 'speedrun' && selectedGameType !== 'xox') {
+          const allDone = pList.length === room.capacity && pList.every(p => p.opened === totalBoxesPerPlayer);
+          if (allDone && room.status === "playing") {
+            document.getElementById("pvp-status-badge").innerText = "🏆 Maç Bitti!";
+            db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
+            setTimeout(() => showPodium(pList, "Maç Tamamlandı!"), 1800);
+          }
         }
       });
     }
@@ -473,39 +523,161 @@
       document.getElementById("btn-ready-pvp").style.background = isMyReady ? "var(--neon-green)" : "var(--neon-gold)";
     }
 
-    // MODLARA GÖRE OYNANIŞ AYARLAMA
-    function startModeGameplay() {
-      document.getElementById("lbl-pvp-progress").innerText = `${myOpenedCount} / ${totalBoxesPerPlayer}`;
-
-      if (selectedGameType === 'mines') {
+    function startModeGameplay(room) {
+      if (selectedGameType === 'speedrun') {
+        document.getElementById("box-grid-container").style.display = "none";
+        document.getElementById("mines-grid-container").style.display = "none";
+        document.getElementById("roulette-wrap-area").style.display = "none";
+        document.getElementById("xox-zone").style.display = "none";
+        document.getElementById("speedrun-zone").style.display = "block";
+        document.getElementById("lbl-mode-title").innerText = "⚡ 1000P Yarışı:";
+        document.getElementById("lbl-pvp-progress").innerText = `${myTotalScore} / 1000 P`;
+      } else if (selectedGameType === 'xox') {
+        document.getElementById("box-grid-container").style.display = "none";
+        document.getElementById("mines-grid-container").style.display = "none";
+        document.getElementById("roulette-wrap-area").style.display = "none";
+        document.getElementById("speedrun-zone").style.display = "none";
+        document.getElementById("xox-zone").style.display = "flex";
+        document.getElementById("lbl-mode-title").innerText = "⭕❌ Canlı XOX:";
+        document.getElementById("lbl-pvp-progress").innerText = `Sen: ${mySymbol}`;
+        renderXOXBoard(room);
+      } else if (selectedGameType === 'mines') {
         document.getElementById("box-grid-container").style.display = "none";
         document.getElementById("roulette-wrap-area").style.display = "none";
+        document.getElementById("speedrun-zone").style.display = "none";
+        document.getElementById("xox-zone").style.display = "none";
         document.getElementById("mines-grid-container").style.display = "block";
         document.getElementById("lbl-mode-title").innerText = "💣 3×3 Mayın Tarlası:";
+        document.getElementById("lbl-pvp-progress").innerText = `${myOpenedCount} / ${totalBoxesPerPlayer}`;
         renderMines3x3Grid();
-      } else if (selectedGameType === 'speedrun') {
-        document.getElementById("mines-grid-container").style.display = "none";
-        document.getElementById("roulette-wrap-area").style.display = "none";
-        document.getElementById("box-grid-container").style.display = "block";
-        document.getElementById("lbl-mode-title").innerText = "⚡ Seri Kutuları Patlat!";
-        renderPvPBoxesGrid(true); // Speedrun hızlı tık modu
       } else {
-        // Standart & Mega
         document.getElementById("mines-grid-container").style.display = "none";
+        document.getElementById("speedrun-zone").style.display = "none";
+        document.getElementById("xox-zone").style.display = "none";
         document.getElementById("box-grid-container").style.display = "block";
         document.getElementById("roulette-wrap-area").style.display = "block";
         document.getElementById("lbl-mode-title").innerText = "📦 Ruletli Kutu Seç:";
-        renderPvPBoxesGrid(false);
+        document.getElementById("lbl-pvp-progress").innerText = `${myOpenedCount} / ${totalBoxesPerPlayer}`;
+        renderPvPBoxesGrid();
       }
     }
 
-    // 3X3 MAYIN TARLASI MOTORU
+    /* 1. SPEEDRUN OYUN MOTORU (İLK 1000 PUAN YAPAN KAZANIR) */
+    function clickSpeedrunPVP() {
+      if (!isMatchPlaying || myTotalScore >= 1000) return;
+
+      const pts = Math.floor(Math.random() * 41) + 20; // 20-60 Puan
+      myTotalScore += pts;
+      myDrops.push({ name: `Hızlı Tık (+${pts}P)`, p: pts, c: '#38bdf8' });
+
+      document.getElementById("lbl-pvp-progress").innerText = `${Math.min(1000, myTotalScore)} / 1000 P`;
+
+      const u = getUserInfo();
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+      const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
+
+      db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
+        score: myTotalScore,
+        lastDrop: `⚡ +${pts}P`,
+        drops: myDrops
+      });
+
+      if (myTotalScore >= 1000) {
+        db.ref("pvp_rooms/" + chKey).update({ status: "finished" });
+        db.ref("pvp_rooms/" + chKey + "/players").once("value", snap => {
+          const list = Object.values(snap.val() || {});
+          showPodium(list, `🏆 ${u.name}${u.tag} 1000 Puana İlk Ulaştı!`);
+        });
+      }
+    }
+
+    /* 2. XOX MOTORU */
+    function renderXOXBoard(room) {
+      const u = getUserInfo();
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+      const board = room.xoxBoard || ["", "", "", "", "", "", "", "", ""];
+      const isMyTurn = room.turn === cleanUID;
+      const turnIndicator = document.getElementById("lbl-xox-turn");
+
+      turnIndicator.innerText = isMyTurn ? "👉 Sıra Sende! Hamle Yap." : "⏳ Rakibin Hamlesi Bekleniyor...";
+      turnIndicator.style.color = isMyTurn ? "var(--neon-green)" : "var(--neon-gold)";
+
+      const container = document.getElementById("xox-board-box");
+      container.innerHTML = "";
+
+      board.forEach((val, idx) => {
+        const cell = document.createElement("div");
+        cell.className = "xox-cell";
+        cell.innerText = val;
+        if (val === "X") cell.style.color = "var(--neon-blue)";
+        if (val === "O") cell.style.color = "var(--neon-gold)";
+
+        cell.onclick = () => {
+          if (!isMyTurn || val !== "" || !isMatchPlaying) return;
+          board[idx] = mySymbol;
+
+          const pList = Object.keys(room.players || {});
+          const nextTurn = pList.find(id => id !== cleanUID) || cleanUID;
+          const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
+
+          if (checkXOXWinner(board)) {
+            myTotalScore += 100;
+            myDrops.push({ name: "XOX Galibiyeti", p: 100, c: '#fbbf24' });
+
+            db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
+              score: myTotalScore,
+              lastDrop: "👑 XOX Kazandı!",
+              drops: myDrops
+            });
+
+            db.ref("pvp_rooms/" + chKey).update({
+              xoxBoard: board,
+              status: "finished"
+            });
+
+            setTimeout(() => {
+              db.ref("pvp_rooms/" + chKey + "/players").once("value", snap => {
+                showPodium(Object.values(snap.val() || {}), `🏆 ${u.name}${u.tag} XOX'i Kazandı!`);
+              });
+            }, 600);
+
+          } else if (board.every(b => b !== "")) {
+            db.ref("pvp_rooms/" + chKey).update({
+              xoxBoard: board,
+              status: "finished"
+            });
+            setTimeout(() => {
+              db.ref("pvp_rooms/" + chKey + "/players").once("value", snap => {
+                showPodium(Object.values(snap.val() || {}), "🤝 Berabere Bitti!");
+              });
+            }, 600);
+          } else {
+            db.ref("pvp_rooms/" + chKey).update({
+              xoxBoard: board,
+              turn: nextTurn
+            });
+          }
+        };
+
+        container.appendChild(cell);
+      });
+    }
+
+    function checkXOXWinner(b) {
+      const lines = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]
+      ];
+      return lines.some(([x, y, z]) => b[x] && b[x] === b[y] && b[x] === b[z]);
+    }
+
+    /* 3. MAYIN TARLASI MOTORU */
     function renderMines3x3Grid() {
       const board = document.getElementById("mines-3x3-board");
       if (board.children.length > 0) return;
       board.innerHTML = "";
 
-      // 9 karenin 3'üne rastgele bomba koy
       const bombIndexes = [];
       while (bombIndexes.length < 3) {
         let r = Math.floor(Math.random() * 9);
@@ -555,7 +727,6 @@
             drops: myDrops
           });
 
-          // Eğer 9 hücrenin çoğu açıldıysa ve oyuncunun hakkı varsa tahtayı yenile
           if (myOpenedCount < totalBoxesPerPlayer && board.querySelectorAll('[data-revealed="1"]').length >= 6) {
             setTimeout(() => {
               board.innerHTML = "";
@@ -568,8 +739,8 @@
       }
     }
 
-    // NORMAL / MEGA / SPEEDRUN KUTULARI
-    function renderPvPBoxesGrid(isSpeedrun) {
+    /* 4. NORMAL & MEGA KASA MOTORU */
+    function renderPvPBoxesGrid() {
       const grid = document.getElementById("pvp-boxes-grid");
       if (grid.children.length > 0) return;
       grid.innerHTML = "";
@@ -578,37 +749,12 @@
         const b = document.createElement("div");
         b.className = "roulette-item";
         b.style.cssText = "width:100%; height:50px; cursor:pointer;";
-        b.innerHTML = `<span>${isSpeedrun ? '⚡' : '📦'}</span><span style="font-size:7px;">${i+1}</span>`;
+        b.innerHTML = `<span>📦</span><span style="font-size:7px;">${i+1}</span>`;
 
         b.onclick = () => {
           if (!isMatchPlaying || isSpinningSlot || b.dataset.opened || myOpenedCount >= totalBoxesPerPlayer) return;
           b.dataset.opened = "1";
-
-          if (isSpeedrun) {
-            // Hızlı Speedrun Tıklaması
-            const pool = PVP_TIERS.speedrun;
-            const drop = pool[Math.floor(Math.random() * pool.length)];
-            myTotalScore += drop.p;
-            myOpenedCount++;
-            myDrops.push(drop);
-
-            b.style.background = "#070212";
-            b.innerHTML = `<span style="color:${drop.c}; font-size:6px;">${drop.name}</span><b style="color:var(--neon-green); font-size:8px;">+${drop.p}P</b>`;
-            document.getElementById("lbl-pvp-progress").innerText = `${myOpenedCount} / ${totalBoxesPerPlayer}`;
-
-            const u = getUserInfo();
-            const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
-            const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
-            db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({
-              score: myTotalScore,
-              opened: myOpenedCount,
-              lastDrop: `⚡ +${drop.p}P (${drop.name})`,
-              drops: myDrops
-            });
-          } else {
-            // Normal & Mega Ruletli Çevirme
-            spinSlotForPvP(b);
-          }
+          spinSlotForPvP(b);
         };
         grid.appendChild(b);
       }
@@ -667,10 +813,9 @@
       }, 2300);
     }
 
-    // SOHBET & REAKSİYON FONKSİYONLARI
     function sendQuickAction(txt) {
       const u = getUserInfo();
-      if (!currentRoomCode || !u) return;
+      if (!currentRoomCode) return;
       const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       const chKey = currentRoomCode.replace(/[^a-zA-Z0-9]/g, '_');
       db.ref(`pvp_rooms/${chKey}/players/${cleanUID}`).update({ lastDrop: txt });
@@ -684,9 +829,10 @@
       input.value = "";
     }
 
-    function showPodium(pList) {
+    function showPodium(pList, msg) {
       document.getElementById("pvp-game-panel").style.display = "none";
       document.getElementById("pvp-podium-panel").style.display = "flex";
+      document.getElementById("podium-result-msg").innerText = msg || "Maç Bitti!";
 
       const u = getUserInfo();
       const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
@@ -711,7 +857,7 @@
     }
 
     function openPvPInspect(player) {
-      document.getElementById("inspect-player-name").innerText = `${player.fullName} - Çıkan Eşyalar`;
+      document.getElementById("inspect-player-name").innerText = `${player.fullName} - Döküm`;
       const box = document.getElementById("inspect-drops-list");
       box.innerHTML = "";
 
@@ -725,7 +871,7 @@
           `;
         });
       } else {
-        box.innerHTML = "<div style='color:#666; font-size:10px; padding:10px; text-align:center;'>Eşya dökümü bulunamadı.</div>";
+        box.innerHTML = "<div style='color:#666; font-size:10px; padding:10px; text-align:center;'>Döküm bulunamadı.</div>";
       }
 
       document.getElementById("modal-pvp-inspect").style.display = "flex";
@@ -750,7 +896,10 @@
         score: 0, opened: 0, lastDrop: "-", ready: false, wantsReplay: false, drops: []
       });
 
-      db.ref(`pvp_rooms/${chKey}`).update({ status: "waiting" });
+      db.ref(`pvp_rooms/${chKey}`).update({
+        status: "waiting",
+        xoxBoard: ["", "", "", "", "", "", "", "", ""]
+      });
 
       document.getElementById("pvp-boxes-grid").innerHTML = "";
       document.getElementById("mines-3x3-board").innerHTML = "";
