@@ -3,131 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kasa Açma Oyunu - Ana Lobi</title>
+  <title>Kasa Açma Oyunu</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    /* Orijinal 2 Sütunlu Mod Izgarası */
+    .mode-grid-2col {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+  </style>
 </head>
 <body class="bg-standard">
 
   <div class="app-container">
     
     <div class="top-header">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <div class="user-avatar" id="u-avatar" style="font-size:26px; cursor:pointer;" onclick="location.href='inventory.html'">👤</div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="u-avatar" style="font-size:24px;">👤</span>
         <div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span style="font-weight:900; font-size:13px; color:#fff;" id="u-name">Oyuncu#0000</span>
-            <span class="badge" id="u-title" style="background:#4338ca; font-size:9px; padding:2px 6px;">Çaylak</span>
-          </div>
-          <div style="display:flex; gap:10px; font-size:11px; margin-top:2px;">
-            <span style="color:var(--neon-gold); font-weight:bold;" id="u-gold">🪙 0 Altın</span>
-            <span style="color:#38bdf8; font-weight:bold;" id="u-gems">💎 0 Elmas</span>
-          </div>
+          <b id="u-name" style="font-size:13px; color:#fff;">Oyuncu#0000</b>
+          <div id="u-title" style="font-size:10px; color:#94a3b8;">Çaylak</div>
         </div>
       </div>
-
       <div style="display:flex; align-items:center; gap:6px;">
-        <button class="icon-btn" style="border-color:#eab308; color:#eab308;" onclick="claimDailyReward()">🎁 Günlük</button>
-        <button class="icon-btn" style="border-color:var(--danger); color:var(--danger);" onclick="logoutUser()">🚪 Çıkış</button>
+        <a href="leaderboard.html" class="icon-btn" style="text-decoration:none;">🏆 Sıralama</a>
+        <a href="chat.html" class="icon-btn" style="text-decoration:none;">💬 Sohbet</a>
+        <button class="icon-btn" style="border-color:var(--danger); color:var(--danger);" onclick="logoutUser()">Çıkış</button>
       </div>
     </div>
 
-    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin: 12px 0;">
-      <a href="chat.html" class="icon-btn" style="text-decoration:none; text-align:center; padding:8px 0; font-weight:bold;">💬 Sohbet</a>
-      <a href="friends.html" class="icon-btn" style="text-decoration:none; text-align:center; padding:8px 0; font-weight:bold;">👥 Arkadaşlar</a>
-      <a href="leaderboard.html" class="icon-btn" style="text-decoration:none; text-align:center; padding:8px 0; font-weight:bold;">🏆 Sıralama</a>
-      <a href="inventory.html" class="icon-btn" style="text-decoration:none; text-align:center; padding:8px 0; font-weight:bold;">🎒 Envanter</a>
-    </div>
-
-    <div style="font-weight:800; font-size:12px; color:#94a3b8; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-      <span>🎮 OYUN MODLARI</span>
-    </div>
-
-    <div class="mode-grid">
+    <div class="mode-grid-2col">
       
       <a href="game.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">📦</div>
         <div class="mode-title">Klasik Kasa</div>
-        <div class="mode-desc">Tek tek şansını dene ve nadir eşyaları topla.</div>
+        <div class="mode-desc">Tekli şanslı kasa açılışı</div>
       </a>
 
       <a href="tencases.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">📦🔟</div>
         <div class="mode-title">10 Kutu Aç</div>
-        <div class="mode-desc">Seri 10 kasayı aynı anda aç, rekor puan kazan.</div>
+        <div class="mode-desc">10 kasayı tek seferde aç</div>
       </a>
 
       <a href="catch_basket.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">🧺</div>
         <div class="mode-title">Tut & Aç</div>
-        <div class="mode-desc">Gökten düşen kasaları sepetinle yakala.</div>
+        <div class="mode-desc">Düşen kasaları sepete yakala</div>
       </a>
 
       <a href="catch_open.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">🎯</div>
         <div class="mode-title">Yakala & Aç</div>
-        <div class="mode-desc">Hızlıca dönen göstergeyi hedefe denk getir.</div>
+        <div class="mode-desc">Hedef göstergeyi tuttur</div>
       </a>
 
       <a href="mines.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">💣</div>
         <div class="mode-title">Mayınlı Kasa</div>
-        <div class="mode-desc">Tuzaklara takılmadan katları tek tek tırman.</div>
+        <div class="mode-desc">Mayınlara basmadan ilerle</div>
       </a>
 
       <a href="mega.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">💎</div>
         <div class="mode-title">Mega Kasa</div>
-        <div class="mode-desc">Büyük ödüller, özel kasalar ve dev kazanç.</div>
+        <div class="mode-desc">Büyük ödüllü mega kasalar</div>
       </a>
 
       <a href="speedrun.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">⚡</div>
         <div class="mode-title">Speedrun</div>
-        <div class="mode-desc">Zaman dolmadan en çok puanı topla.</div>
+        <div class="mode-desc">Süreye karşı yarış</div>
       </a>
 
       <a href="temple.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">🏛️</div>
         <div class="mode-title">Gizli Tapınak</div>
-        <div class="mode-desc">Kadim kapıları arala, gizli odaya ulaş.</div>
+        <div class="mode-desc">Antik kapıların ardındaki ödül</div>
       </a>
 
       <a href="double.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">🎰</div>
         <div class="mode-title">Çift Rulet</div>
-        <div class="mode-desc">İki çarkı aynı anda çevir, çarpanları katla.</div>
+        <div class="mode-desc">İki çarklı şans ruleti</div>
       </a>
 
       <a href="wheel.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">🎡</div>
         <div class="mode-title">Çarkıfelek</div>
-        <div class="mode-desc">Günlük şans çarkını çevir ve ödülleri kap.</div>
+        <div class="mode-desc">Şans çarkını çevir</div>
       </a>
 
       <a href="scratch.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">🪙</div>
         <div class="mode-title">Kazı Kazan</div>
-        <div class="mode-desc">Kartı kazı, 3 eşleşen ödülü hemen kazan.</div>
+        <div class="mode-desc">Kartı kazı ve ödülü bul</div>
       </a>
 
       <a href="memory.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">🃏</div>
         <div class="mode-title">Kart Eşleme</div>
-        <div class="mode-desc">Eşleşen kartları bul, hafızanı test et.</div>
+        <div class="mode-desc">Kart çiftlerini eşleştir</div>
       </a>
 
       <a href="merge.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">♾️</div>
-        <div class="mode-title">Birleştirme (Merge)</div>
-        <div class="mode-desc">Aynı kasaları birleştirip üst seviyeleri keşfet.</div>
+        <div class="mode-title">Birleştirme</div>
+        <div class="mode-desc">Kasaları birleştir, seviye atla</div>
       </a>
 
       <a href="guess.html" class="mode-card" style="text-decoration:none;">
         <div class="mode-icon">🔮</div>
         <div class="mode-title">Kasa Tahmin</div>
-        <div class="mode-desc">Büyük ödülün saklandığı kasayı tahmin et.</div>
+        <div class="mode-desc">Gizli kutuyu tahmin et</div>
       </a>
 
     </div>
@@ -140,21 +132,13 @@
       const u = getActiveUser();
       if (!u) return location.href = "index.html";
 
-      document.getElementById("u-name").innerText = `${u.name}${u.tag || ''}`;
+      document.getElementById("u-name").innerText = `${u.name || 'Oyuncu'}${u.tag || ''}`;
       document.getElementById("u-avatar").innerText = u.avatar || '👤';
       document.getElementById("u-title").innerText = u.title || 'Çaylak';
-      document.getElementById("u-gold").innerText = `🪙 ${u.gold || 0} Altın`;
-      if (document.getElementById("u-gems")) {
-        document.getElementById("u-gems").innerText = `💎 ${u.gems || 0} Elmas`;
-      }
     };
 
-    function claimDailyReward() {
-      alert("🎁 Günlük ödülün hesabına eklendi: +100 Altın!");
-    }
-
     function logoutUser() {
-      if (confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+      if (confirm("Çıkış yapmak istiyor musunuz?")) {
         localStorage.removeItem("kutu_active_user");
         location.href = "index.html";
       }
