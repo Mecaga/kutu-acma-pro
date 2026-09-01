@@ -7,6 +7,47 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    /* Dinamik Arka Plan Renk Tonları ve Akıcı Geçiş */
+    body {
+      transition: background 0.4s ease-in-out, background-color 0.4s ease-in-out;
+      background-attachment: fixed;
+    }
+
+    .bg-standard {
+      background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #030712 85%) !important;
+    }
+
+    .bg-catch_open {
+      background: radial-gradient(circle at 50% 20%, #1e3a5f 0%, #020617 85%) !important;
+    }
+
+    .bg-mines_mode {
+      background: radial-gradient(circle at 50% 20%, #450a0a 0%, #050505 85%) !important;
+    }
+
+    .bg-speedrun_mode {
+      background: radial-gradient(circle at 50% 20%, #431407 0%, #090302 85%) !important;
+    }
+
+    .bg-double_mode {
+      background: radial-gradient(circle at 50% 20%, #3b0764 0%, #05010a 85%) !important;
+    }
+
+    .bg-farm_mode {
+      background: radial-gradient(circle at 50% 20%, #064e3b 0%, #02140d 85%) !important;
+    }
+
+    /* Kart Aktiflik Efekti */
+    .mode-card-8 {
+      transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .mode-card-8.active {
+      border-color: var(--neon-gold) !important;
+      box-shadow: 0 0 12px rgba(251, 191, 36, 0.35);
+      transform: scale(1.02);
+    }
+  </style>
 </head>
 <body class="bg-standard">
   <div class="app-container" style="justify-content:space-between;">
@@ -126,8 +167,8 @@
       catch_open: { bg: "bg-catch_open", title: "YAKALA & AÇ", tiers: [{name:"Classic Kasa (%45)",pts:"2-5P",c:"#fff"},{name:"Super Kasa (%30)",pts:"6-18P",c:"#38bdf8"},{name:"Ultra Kasa (%15)",pts:"25-60P",c:"#c084fc"},{name:"Omega Kasa (%8)",pts:"80-250P",c:"#fb923c"},{name:"Godly Kasa (%2)",pts:"750-1500P",c:"#f43f5e"}] },
       mines_mode: { bg: "bg-mines_mode", title: "MAYINLI KASA", tiers: [{name:"Güvenli Kasa (%70)",pts:"15-45P",c:"#10b981"},{name:"Büyük Hazine (%30)",pts:"60-160P",c:"#fbbf24"},{name:"Bomba",pts:"0P",c:"#ef4444"}] },
       speedrun_mode: { bg: "bg-speedrun_mode", title: "SPEEDRUN YARIŞI", tiers: [{name:"Hızlı Kasa",pts:"20-60P",c:"#38bdf8"},{name:"Hedef",pts:"En Hızlı 1000P!",c:"#f43f5e"}] },
-      double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] },
-      farm_mode: { bg: "bg-standard", title: "KASA ÇİFTLİĞİ", tiers: [{name:"Tarla Mahsulleri",pts:"10-100 Altın",c:"#10b981"},{name:"Hayvancılık Ürünleri",pts:"50-350 Altın",c:"#fbbf24"},{name:"Nadir Hasat",pts:"500-1500 Altın",c:"#f43f5e"}] }
+      double_mode: { bg: "bg-double_mode", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] },
+      farm_mode: { bg: "bg-farm_mode", title: "KASA ÇİFTLİĞİ", tiers: [{name:"Tarla Mahsulleri",pts:"10-100 Altın",c:"#10b981"},{name:"Hayvancılık Ürünleri",pts:"50-350 Altın",c:"#fbbf24"},{name:"Nadir Hasat",pts:"500-1500 Altın",c:"#f43f5e"}] }
     };
 
     window.onload = () => {
