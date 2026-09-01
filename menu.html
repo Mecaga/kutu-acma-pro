@@ -2,50 +2,89 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Kutu Açma Pro - Lobi</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
-    /* Dinamik Arka Plan Renk Tonları ve Akıcı Geçiş */
-    body {
-      transition: background 0.4s ease-in-out, background-color 0.4s ease-in-out;
+    /* Hem PC hem Mobilde 100dvh Akıcı Geçiş */
+    html, body {
+      width: 100%;
+      height: 100%;
+      min-height: 100dvh;
+      margin: 0;
+      padding: 0;
+      transition: background 0.35s ease, background-color 0.35s ease;
       background-attachment: fixed;
     }
 
-    .bg-standard {
-      background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #030712 85%) !important;
+    /* Mobilde arkaplanı görebilmek için konteyneri yarı-saydam yapıyoruz */
+    .app-container {
+      background: rgba(3, 7, 18, 0.72) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
+      transition: box-shadow 0.35s ease, border-color 0.35s ease;
     }
 
-    .bg-catch_open {
-      background: radial-gradient(circle at 50% 20%, #1e3a5f 0%, #020617 85%) !important;
+    /* 1. Normal Kasa (Neon Mavi / Mor) */
+    body.bg-standard {
+      background: radial-gradient(circle at 50% 30%, #312e81 0%, #030712 90%) !important;
+    }
+    body.bg-standard .app-container {
+      box-shadow: inset 0 0 50px rgba(99, 102, 241, 0.25);
     }
 
-    .bg-mines_mode {
-      background: radial-gradient(circle at 50% 20%, #450a0a 0%, #050505 85%) !important;
+    /* 2. Yakala & Aç (Kozmik Camgöbeği) */
+    body.bg-catch_open {
+      background: radial-gradient(circle at 50% 30%, #0e7490 0%, #020617 90%) !important;
+    }
+    body.bg-catch_open .app-container {
+      box-shadow: inset 0 0 50px rgba(6, 182, 212, 0.25);
     }
 
-    .bg-speedrun_mode {
-      background: radial-gradient(circle at 50% 20%, #431407 0%, #090302 85%) !important;
+    /* 3. Mayınlı Kasa (Tehlike Kırmızı / Lav) */
+    body.bg-mines_mode {
+      background: radial-gradient(circle at 50% 30%, #7f1d1d 0%, #030202 90%) !important;
+    }
+    body.bg-mines_mode .app-container {
+      box-shadow: inset 0 0 50px rgba(239, 68, 68, 0.3);
     }
 
-    .bg-double_mode {
-      background: radial-gradient(circle at 50% 20%, #3b0764 0%, #05010a 85%) !important;
+    /* 4. Speedrun (Elektrik Turuncusu) */
+    body.bg-speedrun_mode {
+      background: radial-gradient(circle at 50% 30%, #c2410c 0%, #0a0402 90%) !important;
+    }
+    body.bg-speedrun_mode .app-container {
+      box-shadow: inset 0 0 50px rgba(249, 115, 22, 0.3);
     }
 
-    .bg-farm_mode {
-      background: radial-gradient(circle at 50% 20%, #064e3b 0%, #02140d 85%) !important;
+    /* 5. Çift Rulet (Mistik Mor) */
+    body.bg-double_mode {
+      background: radial-gradient(circle at 50% 30%, #6b21a8 0%, #08020d 90%) !important;
+    }
+    body.bg-double_mode .app-container {
+      box-shadow: inset 0 0 50px rgba(168, 85, 247, 0.3);
     }
 
-    /* Kart Aktiflik Efekti */
+    /* 6. Kasa Çiftliği (Zümrüt Yeşili) */
+    body.bg-farm_mode {
+      background: radial-gradient(circle at 50% 30%, #065f46 0%, #01140b 90%) !important;
+    }
+    body.bg-farm_mode .app-container {
+      box-shadow: inset 0 0 50px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Seçili Buton Parlaması */
     .mode-card-8 {
-      transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+      transition: all 0.2s ease;
     }
     .mode-card-8.active {
       border-color: var(--neon-gold) !important;
-      box-shadow: 0 0 12px rgba(251, 191, 36, 0.35);
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.45) !important;
       transform: scale(1.02);
+      background: rgba(255, 255, 255, 0.08) !important;
     }
   </style>
 </head>
