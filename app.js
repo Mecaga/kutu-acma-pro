@@ -2,13 +2,11 @@
 const firebaseConfig = {
   apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
   authDomain: "kutu-acma-pro.firebaseapp.com",
-  databaseURL: "https://kutu-acma-pro-default-rtdb.firebaseio.com",
   projectId: "kutu-acma-pro",
   storageBucket: "kutu-acma-pro.firebasestorage.app",
   messagingSenderId: "483395048462",
   appId: "1:483395048462:web:450f18178e682a4a2f985f"
 };
-
 if (typeof firebase !== "undefined") {
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
