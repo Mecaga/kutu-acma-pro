@@ -3,29 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Canlı Sohbet Odaları</title>
+  <title>Canlı Sohbet & Kanallar</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      overflow: hidden;
-      background: #020617;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #fff;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+    html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #020617; font-family: system-ui, sans-serif; color: #fff; }
+    
     .chat-layout {
       position: relative;
       width: 100%;
@@ -33,13 +18,11 @@
       height: 100dvh;
       margin: 0 auto;
       background: #030712;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
-    /* Üst Sabit Başlık */
-    .chat-top-header {
+    .chat-header {
       flex-shrink: 0;
       background: #090d1a;
       border-bottom: 2px solid #1e293b;
@@ -47,11 +30,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 1000;
+      z-index: 100;
     }
 
-    /* Kanal Seçim Şeridi */
-    .channel-bar {
+    .channel-nav-bar {
       flex-shrink: 0;
       background: #0b1120;
       border-bottom: 1px solid #1e293b;
@@ -61,7 +43,7 @@
       overflow-x: auto;
       scrollbar-width: none;
     }
-    .channel-bar::-webkit-scrollbar { display: none; }
+    .channel-nav-bar::-webkit-scrollbar { display: none; }
 
     .channel-chip {
       flex: 0 0 auto;
@@ -69,33 +51,26 @@
       background: #1e293b;
       border: 1px solid #334155;
       color: #94a3b8;
-      font-size: 8.5px;
+      font-size: 8px;
       font-weight: bold;
       border-radius: 12px;
       cursor: pointer;
     }
-    .channel-chip.active {
-      background: #4338ca;
-      border-color: var(--neon-gold);
-      color: #fff;
-    }
+    .channel-chip.active { background: #4338ca; border-color: var(--neon-gold); color: #fff; }
 
-    /* Mesaj Akış Alanı */
-    .messages-scroll-area {
+    .chat-content-area {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      overflow-x: hidden;
       padding: 8px;
       display: flex;
       flex-direction: column;
       gap: 6px;
       -webkit-overflow-scrolling: touch;
     }
-    .messages-scroll-area::-webkit-scrollbar { width: 3px; }
-    .messages-scroll-area::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
+    .chat-content-area::-webkit-scrollbar { width: 3px; }
+    .chat-content-area::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
 
-    /* Mesaj Kartı */
     .msg-bubble {
       background: #0f172a;
       border: 1px solid #1e293b;
@@ -108,22 +83,20 @@
       max-width: 90%;
       word-break: break-word;
     }
-    .msg-bubble.is-me {
-      align-self: flex-end;
-      background: #1e1b4b;
-      border-color: #6366f1;
-    }
-    .msg-header {
+    .msg-bubble.is-me { align-self: flex-end; background: #1e1b4b; border-color: #6366f1; }
+
+    .channel-list-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 6px 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 7.5px;
-      color: #94a3b8;
-      gap: 6px;
+      font-size: 8.5px;
     }
 
-    /* Alt Sabit Yazma Alanı */
-    .chat-bottom-bar {
+    .chat-input-bar {
       flex-shrink: 0;
       background: #090d1a;
       border-top: 2px solid #1e293b;
@@ -131,111 +104,158 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
-      z-index: 1000;
-    }
-
-    .quick-emojis-row {
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .quick-emojis-row::-webkit-scrollbar { display: none; }
-    .emoji-chip {
-      background: #1e293b;
-      padding: 2px 6px;
-      border-radius: 8px;
-      font-size: 10px;
-      cursor: pointer;
+      z-index: 100;
     }
   </style>
 </head>
 <body>
   <div class="chat-layout">
     
-    <!-- 1. Üst Başlık -->
-    <div class="chat-top-header">
-      <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
-      <div style="font-weight:900; font-size:11px; color:#38bdf8;" id="lbl-channel-title">💬 Genel Sohbet</div>
-      <a href="friends.html" class="icon-btn" style="background:#4338ca; padding:2px 8px; font-size:9.5px; text-decoration:none;">👥 Arkadaşlar</a>
+    <!-- Üst Başlık -->
+    <div class="chat-header">
+      <div style="display:flex; gap:3px;">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
+        <button type="button" class="icon-btn" style="background:#7c3aed; padding:2px 6px; font-size:8.5px;" onclick="openCreateChannelModal()">➕ Kanal Kur</button>
+      </div>
+      <div style="font-weight:900; font-size:11px; color:#38bdf8;" id="lbl-active-title">💬 Global Sohbet</div>
+      <a href="friends.html" class="icon-btn" style="background:#0284c7; padding:2px 8px; font-size:9.5px; text-decoration:none;">👥 Arkadaşlar</a>
     </div>
 
-    <!-- 2. Kanal Seçimi -->
-    <div class="channel-bar">
-      <button type="button" class="channel-chip active" id="chn-general" onclick="switchChannel('general')">🌍 Genel Oda</button>
-      <button type="button" class="channel-chip" id="chn-trade" onclick="switchChannel('trade')">🏪 Pazar & Ticaret</button>
-      <button type="button" class="channel-chip" id="chn-farm" onclick="switchChannel('farm')">🌾 Çiftlik Yardımlaşma</button>
-      <button type="button" class="channel-chip" id="chn-pvp" onclick="switchChannel('pvp')">⚔️ PvP Meydanı</button>
+    <!-- Sekmeler / Kanallar -->
+    <div class="channel-nav-bar" id="channels-bar-container">
+      <button type="button" class="channel-chip active" id="chip-global" onclick="selectChannel('global', '🌍 Global Sohbet')">🌍 Global</button>
+      <button type="button" class="channel-chip" id="chip-channels-list" onclick="viewAllChannelsTab()">📋 Tüm Kanallar</button>
+      <button type="button" class="channel-chip" id="chip-trade" onclick="selectChannel('trade', '🏪 Ticaret & Pazar')">🏪 Ticaret</button>
+      <button type="button" class="channel-chip" id="chip-farm" onclick="selectChannel('farm', '🌾 Çiftlik Yardımlaşma')">🌾 Çiftlik</button>
+      <button type="button" class="channel-chip" id="chip-pvp" onclick="selectChannel('pvp', '⚔️ PvP Meydanı')">⚔️ PvP</button>
     </div>
 
-    <!-- 3. Mesajlar Akış Alanı -->
-    <div class="messages-scroll-area" id="chat-messages-container">
+    <!-- Mesaj / Kanal Listesi Alanı -->
+    <div class="chat-content-area" id="chat-messages-box">
       <div style="color:#64748b; font-size:8px; text-align:center; padding:10px;">Mesajlar yükleniyor...</div>
     </div>
 
-    <!-- 4. Alt Sabit Gönderme Alanı -->
-    <div class="chat-bottom-bar">
-      <div class="quick-emojis-row">
-        <span class="emoji-chip" onclick="insertEmoji('🔥')">🔥</span>
-        <span class="emoji-chip" onclick="insertEmoji('🌾')">🌾</span>
-        <span class="emoji-chip" onclick="insertEmoji('⚔️')">⚔️</span>
-        <span class="emoji-chip" onclick="insertEmoji('🪙')">🪙</span>
-        <span class="emoji-chip" onclick="insertEmoji('👑')">👑</span>
-        <span class="emoji-chip" onclick="insertEmoji('😎')">😎</span>
-        <span class="emoji-chip" onclick="insertEmoji('🤝')">🤝</span>
+    <!-- Alt Mesaj Gönderme Çubuğu -->
+    <div class="chat-input-bar" id="chat-input-panel">
+      <div style="display:flex; gap:4px; overflow-x:auto; scrollbar-width:none;">
+        <span style="background:#1e293b; padding:2px 6px; border-radius:6px; font-size:10px; cursor:pointer;" onclick="insertEmoji('🔥')">🔥</span>
+        <span style="background:#1e293b; padding:2px 6px; border-radius:6px; font-size:10px; cursor:pointer;" onclick="insertEmoji('🌾')">🌾</span>
+        <span style="background:#1e293b; padding:2px 6px; border-radius:6px; font-size:10px; cursor:pointer;" onclick="insertEmoji('⚔️')">⚔️</span>
+        <span style="background:#1e293b; padding:2px 6px; border-radius:6px; font-size:10px; cursor:pointer;" onclick="insertEmoji('🪙')">🪙</span>
+        <span style="background:#1e293b; padding:2px 6px; border-radius:6px; font-size:10px; cursor:pointer;" onclick="insertEmoji('👑')">👑</span>
+        <span style="background:#1e293b; padding:2px 6px; border-radius:6px; font-size:10px; cursor:pointer;" onclick="insertEmoji('😎')">😎</span>
       </div>
       <div style="display:flex; gap:4px;">
-        <input type="text" id="in-chat-text" class="input-field" style="margin:0; flex:1; font-size:10px; padding:6px 8px;" placeholder="Mesajını yaz..." onkeydown="handleChatKey(event)">
-        <button type="button" class="icon-btn" style="background:#16a34a; padding:6px 12px; font-size:10px; font-weight:bold;" onclick="sendMessage()">Gönder</button>
+        <input type="text" id="in-chat-text" class="input-field" style="margin:0; flex:1; font-size:9.5px; padding:6px 8px;" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+        <button type="button" class="icon-btn" style="background:#16a34a; padding:6px 12px; font-size:9.5px; font-weight:bold;" onclick="sendChatMessage()">Gönder</button>
       </div>
     </div>
 
   </div>
 
+  <!-- KANAL KURMA MODALI -->
+  <div id="modal-create-channel" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <div style="font-size:12px; font-weight:bold; color:var(--neon-purple); text-align:center;">➕ Yeni Sohbet Kanalı Kur</div>
+      <div style="font-size:8px; color:#cbd5e1; text-align:center;">Arkadaşlarınla konuşmak için özel bir kanal oluştur!</div>
+
+      <div style="display:flex; flex-direction:column; gap:4px; font-size:8px; margin:4px 0;">
+        <label>Kanal Adı:</label>
+        <input type="text" id="in-channel-name" class="icon-btn" style="width:100%; padding:5px; font-size:9px; background:#0f172a;" placeholder="Örn: Efsane Çiftçiler">
+        <label>Kanal Simgesi:</label>
+        <select id="sel-channel-icon" class="icon-btn" style="width:100%; padding:4px; font-size:9px; background:#1e293b;">
+          <option value="💬">💬 Standart</option>
+          <option value="🌾">🌾 Çiftlik Ekibi</option>
+          <option value="⚔️">⚔️ PvP Klanı</option>
+          <option value="💎">💎 Zenginler Kulübü</option>
+          <option value="🚀">🚀 Hızlı Sohbet</option>
+        </select>
+      </div>
+
+      <div style="display:flex; gap:4px;">
+        <button type="button" class="icon-btn" style="flex:1; background:#7c3aed; font-size:8.5px; padding:5px; font-weight:bold;" onclick="confirmCreateChannel()">Kanalı Oluştur</button>
+        <button type="button" class="icon-btn" style="flex:1; background:#334155; font-size:8.5px; padding:5px;" onclick="document.getElementById('modal-create-channel').style.display='none'">İptal</button>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
   <script>
-    let activeChannel = 'general';
+    let currentChannel = 'global';
     let chatListener = null;
 
     window.onload = () => {
       const u = getActiveUser();
       if (!u) return location.href = "index.html";
-      listenChannel(activeChannel);
+      selectChannel('global', '🌍 Global Sohbet');
     };
 
-    function switchChannel(channelKey) {
-      activeChannel = channelKey;
-      ['general', 'trade', 'farm', 'pvp'].forEach(c => {
-        const btn = document.getElementById(`chn-${c}`);
-        if (btn) btn.classList.toggle('active', c === channelKey);
-      });
+    function selectChannel(chKey, title) {
+      currentChannel = chKey;
+      document.getElementById("lbl-active-title").innerText = title;
+      document.getElementById("chat-input-panel").style.display = "flex";
 
-      const titleMap = {
-        general: "💬 Genel Sohbet",
-        trade: "🏪 Pazar & Ticaret",
-        farm: "🌾 Çiftlik Yardımlaşma",
-        pvp: "⚔️ PvP Meydanı"
-      };
-      document.getElementById("lbl-channel-title").innerText = titleMap[channelKey];
-      listenChannel(channelKey);
+      document.querySelectorAll(".channel-chip").forEach(c => c.classList.remove("active"));
+      const activeBtn = document.getElementById(`chip-${chKey}`);
+      if (activeBtn) activeBtn.classList.add("active");
+
+      listenMessages(chKey);
     }
 
-    function listenChannel(channelKey) {
-      const container = document.getElementById("chat-messages-container");
-      container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:10px;'>Yükleniyor...</div>";
+    function viewAllChannelsTab() {
+      if (chatListener) db.ref("public_chats/" + currentChannel).off();
+      document.querySelectorAll(".channel-chip").forEach(c => c.classList.remove("active"));
+      document.getElementById("chip-channels-list").classList.add("active");
+      document.getElementById("lbl-active-title").innerText = "📋 Oluşturulan Kanallar";
+      document.getElementById("chat-input-panel").style.display = "none";
 
-      if (chatListener) {
-        db.ref("public_chats/" + activeChannel).off();
-      }
+      const container = document.getElementById("chat-messages-box");
+      container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:10px;'>Kanallar yükleniyor...</div>";
+
+      db.ref("custom_channels").on("value", snap => {
+        container.innerHTML = "";
+        if (!snap.exists()) {
+          container.innerHTML = `
+            <div style='color:#64748b; font-size:8.5px; text-align:center; padding:20px;'>
+              Henüz özel kanal kurulmadı.<br>Yukarıdaki <b>➕ Kanal Kur</b> butonundan ilk kanalı aç!
+            </div>
+          `;
+          return;
+        }
+
+        snap.forEach(child => {
+          const ch = child.val();
+          const div = document.createElement("div");
+          div.className = "channel-list-card";
+          div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-size:14px;">${ch.icon || '💬'}</span>
+              <div>
+                <b>${ch.name}</b>
+                <div style="color:#94a3b8; font-size:6.5px;">Kurucu: ${ch.creator}</div>
+              </div>
+            </div>
+            <button type="button" class="icon-btn" style="background:#4338ca; padding:3px 8px; font-size:7.5px;" onclick="selectChannel('${child.key}', '${ch.icon} ${ch.name}')">Odaya Gir</button>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function listenMessages(chKey) {
+      const container = document.getElementById("chat-messages-box");
+      container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:10px;'>Mesajlar yükleniyor...</div>";
+
+      if (chatListener) db.ref("public_chats/" + currentChannel).off();
 
       const u = getActiveUser();
       const myUID = u ? String(u.uid).replace(/[.#$\[\]]/g, "_") : "";
 
-      chatListener = db.ref("public_chats/" + channelKey).limitToLast(50);
+      chatListener = db.ref("public_chats/" + chKey).limitToLast(60);
       chatListener.on("value", snap => {
         container.innerHTML = "";
         if (!snap.exists()) {
-          container.innerHTML = "<div style='color:#64748b; font-size:8.5px; text-align:center; padding:15px;'>Henüz mesaj yok. İlk mesajı sen yaz!</div>";
+          container.innerHTML = "<div style='color:#64748b; font-size:8.5px; text-align:center; padding:20px;'>Bu kanalda henüz mesaj yok. İlk mesajı sen yaz!</div>";
           return;
         }
 
@@ -245,17 +265,17 @@
           const div = document.createElement("div");
           div.className = "msg-bubble" + (isMe ? " is-me" : "");
 
-          const addFriendBtn = (!isMe && myUID) ? `<button type="button" class="icon-btn" style="padding:1px 4px; font-size:6px; background:#4338ca;" onclick="sendFriendRequestDirect('${m.senderUID}', '${m.senderName}')">➕ Ekle</button>` : '';
+          const addBtn = (!isMe && myUID) ? `<button type="button" class="icon-btn" style="padding:1px 4px; font-size:6px; background:#4338ca;" onclick="sendFriendRequestFromChat('${m.senderUID}', '${m.senderName}')">➕ Ekle</button>` : '';
 
           div.innerHTML = `
-            <div class="msg-header">
-              <span style="font-weight:bold; color:${isMe ? 'var(--neon-gold)' : 'var(--neon-blue)'};">${m.senderAvatar || '👤'} ${m.senderName} ${isMe ? '(Sen)' : ''}</span>
-              <div style="display:flex; align-items:center; gap:3px;">
-                ${addFriendBtn}
+            <div style="display:flex; justify-content:space-between; font-size:7px; color:#94a3b8; gap:4px;">
+              <span style="font-weight:bold; color:${isMe ? 'var(--neon-gold)' : 'var(--neon-blue)'};">${m.senderAvatar || '👤'} ${m.senderName}</span>
+              <div style="display:flex; align-items:center; gap:2px;">
+                ${addBtn}
                 <span>${m.time || ''}</span>
               </div>
             </div>
-            <div style="color:#f8fafc; font-size:9.5px; margin-top:1px;">${escapeHtml(m.text)}</div>
+            <div style="color:#fff; font-size:9px; margin-top:2px;">${escapeHtml(m.text)}</div>
           `;
           container.appendChild(div);
         });
@@ -264,7 +284,7 @@
       });
     }
 
-    function sendMessage() {
+    function sendChatMessage() {
       const input = document.getElementById("in-chat-text");
       const text = input.value.trim();
       if (!text) return;
@@ -276,7 +296,7 @@
       const d = new Date();
       const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
-      db.ref("public_chats/" + activeChannel).push({
+      db.ref("public_chats/" + currentChannel).push({
         senderUID: cleanUID,
         senderName: `${u.name}${u.tag || ''}`,
         senderAvatar: u.avatar || '👤',
@@ -288,21 +308,35 @@
       input.value = "";
     }
 
-    function handleChatKey(e) {
-      if (e.key === 'Enter') sendMessage();
+    function openCreateChannelModal() {
+      document.getElementById("modal-create-channel").style.display = "flex";
     }
 
-    function insertEmoji(emo) {
-      const input = document.getElementById("in-chat-text");
-      input.value += emo;
-      input.focus();
+    function confirmCreateChannel() {
+      const name = document.getElementById("in-channel-name").value.trim();
+      const icon = document.getElementById("sel-channel-icon").value;
+      if (!name) return alert("Lütfen bir kanal adı belirleyin!");
+
+      const u = getActiveUser();
+      const channelKey = "ch_" + Date.now();
+
+      db.ref("custom_channels/" + channelKey).set({
+        name: name,
+        icon: icon,
+        creator: `${u.name}${u.tag || ''}`,
+        createdAt: Date.now()
+      }).then(() => {
+        document.getElementById("modal-create-channel").style.display = "none";
+        document.getElementById("in-channel-name").value = "";
+        selectChannel(channelKey, `${icon} ${name}`);
+      });
     }
 
-    function sendFriendRequestDirect(targetUID, targetName) {
+    function sendFriendRequestFromChat(targetUID, targetName) {
       const u = getActiveUser();
       if (!u) return;
       const myUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
-      if (myUID === targetUID) return alert("Kendine istek atamazsın!");
+      if (myUID === targetUID) return alert("Kendine arkadaşlık isteği atamazsın!");
 
       db.ref(`friend_requests/${targetUID}/${myUID}`).set({
         fromUID: myUID,
@@ -314,10 +348,14 @@
       });
     }
 
-    function escapeHtml(string) {
-      return String(string).replace(/[&<>"']/g, function (s) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s];
-      });
+    function insertEmoji(emo) {
+      const input = document.getElementById("in-chat-text");
+      input.value += emo;
+      input.focus();
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
   </script>
 </body>
