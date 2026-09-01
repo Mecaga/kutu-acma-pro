@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Kasa Çiftliği - Mega Hay Day & Prestij</title>
+  <title>Kasa Çiftliği - Hay Day Edition 2026</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
@@ -43,7 +43,7 @@
       overflow: hidden;
     }
 
-    /* 1. ÜST PANEL */
+    /* 1. ÜST SABİT PANEL (Fiziksel Kilitli) */
     .farm-fixed-top {
       position: absolute;
       top: 0;
@@ -78,7 +78,7 @@
     .farm-scroll-area::-webkit-scrollbar { width: 3px; }
     .farm-scroll-area::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
 
-    /* 3. ALT DOCK */
+    /* 3. ALT SABİT DOCK */
     .farm-fixed-bottom {
       position: absolute;
       bottom: 0;
@@ -103,7 +103,7 @@
       cursor: pointer;
     }
 
-    /* Tarla Izgarası */
+    /* 30 Parselli Tarla */
     .farm-grid-30 {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -127,7 +127,7 @@
     .farm-plot-mini.locked { background: #0c0a09; border-color: #332a22; opacity: 0.5; }
     .farm-plot-mini.ready { border-color: #22c55e; background: #062e16; box-shadow: 0 0 4px #22c55e; }
 
-    /* Sağa Sola Kayan Şeritler */
+    /* Sağa-Sola Kayan Şeritler */
     .horizontal-scroll-row {
       display: flex;
       gap: 6px;
@@ -166,6 +166,20 @@
       justify-content: space-between;
       font-size: 7px;
       gap: 3px;
+    }
+
+    .market-stall-card {
+      flex: 0 0 110px;
+      background: #1e1b4b;
+      border: 1px solid #6366f1;
+      border-radius: 6px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 7px;
+      gap: 2px;
     }
 
     .dock-tab-btn {
@@ -223,7 +237,7 @@
       background: #0f172a;
       border: 2px solid var(--neon-purple);
       border-radius: 10px;
-      padding: 12px;
+      padding: 10px;
       width: 100%;
       max-width: 400px;
       max-height: 85vh;
@@ -237,12 +251,13 @@
 <body>
   <div class="farm-app-layout">
     
-    <!-- 1. ÜST PANEL -->
+    <!-- 1. ÜST SABİT PANEL -->
     <div class="farm-fixed-top">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div style="display:flex; gap:3px;">
           <button type="button" class="icon-btn" style="border-color:var(--danger); padding:2px 6px; font-size:9px;" onclick="location.href='menu.html'">‹ Lobi</button>
-          <button type="button" class="icon-btn" style="background:#7c3aed; border-color:var(--neon-purple); padding:2px 6px; font-size:9px;" onclick="openRebirthModal()">⭐ Prestij</button>
+          <button type="button" class="icon-btn" style="background:#0284c7; padding:2px 6px; font-size:9px;" onclick="openLeaderboardModal()">🏆 Sıralama</button>
+          <button type="button" class="icon-btn" style="background:#7c3aed; padding:2px 6px; font-size:9px;" onclick="openRebirthModal()">⭐ Prestij</button>
         </div>
         <div style="font-weight:900; font-size:11px; color:#38bdf8;">🌾 Kasa Çiftliği Pro</div>
         <div id="lbl-farm-gold" style="color:var(--neon-gold); font-weight:bold; font-size:11px;">🪙 200</div>
@@ -265,10 +280,19 @@
       </div>
       <div class="farm-grid-30" id="plots-container"></div>
 
-      <!-- Kasaba Yük Gemisi (Büyük Vapur Etkinliği) -->
+      <!-- Yol Kenarı Pazarı (Hay Day Market) -->
+      <div style="background:#090d1a; border:1px solid #4338ca; border-radius:6px; padding:5px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:8px; color:var(--neon-gold); font-weight:bold; margin-bottom:3px;">
+          <span>🏪 Yol Kenarı Pazarı (Kendi Fiyatını Belirle & Sat)</span>
+          <button type="button" class="icon-btn" style="padding:1px 4px; font-size:6.5px; background:#16a34a;" onclick="openSellModal()">➕ Ürün Sat</button>
+        </div>
+        <div class="horizontal-scroll-row" id="market-stalls-container"></div>
+      </div>
+
+      <!-- Kasaba Yük Gemisi -->
       <div style="background:#091224; border:1px solid #1e3a8a; border-radius:6px; padding:5px;">
         <div style="display:flex; justify-content:space-between; align-items:center; font-size:8px; color:#38bdf8; font-weight:bold; margin-bottom:3px;">
-          <span>🚢 Kasaba Yük Vapuru (Büyük Kasa)</span>
+          <span>🚢 Kasaba Yük Vapuru (Büyük Sandık)</span>
           <span id="lbl-steamer-timer">Kalkış: 120s</span>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;" id="steamer-crates-container"></div>
@@ -357,13 +381,62 @@
 
   </div>
 
-  <!-- GENİŞLETİLMİŞ 8 KADEMELİ PRESTİJ MODALI -->
+  <!-- MODAL 1: ÜRÜN SATIŞ TEZGAHI (HAY DAY MARKET) -->
+  <div id="modal-sell" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <div style="font-size:12px; font-weight:bold; color:var(--neon-gold); text-align:center;">🏪 Yol Kenarı Pazarı - Tezgaha Koy</div>
+      <div style="font-size:8px; color:#cbd5e1; text-align:center;">Satmak istediğin ürünü seç, adet ve fiyatını belirle!</div>
+
+      <div style="display:flex; flex-direction:column; gap:4px; font-size:8px;">
+        <div>
+          <label>Satılacak Ürün:</label>
+          <select id="sel-sell-item" class="icon-btn" style="width:100%; padding:3px; font-size:8px; background:#1e293b;" onchange="updateSellDefaults()"></select>
+        </div>
+        <div style="display:flex; gap:4px;">
+          <div style="flex:1;">
+            <label>Adet (Maks: <span id="lbl-max-sell">0</span>):</label>
+            <input type="number" id="in-sell-count" class="icon-btn" style="width:100%; padding:3px; font-size:8px; background:#0f172a;" value="1" min="1" onchange="calcTotalSellPrice()">
+          </div>
+          <div style="flex:1;">
+            <label>Birim Fiyat (Önerilen: <span id="lbl-def-price">0</span>🪙):</label>
+            <input type="number" id="in-sell-price" class="icon-btn" style="width:100%; padding:3px; font-size:8px; background:#0f172a;" value="10" onchange="calcTotalSellPrice()">
+          </div>
+        </div>
+        <div style="font-size:8px; color:var(--neon-green); text-align:center;">Toplam Satış Tutarı: <b id="lbl-total-earn">0</b>🪙</div>
+      </div>
+
+      <div style="display:flex; gap:4px; margin-top:4px;">
+        <button type="button" class="icon-btn" style="flex:1; background:#16a34a; font-size:8px; padding:4px;" onclick="confirmPutOnSale()">Tezgaha Çıkar</button>
+        <button type="button" class="icon-btn" style="flex:1; background:#334155; font-size:8px; padding:4px;" onclick="document.getElementById('modal-sell').style.display='none'">İptal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: 3 KADEMELİ SIRALAMA LİDERLİK TABLOSU -->
+  <div id="modal-leaderboard" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <div style="font-size:12px; font-weight:bold; color:#38bdf8; text-align:center;">🏆 Çiftlik Liderlik Tablosu</div>
+      
+      <!-- Sekmeler -->
+      <div style="display:flex; gap:3px;">
+        <button type="button" class="dock-tab-btn active" id="tab-lb-global" onclick="switchLBTab('global')">🌍 Global</button>
+        <button type="button" class="dock-tab-btn" id="tab-lb-prestige" onclick="switchLBTab('prestige')">⭐ Prestij</button>
+        <button type="button" class="dock-tab-btn" id="tab-lb-friends" onclick="switchLBTab('friends')">👥 Arkadaşlar</button>
+      </div>
+
+      <div id="leaderboard-list-container" style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; font-size:8px; padding:2px;"></div>
+
+      <button type="button" class="icon-btn" style="width:100%; background:#334155; font-size:8px; padding:4px;" onclick="document.getElementById('modal-leaderboard').style.display='none'">Kapat</button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: PRESTİJ MODALI -->
   <div id="modal-rebirth" class="modal-overlay" style="display:none;">
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-purple); text-align:center;">⭐ Çiftlik Prestiji & Yetenek Ağacı</div>
-      <div style="font-size:8.5px; color:#cbd5e1; text-align:center;">Seviye 10'da çiftliğini sıfırla, kalıcı Prestij Yıldızları kazan ve yetenekleri aç!</div>
+      <div style="font-size:8px; color:#cbd5e1; text-align:center;">Seviye 10'da çiftliğini sıfırla, kalıcı Prestij Yıldızları kazan ve yetenekleri aç!</div>
       
-      <div style="display:flex; flex-direction:column; gap:4px; margin:4px 0; font-size:7.5px;">
+      <div style="display:flex; flex-direction:column; gap:3px; margin:4px 0; font-size:7.5px;">
         <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
           <span>🌾 Çifte Hasat Şansı (+%10 4x Ürün)</span>
           <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('doubleHarvest')">Yükselt (1⭐) - Lv.<span id="sk-doubleHarvest">0</span></button>
@@ -373,11 +446,11 @@
           <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('speed')">Yükselt (1⭐) - Lv.<span id="sk-speed">0</span></button>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
-          <span>💧 Otomatik Sulama Şebekesi (Bedava Su)</span>
+          <span>💧 Otomatik Sulama (Bedava Su)</span>
           <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('autoWater')">Yükselt (1⭐) - Lv.<span id="sk-autoWater">0</span></button>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
-          <span>🥣 Yem Tasarrufu (%20 Bedava Besleme)</span>
+          <span>🥣 Yem Tasarrufu (%20 Bedava Yem)</span>
           <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('feedSave')">Yükselt (1⭐) - Lv.<span id="sk-feedSave">0</span></button>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
@@ -387,14 +460,6 @@
         <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
           <span>⭐ XP Çarpanı (+%25 Hızlı Seviye)</span>
           <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('xp')">Yükselt (1⭐) - Lv.<span id="sk-xp">0</span></button>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
-          <span>🚢 Vapur Bonusu (+%50 Gemi Geliri)</span>
-          <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('steamer')">Yükselt (1⭐) - Lv.<span id="sk-steamer">0</span></button>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
-          <span>📈 Borsa Tavanı (x3.5 Maksimum Piyasa)</span>
-          <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('market')">Yükselt (1⭐) - Lv.<span id="sk-market">0</span></button>
         </div>
       </div>
 
@@ -443,6 +508,11 @@
       fabric: "🧵 Dokuma Kumaş",
       jam: "🍓 Çilek Reçeli",
       chocolate: "🍫 Sütlü Çikolata"
+    };
+
+    const ITEM_DEFAULT_PRICES = {
+      wood: 8, iron: 15, gold: 25, sapphire: 40, emerald: 60, ruby: 90, sunflower: 110, amethyst: 130, olive: 160, legend: 200, orange: 250, cosmic: 320, godly: 500,
+      egg: 15, milk: 30, wool: 50, honey: 65, truffle: 120, bread: 35, cookie: 70, butter: 55, cheese: 110, sugar: 85, juice: 140, sauce: 160, pie: 210, olive_oil: 280, ice_cream: 240, latte: 270, fabric: 310, jam: 360, chocolate: 420
     };
 
     const SEEDS = [
@@ -496,12 +566,14 @@
     ];
 
     let selectedSeedIdx = 0;
+    let activeLBTab = 'global';
+
     let farmState = {
       gold: 200,
       xp: 0,
       lvl: 1,
       prestigeStars: 0,
-      skills: { doubleHarvest: 0, speed: 0, autoWater: 0, feedSave: 0, critOrder: 0, xp: 0, steamer: 0, market: 0 },
+      skills: { doubleHarvest: 0, speed: 0, autoWater: 0, feedSave: 0, critOrder: 0, xp: 0 },
       totalHarvestPts: 0,
       water: 15,
       unlockedPlots: 8,
@@ -511,6 +583,7 @@
       ownedWorkbenches: ['bakery'],
       workbenchQueue: {},
       inventory: { wood: 6, iron: 2, gold: 0, sapphire: 0, emerald: 0, chicken_feed: 2, cow_feed: 1, sheep_feed: 0 },
+      marketStalls: [], // { id, item, count, price, readyTime, isSold }
       orders: [
         { id: 1, req: { wood: 3 }, gold: 40, xp: 25 },
         { id: 2, req: { egg: 2 }, gold: 60, xp: 40 },
@@ -622,12 +695,227 @@
       document.getElementById("lbl-plot-stats").innerText = `Açık: ${farmState.unlockedPlots}/30`;
       document.getElementById("lbl-prestige-stars").innerText = `${farmState.prestigeStars || 0}⭐`;
 
+      renderMarketStalls();
       renderAnimals();
       renderWorkbenches();
       renderOrders();
       renderSteamer();
       updateStorageCounter();
       updateFeedStockIndicators();
+    }
+
+    /* 🏪 Yol Kenarı Pazarı (Market Mekaniği) */
+    function renderMarketStalls() {
+      const container = document.getElementById("market-stalls-container");
+      if (!container) return;
+      container.innerHTML = "";
+      const now = Date.now();
+
+      if (!farmState.marketStalls) farmState.marketStalls = [];
+
+      farmState.marketStalls.forEach((stall, idx) => {
+        const div = document.createElement("div");
+        div.className = "market-stall-card";
+        const trName = ITEM_NAMES[stall.item] || stall.item;
+
+        if (stall.isSold) {
+          div.innerHTML = `
+            <span style="color:#22c55e; font-weight:bold;">💰 SATILDI!</span>
+            <div>${stall.count}x ${trName}</div>
+            <b style="color:var(--neon-gold); font-size:8px;">+${stall.totalPrice}🪙</b>
+            <button type="button" class="icon-btn" style="padding:1px 4px; font-size:6px; background:#16a34a; width:100%;" onclick="collectStallEarnings(${idx})">Parayı Al</button>
+          `;
+        } else {
+          const rem = Math.max(0, Math.ceil((stall.readyTime - now) / 1000));
+          if (rem === 0) {
+            stall.isSold = true;
+            saveFarmData();
+          }
+          div.innerHTML = `
+            <span style="color:#38bdf8;">Tezgah #${idx+1}</span>
+            <div>${stall.count}x ${trName}</div>
+            <b style="color:var(--neon-gold);">${stall.totalPrice}🪙</b>
+            <small style="color:#94a3b8;">Müşteri: ${rem > 0 ? rem + 's' : 'Satılıyor...'}</small>
+          `;
+        }
+        container.appendChild(div);
+      });
+
+      if (farmState.marketStalls.length < 6) {
+        const emptyDiv = document.createElement("div");
+        emptyDiv.className = "market-stall-card";
+        emptyDiv.style.borderStyle = "dashed";
+        emptyDiv.style.background = "#090d16";
+        emptyDiv.innerHTML = `
+          <span style="color:#64748b;">Boş Tezgah</span>
+          <button type="button" class="icon-btn" style="padding:2px 6px; font-size:6.5px; background:#4338ca;" onclick="openSellModal()">➕ Ürün Koy</button>
+        `;
+        container.appendChild(emptyDiv);
+      }
+    }
+
+    function openSellModal() {
+      if ((farmState.marketStalls || []).length >= 6) return alert("Pazardaki tüm 6 tezgahınız dolu!");
+
+      const sel = document.getElementById("sel-sell-item");
+      sel.innerHTML = "";
+      let hasItems = false;
+
+      for (let item in farmState.inventory) {
+        const count = farmState.inventory[item];
+        if (count > 0 && !item.includes('feed')) {
+          hasItems = true;
+          const opt = document.createElement("option");
+          opt.value = item;
+          opt.innerText = `${ITEM_NAMES[item] || item} (${count} adet)`;
+          sel.appendChild(opt);
+        }
+      }
+
+      if (!hasItems) return alert("Ambarda satılabilecek ürününüz yok!");
+
+      document.getElementById("modal-sell").style.display = "flex";
+      updateSellDefaults();
+    }
+
+    function updateSellDefaults() {
+      const item = document.getElementById("sel-sell-item").value;
+      const have = farmState.inventory[item] || 1;
+      const defPrice = ITEM_DEFAULT_PRICES[item] || 10;
+
+      document.getElementById("lbl-max-sell").innerText = have;
+      document.getElementById("in-sell-count").value = Math.min(1, have);
+      document.getElementById("in-sell-count").max = have;
+      document.getElementById("in-sell-price").value = defPrice;
+      document.getElementById("lbl-def-price").innerText = defPrice;
+      calcTotalSellPrice();
+    }
+
+    function calcTotalSellPrice() {
+      const count = parseInt(document.getElementById("in-sell-count").value, 10) || 1;
+      const price = parseInt(document.getElementById("in-sell-price").value, 10) || 1;
+      document.getElementById("lbl-total-earn").innerText = count * price;
+    }
+
+    function confirmPutOnSale() {
+      const item = document.getElementById("sel-sell-item").value;
+      const count = parseInt(document.getElementById("in-sell-count").value, 10) || 1;
+      const price = parseInt(document.getElementById("in-sell-price").value, 10) || 1;
+      const defPrice = ITEM_DEFAULT_PRICES[item] || 10;
+
+      if ((farmState.inventory[item] || 0) < count) return alert("Yetersiz stok!");
+
+      farmState.inventory[item] -= count;
+
+      // Fiyat ortalamanın çok üstündeyse müşteri daha geç gelir (15s - 60s)
+      const ratio = price / defPrice;
+      const sellDurationSec = Math.floor(Math.max(10, Math.min(75, 20 * ratio)));
+
+      farmState.marketStalls.push({
+        id: Date.now(),
+        item: item,
+        count: count,
+        unitPrice: price,
+        totalPrice: count * price,
+        readyTime: Date.now() + (sellDurationSec * 1000),
+        isSold: false
+      });
+
+      saveFarmData();
+      document.getElementById("modal-sell").style.display = "none";
+      renderPlots();
+      alert(`🏪 Ürün pazara konuldu! (${count}x ${ITEM_NAMES[item]} = ${count * price}🪙)`);
+    }
+
+    function collectStallEarnings(idx) {
+      const stall = farmState.marketStalls[idx];
+      if (!stall) return;
+
+      farmState.gold += stall.totalPrice;
+      addXP(Math.floor(stall.totalPrice * 0.25));
+      farmState.marketStalls.splice(idx, 1);
+
+      saveFarmData();
+      renderPlots();
+    }
+
+    /* 🏆 3 KADEMELİ LİDERLİK TABLOSU */
+    function openLeaderboardModal() {
+      document.getElementById("modal-leaderboard").style.display = "flex";
+      loadLeaderboardData();
+    }
+
+    function switchLBTab(tab) {
+      activeLBTab = tab;
+      ['global', 'prestige', 'friends'].forEach(t => {
+        document.getElementById(`tab-lb-${t}`).classList.toggle('active', t === tab);
+      });
+      loadLeaderboardData();
+    }
+
+    function loadLeaderboardData() {
+      const container = document.getElementById("leaderboard-list-container");
+      container.innerHTML = "<div style='color:#94a3b8; text-align:center;'>Yükleniyor...</div>";
+
+      db.ref("users").once("value").then(snap => {
+        container.innerHTML = "";
+        if (!snap.exists()) {
+          container.innerHTML = "<div style='color:#64748b; text-align:center;'>Kayıt bulunamadı.</div>";
+          return;
+        }
+
+        let list = [];
+        const u = getActiveUser();
+        const myFriends = u?.friends || [];
+
+        snap.forEach(child => {
+          const val = child.val();
+          const fData = val.farm_hayday_v4 || {};
+          list.push({
+            name: `${val.name || 'Çiftçi'}${val.tag || '#0000'}`,
+            uid: child.key,
+            lvl: fData.lvl || 1,
+            xp: fData.xp || 0,
+            stars: fData.prestigeStars || 0,
+            gold: fData.gold || 0,
+            avatar: val.avatar || '👤'
+          });
+        });
+
+        // Sekmeye göre filtre ve sıralama
+        if (activeLBTab === 'global') {
+          list.sort((a, b) => b.lvl !== a.lvl ? b.lvl - a.lvl : b.xp - a.xp);
+        } else if (activeLBTab === 'prestige') {
+          list.sort((a, b) => b.stars !== a.stars ? b.stars - a.stars : b.lvl - a.lvl);
+        } else if (activeLBTab === 'friends') {
+          list = list.filter(item => myFriends.includes(item.uid) || item.uid === u.uid);
+          list.sort((a, b) => b.lvl !== a.lvl ? b.lvl - a.lvl : b.xp - a.xp);
+        }
+
+        if (list.length === 0) {
+          container.innerHTML = "<div style='color:#64748b; text-align:center;'>Bu kategoride oyuncu bulunamadı.</div>";
+          return;
+        }
+
+        list.slice(0, 30).forEach((p, rank) => {
+          const div = document.createElement("div");
+          div.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#070a13; padding:4px 6px; border-radius:4px; border:1px solid #1e293b;";
+          
+          let statTxt = "";
+          if (activeLBTab === 'prestige') statTxt = `<b style="color:var(--neon-purple);">${p.stars}⭐ Yıldız</b>`;
+          else statTxt = `<b style="color:var(--neon-gold);">Lv.${p.lvl}</b> <small style="color:#94a3b8;">(${p.gold}🪙)</small>`;
+
+          div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-weight:bold; color:#38bdf8; width:15px;">#${rank+1}</span>
+              <span>${p.avatar}</span>
+              <b>${p.name}</b>
+            </div>
+            <div>${statTxt}</div>
+          `;
+          container.appendChild(div);
+        });
+      });
     }
 
     /* Kasaba Vapuru */
@@ -669,11 +957,9 @@
       farmState.inventory[crate.item] -= crate.count;
       crate.done = true;
 
-      const steamerBonus = 1 + ((farmState.skills?.steamer || 0) * 0.5);
-      farmState.gold += Math.floor(crate.gold * steamerBonus);
-      addXP(Math.floor(crate.xp * steamerBonus));
+      farmState.gold += crate.gold;
+      addXP(crate.xp);
 
-      // Tüm sandıklar yüklendi mi?
       if (farmState.steamer.crates.every(c => c.done)) {
         alert("🚢 TEBRİKLER! Tüm vapur yüklendi! Büyük Kasa Ödülü: +300 Altın ve +250 XP!");
         farmState.gold += 300;
@@ -789,8 +1075,7 @@
       const an = ANIMALS_DEF.find(a => a.id === id);
       if (!an) return;
       
-      const yieldBonus = 1;
-      farmState.inventory[an.produce] = (farmState.inventory[an.produce] || 0) + yieldBonus;
+      farmState.inventory[an.produce] = (farmState.inventory[an.produce] || 0) + 1;
       farmState.animalStatus[id] = { state: 'hungry', readyTime: 0 };
       addXP(15);
       saveFarmData();
@@ -904,8 +1189,7 @@
       const rcp = wb?.recipes.find(r => r.id === q.recipeId);
       if (!rcp) return;
 
-      const yieldBonus = 1;
-      farmState.inventory[rcp.out] = (farmState.inventory[rcp.out] || 0) + yieldBonus;
+      farmState.inventory[rcp.out] = (farmState.inventory[rcp.out] || 0) + 1;
       addXP(rcp.xp);
       farmState.workbenchQueue[wbId] = null;
       saveFarmData();
@@ -931,7 +1215,6 @@
       renderPlots();
     }
 
-    /* 6 Sözleşmeli Kasaba Sipariş Panosu */
     function renderOrders() {
       const container = document.getElementById("orders-board-container");
       if (!container) return;
@@ -1004,7 +1287,6 @@
       return { id: Date.now() + Math.random(), req: req, gold: count * 45, xp: count * 30 };
     }
 
-    /* Ambar / Depo */
     function renderBarnInventory() {
       const list = document.getElementById("barn-inventory-list");
       if (!list) return;
@@ -1144,7 +1426,7 @@
     function openRebirthModal() {
       document.getElementById("modal-rebirth").style.display = "flex";
       const s = farmState.skills || {};
-      ['doubleHarvest', 'speed', 'autoWater', 'feedSave', 'critOrder', 'xp', 'steamer', 'market'].forEach(sk => {
+      ['doubleHarvest', 'speed', 'autoWater', 'feedSave', 'critOrder', 'xp'].forEach(sk => {
         const el = document.getElementById(`sk-${sk}`);
         if (el) el.innerText = s[sk] || 0;
       });
@@ -1184,6 +1466,7 @@
           ownedWorkbenches: ['bakery'],
           workbenchQueue: {},
           inventory: { wood: 6, iron: 2, gold: 0, sapphire: 0, emerald: 0, chicken_feed: 2, cow_feed: 1, sheep_feed: 0 },
+          marketStalls: [],
           orders: [
             { id: 1, req: { wood: 3 }, gold: 40, xp: 25 },
             { id: 2, req: { egg: 2 }, gold: 60, xp: 40 },
@@ -1215,22 +1498,22 @@
     }
 
     function saveFarmData() {
-      localStorage.setItem("kutu_farm_hayday_v4_save", JSON.stringify(farmState));
+      localStorage.setItem("kutu_farm_hayday_v5_save", JSON.stringify(farmState));
       const u = getActiveUser();
       if (u && u.uid && u.uid !== "ADMIN_ROOT") {
-        db.ref(`users/${u.uid}/farm_hayday_v4`).set(farmState);
+        db.ref(`users/${u.uid}/farm_hayday_v5`).set(farmState);
       }
     }
 
     function loadFarmData() {
-      const local = localStorage.getItem("kutu_farm_hayday_v4_save");
+      const local = localStorage.getItem("kutu_farm_hayday_v5_save");
       if (local) {
         try { farmState = Object.assign(farmState, JSON.parse(local)); } catch (e) {}
       }
 
       const u = getActiveUser();
       if (u && u.uid && u.uid !== "ADMIN_ROOT") {
-        db.ref(`users/${u.uid}/farm_hayday_v4`).once("value", snap => {
+        db.ref(`users/${u.uid}/farm_hayday_v5`).once("value", snap => {
           if (snap.exists()) {
             farmState = Object.assign(farmState, snap.val());
           }
