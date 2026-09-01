@@ -89,15 +89,12 @@
     <div class="lb-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
       <div style="font-weight:900; font-size:11px; color:#38bdf8;">🏆 Liderlik Sıralamaları</div>
-      <div id="lbl-my-current-score" style="font-size:8px; color:var(--neon-gold);">Puanım: 0</div>
+      <div id="lbl-my-current-score" style="font-size:8px; color:var(--neon-gold);">Puanım: 0 P</div>
     </div>
 
     <!-- Mod Kategorileri Şeridi -->
     <div class="lb-modes-scroll">
-      <!-- 4'lü Ana Mod Toplamı -->
       <button type="button" class="lb-chip active" id="chip-all_top4" onclick="switchLBMode('all_top4')">🌟 Tümü (4 Ana Mod)</button>
-      
-      <!-- Özel Oyun Modları -->
       <button type="button" class="lb-chip" id="chip-standard" onclick="switchLBMode('standard')">⚔️ Normal Mod</button>
       <button type="button" class="lb-chip" id="chip-ten_cases" onclick="switchLBMode('ten_cases')">📦 10 Kutu</button>
       <button type="button" class="lb-chip" id="chip-catch_basket" onclick="switchLBMode('catch_basket')">🧺 Tut & Aç</button>
@@ -109,8 +106,6 @@
       <button type="button" class="lb-chip" id="chip-double_mode" onclick="switchLBMode('double_mode')">🎰 Çift Rulet</button>
       <button type="button" class="lb-chip" id="chip-wheel_mode" onclick="switchLBMode('wheel_mode')">🎡 Çarkıfelek</button>
       <button type="button" class="lb-chip" id="chip-scratch_mode" onclick="switchLBMode('scratch_mode')">🪙 Kazı Kazan</button>
-
-      <!-- Eğlence & Birleştirme Modu -->
       <button type="button" class="lb-chip" id="chip-merge_mode" onclick="switchLBMode('merge_mode')">♾️ Birleştirme (Merge)</button>
     </div>
 
@@ -145,42 +140,51 @@
       const u = getActiveUser();
       const myUID = u ? String(u.uid).replace(/[.#$\[\]]/g, "_") : "";
 
-      db.ref("scores").once("value").then(snap => {
+      // Hem 'game_scores' hem de 'scores' tablolarını ortak okuyarak verilerin kaybolmasını engelliyoruz
+      Promise.all([
+        db.ref("game_scores").once("value"),
+        db.ref("scores").once("value")
+      ]).then(([snap1, snap2]) => {
         container.innerHTML = "";
-        if (!snap.exists()) {
+        let rawRecords = [];
+
+        if (snap1.exists()) {
+          snap1.forEach(c => rawRecords.push(c.val()));
+        }
+        if (snap2.exists()) {
+          snap2.forEach(c => rawRecords.push(c.val()));
+        }
+
+        if (rawRecords.length === 0) {
           container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Kayıtlı skor bulunamadı.</div>";
           return;
         }
 
         let userMap = {};
 
-        snap.forEach(child => {
-          const s = child.val();
-          const uid = s.uid || child.key;
+        rawRecords.forEach(s => {
+          if (!s) return;
+          const uid = String(s.uid || s.username || 'guest').replace(/[.#$\[\]]/g, "_");
+          const username = s.username || s.name || 'Oyuncu';
+          const score = parseInt(s.score || s.points, 10) || 0;
+          const mode = s.gameMode || s.mode || 'standard';
 
           if (!userMap[uid]) {
             userMap[uid] = {
-              name: s.username || 'Oyuncu',
+              name: username,
               avatar: s.avatar || '👤',
               title: s.title || 'Çaylak',
-              top4Total: 0,
               modeScores: {}
             };
           }
 
-          const pts = parseInt(s.score, 10) || 0;
-          const gameMode = s.gameMode || 'standard';
-
-          // Mod skorunu güncelle
-          if (!userMap[uid].modeScores[gameMode] || pts > userMap[uid].modeScores[gameMode]) {
-            userMap[uid].modeScores[gameMode] = pts;
+          if (!userMap[uid].modeScores[mode] || score > userMap[uid].modeScores[mode]) {
+            userMap[uid].modeScores[mode] = score;
           }
         });
 
-        // Skorları Listele ve Hesapla
         let list = Object.keys(userMap).map(uid => {
           const d = userMap[uid];
-          // Tümü kategorisi: Sadece Normal, 10 Kutu, Mayınlı ve Mega toplamı
           const top4 = (d.modeScores['standard'] || 0) + (d.modeScores['ten_cases'] || 0) + (d.modeScores['mines_mode'] || 0) + (d.modeScores['mega_mode'] || 0);
           
           let displayScore = 0;
@@ -198,12 +202,11 @@
 
         list.sort((a, b) => b.score - a.score);
 
-        // Kendi Puanını Üstte Göster
         const myItem = list.find(l => l.uid === myUID);
         document.getElementById("lbl-my-current-score").innerText = `Puanım: ${myItem ? myItem.score : 0} P`;
 
         if (list.length === 0 || list.every(l => l.score === 0)) {
-          container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Bu modda henüz skor kaydedilmemiş.</div>";
+          container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Bu kategoride henüz skor kaydedilmemiş.</div>";
           return;
         }
 
@@ -231,6 +234,8 @@
           `;
           container.appendChild(div);
         });
+      }).catch(err => {
+        container.innerHTML = `<div style='color:var(--danger); font-size:8px; text-align:center; padding:15px;'>Hata: ${err.message}</div>`;
       });
     }
   </script>
