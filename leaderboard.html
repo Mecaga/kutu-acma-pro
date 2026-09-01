@@ -2,110 +2,36 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Liderlik Tablosu & Sıralama</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
-    html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #020617; font-family: system-ui, sans-serif; color: #fff; }
-
-    .lb-layout {
-      position: relative;
-      width: 100%;
-      max-width: 480px;
-      height: 100dvh;
-      margin: 0 auto;
-      background: #030712;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .lb-header {
-      flex-shrink: 0;
-      background: #090d1a;
-      border-bottom: 2px solid #1e293b;
-      padding: 6px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 100;
-    }
-
-    .lb-modes-scroll {
-      flex-shrink: 0;
-      background: #0b1120;
-      border-bottom: 1px solid #1e293b;
-      display: flex;
-      gap: 3px;
-      padding: 4px 6px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .lb-modes-scroll::-webkit-scrollbar { display: none; }
-
-    .lb-chip {
-      flex: 0 0 auto;
-      padding: 3px 7px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #94a3b8;
-      font-size: 7.5px;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .lb-chip.active { background: #4338ca; border-color: var(--neon-gold); color: #fff; }
-
-    .lb-list-area {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .rank-item-card {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 6px;
-      padding: 5px 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 8.5px;
-    }
-  </style>
 </head>
-<body>
-  <div class="lb-layout">
+<body class="bg-standard">
+  <div class="app-container">
     
-    <div class="lb-header">
-      <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
-      <div style="font-weight:900; font-size:11px; color:#38bdf8;">🏆 Liderlik Sıralamaları</div>
-      <div id="lbl-my-current-score" style="font-size:8px; color:var(--neon-gold);">Puanım: 0 P</div>
+    <div class="top-header">
+      <a href="menu.html" class="icon-btn" style="border-color:var(--danger); text-decoration:none;">‹ Lobi</a>
+      <div style="font-weight:bold; font-size:14px; color:var(--neon-blue);">🏆 Liderlik Tablosu</div>
+      <div id="lbl-my-score" style="font-size:11px; color:var(--neon-gold);">Puanım: 0 P</div>
     </div>
 
-    <div class="lb-modes-scroll">
-      <button type="button" class="lb-chip active" id="chip-all_top3" onclick="switchLBMode('all_top3')">🌟 Tümü (Ana Modlar)</button>
-      <button type="button" class="lb-chip" id="chip-standard" onclick="switchLBMode('standard')">📦 Normal Mod</button>
-      <button type="button" class="lb-chip" id="chip-ten_cases" onclick="switchLBMode('ten_cases')">📦🔟 10 Kutu</button>
-      <button type="button" class="lb-chip" id="chip-catch_basket" onclick="switchLBMode('catch_basket')">🧺 Tut & Aç</button>
-      <button type="button" class="lb-chip" id="chip-catch_open" onclick="switchLBMode('catch_open')">🎯 Yakala & Aç</button>
-      <button type="button" class="lb-chip" id="chip-mines_mode" onclick="switchLBMode('mines_mode')">💣 Mayınlı Kasa</button>
-      <button type="button" class="lb-chip" id="chip-speedrun_mode" onclick="switchLBMode('speedrun_mode')">⚡ Speedrun</button>
-      <button type="button" class="lb-chip" id="chip-double_mode" onclick="switchLBMode('double_mode')">🎰 Çift Rulet</button>
-      <button type="button" class="lb-chip" id="chip-guess_mode" onclick="switchLBMode('guess_mode')">🔮 Kasa Tahmin</button>
-      <button type="button" class="lb-chip" id="chip-farm_mode" onclick="switchLBMode('farm_mode')">🌾 Kasa Çiftliği</button>
+    <div style="display:flex; gap:4px; overflow-x:auto; padding:6px 0; scrollbar-width:none;" id="lb-chips-bar">
+      <button class="icon-btn active" id="chip-all_top3" onclick="selectLBMode('all_top3')">🌟 Tümü</button>
+      <button class="icon-btn" id="chip-standard" onclick="selectLBMode('standard')">📦 Klasik</button>
+      <button class="icon-btn" id="chip-ten_cases" onclick="selectLBMode('ten_cases')">📦🔟 10 Kutu</button>
+      <button class="icon-btn" id="chip-catch_basket" onclick="selectLBMode('catch_basket')">🧺 Tut & Aç</button>
+      <button class="icon-btn" id="chip-catch_open" onclick="selectLBMode('catch_open')">🎯 Yakala & Aç</button>
+      <button class="icon-btn" id="chip-mines_mode" onclick="selectLBMode('mines_mode')">💣 Mayınlı Kasa</button>
+      <button class="icon-btn" id="chip-speedrun_mode" onclick="selectLBMode('speedrun_mode')">⚡ Speedrun</button>
+      <button class="icon-btn" id="chip-double_mode" onclick="selectLBMode('double_mode')">🎰 Çift Rulet</button>
+      <button class="icon-btn" id="chip-guess_mode" onclick="selectLBMode('guess_mode')">🔮 Kasa Tahmin</button>
+      <button class="icon-btn" id="chip-farm_mode" onclick="selectLBMode('farm_mode')">🌾 Çiftlik</button>
     </div>
 
-    <div class="lb-list-area" id="leaderboard-container">
-      <div style="color:#64748b; font-size:8px; text-align:center; padding:15px;">Sıralama yükleniyor...</div>
+    <div class="leaderboard-list" id="lb-container" style="margin-top:10px;">
+      <div style="text-align:center; color:#64748b; padding:20px;">Yükleniyor...</div>
     </div>
 
   </div>
@@ -115,21 +41,21 @@
     let currentMode = 'all_top3';
 
     window.onload = () => {
-      switchLBMode('all_top3');
+      selectLBMode('all_top3');
     };
 
-    function switchLBMode(modeKey) {
+    function selectLBMode(modeKey) {
       currentMode = modeKey;
-      document.querySelectorAll(".lb-chip").forEach(c => c.classList.remove("active"));
-      const activeEl = document.getElementById(`chip-${modeKey}`);
-      if (activeEl) activeEl.classList.add("active");
+      document.querySelectorAll("#lb-chips-bar button").forEach(b => b.classList.remove("active"));
+      const target = document.getElementById(`chip-${modeKey}`);
+      if (target) target.classList.add("active");
 
-      loadLeaderboard(modeKey);
+      loadLeaderboardData(modeKey);
     }
 
-    function loadLeaderboard(modeKey) {
-      const container = document.getElementById("leaderboard-container");
-      container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Yükleniyor...</div>";
+    function loadLeaderboardData(modeKey) {
+      const container = document.getElementById("lb-container");
+      container.innerHTML = "<div style='text-align:center; color:#64748b; padding:20px;'>Skorlar getiriliyor...</div>";
 
       const u = getActiveUser();
       const myUID = u ? String(u.uid).replace(/[.#$\[\]]/g, "_") : "";
@@ -139,47 +65,46 @@
         db.ref("scores").once("value")
       ]).then(([snap1, snap2]) => {
         container.innerHTML = "";
-        let rawRecords = [];
+        let raw = [];
 
-        if (snap1.exists()) snap1.forEach(c => rawRecords.push(c.val()));
-        if (snap2.exists()) snap2.forEach(c => rawRecords.push(c.val()));
+        if (snap1.exists()) snap1.forEach(c => raw.push(c.val()));
+        if (snap2.exists()) snap2.forEach(c => raw.push(c.val()));
 
-        if (rawRecords.length === 0) {
-          container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Kayıtlı skor bulunamadı.</div>";
+        if (raw.length === 0) {
+          container.innerHTML = "<div style='text-align:center; color:#64748b; padding:20px;'>Henüz kayıtlı skor bulunmuyor.</div>";
           return;
         }
 
-        let userMap = {};
+        let users = {};
 
-        rawRecords.forEach(s => {
+        raw.forEach(s => {
           if (!s) return;
           const uid = String(s.uid || s.username || 'guest').replace(/[.#$\[\]]/g, "_");
-          const username = s.username || s.name || 'Oyuncu';
-          const score = parseInt(s.score || s.points, 10) || 0;
+          const name = s.username || s.name || 'Oyuncu';
+          const pts = parseInt(s.score || s.points, 10) || 0;
           const mode = s.gameMode || s.mode || 'standard';
 
-          if (!userMap[uid]) {
-            userMap[uid] = {
-              name: username,
+          if (!users[uid]) {
+            users[uid] = {
+              name: name,
               avatar: s.avatar || '👤',
               title: s.title || 'Çaylak',
-              modeScores: {}
+              scores: {}
             };
           }
 
-          if (!userMap[uid].modeScores[mode] || score > userMap[uid].modeScores[mode]) {
-            userMap[uid].modeScores[mode] = score;
+          if (!users[uid].scores[mode] || pts > users[uid].scores[mode]) {
+            users[uid].scores[mode] = pts;
           }
         });
 
-        let list = Object.keys(userMap).map(uid => {
-          const d = userMap[uid];
-          // Tümü Kategorisi: Normal Kasa, 10 Kutu ve Mayınlı Kasa toplamı
-          const mainTopTotal = (d.modeScores['standard'] || 0) + (d.modeScores['ten_cases'] || 0) + (d.modeScores['mines_mode'] || 0);
-          
+        let list = Object.keys(users).map(uid => {
+          const d = users[uid];
+          const top3Total = (d.scores['standard'] || 0) + (d.scores['ten_cases'] || 0) + (d.scores['mines_mode'] || 0);
+
           let displayScore = 0;
-          if (modeKey === 'all_top3') displayScore = mainTopTotal;
-          else displayScore = d.modeScores[modeKey] || 0;
+          if (modeKey === 'all_top3') displayScore = top3Total;
+          else displayScore = d.scores[modeKey] || 0;
 
           return {
             uid: uid,
@@ -193,39 +118,33 @@
         list.sort((a, b) => b.score - a.score);
 
         const myItem = list.find(l => l.uid === myUID);
-        document.getElementById("lbl-my-current-score").innerText = `Puanım: ${myItem ? myItem.score : 0} P`;
-
-        if (list.length === 0 || list.every(l => l.score === 0)) {
-          container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Bu kategoride henüz skor kaydedilmemiş.</div>";
-          return;
-        }
+        document.getElementById("lbl-my-score").innerText = `Puanım: ${myItem ? myItem.score : 0} P`;
 
         list.slice(0, 50).forEach((item, idx) => {
           if (item.score <= 0 && modeKey !== 'all_top3') return;
           const isMe = item.uid === myUID;
 
-          const div = document.createElement("div");
-          div.className = "rank-item-card";
-          if (isMe) div.style.borderColor = "var(--neon-gold)";
+          const card = document.createElement("div");
+          card.className = "rank-card" + (isMe ? " my-rank" : "");
 
-          let rankBadge = `#${idx+1}`;
-          if (idx === 0) rankBadge = "🥇 1.";
-          else if (idx === 1) rankBadge = "🥈 2.";
-          else if (idx === 2) rankBadge = "🥉 3.";
+          let badge = `#${idx + 1}`;
+          if (idx === 0) badge = "🥇 1.";
+          else if (idx === 1) badge = "🥈 2.";
+          else if (idx === 2) badge = "🥉 3.";
 
-          div.innerHTML = `
-            <div style="display:flex; align-items:center; gap:4px;">
-              <span style="font-weight:bold; color:#38bdf8; width:22px;">${rankBadge}</span>
-              <span>${item.avatar}</span>
-              <b>${item.name}</b>
-              <span style="color:#94a3b8; font-size:6.5px;">(${item.title})</span>
+          card.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="rank-pos">${badge}</span>
+              <span style="font-size:18px;">${item.avatar}</span>
+              <div>
+                <div style="font-weight:bold; font-size:12px;">${item.name}</div>
+                <div style="font-size:9px; color:#94a3b8;">${item.title}</div>
+              </div>
             </div>
-            <div style="font-weight:bold; color:var(--neon-green); font-size:9.5px;">${item.score} P</div>
+            <div style="font-weight:bold; color:var(--neon-green); font-size:13px;">${item.score} P</div>
           `;
-          container.appendChild(div);
+          container.appendChild(card);
         });
-      }).catch(err => {
-        container.innerHTML = `<div style='color:var(--danger); font-size:8px; text-align:center; padding:15px;'>Hata: ${err.message}</div>`;
       });
     }
   </script>
