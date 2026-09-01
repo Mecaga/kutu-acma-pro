@@ -18,15 +18,21 @@
     </div>
 
     <div style="display:flex; gap:4px; overflow-x:auto; padding:6px 0; scrollbar-width:none;" id="lb-chips-bar">
-      <button class="icon-btn active" id="chip-all_top3" onclick="selectLBMode('all_top3')">🌟 Tümü</button>
+      <button class="icon-btn active" id="chip-all_modes" onclick="selectLBMode('all_modes')">🌟 Tümü (Genel)</button>
       <button class="icon-btn" id="chip-standard" onclick="selectLBMode('standard')">📦 Klasik</button>
       <button class="icon-btn" id="chip-ten_cases" onclick="selectLBMode('ten_cases')">📦🔟 10 Kutu</button>
       <button class="icon-btn" id="chip-catch_basket" onclick="selectLBMode('catch_basket')">🧺 Tut & Aç</button>
       <button class="icon-btn" id="chip-catch_open" onclick="selectLBMode('catch_open')">🎯 Yakala & Aç</button>
-      <button class="icon-btn" id="chip-mines_mode" onclick="selectLBMode('mines_mode')">💣 Mayınlı Kasa</button>
+      <button class="icon-btn" id="chip-mines_mode" onclick="selectLBMode('mines_mode')">💣 Mayınlı</button>
+      <button class="icon-btn" id="chip-mega_mode" onclick="selectLBMode('mega_mode')">💎 Mega</button>
       <button class="icon-btn" id="chip-speedrun_mode" onclick="selectLBMode('speedrun_mode')">⚡ Speedrun</button>
+      <button class="icon-btn" id="chip-temple_mode" onclick="selectLBMode('temple_mode')">🏛️ Tapınak</button>
       <button class="icon-btn" id="chip-double_mode" onclick="selectLBMode('double_mode')">🎰 Çift Rulet</button>
-      <button class="icon-btn" id="chip-guess_mode" onclick="selectLBMode('guess_mode')">🔮 Kasa Tahmin</button>
+      <button class="icon-btn" id="chip-wheel_mode" onclick="selectLBMode('wheel_mode')">🎡 Çarkıfelek</button>
+      <button class="icon-btn" id="chip-scratch_mode" onclick="selectLBMode('scratch_mode')">🪙 Kazı Kazan</button>
+      <button class="icon-btn" id="chip-memory_mode" onclick="selectLBMode('memory_mode')">🃏 Kart Eşleme</button>
+      <button class="icon-btn" id="chip-merge_mode" onclick="selectLBMode('merge_mode')">♾️ Birleştirme</button>
+      <button class="icon-btn" id="chip-guess_mode" onclick="selectLBMode('guess_mode')">🔮 Tahmin</button>
       <button class="icon-btn" id="chip-farm_mode" onclick="selectLBMode('farm_mode')">🌾 Çiftlik</button>
     </div>
 
@@ -38,10 +44,10 @@
 
   <script src="app.js"></script>
   <script>
-    let currentMode = 'all_top3';
+    let currentMode = 'all_modes';
 
     window.onload = () => {
-      selectLBMode('all_top3');
+      selectLBMode('all_modes');
     };
 
     function selectLBMode(modeKey) {
@@ -100,10 +106,12 @@
 
         let list = Object.keys(users).map(uid => {
           const d = users[uid];
-          const top3Total = (d.scores['standard'] || 0) + (d.scores['ten_cases'] || 0) + (d.scores['mines_mode'] || 0);
+          
+          let totalScore = 0;
+          Object.values(d.scores).forEach(val => { totalScore += (val || 0); });
 
           let displayScore = 0;
-          if (modeKey === 'all_top3') displayScore = top3Total;
+          if (modeKey === 'all_modes') displayScore = totalScore;
           else displayScore = d.scores[modeKey] || 0;
 
           return {
@@ -121,7 +129,7 @@
         document.getElementById("lbl-my-score").innerText = `Puanım: ${myItem ? myItem.score : 0} P`;
 
         list.slice(0, 50).forEach((item, idx) => {
-          if (item.score <= 0 && modeKey !== 'all_top3') return;
+          if (item.score <= 0 && modeKey !== 'all_modes') return;
           const isMe = item.uid === myUID;
 
           const card = document.createElement("div");
@@ -145,6 +153,8 @@
           `;
           container.appendChild(card);
         });
+      }).catch(err => {
+        container.innerHTML = `<div style='text-align:center; color:var(--danger); padding:20px;'>Hata: ${err.message}</div>`;
       });
     }
   </script>
