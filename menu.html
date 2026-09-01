@@ -23,7 +23,6 @@
         </div>
       </div>
 
-      <!-- Üst Butonlar -->
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-bottom:4px;">
         <a href="chat.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:5px; font-size:10px;">💬 Sohbet</a>
         <a href="friends.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:5px; font-size:10px;">👥 Arkadaşlar</a>
@@ -31,16 +30,17 @@
       </div>
     </div>
 
-    <!-- 2 SÜTUNLU AKTİF MODLAR IZGARASI -->
     <div class="mode-grid-8" style="grid-template-rows: repeat(4, 1fr); max-height:270px; overflow-y:auto;">
       <div class="mode-card-8 active" onclick="selectGameMode('standard', this, 'normal.html')"><b>⚔️ Normal Kasa</b><span>30s Klasik</span></div>
       <div class="mode-card-8" onclick="selectGameMode('ten_cases', this, 'ten_cases.html')"><b>📦 10 Kutu Modu</b><span>10 Hak</span></div>
-      <div class="mode-card-8" onclick="selectGameMode('catch_basket', this, 'catch_basket.html')"><b>🧺 Tut & Aç</b><span>Sepetle Topla</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('tut_ac', this, 'tut_ac.html')"><b>🧺 Tut & Aç</b><span>Sepetle Topla</span></div>
       <div class="mode-card-8" onclick="selectGameMode('catch_open', this, 'catch.html')"><b>🎯 Yakala & Aç</b><span>Kutuları Yakala</span></div>
       <div class="mode-card-8" onclick="selectGameMode('mines_mode', this, 'mines.html')"><b>💣 Mayınlı Kasa</b><span>Risk & Çıkış</span></div>
       <div class="mode-card-8" onclick="selectGameMode('speedrun_mode', this, 'speedrun.html')"><b>⚡ Speedrun</b><span>1000P Yarışı</span></div>
       <div class="mode-card-8" onclick="selectGameMode('double_mode', this, 'double.html')"><b>🎰 Çift Rulet</b><span>Eşya + Çarpan</span></div>
       <div class="mode-card-8" onclick="selectGameMode('predict_mode', this, 'predict.html')"><b>🔮 Kasa Tahmin</b><span>Renk Seç (x2-x5)</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('farm_mode', this, 'farm.html')"><b>🌾 Kasa Çiftliği</b><span>Ekin & Hayvan</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('pvp_mode', this, 'pvp.html')"><b>⚔️ 1v1 Düello</b><span>Canlı PvP</span></div>
     </div>
 
     <div>
@@ -49,7 +49,6 @@
     </div>
   </div>
 
-  <!-- AYARLAR MODALI -->
   <div id="modal-settings" class="modal-overlay">
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">⚙️ Ayarlar</div>
@@ -86,7 +85,6 @@
     </div>
   </div>
 
-  <!-- DUYURULAR & OYLAMA MODALI -->
   <div id="modal-announcements" class="modal-overlay">
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">📢 Duyurular & Oylama</div>
@@ -102,7 +100,6 @@
     </div>
   </div>
 
-  <!-- REHBER MODALI -->
   <div id="modal-guide" class="modal-overlay">
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-blue); text-align:center; margin-bottom:6px;">ℹ️ Mod Rehberi</div>
@@ -115,6 +112,8 @@
         <div><b>⚡ Speedrun:</b> En hızlı sürede 1000 puana ulaş!</div>
         <div><b>🎰 Çift Rulet:</b> Eşya ve x1-x10 çarpan kazan.</div>
         <div><b>🔮 Kasa Tahmin:</b> Gelecek kasanın rengini tahmin et (x2-x5).</div>
+        <div><b>🌾 Kasa Çiftliği:</b> Tarla ek, hasat topla ve pazar yerinde kazan.</div>
+        <div><b>⚔️ 1v1 PvP:</b> Gerçek rakiplerle anlık kasa düellosu yap.</div>
       </div>
       <button class="btn-close" onclick="document.getElementById('modal-guide').style.display='none'">Kapat</button>
     </div>
@@ -128,12 +127,14 @@
     const MODE_RATES = {
       standard: { bg: "bg-standard", title: "NORMAL KASA", tiers: [{name:"Classic (%58)",pts:"1-3P",c:"#fff"},{name:"Super (%29)",pts:"4-10P",c:"#38bdf8"},{name:"Ultra (%10)",pts:"12-30P",c:"#c084fc"},{name:"Omega (%2.8)",pts:"35-120P",c:"#fb923c"},{name:"Godly (%0.2)",pts:"500-1000P",c:"#f43f5e"}] },
       ten_cases: { bg: "bg-ten_cases", title: "10 KUTU MODU", tiers: [{name:"Classic (%35)",pts:"2-5P",c:"#fff"},{name:"Super (%35)",pts:"6-15P",c:"#38bdf8"},{name:"Ultra (%20)",pts:"20-50P",c:"#c084fc"},{name:"Omega (%8.5)",pts:"60-200P",c:"#fb923c"},{name:"Godly (%1.5)",pts:"600-1200P",c:"#f43f5e"}] },
-      catch_basket: { bg: "bg-catch_open", title: "TUT & AÇ (SEPET)", tiers: [{name:"Tahta Kutu (%45)",pts:"3-8P",c:"#fff"},{name:"Çelik Kutu (%30)",pts:"10-25P",c:"#38bdf8"},{name:"Mistik Kutu (%16)",pts:"30-80P",c:"#c084fc"},{name:"Kozmik Sandık (%7)",pts:"100-300P",c:"#fb923c"},{name:"Tanrısal Kasa (%2)",pts:"800-1600P",c:"#f43f5e"}] },
+      tut_ac: { bg: "bg-catch_open", title: "TUT & AÇ (SEPET)", tiers: [{name:"Tahta Kutu (%45)",pts:"3-8P",c:"#fff"},{name:"Çelik Kutu (%30)",pts:"10-25P",c:"#38bdf8"},{name:"Mistik Kutu (%16)",pts:"30-80P",c:"#c084fc"},{name:"Kozmik Sandık (%7)",pts:"100-300P",c:"#fb923c"},{name:"Tanrısal Kasa (%2)",pts:"800-1600P",c:"#f43f5e"}] },
       catch_open: { bg: "bg-catch_open", title: "YAKALA & AÇ", tiers: [{name:"Classic Kasa (%45)",pts:"2-5P",c:"#fff"},{name:"Super Kasa (%30)",pts:"6-18P",c:"#38bdf8"},{name:"Ultra Kasa (%15)",pts:"25-60P",c:"#c084fc"},{name:"Omega Kasa (%8)",pts:"80-250P",c:"#fb923c"},{name:"Godly Kasa (%2)",pts:"750-1500P",c:"#f43f5e"}] },
       mines_mode: { bg: "bg-mines_mode", title: "MAYINLI KASA", tiers: [{name:"Güvenli Kasa (%70)",pts:"15-45P",c:"#10b981"},{name:"Büyük Hazine (%30)",pts:"60-160P",c:"#fbbf24"},{name:"Bomba",pts:"0P",c:"#ef4444"}] },
       speedrun_mode: { bg: "bg-speedrun_mode", title: "SPEEDRUN YARIŞI", tiers: [{name:"Hızlı Kasa",pts:"20-60P",c:"#38bdf8"},{name:"Hedef",pts:"En Hızlı 1000P!",c:"#f43f5e"}] },
       double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] },
-      predict_mode: { bg: "bg-standard", title: "KASA RENK TAHMİNİ", tiers: [{name:"Mavi Kasa (%50)",pts:"x2 Katı (80P)",c:"#38bdf8"},{name:"Mor Kasa (%35)",pts:"x3 Katı (120P)",c:"#c084fc"},{name:"Kırmızı Kasa (%15)",pts:"x5 Katı (200P)",c:"#f43f5e"}] }
+      predict_mode: { bg: "bg-standard", title: "KASA RENK TAHMİNİ", tiers: [{name:"Mavi Kasa (%50)",pts:"x2 Katı (80P)",c:"#38bdf8"},{name:"Mor Kasa (%35)",pts:"x3 Katı (120P)",c:"#c084fc"},{name:"Kırmızı Kasa (%15)",pts:"x5 Katı (200P)",c:"#f43f5e"}] },
+      farm_mode: { bg: "bg-standard", title: "KASA ÇİFTLİĞİ", tiers: [{name:"Tarla Mahsulleri",pts:"10-100 Altın",c:"#10b981"},{name:"Hayvancılık Ürünleri",pts:"50-350 Altın",c:"#fbbf24"},{name:"Nadir Hasat",pts:"500-1500 Altın",c:"#f43f5e"}] },
+      pvp_mode: { bg: "bg-standard", title: "1v1 CANLI DÜELLO", tiers: [{name:"1v1 Kasa Savaşı",pts:"Kazanan Hepsini Alır",c:"#f43f5e"},{name:"Süre",pts:"30 Saniye",c:"#38bdf8"}] }
     };
 
     window.onload = () => {
@@ -141,7 +142,7 @@
       if (!u) return window.location.href = "index.html";
       selectedAvatar = u.avatar || "👤";
       document.getElementById("lbl-avatar").innerText = selectedAvatar;
-      document.getElementById("lbl-username").innerText = `${u.name}${u.tag}`;
+      document.getElementById("lbl-username").innerText = `${u.name}${u.tag || ''}`;
       document.getElementById("in-new-name").value = u.name;
       document.getElementById("sel-title").value = u.title || "Çaylak";
 
@@ -213,7 +214,7 @@
       const txt = document.getElementById("in-announce-txt").value.trim();
       if (!txt) return;
       const u = getActiveUser();
-      db.ref("announcements").push({ author: `${u.name}${u.tag}`, text: txt, isPoll: isPoll, votesYes: 0, votesNo: 0, date: new Date().toLocaleDateString("tr-TR") });
+      db.ref("announcements").push({ author: `${u.name}${u.tag || ''}`, text: txt, isPoll: isPoll, votesYes: 0, votesNo: 0, date: new Date().toLocaleDateString("tr-TR") });
       document.getElementById("in-announce-txt").value = "";
     }
 
