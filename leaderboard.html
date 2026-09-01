@@ -85,31 +85,25 @@
 <body>
   <div class="lb-layout">
     
-    <!-- Üst Başlık -->
     <div class="lb-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
       <div style="font-weight:900; font-size:11px; color:#38bdf8;">🏆 Liderlik Sıralamaları</div>
       <div id="lbl-my-current-score" style="font-size:8px; color:var(--neon-gold);">Puanım: 0 P</div>
     </div>
 
-    <!-- Mod Kategorileri Şeridi -->
     <div class="lb-modes-scroll">
-      <button type="button" class="lb-chip active" id="chip-all_top4" onclick="switchLBMode('all_top4')">🌟 Tümü (4 Ana Mod)</button>
-      <button type="button" class="lb-chip" id="chip-standard" onclick="switchLBMode('standard')">⚔️ Normal Mod</button>
-      <button type="button" class="lb-chip" id="chip-ten_cases" onclick="switchLBMode('ten_cases')">📦 10 Kutu</button>
+      <button type="button" class="lb-chip active" id="chip-all_top3" onclick="switchLBMode('all_top3')">🌟 Tümü (Ana Modlar)</button>
+      <button type="button" class="lb-chip" id="chip-standard" onclick="switchLBMode('standard')">📦 Normal Mod</button>
+      <button type="button" class="lb-chip" id="chip-ten_cases" onclick="switchLBMode('ten_cases')">📦🔟 10 Kutu</button>
       <button type="button" class="lb-chip" id="chip-catch_basket" onclick="switchLBMode('catch_basket')">🧺 Tut & Aç</button>
       <button type="button" class="lb-chip" id="chip-catch_open" onclick="switchLBMode('catch_open')">🎯 Yakala & Aç</button>
       <button type="button" class="lb-chip" id="chip-mines_mode" onclick="switchLBMode('mines_mode')">💣 Mayınlı Kasa</button>
-      <button type="button" class="lb-chip" id="chip-mega_mode" onclick="switchLBMode('mega_mode')">💎 Mega Kasa</button>
       <button type="button" class="lb-chip" id="chip-speedrun_mode" onclick="switchLBMode('speedrun_mode')">⚡ Speedrun</button>
-      <button type="button" class="lb-chip" id="chip-temple_mode" onclick="switchLBMode('temple_mode')">🏛️ Gizli Tapınak</button>
       <button type="button" class="lb-chip" id="chip-double_mode" onclick="switchLBMode('double_mode')">🎰 Çift Rulet</button>
-      <button type="button" class="lb-chip" id="chip-wheel_mode" onclick="switchLBMode('wheel_mode')">🎡 Çarkıfelek</button>
-      <button type="button" class="lb-chip" id="chip-scratch_mode" onclick="switchLBMode('scratch_mode')">🪙 Kazı Kazan</button>
-      <button type="button" class="lb-chip" id="chip-merge_mode" onclick="switchLBMode('merge_mode')">♾️ Birleştirme (Merge)</button>
+      <button type="button" class="lb-chip" id="chip-guess_mode" onclick="switchLBMode('guess_mode')">🔮 Kasa Tahmin</button>
+      <button type="button" class="lb-chip" id="chip-farm_mode" onclick="switchLBMode('farm_mode')">🌾 Kasa Çiftliği</button>
     </div>
 
-    <!-- Sıralama Listesi -->
     <div class="lb-list-area" id="leaderboard-container">
       <div style="color:#64748b; font-size:8px; text-align:center; padding:15px;">Sıralama yükleniyor...</div>
     </div>
@@ -118,10 +112,10 @@
 
   <script src="app.js"></script>
   <script>
-    let currentMode = 'all_top4';
+    let currentMode = 'all_top3';
 
     window.onload = () => {
-      switchLBMode('all_top4');
+      switchLBMode('all_top3');
     };
 
     function switchLBMode(modeKey) {
@@ -140,7 +134,6 @@
       const u = getActiveUser();
       const myUID = u ? String(u.uid).replace(/[.#$\[\]]/g, "_") : "";
 
-      // Hem 'game_scores' hem de 'scores' tablolarını ortak okuyarak verilerin kaybolmasını engelliyoruz
       Promise.all([
         db.ref("game_scores").once("value"),
         db.ref("scores").once("value")
@@ -148,12 +141,8 @@
         container.innerHTML = "";
         let rawRecords = [];
 
-        if (snap1.exists()) {
-          snap1.forEach(c => rawRecords.push(c.val()));
-        }
-        if (snap2.exists()) {
-          snap2.forEach(c => rawRecords.push(c.val()));
-        }
+        if (snap1.exists()) snap1.forEach(c => rawRecords.push(c.val()));
+        if (snap2.exists()) snap2.forEach(c => rawRecords.push(c.val()));
 
         if (rawRecords.length === 0) {
           container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Kayıtlı skor bulunamadı.</div>";
@@ -185,10 +174,11 @@
 
         let list = Object.keys(userMap).map(uid => {
           const d = userMap[uid];
-          const top4 = (d.modeScores['standard'] || 0) + (d.modeScores['ten_cases'] || 0) + (d.modeScores['mines_mode'] || 0) + (d.modeScores['mega_mode'] || 0);
+          // Tümü Kategorisi: Normal Kasa, 10 Kutu ve Mayınlı Kasa toplamı
+          const mainTopTotal = (d.modeScores['standard'] || 0) + (d.modeScores['ten_cases'] || 0) + (d.modeScores['mines_mode'] || 0);
           
           let displayScore = 0;
-          if (modeKey === 'all_top4') displayScore = top4;
+          if (modeKey === 'all_top3') displayScore = mainTopTotal;
           else displayScore = d.modeScores[modeKey] || 0;
 
           return {
@@ -211,7 +201,7 @@
         }
 
         list.slice(0, 50).forEach((item, idx) => {
-          if (item.score <= 0 && modeKey !== 'all_top4') return;
+          if (item.score <= 0 && modeKey !== 'all_top3') return;
           const isMe = item.uid === myUID;
 
           const div = document.createElement("div");
