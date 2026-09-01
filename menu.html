@@ -3,145 +3,237 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kasa Açma Oyunu</title>
+  <title>Kutu Açma Pro - Lobi</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <style>
-    /* Orijinal 2 Sütunlu Mod Izgarası */
-    .mode-grid-2col {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 12px;
-    }
-  </style>
 </head>
 <body class="bg-standard">
-
-  <div class="app-container">
-    
-    <div class="top-header">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span id="u-avatar" style="font-size:24px;">👤</span>
-        <div>
-          <b id="u-name" style="font-size:13px; color:#fff;">Oyuncu#0000</b>
-          <div id="u-title" style="font-size:10px; color:#94a3b8;">Çaylak</div>
+  <div class="app-container" style="justify-content:space-between;">
+    <div>
+      <div class="top-header">
+        <div class="app-title" onclick="location.href='user.html'">
+          <span id="lbl-avatar">👤</span> <span id="lbl-username">...</span>
+        </div>
+        <div style="display:flex; gap:3px;">
+          <a href="leaderboard.html" class="icon-btn">🏆 Sıralama</a>
+          <button class="icon-btn" style="border-color:var(--neon-gold);" onclick="openAnnouncementsModal()">📢 Duyurular</button>
+          <button class="icon-btn" onclick="openGuideModal()">ℹ️ Rehber</button>
+          <button class="icon-btn" onclick="openSettingsModal()">⚙️ Ayarlar</button>
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap:6px;">
-        <a href="leaderboard.html" class="icon-btn" style="text-decoration:none;">🏆 Sıralama</a>
-        <a href="chat.html" class="icon-btn" style="text-decoration:none;">💬 Sohbet</a>
-        <button class="icon-btn" style="border-color:var(--danger); color:var(--danger);" onclick="logoutUser()">Çıkış</button>
+
+      <!-- Üst Butonlar -->
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-bottom:4px;">
+        <a href="chat.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:5px; font-size:10px;">💬 Sohbet</a>
+        <a href="friends.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:5px; font-size:10px;">👥 Arkadaşlar</a>
+        <a href="pvp.html" class="mode-btn" style="text-align:center; font-weight:bold; color:var(--neon-gold); padding:5px; font-size:10px; border-color:var(--neon-gold);">⚔️ 1v1 PvP</a>
       </div>
     </div>
 
-    <div class="mode-grid-2col">
-      
-      <a href="game.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">📦</div>
-        <div class="mode-title">Klasik Kasa</div>
-        <div class="mode-desc">Tekli şanslı kasa açılışı</div>
-      </a>
-
-      <a href="tencases.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">📦🔟</div>
-        <div class="mode-title">10 Kutu Aç</div>
-        <div class="mode-desc">10 kasayı tek seferde aç</div>
-      </a>
-
-      <a href="catch_basket.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">🧺</div>
-        <div class="mode-title">Tut & Aç</div>
-        <div class="mode-desc">Düşen kasaları sepete yakala</div>
-      </a>
-
-      <a href="catch_open.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">🎯</div>
-        <div class="mode-title">Yakala & Aç</div>
-        <div class="mode-desc">Hedef göstergeyi tuttur</div>
-      </a>
-
-      <a href="mines.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">💣</div>
-        <div class="mode-title">Mayınlı Kasa</div>
-        <div class="mode-desc">Mayınlara basmadan ilerle</div>
-      </a>
-
-      <a href="mega.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">💎</div>
-        <div class="mode-title">Mega Kasa</div>
-        <div class="mode-desc">Büyük ödüllü mega kasalar</div>
-      </a>
-
-      <a href="speedrun.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">⚡</div>
-        <div class="mode-title">Speedrun</div>
-        <div class="mode-desc">Süreye karşı yarış</div>
-      </a>
-
-      <a href="temple.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">🏛️</div>
-        <div class="mode-title">Gizli Tapınak</div>
-        <div class="mode-desc">Antik kapıların ardındaki ödül</div>
-      </a>
-
-      <a href="double.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">🎰</div>
-        <div class="mode-title">Çift Rulet</div>
-        <div class="mode-desc">İki çarklı şans ruleti</div>
-      </a>
-
-      <a href="wheel.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">🎡</div>
-        <div class="mode-title">Çarkıfelek</div>
-        <div class="mode-desc">Şans çarkını çevir</div>
-      </a>
-
-      <a href="scratch.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">🪙</div>
-        <div class="mode-title">Kazı Kazan</div>
-        <div class="mode-desc">Kartı kazı ve ödülü bul</div>
-      </a>
-
-      <a href="memory.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">🃏</div>
-        <div class="mode-title">Kart Eşleme</div>
-        <div class="mode-desc">Kart çiftlerini eşleştir</div>
-      </a>
-
-      <a href="merge.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">♾️</div>
-        <div class="mode-title">Birleştirme</div>
-        <div class="mode-desc">Kasaları birleştir, seviye atla</div>
-      </a>
-
-      <a href="guess.html" class="mode-card" style="text-decoration:none;">
-        <div class="mode-icon">🔮</div>
-        <div class="mode-title">Kasa Tahmin</div>
-        <div class="mode-desc">Gizli kutuyu tahmin et</div>
-      </a>
-
+    <!-- 2 SÜTUNLU AKTİF MODLAR IZGARASI -->
+    <div class="mode-grid-8" style="grid-template-rows: repeat(4, 1fr); max-height:270px; overflow-y:auto;">
+      <div class="mode-card-8 active" onclick="selectGameMode('standard', this, 'normal.html')"><b>⚔️ Normal Kasa</b><span>30s Klasik</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('ten_cases', this, 'ten_cases.html')"><b>📦 10 Kutu Modu</b><span>10 Hak</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('catch_basket', this, 'catch_basket.html')"><b>🧺 Tut & Aç</b><span>Sepetle Topla</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('catch_open', this, 'catch.html')"><b>🎯 Yakala & Aç</b><span>Kutuları Yakala</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('mines_mode', this, 'mines.html')"><b>💣 Mayınlı Kasa</b><span>Risk & Çıkış</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('speedrun_mode', this, 'speedrun.html')"><b>⚡ Speedrun</b><span>1000P Yarışı</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('double_mode', this, 'double.html')"><b>🎰 Çift Rulet</b><span>Eşya + Çarpan</span></div>
+      <div class="mode-card-8" onclick="selectGameMode('predict_mode', this, 'predict.html')"><b>🔮 Kasa Tahmin</b><span>Renk Seç (x2-x5)</span></div>
     </div>
 
+    <div>
+      <div class="menu-preview-box" id="rates-preview-box"></div>
+      <button class="btn-start" onclick="launchGame()">OYUNA BAŞLA</button>
+    </div>
+  </div>
+
+  <!-- AYARLAR MODALI -->
+  <div id="modal-settings" class="modal-overlay">
+    <div class="modal-card">
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">⚙️ Ayarlar</div>
+      <div style="font-size:10px; color:var(--text-dim); margin-bottom:2px;">Avatarını Seç:</div>
+      <div class="avatar-grid" id="avatar-picker-box"></div>
+      <div style="font-size:10px; color:var(--text-dim); margin-bottom:2px;">Unvan Seç:</div>
+      <select id="sel-title" class="input-field" onchange="changeTitle(this.value)">
+        <option value="Çaylak">Çaylak</option>
+        <option value="Usta">Usta</option>
+        <option value="Efsane">Efsane</option>
+        <option value="Kral">Kral</option>
+        <option value="Hükümdar">Hükümdar</option>
+      </select>
+      <div style="font-size:10px; color:var(--text-dim); margin-bottom:2px;">Kullanıcı Adı:</div>
+      <div style="display:flex; gap:4px; margin-bottom:6px;">
+        <input type="text" id="in-new-name" class="input-field" style="margin:0; font-size:11px;" placeholder="Yeni isim...">
+        <button class="icon-btn" style="background:var(--neon-green);" onclick="submitNewName()">Kaydet</button>
+      </div>
+
+      <div id="admin-panel-section" style="display:none; border:2px solid var(--danger); border-radius:8px; padding:6px; margin:6px 0; background:rgba(239, 68, 68, 0.1);">
+        <div style="font-size:11px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:4px;">🛑 ADMIN PANELİ</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+          <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllUsers()">Kullanıcıları Sil</button>
+          <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllScores()">Skorları Sil</button>
+          <button class="icon-btn" style="background:var(--danger); justify-content:center;" onclick="adminClearAllChannels()">Kanalları Sil</button>
+          <button class="icon-btn" style="background:#7f1d1d; border-color:var(--danger); justify-content:center;" onclick="adminWipeEverything()">🔥 TÜMÜNÜ SİL</button>
+        </div>
+      </div>
+
+      <button id="btn-sound-toggle" class="mode-btn" style="margin-bottom:6px; text-align:center; color:#fff;" onclick="toggleSound()">🔊 Ses: Açık</button>
+      <button id="btn-delete-acc" class="btn-start" style="background:var(--danger); font-size:11px; padding:6px; margin-bottom:6px;" onclick="deleteAccountPermanently()">🗑️ Hesabı Kalıcı Olarak Sil</button>
+      <button class="btn-start" style="background:#334155; font-size:11px; padding:6px; margin-bottom:6px;" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
+      <button class="btn-close" onclick="closeSettingsModal()">Kapat</button>
+    </div>
+  </div>
+
+  <!-- DUYURULAR & OYLAMA MODALI -->
+  <div id="modal-announcements" class="modal-overlay">
+    <div class="modal-card">
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">📢 Duyurular & Oylama</div>
+      <div id="admin-broadcast-box" style="display:none; border:1px solid var(--neon-purple); padding:6px; border-radius:6px; margin-bottom:6px;">
+        <input type="text" id="in-announce-txt" class="input-field" style="margin:4px 0;" placeholder="Duyuru veya Oylama Sorusu...">
+        <div style="display:flex; gap:4px;">
+          <button class="icon-btn" style="flex:1; background:var(--neon-blue);" onclick="publishAnnouncement(false)">📢 Paylaş</button>
+          <button class="icon-btn" style="flex:1; background:var(--neon-gold); color:#000;" onclick="publishAnnouncement(true)">🗳️ Oylama</button>
+        </div>
+      </div>
+      <div id="announcements-feed" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
+      <button class="btn-close" onclick="document.getElementById('modal-announcements').style.display='none'">Kapat</button>
+    </div>
+  </div>
+
+  <!-- REHBER MODALI -->
+  <div id="modal-guide" class="modal-overlay">
+    <div class="modal-card">
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-blue); text-align:center; margin-bottom:6px;">ℹ️ Mod Rehberi</div>
+      <div style="font-size:10px; color:#cbd5e1; line-height:1.6; max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">
+        <div><b>⚔️ Normal Kasa:</b> 30s klasik kasa açma yarışı.</div>
+        <div><b>📦 10 Kutu:</b> Süresiz 10 kutu açma hakkı.</div>
+        <div><b>🧺 Tut & Aç:</b> Sepetle düşen kutuları toplayıp rulette aç.</div>
+        <div><b>🎯 Yakala & Aç:</b> 20s düşen kutuları topla.</div>
+        <div><b>💣 Mayınlı Kasa:</b> 9 kutudan mayına basmadan ödül topla.</div>
+        <div><b>⚡ Speedrun:</b> En hızlı sürede 1000 puana ulaş!</div>
+        <div><b>🎰 Çift Rulet:</b> Eşya ve x1-x10 çarpan kazan.</div>
+        <div><b>🔮 Kasa Tahmin:</b> Gelecek kasanın rengini tahmin et (x2-x5).</div>
+      </div>
+      <button class="btn-close" onclick="document.getElementById('modal-guide').style.display='none'">Kapat</button>
+    </div>
   </div>
 
   <script src="app.js"></script>
   <script>
-    window.onload = () => {
-      const u = getActiveUser();
-      if (!u) return location.href = "index.html";
+    let targetPage = 'normal.html';
+    let selectedAvatar = "👤";
 
-      document.getElementById("u-name").innerText = `${u.name || 'Oyuncu'}${u.tag || ''}`;
-      document.getElementById("u-avatar").innerText = u.avatar || '👤';
-      document.getElementById("u-title").innerText = u.title || 'Çaylak';
+    const MODE_RATES = {
+      standard: { bg: "bg-standard", title: "NORMAL KASA", tiers: [{name:"Classic (%58)",pts:"1-3P",c:"#fff"},{name:"Super (%29)",pts:"4-10P",c:"#38bdf8"},{name:"Ultra (%10)",pts:"12-30P",c:"#c084fc"},{name:"Omega (%2.8)",pts:"35-120P",c:"#fb923c"},{name:"Godly (%0.2)",pts:"500-1000P",c:"#f43f5e"}] },
+      ten_cases: { bg: "bg-ten_cases", title: "10 KUTU MODU", tiers: [{name:"Classic (%35)",pts:"2-5P",c:"#fff"},{name:"Super (%35)",pts:"6-15P",c:"#38bdf8"},{name:"Ultra (%20)",pts:"20-50P",c:"#c084fc"},{name:"Omega (%8.5)",pts:"60-200P",c:"#fb923c"},{name:"Godly (%1.5)",pts:"600-1200P",c:"#f43f5e"}] },
+      catch_basket: { bg: "bg-catch_open", title: "TUT & AÇ (SEPET)", tiers: [{name:"Tahta Kutu (%45)",pts:"3-8P",c:"#fff"},{name:"Çelik Kutu (%30)",pts:"10-25P",c:"#38bdf8"},{name:"Mistik Kutu (%16)",pts:"30-80P",c:"#c084fc"},{name:"Kozmik Sandık (%7)",pts:"100-300P",c:"#fb923c"},{name:"Tanrısal Kasa (%2)",pts:"800-1600P",c:"#f43f5e"}] },
+      catch_open: { bg: "bg-catch_open", title: "YAKALA & AÇ", tiers: [{name:"Classic Kasa (%45)",pts:"2-5P",c:"#fff"},{name:"Super Kasa (%30)",pts:"6-18P",c:"#38bdf8"},{name:"Ultra Kasa (%15)",pts:"25-60P",c:"#c084fc"},{name:"Omega Kasa (%8)",pts:"80-250P",c:"#fb923c"},{name:"Godly Kasa (%2)",pts:"750-1500P",c:"#f43f5e"}] },
+      mines_mode: { bg: "bg-mines_mode", title: "MAYINLI KASA", tiers: [{name:"Güvenli Kasa (%70)",pts:"15-45P",c:"#10b981"},{name:"Büyük Hazine (%30)",pts:"60-160P",c:"#fbbf24"},{name:"Bomba",pts:"0P",c:"#ef4444"}] },
+      speedrun_mode: { bg: "bg-speedrun_mode", title: "SPEEDRUN YARIŞI", tiers: [{name:"Hızlı Kasa",pts:"20-60P",c:"#38bdf8"},{name:"Hedef",pts:"En Hızlı 1000P!",c:"#f43f5e"}] },
+      double_mode: { bg: "bg-standard", title: "ÇİFT RULET", tiers: [{name:"Eşya Ruleti",pts:"Eşya Puanı",c:"#38bdf8"},{name:"Çarpan Ruleti",pts:"x1 - x10 Katı",c:"#fbbf24"}] },
+      predict_mode: { bg: "bg-standard", title: "KASA RENK TAHMİNİ", tiers: [{name:"Mavi Kasa (%50)",pts:"x2 Katı (80P)",c:"#38bdf8"},{name:"Mor Kasa (%35)",pts:"x3 Katı (120P)",c:"#c084fc"},{name:"Kırmızı Kasa (%15)",pts:"x5 Katı (200P)",c:"#f43f5e"}] }
     };
 
-    function logoutUser() {
-      if (confirm("Çıkış yapmak istiyor musunuz?")) {
-        localStorage.removeItem("kutu_active_user");
-        location.href = "index.html";
+    window.onload = () => {
+      const u = getActiveUser();
+      if (!u) return window.location.href = "index.html";
+      selectedAvatar = u.avatar || "👤";
+      document.getElementById("lbl-avatar").innerText = selectedAvatar;
+      document.getElementById("lbl-username").innerText = `${u.name}${u.tag}`;
+      document.getElementById("in-new-name").value = u.name;
+      document.getElementById("sel-title").value = u.title || "Çaylak";
+
+      if (u.isAdmin || u.name.toLowerCase() === "admin") {
+        document.getElementById("admin-panel-section").style.display = "block";
+        document.getElementById("admin-broadcast-box").style.display = "block";
+        document.getElementById("btn-delete-acc").style.display = "none";
       }
+
+      renderAvatarPicker();
+      renderRates('standard');
+    };
+
+    function renderAvatarPicker() {
+      const box = document.getElementById("avatar-picker-box");
+      box.innerHTML = "";
+      AVATAR_LIST.forEach(av => {
+        const div = document.createElement("div");
+        div.className = "avatar-option" + (av === selectedAvatar ? " selected" : "");
+        div.innerText = av;
+        div.onclick = () => {
+          updateAvatarGlobal(av);
+          selectedAvatar = av;
+          document.getElementById("lbl-avatar").innerText = av;
+          renderAvatarPicker();
+        };
+        box.appendChild(div);
+      });
+    }
+
+    function selectGameMode(key, cardEl, page) {
+      targetPage = page;
+      document.querySelectorAll(".mode-card-8").forEach(b => b.classList.remove("active"));
+      cardEl.classList.add("active");
+      document.body.className = MODE_RATES[key] ? MODE_RATES[key].bg : "bg-standard";
+      renderRates(key);
+    }
+
+    function renderRates(key) {
+      const info = MODE_RATES[key] || MODE_RATES['standard'];
+      let html = `<div style="color:var(--neon-gold); font-weight:bold; font-size:11px; margin-bottom:2px;">📊 ${info.title}</div>`;
+      info.tiers.forEach(t => {
+        html += `<div style="display:flex; justify-content:space-between; color:${t.c}; font-weight:600; font-size:10px;">
+          <span>${t.name}</span><span>${t.pts}</span>
+        </div>`;
+      });
+      document.getElementById("rates-preview-box").innerHTML = html;
+    }
+
+    function launchGame() { window.location.href = targetPage; }
+    function openSettingsModal() { document.getElementById("modal-settings").style.display = "flex"; }
+    function closeSettingsModal() { document.getElementById("modal-settings").style.display = "none"; }
+    function openAnnouncementsModal() { document.getElementById("modal-announcements").style.display = "flex"; loadAnnouncements(); }
+    function openGuideModal() { document.getElementById("modal-guide").style.display = "flex"; }
+    function changeTitle(val) { let u = getActiveUser(); u.title = val; setActiveUser(u); }
+    function submitNewName() { updateUsernameGlobal(document.getElementById("in-new-name").value.trim()); }
+    function toggleSound() {
+      let u = getActiveUser();
+      u.sound = !u.sound;
+      setActiveUser(u);
+      document.getElementById("btn-sound-toggle").innerText = u.sound ? "🔊 Ses: Açık" : "🔇 Ses: Kapalı";
+    }
+    function logout() {
+      localStorage.removeItem("kutu_active_session");
+      window.location.href = "index.html";
+    }
+
+    function publishAnnouncement(isPoll) {
+      const txt = document.getElementById("in-announce-txt").value.trim();
+      if (!txt) return;
+      const u = getActiveUser();
+      db.ref("announcements").push({ author: `${u.name}${u.tag}`, text: txt, isPoll: isPoll, votesYes: 0, votesNo: 0, date: new Date().toLocaleDateString("tr-TR") });
+      document.getElementById("in-announce-txt").value = "";
+    }
+
+    function loadAnnouncements() {
+      db.ref("announcements").on("value", snap => {
+        const feed = document.getElementById("announcements-feed");
+        feed.innerHTML = "";
+        if (!snap.exists()) { feed.innerHTML = "<div style='color:#666; font-size:10px; padding:6px;'>Duyuru bulunmuyor.</div>"; return; }
+        snap.forEach(c => {
+          const a = c.val();
+          feed.innerHTML += `
+            <div class="rank-card" style="flex-direction:column; align-items:flex-start; gap:4px;">
+              <div style="display:flex; justify-content:space-between; width:100%; font-size:9px; color:var(--neon-gold);">
+                <b>${a.isPoll ? '🗳️ OYLAMA' : '📢 DUYURU'} (${a.author})</b><span>${a.date}</span>
+              </div>
+              <div style="font-size:11px; color:#fff;">${a.text}</div>
+            </div>
+          `;
+        });
+      });
     }
   </script>
 </body>
