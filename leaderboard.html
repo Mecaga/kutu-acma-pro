@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="app.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
     html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #020617; font-family: system-ui, sans-serif; color: #fff; }
@@ -111,7 +112,6 @@
 
   </div>
 
-  <script src="app.js"></script>
   <script>
     let currentMode = 'all_top3';
 
@@ -133,20 +133,24 @@
       container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Yükleniyor...</div>";
 
       const u = getActiveUser();
-      const myUID = u ? String(u.uid).replace(/[.#$\[\]]/g, "_") : "";
+      const myUID = u ? String(u.uid || u.name).replace(/[.#$\[\]]/g, "_") : "";
 
-      Promise.all([
-        db.ref("game_scores").once("value"),
-        db.ref("scores").once("value")
-      ]).then(([snap1, snap2]) => {
+      if (!db) {
+        container.innerHTML = "<div style='color:var(--danger); font-size:8px; text-align:center; padding:15px;'>Veritabanı bağlantısı kurulamadı.</div>";
+        return;
+      }
+
+      db.ref("game_scores").on("value", snap => {
         container.innerHTML = "";
         let rawRecords = [];
 
-        if (snap1.exists()) snap1.forEach(c => rawRecords.push(c.val()));
-        if (snap2.exists()) snap2.forEach(c => rawRecords.push(c.val()));
+        if (snap.exists()) {
+          snap.forEach(c => rawRecords.push(c.val()));
+        }
 
         if (rawRecords.length === 0) {
           container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Kayıtlı skor bulunamadı.</div>";
+          document.getElementById("lbl-my-current-score").innerText = "Durumum: -";
           return;
         }
 
@@ -168,7 +172,6 @@
             };
           }
 
-          // Speedrun için en KÜÇÜK süre en iyisidir
           if (mode === 'speedrun_mode') {
             if (score > 0) {
               if (!userMap[uid].modeScores[mode] || score < userMap[uid].modeScores[mode]) {
@@ -176,7 +179,6 @@
               }
             }
           } else {
-            // Diğer modlar için en YÜKSEK puan en iyisidir
             if (!userMap[uid].modeScores[mode] || score > userMap[uid].modeScores[mode]) {
               userMap[uid].modeScores[mode] = score;
             }
@@ -203,24 +205,23 @@
           };
         });
 
-        // SIRALAMA ALGORİTMASI
         if (modeKey === 'all_top3') {
+          list = list.filter(item => item.top3Total > 0);
           list.sort((a, b) => b.top3Total - a.top3Total);
         } else if (modeKey === 'speedrun_mode') {
-          // Sadece süresi olanları al ve en küçükten büyüğe sırala (1. en hızlı)
           list = list.filter(item => item.modeScore > 0);
           list.sort((a, b) => a.modeScore - b.modeScore);
         } else {
+          list = list.filter(item => item.modeScore > 0);
           list.sort((a, b) => b.modeScore - a.modeScore);
         }
 
-        // Kendi Skorunu Üstte Göster
         const myItem = list.find(l => l.uid === myUID);
         if (myItem) {
           if (modeKey === 'all_top3') {
             document.getElementById("lbl-my-current-score").innerText = `Toplam: ${myItem.top3Total} P`;
           } else if (modeKey === 'speedrun_mode') {
-            document.getElementById("lbl-my-current-score").innerText = `Sürem: ${myItem.modeScore > 0 ? myItem.modeScore + 's' : '-'}`;
+            document.getElementById("lbl-my-current-score").innerText = `Sürem: ${myItem.modeScore}s`;
           } else {
             document.getElementById("lbl-my-current-score").innerText = `Puanım: ${myItem.modeScore} P`;
           }
@@ -245,7 +246,6 @@
           else if (idx === 2) rankBadge = "🥉 3.";
 
           if (modeKey === 'all_top3') {
-            // Tümü Kategorisi: Normal, Yakala & Aç, Mayın dökümü ile
             div.innerHTML = `
               <div style="display:flex; align-items:center; gap:5px;">
                 <span style="font-weight:bold; color:#38bdf8; width:22px;">${rankBadge}</span>
@@ -265,7 +265,6 @@
               </div>
             `;
           } else if (modeKey === 'speedrun_mode') {
-            // Speedrun: En kısa süre
             div.innerHTML = `
               <div style="display:flex; align-items:center; gap:5px;">
                 <span style="font-weight:bold; color:#38bdf8; width:22px;">${rankBadge}</span>
@@ -278,7 +277,6 @@
               <div style="font-weight:bold; color:var(--neon-gold); font-size:10px;">⚡ ${item.modeScore} sn</div>
             `;
           } else {
-            // Normal, Yakala & Aç, Mayın, Çift Rulet tekli puanı
             div.innerHTML = `
               <div style="display:flex; align-items:center; gap:5px;">
                 <span style="font-weight:bold; color:#38bdf8; width:22px;">${rankBadge}</span>
@@ -294,7 +292,7 @@
 
           container.appendChild(div);
         });
-      }).catch(err => {
+      }, err => {
         container.innerHTML = `<div style='color:var(--danger); font-size:8px; text-align:center; padding:15px;'>Hata: ${err.message}</div>`;
       });
     }
