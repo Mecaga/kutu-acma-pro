@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Kasa Çiftliği - Genişletilmiş Hay Day</title>
+  <title>Kasa Çiftliği - Mega Hay Day & Prestij</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
@@ -103,7 +103,7 @@
       cursor: pointer;
     }
 
-    /* Tarla */
+    /* Tarla Izgarası */
     .farm-grid-30 {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -225,7 +225,9 @@
       border-radius: 10px;
       padding: 12px;
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
+      max-height: 85vh;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -263,6 +265,15 @@
       </div>
       <div class="farm-grid-30" id="plots-container"></div>
 
+      <!-- Kasaba Yük Gemisi (Büyük Vapur Etkinliği) -->
+      <div style="background:#091224; border:1px solid #1e3a8a; border-radius:6px; padding:5px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:8px; color:#38bdf8; font-weight:bold; margin-bottom:3px;">
+          <span>🚢 Kasaba Yük Vapuru (Büyük Kasa)</span>
+          <span id="lbl-steamer-timer">Kalkış: 120s</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;" id="steamer-crates-container"></div>
+      </div>
+
       <!-- Hayvan Barınakları -->
       <div style="font-size:8px; color:#38bdf8; font-weight:bold;">🐮 Hayvan Barınakları (Besle & Topla ➔):</div>
       <div class="horizontal-scroll-row" id="animals-container"></div>
@@ -298,8 +309,9 @@
         <button type="button" class="seed-btn-chip-1x5" id="btn-seed-7" onclick="selectSeed(7)"><b>☁️Pamuk</b><small>130🪙•100s</small><span style="color:#94a3b8;">Lv.7</span></button>
         <button type="button" class="seed-btn-chip-1x5" id="btn-seed-8" onclick="selectSeed(8)"><b>🫒Zeytin</b><small>160🪙•120s</small><span style="color:#94a3b8;">Lv.7</span></button>
         <button type="button" class="seed-btn-chip-1x5" id="btn-seed-9" onclick="selectSeed(9)"><b>🍫Kakao</b><small>200🪙•140s</small><span style="color:#94a3b8;">Lv.8</span></button>
-        <button type="button" class="seed-btn-chip-1x5" id="btn-seed-10" onclick="selectSeed(10)"><b>☕Kahve</b><small>320🪙•200s</small><span style="color:#94a3b8;">Lv.10</span></button>
-        <button type="button" class="seed-btn-chip-1x5" id="btn-seed-11" onclick="selectSeed(11)"><b>🍓Çilek</b><small>500🪙•300s</small><span style="color:#94a3b8;">Lv.12</span></button>
+        <button type="button" class="seed-btn-chip-1x5" id="btn-seed-10" onclick="selectSeed(10)"><b>🍊Portakal</b><small>250🪙•160s</small><span style="color:#94a3b8;">Lv.9</span></button>
+        <button type="button" class="seed-btn-chip-1x5" id="btn-seed-11" onclick="selectSeed(11)"><b>☕Kahve</b><small>320🪙•200s</small><span style="color:#94a3b8;">Lv.10</span></button>
+        <button type="button" class="seed-btn-chip-1x5" id="btn-seed-12" onclick="selectSeed(12)"><b>🍓Çilek</b><small>500🪙•300s</small><span style="color:#94a3b8;">Lv.12</span></button>
       </div>
 
       <!-- Panel 2: Yem Değirmeni -->
@@ -345,28 +357,44 @@
 
   </div>
 
-  <!-- PRESTİJ MODALI -->
+  <!-- GENİŞLETİLMİŞ 8 KADEMELİ PRESTİJ MODALI -->
   <div id="modal-rebirth" class="modal-overlay" style="display:none;">
     <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:var(--neon-purple); text-align:center;">⭐ Çiftlik Prestiji (Rebirth)</div>
-      <div style="font-size:8.5px; color:#cbd5e1; text-align:center;">Seviye 10'da çiftliğini sıfırla, kalıcı Prestij Yıldızları kazanıp yetenek ağacını güçlendir!</div>
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-purple); text-align:center;">⭐ Çiftlik Prestiji & Yetenek Ağacı</div>
+      <div style="font-size:8.5px; color:#cbd5e1; text-align:center;">Seviye 10'da çiftliğini sıfırla, kalıcı Prestij Yıldızları kazan ve yetenekleri aç!</div>
       
-      <div style="display:flex; flex-direction:column; gap:4px; margin:4px 0; font-size:8px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:4px; border-radius:4px; border:1px solid #1e293b;">
-          <span>🌾 Hasat Verimi (+%10 Ürün)</span>
-          <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('yield')">Yükselt (1⭐) - Lv.<span id="sk-yield">0</span></button>
+      <div style="display:flex; flex-direction:column; gap:4px; margin:4px 0; font-size:7.5px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
+          <span>🌾 Çifte Hasat Şansı (+%10 4x Ürün)</span>
+          <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('doubleHarvest')">Yükselt (1⭐) - Lv.<span id="sk-doubleHarvest">0</span></button>
         </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:4px; border-radius:4px; border:1px solid #1e293b;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
           <span>⚡ Üretim Hızı (-%15 Süre)</span>
           <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('speed')">Yükselt (1⭐) - Lv.<span id="sk-speed">0</span></button>
         </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:4px; border-radius:4px; border:1px solid #1e293b;">
-          <span>⭐ XP Güçlendirici (+%20 XP)</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
+          <span>💧 Otomatik Sulama Şebekesi (Bedava Su)</span>
+          <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('autoWater')">Yükselt (1⭐) - Lv.<span id="sk-autoWater">0</span></button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
+          <span>🥣 Yem Tasarrufu (%20 Bedava Besleme)</span>
+          <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('feedSave')">Yükselt (1⭐) - Lv.<span id="sk-feedSave">0</span></button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
+          <span>🪙 Kritik Sipariş Satışı (%15 İhtimalle 3x Altın)</span>
+          <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('critOrder')">Yükselt (1⭐) - Lv.<span id="sk-critOrder">0</span></button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
+          <span>⭐ XP Çarpanı (+%25 Hızlı Seviye)</span>
           <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('xp')">Yükselt (1⭐) - Lv.<span id="sk-xp">0</span></button>
         </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:4px; border-radius:4px; border:1px solid #1e293b;">
-          <span>🪙 Borsa Kazancı (+%15 Altın)</span>
-          <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('gold')">Yükselt (1⭐) - Lv.<span id="sk-gold">0</span></button>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
+          <span>🚢 Vapur Bonusu (+%50 Gemi Geliri)</span>
+          <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('steamer')">Yükselt (1⭐) - Lv.<span id="sk-steamer">0</span></button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:3px 5px; border-radius:4px; border:1px solid #1e293b;">
+          <span>📈 Borsa Tavanı (x3.5 Maksimum Piyasa)</span>
+          <button type="button" class="icon-btn" style="background:#7c3aed; font-size:7px; padding:2px 5px;" onclick="upgradeSkill('market')">Yükselt (1⭐) - Lv.<span id="sk-market">0</span></button>
         </div>
       </div>
 
@@ -379,7 +407,6 @@
 
   <script src="app.js"></script>
   <script>
-    // TÜRKÇE SÖZLÜK VE İKONLAR
     const ITEM_NAMES = {
       wood: "🌾 Buğday",
       iron: "🌽 Mısır",
@@ -391,6 +418,7 @@
       amethyst: "☁️ Pamuk",
       olive: "🫒 Zeytin",
       legend: "🍫 Kakao",
+      orange: "🍊 Portakal",
       cosmic: "☕ Kahve",
       godly: "🍓 Çilek",
       chicken_feed: "🥣 Tavuk Yemi",
@@ -409,8 +437,12 @@
       juice: "🧃 Meyve Suyu",
       sauce: "🥫 Domates Salçası",
       pie: "🥧 Kasa Turtası",
-      chocolate: "🍫 Tablet Çikolata",
-      olive_oil: "🍾 Sızma Zeytinyağı"
+      olive_oil: "🍾 Sızma Zeytinyağı",
+      ice_cream: "🍦 Çilekli Dondurma",
+      latte: "☕ Sıcak Latte",
+      fabric: "🧵 Dokuma Kumaş",
+      jam: "🍓 Çilek Reçeli",
+      chocolate: "🍫 Sütlü Çikolata"
     };
 
     const SEEDS = [
@@ -424,6 +456,7 @@
       { id: 'amethyst', name: 'Pamuk', cost: 130, reqLvl: 7, growTime: 100, pts: 280, gold: 190, xp: 135, icon: '☁️' },
       { id: 'olive', name: 'Zeytin', cost: 160, reqLvl: 7, growTime: 120, pts: 340, gold: 230, xp: 160, icon: '🫒' },
       { id: 'legend', name: 'Kakao', cost: 200, reqLvl: 8, growTime: 140, pts: 420, gold: 280, xp: 190, icon: '🍫' },
+      { id: 'orange', name: 'Portakal', cost: 250, reqLvl: 9, growTime: 160, pts: 520, gold: 340, xp: 230, icon: '🍊' },
       { id: 'cosmic', name: 'Kahve', cost: 320, reqLvl: 10, growTime: 200, pts: 700, gold: 430, xp: 280, icon: '☕' },
       { id: 'godly', name: 'Çilek', cost: 500, reqLvl: 12, growTime: 300, pts: 1400, gold: 750, xp: 500, icon: '🍓' }
     ];
@@ -448,20 +481,17 @@
       { id: 'sugar_mill', name: 'Şeker Ocağı', reqLvl: 5, cost: 300, icon: '🎋', recipes: [
         { id: 'sugar', name: 'Şeker', time: 40, req: { emerald: 1 }, out: 'sugar', icon: '🍬', gold: 85, xp: 50 }
       ]},
-      { id: 'juice_press', name: 'Meyve Presi', reqLvl: 5, cost: 380, icon: '🧃', recipes: [
-        { id: 'juice', name: 'Safir Suyu', time: 50, req: { sapphire: 2 }, out: 'juice', icon: '🧃', gold: 140, xp: 80 }
+      { id: 'icecream_maker', name: 'Dondurma Makinesi', reqLvl: 6, cost: 420, icon: '🍦', recipes: [
+        { id: 'ice_cream', name: 'Çilekli Dondurma', time: 60, req: { milk: 1, godly: 1, sugar: 1 }, out: 'ice_cream', icon: '🍦', gold: 240, xp: 140 }
       ]},
-      { id: 'sauce_maker', name: 'Konserve Kazanı', reqLvl: 6, cost: 420, icon: '🥫', recipes: [
-        { id: 'sauce', name: 'Domates Salçası', time: 60, req: { ruby: 2 }, out: 'sauce', icon: '🥫', gold: 160, xp: 95 }
+      { id: 'coffee_bar', name: 'Kahve & İçecek Barı', reqLvl: 7, cost: 550, icon: '☕', recipes: [
+        { id: 'latte', name: 'Sıcak Latte', time: 65, req: { cosmic: 2, milk: 1 }, out: 'latte', icon: '☕', gold: 270, xp: 160 }
       ]},
-      { id: 'pie_oven', name: 'Pasta Fırını', reqLvl: 6, cost: 500, icon: '🥧', recipes: [
-        { id: 'apple_pie', name: 'Turtası', time: 70, req: { bread: 1, honey: 1, egg: 1 }, out: 'pie', icon: '🥧', gold: 210, xp: 120 }
+      { id: 'loom_tailor', name: 'Dokuma & Terzi Tezgahı', reqLvl: 8, cost: 680, icon: '🧵', recipes: [
+        { id: 'fabric', name: 'Dokuma Kumaş', time: 70, req: { amethyst: 2, wool: 1 }, out: 'fabric', icon: '🧵', gold: 310, xp: 180 }
       ]},
-      { id: 'oil_press', name: 'Zeytinyağı Presi', reqLvl: 7, cost: 600, icon: '🍾', recipes: [
-        { id: 'olive_oil', name: 'Sızma Yağ', time: 80, req: { olive: 3 }, out: 'olive_oil', icon: '🍾', gold: 280, xp: 160 }
-      ]},
-      { id: 'choc_shop', name: 'Çikolata Atölyesi', reqLvl: 8, cost: 750, icon: '🍫', recipes: [
-        { id: 'chocolate', name: 'Çikolata', time: 90, req: { legend: 2, milk: 1, sugar: 1 }, out: 'chocolate', icon: '🍫', gold: 380, xp: 220 }
+      { id: 'jam_maker', name: 'Reçel & Konserve Kazanı', reqLvl: 8, cost: 750, icon: '🍓', recipes: [
+        { id: 'jam', name: 'Çilek Reçeli', time: 80, req: { godly: 2, sugar: 1 }, out: 'jam', icon: '🍓', gold: 360, xp: 210 }
       ]}
     ];
 
@@ -471,7 +501,7 @@
       xp: 0,
       lvl: 1,
       prestigeStars: 0,
-      skills: { yield: 0, speed: 0, xp: 0, gold: 0 },
+      skills: { doubleHarvest: 0, speed: 0, autoWater: 0, feedSave: 0, critOrder: 0, xp: 0, steamer: 0, market: 0 },
       totalHarvestPts: 0,
       water: 15,
       unlockedPlots: 8,
@@ -488,7 +518,16 @@
         { id: 4, req: { milk: 1, wood: 2 }, gold: 75, xp: 50 },
         { id: 5, req: { bread: 1 }, gold: 90, xp: 60 },
         { id: 6, req: { gold: 2 }, gold: 110, xp: 75 }
-      ]
+      ],
+      steamer: {
+        readyTime: Date.now() + 120000,
+        crates: [
+          { item: 'wood', count: 4, done: false, gold: 80, xp: 50 },
+          { item: 'egg', count: 3, done: false, gold: 120, xp: 80 },
+          { item: 'bread', count: 2, done: false, gold: 180, xp: 110 },
+          { item: 'milk', count: 2, done: false, gold: 150, xp: 90 }
+        ]
+      }
     };
 
     window.onload = () => {
@@ -568,7 +607,7 @@
             div.innerHTML = `
               <span style="font-size:9px;">🌱</span>
               <b style="font-size:6px; color:#fbbf24;">${remSec}s</b>
-              ${!p.watered ? `<button type="button" class="icon-btn" style="padding:0px 2px; font-size:5px; background:#0284c7; margin-top:1px;" onclick="event.stopPropagation(); waterPlot(${idx});">💧</button>` : `<small style="font-size:5px; color:#38bdf8;">✓</small>`}
+              ${!p.watered && (farmState.skills?.autoWater || 0) === 0 ? `<button type="button" class="icon-btn" style="padding:0px 2px; font-size:5px; background:#0284c7; margin-top:1px;" onclick="event.stopPropagation(); waterPlot(${idx});">💧</button>` : `<small style="font-size:5px; color:#38bdf8;">✓</small>`}
             `;
             div.onclick = () => {};
           }
@@ -586,8 +625,70 @@
       renderAnimals();
       renderWorkbenches();
       renderOrders();
+      renderSteamer();
       updateStorageCounter();
       updateFeedStockIndicators();
+    }
+
+    /* Kasaba Vapuru */
+    function renderSteamer() {
+      const container = document.getElementById("steamer-crates-container");
+      const timerEl = document.getElementById("lbl-steamer-timer");
+      if (!container || !farmState.steamer) return;
+
+      const now = Date.now();
+      const rem = Math.max(0, Math.ceil((farmState.steamer.readyTime - now) / 1000));
+      if (timerEl) timerEl.innerText = rem === 0 ? "Vapur İskelede!" : `Kalkış: ${rem}s`;
+
+      container.innerHTML = "";
+      farmState.steamer.crates.forEach((crate, idx) => {
+        const have = farmState.inventory[crate.item] || 0;
+        const trName = ITEM_NAMES[crate.item] || crate.item;
+        const div = document.createElement("div");
+        div.style.cssText = "background:#0f172a; border:1px solid #334155; border-radius:4px; padding:3px; display:flex; justify-content:space-between; align-items:center; font-size:6.5px;";
+
+        if (crate.done) {
+          div.innerHTML = `<span style="color:#22c55e;">✅ ${trName} (Yüklendi)</span><b style="color:var(--neon-gold);">+${crate.gold}🪙</b>`;
+        } else {
+          div.innerHTML = `
+            <div><b>${trName}</b>: ${have}/${crate.count}</div>
+            <button type="button" class="icon-btn" style="padding:1px 3px; font-size:6px; background:${have >= crate.count ? '#16a34a' : '#334155'};" onclick="loadSteamerCrate(${idx})">Yükle</button>
+          `;
+        }
+        container.appendChild(div);
+      });
+    }
+
+    function loadSteamerCrate(idx) {
+      const crate = farmState.steamer.crates[idx];
+      if (!crate || crate.done) return;
+      if ((farmState.inventory[crate.item] || 0) < crate.count) {
+        return alert(`Yetersiz malzeme! Gerekli: ${crate.count}x ${ITEM_NAMES[crate.item] || crate.item}`);
+      }
+
+      farmState.inventory[crate.item] -= crate.count;
+      crate.done = true;
+
+      const steamerBonus = 1 + ((farmState.skills?.steamer || 0) * 0.5);
+      farmState.gold += Math.floor(crate.gold * steamerBonus);
+      addXP(Math.floor(crate.xp * steamerBonus));
+
+      // Tüm sandıklar yüklendi mi?
+      if (farmState.steamer.crates.every(c => c.done)) {
+        alert("🚢 TEBRİKLER! Tüm vapur yüklendi! Büyük Kasa Ödülü: +300 Altın ve +250 XP!");
+        farmState.gold += 300;
+        addXP(250);
+        farmState.steamer.readyTime = Date.now() + 180000;
+        farmState.steamer.crates = [
+          { item: 'wood', count: 5, done: false, gold: 100, xp: 60 },
+          { item: 'egg', count: 4, done: false, gold: 150, xp: 90 },
+          { item: 'bread', count: 3, done: false, gold: 220, xp: 140 },
+          { item: 'butter', count: 2, done: false, gold: 180, xp: 110 }
+        ];
+      }
+
+      saveFarmData();
+      renderPlots();
     }
 
     function renderAnimals() {
@@ -664,7 +765,11 @@
     function feedAnimal(id) {
       const an = ANIMALS_DEF.find(a => a.id === id);
       if (!an) return;
-      if (an.feed) {
+      
+      const feedSaveChance = (farmState.skills?.feedSave || 0) * 0.2;
+      const isFree = Math.random() < feedSaveChance;
+
+      if (an.feed && !isFree) {
         if ((farmState.inventory[an.feed] || 0) <= 0) {
           return alert(`Yem Değirmeni'nden ${an.name} için yem üretmelisin!`);
         }
@@ -684,7 +789,7 @@
       const an = ANIMALS_DEF.find(a => a.id === id);
       if (!an) return;
       
-      const yieldBonus = 1 + (farmState.skills?.yield || 0);
+      const yieldBonus = 1;
       farmState.inventory[an.produce] = (farmState.inventory[an.produce] || 0) + yieldBonus;
       farmState.animalStatus[id] = { state: 'hungry', readyTime: 0 };
       addXP(15);
@@ -799,7 +904,7 @@
       const rcp = wb?.recipes.find(r => r.id === q.recipeId);
       if (!rcp) return;
 
-      const yieldBonus = 1 + (farmState.skills?.yield || 0);
+      const yieldBonus = 1;
       farmState.inventory[rcp.out] = (farmState.inventory[rcp.out] || 0) + yieldBonus;
       addXP(rcp.xp);
       farmState.workbenchQueue[wbId] = null;
@@ -876,9 +981,14 @@
         farmState.inventory[item] -= ord.req[item];
       }
 
-      const goldBonus = 1 + ((farmState.skills?.gold || 0) * 0.15);
-      farmState.gold += Math.floor(ord.gold * goldBonus);
+      const critChance = (farmState.skills?.critOrder || 0) * 0.15;
+      const isCrit = Math.random() < critChance;
+      const goldMultiplier = isCrit ? 3.0 : 1.0;
+
+      farmState.gold += Math.floor(ord.gold * goldMultiplier);
       addXP(ord.xp);
+
+      if (isCrit) alert("🔥 KRİTİK SİPARİŞ SATIŞI! 3 Kat Altın Kazanıldı!");
 
       farmState.orders[idx] = generateRandomOrder();
       saveFarmData();
@@ -894,7 +1004,7 @@
       return { id: Date.now() + Math.random(), req: req, gold: count * 45, xp: count * 30 };
     }
 
-    /* Türkçe Ambar / Çanta Görüntüleme */
+    /* Ambar / Depo */
     function renderBarnInventory() {
       const list = document.getElementById("barn-inventory-list");
       if (!list) return;
@@ -938,7 +1048,7 @@
         seedIdx: selectedSeedIdx,
         plantTime: now,
         readyTime: now + (seed.growTime * 1000 * speedBonus),
-        watered: false
+        watered: (farmState.skills?.autoWater || 0) > 0
       };
 
       saveFarmData();
@@ -964,8 +1074,11 @@
       if (!p) return;
       const seed = SEEDS[p.seedIdx] || SEEDS[0];
 
-      const yieldBonus = 2 + (farmState.skills?.yield || 0);
-      farmState.inventory[seed.id] = (farmState.inventory[seed.id] || 0) + yieldBonus;
+      const doubleChance = (farmState.skills?.doubleHarvest || 0) * 0.10;
+      const isDouble = Math.random() < doubleChance;
+      const yieldCount = isDouble ? 4 : 2;
+
+      farmState.inventory[seed.id] = (farmState.inventory[seed.id] || 0) + yieldCount;
       farmState.totalHarvestPts += seed.pts;
       addXP(seed.xp);
 
@@ -1016,7 +1129,7 @@
     }
 
     function addXP(amount) {
-      const xpBonus = 1 + ((farmState.skills?.xp || 0) * 0.2);
+      const xpBonus = 1 + ((farmState.skills?.xp || 0) * 0.25);
       farmState.xp += Math.floor(amount * xpBonus);
       const req = farmState.lvl * 120;
       if (farmState.xp >= req) {
@@ -1030,15 +1143,16 @@
     /* PRESTİJ (REBİRTH) SİSTEMİ */
     function openRebirthModal() {
       document.getElementById("modal-rebirth").style.display = "flex";
-      document.getElementById("sk-yield").innerText = farmState.skills?.yield || 0;
-      document.getElementById("sk-speed").innerText = farmState.skills?.speed || 0;
-      document.getElementById("sk-xp").innerText = farmState.skills?.xp || 0;
-      document.getElementById("sk-gold").innerText = farmState.skills?.gold || 0;
+      const s = farmState.skills || {};
+      ['doubleHarvest', 'speed', 'autoWater', 'feedSave', 'critOrder', 'xp', 'steamer', 'market'].forEach(sk => {
+        const el = document.getElementById(`sk-${sk}`);
+        if (el) el.innerText = s[sk] || 0;
+      });
     }
 
     function upgradeSkill(type) {
       if ((farmState.prestigeStars || 0) < 1) return alert("Yetersiz Prestij Yıldızı! Seviye 10'da Rebirth yapmalısın.");
-      if (!farmState.skills) farmState.skills = { yield: 0, speed: 0, xp: 0, gold: 0 };
+      if (!farmState.skills) farmState.skills = {};
 
       farmState.prestigeStars--;
       farmState.skills[type] = (farmState.skills[type] || 0) + 1;
@@ -1053,7 +1167,7 @@
 
       if (confirm("Çiftliğini sıfırlayıp +1 Kalıcı Prestij Yıldızı kazanmak istiyor musun?")) {
         const stars = (farmState.prestigeStars || 0) + 1;
-        const skills = farmState.skills || { yield: 0, speed: 0, xp: 0, gold: 0 };
+        const skills = farmState.skills || {};
 
         farmState = {
           gold: 200,
@@ -1077,7 +1191,16 @@
             { id: 4, req: { milk: 1, wood: 2 }, gold: 75, xp: 50 },
             { id: 5, req: { bread: 1 }, gold: 90, xp: 60 },
             { id: 6, req: { gold: 2 }, gold: 110, xp: 75 }
-          ]
+          ],
+          steamer: {
+            readyTime: Date.now() + 120000,
+            crates: [
+              { item: 'wood', count: 4, done: false, gold: 80, xp: 50 },
+              { item: 'egg', count: 3, done: false, gold: 120, xp: 80 },
+              { item: 'bread', count: 2, done: false, gold: 180, xp: 110 },
+              { item: 'milk', count: 2, done: false, gold: 150, xp: 90 }
+            ]
+          }
         };
 
         saveFarmData();
@@ -1092,22 +1215,22 @@
     }
 
     function saveFarmData() {
-      localStorage.setItem("kutu_farm_hayday_v3_save", JSON.stringify(farmState));
+      localStorage.setItem("kutu_farm_hayday_v4_save", JSON.stringify(farmState));
       const u = getActiveUser();
       if (u && u.uid && u.uid !== "ADMIN_ROOT") {
-        db.ref(`users/${u.uid}/farm_hayday_v3`).set(farmState);
+        db.ref(`users/${u.uid}/farm_hayday_v4`).set(farmState);
       }
     }
 
     function loadFarmData() {
-      const local = localStorage.getItem("kutu_farm_hayday_v3_save");
+      const local = localStorage.getItem("kutu_farm_hayday_v4_save");
       if (local) {
         try { farmState = Object.assign(farmState, JSON.parse(local)); } catch (e) {}
       }
 
       const u = getActiveUser();
       if (u && u.uid && u.uid !== "ADMIN_ROOT") {
-        db.ref(`users/${u.uid}/farm_hayday_v3`).once("value", snap => {
+        db.ref(`users/${u.uid}/farm_hayday_v4`).once("value", snap => {
           if (snap.exists()) {
             farmState = Object.assign(farmState, snap.val());
           }
