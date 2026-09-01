@@ -3,28 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Arkadaş Listesi & Çiftlik Ziyareti</title>
+  <title>Arkadaş Merkezi & Çiftlik Ziyareti</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      overflow: hidden;
-      background: #020617;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #fff;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+    html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #020617; font-family: system-ui, sans-serif; color: #fff; }
 
     .friends-layout {
       position: relative;
@@ -33,12 +18,11 @@
       height: 100dvh;
       margin: 0 auto;
       background: #030712;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
-    .friends-top-header {
+    .friends-header {
       flex-shrink: 0;
       background: #090d1a;
       border-bottom: 2px solid #1e293b;
@@ -46,7 +30,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 1000;
+      z-index: 100;
     }
 
     .friends-tab-bar {
@@ -69,11 +53,7 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    .f-tab-btn.active {
-      background: #4338ca;
-      border-color: var(--neon-gold);
-      color: #fff;
-    }
+    .f-tab-btn.active { background: #4338ca; border-color: var(--neon-gold); color: #fff; }
 
     .friends-scroll-area {
       flex: 1;
@@ -85,8 +65,6 @@
       gap: 6px;
       -webkit-overflow-scrolling: touch;
     }
-    .friends-scroll-area::-webkit-scrollbar { width: 3px; }
-    .friends-scroll-area::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
 
     .friend-card {
       background: #0f172a;
@@ -99,7 +77,6 @@
       font-size: 8.5px;
     }
 
-    /* Birebir DM Modal */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -117,7 +94,6 @@
       padding: 10px;
       width: 100%;
       max-width: 400px;
-      max-height: 85vh;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -127,42 +103,42 @@
 <body>
   <div class="friends-layout">
     
-    <!-- 1. Üst Başlık -->
-    <div class="friends-top-header">
+    <!-- Üst Başlık -->
+    <div class="friends-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
       <div style="font-weight:900; font-size:11px; color:#38bdf8;">👥 Arkadaş Merkezi</div>
       <a href="chat.html" class="icon-btn" style="background:#0284c7; padding:2px 8px; font-size:9.5px; text-decoration:none;">💬 Sohbet</a>
     </div>
 
-    <!-- 2. Sekmeler -->
+    <!-- Sekmeler -->
     <div class="friends-tab-bar">
-      <button type="button" class="f-tab-btn active" id="ftab-list" onclick="switchFriendsTab('list')">👥 Arkadaşlarım (<span id="lbl-friend-count">0</span>)</button>
-      <button type="button" class="f-tab-btn" id="ftab-requests" onclick="switchFriendsTab('requests')">📬 İstekler (<span id="lbl-request-count">0</span>)</button>
-      <button type="button" class="f-tab-btn" id="ftab-add" onclick="switchFriendsTab('add')">➕ Arkadaş Ekle</button>
+      <button type="button" class="f-tab-btn active" id="ftab-list" onclick="switchTab('list')">👥 Arkadaşlarım (<span id="lbl-f-count">0</span>)</button>
+      <button type="button" class="f-tab-btn" id="ftab-reqs" onclick="switchTab('reqs')">📬 İstekler (<span id="lbl-r-count">0</span>)</button>
+      <button type="button" class="f-tab-btn" id="ftab-add" onclick="switchTab('add')">➕ Arkadaş Ekle</button>
     </div>
 
-    <!-- 3. İçerik Alanı -->
+    <!-- İçerik -->
     <div class="friends-scroll-area">
       
-      <!-- Panel 1: Arkadaş Listesi -->
-      <div id="pnl-friends-list" style="display:flex; flex-direction:column; gap:4px;">
+      <!-- Panel 1: Arkadaşlar -->
+      <div id="pnl-list" style="display:flex; flex-direction:column; gap:4px;">
         <div id="friends-list-box" style="display:flex; flex-direction:column; gap:4px;"></div>
       </div>
 
       <!-- Panel 2: İstekler -->
-      <div id="pnl-friends-requests" style="display:none; flex-direction:column; gap:4px;">
+      <div id="pnl-reqs" style="display:none; flex-direction:column; gap:4px;">
         <div id="requests-list-box" style="display:flex; flex-direction:column; gap:4px;"></div>
       </div>
 
-      <!-- Panel 3: Arkadaş Ekle -->
-      <div id="pnl-friends-add" style="display:none; flex-direction:column; gap:6px; background:#0f172a; padding:10px; border-radius:8px; border:1px solid #1e293b;">
-        <div style="font-size:9.5px; font-weight:bold; color:var(--neon-gold);">🏷️ Kullanıcı Adı veya Etiketiyle Ekle:</div>
+      <!-- Panel 3: Arkadaş Ekle (Hatasız İstek Gönderme) -->
+      <div id="pnl-add" style="display:none; flex-direction:column; gap:6px; background:#0f172a; padding:10px; border-radius:8px; border:1px solid #1e293b;">
+        <div style="font-size:9.5px; font-weight:bold; color:var(--neon-gold);">🏷️ Oyuncu İsmi veya Etiketiyle Ekle:</div>
         <div style="display:flex; gap:4px;">
-          <input type="text" id="in-target-tag" class="input-field" style="margin:0; font-size:10px; padding:6px;" placeholder="Örn: Oyuncu#1234">
-          <button type="button" class="icon-btn" style="background:#16a34a; padding:6px 12px; font-size:9.5px;" onclick="sendFriendRequestByInput()">İstek Gönder</button>
+          <input type="text" id="in-player-tag" class="input-field" style="margin:0; font-size:10px; padding:6px;" placeholder="Örn: Oyuncu#1234">
+          <button type="button" class="icon-btn" style="background:#16a34a; padding:6px 12px; font-size:9.5px;" onclick="sendFriendRequest()">İstek Yolla</button>
         </div>
-        <div style="font-size:8px; color:#94a3b8; line-height:1.4;">
-          Arkadaşının tam profil etiketini (#1234) yazarak doğrudan istek yollayabilirsin. İstek onaylandığında çiftliklerini ziyaret edebilir ve hediyeleşebilirsiniz.
+        <div style="font-size:7.5px; color:#94a3b8; line-height:1.4;">
+          Arkadaşının tam etiketini (#0000) yazarak doğrudan istek yollayabilirsin. İstek onaylanınca tarlalarını ziyaret edebilir ve özel DM atabilirsin.
         </div>
       </div>
 
@@ -170,89 +146,83 @@
 
   </div>
 
-  <!-- DM ÖZEL MESAJLAŞMA MODALI -->
+  <!-- SADECE ARKADAŞ SEÇİLİNCE AÇILAN DM MODALI -->
   <div id="modal-dm" class="modal-overlay" style="display:none;">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="font-size:11px; font-weight:bold; color:var(--neon-blue);" id="lbl-dm-target-name">💬 Özel Sohbet</div>
+        <div style="font-size:11px; font-weight:bold; color:var(--neon-blue);" id="lbl-dm-target">💬 Özel Sohbet</div>
         <button type="button" class="icon-btn" style="background:var(--danger); padding:2px 6px; font-size:8px;" onclick="closeDM()">Kapat</button>
       </div>
 
-      <div id="dm-messages-box" style="height:200px; overflow-y:auto; background:#070a13; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:4px; font-size:8.5px;"></div>
+      <div id="dm-box" style="height:200px; overflow-y:auto; background:#070a13; padding:6px; border-radius:6px; display:flex; flex-direction:column; gap:4px; font-size:8.5px;"></div>
 
       <div style="display:flex; gap:4px;">
-        <input type="text" id="in-dm-text" class="input-field" style="margin:0; flex:1; font-size:9px; padding:4px;" placeholder="Özel mesaj..." onkeydown="if(event.key==='Enter') sendDMMessage()">
-        <button type="button" class="icon-btn" style="background:#16a34a; font-size:9px; padding:4px 8px;" onclick="sendDMMessage()">Gönder</button>
+        <input type="text" id="in-dm-msg" class="input-field" style="margin:0; flex:1; font-size:9px; padding:4px;" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter') sendDMSingle()">
+        <button type="button" class="icon-btn" style="background:#16a34a; font-size:9px; padding:4px 8px;" onclick="sendDMSingle()">Gönder</button>
       </div>
     </div>
   </div>
 
   <script src="app.js"></script>
   <script>
-    let activeFriendsTab = 'list';
-    let currentDMTargetUID = null;
-    let dmListener = null;
+    let activeDMTargetUID = null;
+    let dmListenerRef = null;
 
     window.onload = () => {
       const u = getActiveUser();
       if (!u) return location.href = "index.html";
-      loadFriendsAndRequests();
+      loadFriendsData();
     };
 
-    function switchFriendsTab(tab) {
-      activeFriendsTab = tab;
-      ['list', 'requests', 'add'].forEach(t => {
-        document.getElementById(`ftab-${t}`).classList.toggle('active', t === tab);
-        document.getElementById(`pnl-friends-${t}`).style.display = (t === tab ? 'flex' : 'none');
+    function switchTab(tKey) {
+      ['list', 'reqs', 'add'].forEach(k => {
+        document.getElementById(`ftab-${k}`).classList.toggle('active', k === tKey);
+        document.getElementById(`pnl-${k}`).style.display = (k === tKey ? 'flex' : 'none');
       });
     }
 
-    function loadFriendsAndRequests() {
+    function loadFriendsData() {
       const u = getActiveUser();
-      if (!u) return;
-      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+      const myUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
 
-      // 1. İstekleri Dinle
-      db.ref("friend_requests/" + cleanUID).on("value", snap => {
+      // İstekler
+      db.ref("friend_requests/" + myUID).on("value", snap => {
         const reqBox = document.getElementById("requests-list-box");
         reqBox.innerHTML = "";
-        const requests = snap.val() || {};
-        const count = Object.keys(requests).length;
-        document.getElementById("lbl-request-count").innerText = count;
+        const reqs = snap.val() || {};
+        const count = Object.keys(reqs).length;
+        document.getElementById("lbl-r-count").innerText = count;
 
         if (count === 0) {
-          reqBox.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Bekleyen arkadaşlık isteği yok.</div>";
+          reqBox.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Bekleyen istek yok.</div>";
           return;
         }
 
-        for (let senderUID in requests) {
-          const req = requests[senderUID];
+        for (let sUID in reqs) {
+          const r = reqs[sUID];
           const div = document.createElement("div");
           div.className = "friend-card";
           div.innerHTML = `
-            <div style="display:flex; align-items:center; gap:4px;">
-              <span>${req.fromAvatar || '👤'}</span>
-              <b>${req.fromName}</b>
-            </div>
-            <div style="display:flex; gap:3px;">
-              <button type="button" class="icon-btn" style="background:#16a34a; padding:2px 6px; font-size:8px;" onclick="acceptFriendRequest('${senderUID}', '${req.fromName}')">Kabul Et</button>
-              <button type="button" class="icon-btn" style="background:var(--danger); padding:2px 6px; font-size:8px;" onclick="rejectFriendRequest('${senderUID}')">Reddet</button>
+            <div><b>${r.fromAvatar || '👤'} ${r.fromName}</b></div>
+            <div style="display:flex; gap:2px;">
+              <button type="button" class="icon-btn" style="background:#16a34a; padding:2px 6px; font-size:7.5px;" onclick="acceptRequest('${sUID}', '${r.fromName}')">Kabul</button>
+              <button type="button" class="icon-btn" style="background:var(--danger); padding:2px 6px; font-size:7.5px;" onclick="rejectRequest('${sUID}')">Reddet</button>
             </div>
           `;
           reqBox.appendChild(div);
         }
       });
 
-      // 2. Arkadaşlarımı Dinle
-      db.ref("user_friends/" + cleanUID).on("value", snap => {
+      // Arkadaşlar
+      db.ref("user_friends/" + myUID).on("value", snap => {
         const listBox = document.getElementById("friends-list-box");
         listBox.innerHTML = "";
         const friends = snap.val() || {};
         const count = Object.keys(friends).length;
-        document.getElementById("lbl-friend-count").innerText = count;
+        document.getElementById("lbl-f-count").innerText = count;
 
         if (count === 0) {
-          listBox.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Henüz arkadaş eklemedin. 'Arkadaş Ekle' sekmesinden ekleyebilirsin!</div>";
+          listBox.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Henüz arkadaşın yok. 'Arkadaş Ekle' sekmesinden ekle!</div>";
           return;
         }
 
@@ -262,16 +232,12 @@
           div.className = "friend-card";
           div.innerHTML = `
             <div style="display:flex; align-items:center; gap:4px;">
-              <span style="font-size:12px;">${f.avatar || '👤'}</span>
-              <div>
-                <b>${f.name}</b>
-                <div style="color:var(--neon-green); font-size:6.5px;">🟢 Çevrimiçi</div>
-              </div>
+              <span>${f.avatar || '👤'}</span>
+              <b>${f.name}</b>
             </div>
             <div style="display:flex; gap:3px;">
-              <button type="button" class="icon-btn" style="background:#0284c7; padding:2px 5px; font-size:7.5px;" onclick="openDM('${fUID}', '${f.name}')">💬 DM</button>
-              <button type="button" class="icon-btn" style="background:#15803d; padding:2px 5px; font-size:7.5px;" onclick="location.href='farm.html'">🌾 Çiftlik</button>
-              <button type="button" class="icon-btn" style="background:#d97706; padding:2px 5px; font-size:7.5px;" onclick="sendDailyGift('${fUID}', '${f.name}')">🎁 Hediye</button>
+              <button type="button" class="icon-btn" style="background:#0284c7; padding:2px 6px; font-size:7.5px;" onclick="openDMModal('${fUID}', '${f.name}')">💬 DM</button>
+              <button type="button" class="icon-btn" style="background:#15803d; padding:2px 6px; font-size:7.5px;" onclick="location.href='farm.html'">🌾 Çiftlik</button>
             </div>
           `;
           listBox.appendChild(div);
@@ -279,105 +245,78 @@
       });
     }
 
-    function sendFriendRequestByInput() {
-      const tag = document.getElementById("in-target-tag").value.trim();
-      if (!tag) return alert("Lütfen bir kullanıcı etiketi girin!");
+    function sendFriendRequest() {
+      const input = document.getElementById("in-player-tag");
+      const targetQuery = input.value.trim();
+      if (!targetQuery) return alert("Lütfen bir kullanıcı adı veya etiket yazın!");
 
       const u = getActiveUser();
       const myUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
 
       db.ref("users").once("value").then(snap => {
-        let foundUID = null;
-        let foundName = null;
+        let targetUID = null;
+        let targetName = null;
 
         snap.forEach(child => {
           const val = child.val();
-          const fullTag = `${val.name}${val.tag}`;
-          if (fullTag.toLowerCase() === tag.toLowerCase() || (val.name && val.name.toLowerCase() === tag.toLowerCase())) {
-            foundUID = child.key;
-            foundName = fullTag;
+          const fullTag = `${val.name}${val.tag || ''}`;
+          if (fullTag.toLowerCase() === targetQuery.toLowerCase() || (val.name && val.name.toLowerCase() === targetQuery.toLowerCase())) {
+            targetUID = child.key;
+            targetName = fullTag;
           }
         });
 
-        if (!foundUID) return alert("Böyle bir oyuncu bulunamadı!");
-        if (foundUID === myUID) return alert("Kendine istek atamazsın!");
+        if (!targetUID) return alert("Böyle bir oyuncu bulunamadı!");
+        if (targetUID === myUID) return alert("Kendine istek atamazsın!");
 
-        db.ref(`friend_requests/${foundUID}/${myUID}`).set({
+        db.ref(`friend_requests/${targetUID}/${myUID}`).set({
           fromUID: myUID,
           fromName: `${u.name}${u.tag || ''}`,
           fromAvatar: u.avatar || '👤',
           timestamp: Date.now()
         }).then(() => {
-          alert(`${foundName} oyuncusuna arkadaşlık isteği gönderildi!`);
-          document.getElementById("in-target-tag").value = "";
+          alert(`${targetName} oyuncusuna arkadaşlık isteği gönderildi!`);
+          input.value = "";
         });
       });
     }
 
-    function acceptFriendRequest(senderUID, senderName) {
+    function acceptRequest(senderUID, senderName) {
       const u = getActiveUser();
       const myUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
 
-      // İki tarafa da arkadaşlığı ekle
-      db.ref(`user_friends/${myUID}/${senderUID}`).set({
-        uid: senderUID,
-        name: senderName,
-        avatar: '👤'
-      });
-
-      db.ref(`user_friends/${senderUID}/${myUID}`).set({
-        uid: myUID,
-        name: `${u.name}${u.tag || ''}`,
-        avatar: u.avatar || '👤'
-      });
-
-      // İsteği sil
+      db.ref(`user_friends/${myUID}/${senderUID}`).set({ uid: senderUID, name: senderName, avatar: '👤' });
+      db.ref(`user_friends/${senderUID}/${myUID}`).set({ uid: myUID, name: `${u.name}${u.tag || ''}`, avatar: u.avatar || '👤' });
       db.ref(`friend_requests/${myUID}/${senderUID}`).remove();
-      alert(`${senderName} ile artık arkadaşsınız!`);
+      alert(`${senderName} arkadaş olarak eklendi!`);
     }
 
-    function rejectFriendRequest(senderUID) {
+    function rejectRequest(senderUID) {
       const u = getActiveUser();
       const myUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       db.ref(`friend_requests/${myUID}/${senderUID}`).remove();
     }
 
-    function sendDailyGift(targetUID, targetName) {
-      const u = getActiveUser();
-      const myUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
-
-      // Günlük hediye kaydı kontrolü
-      const lastGiftKey = `last_gift_${targetUID}`;
-      const lastGiftTime = localStorage.getItem(lastGiftKey) || 0;
-      if (Date.now() - lastGiftTime < 86400000) {
-        return alert("Bu arkadaşına bugün zaten hediye gönderdin! (Günde 1 kez)");
-      }
-
-      db.ref(`users/${targetUID}/farm_hayday_v7/gold`).transaction(g => (g || 0) + 50);
-      localStorage.setItem(lastGiftKey, Date.now());
-      alert(`🎁 ${targetName} adlı arkadaşına +50 Altın hediye gönderildi!`);
-    }
-
-    /* DM ÖZEL MESAJLAŞMA MOTORU */
-    function openDM(targetUID, targetName) {
-      currentDMTargetUID = targetUID;
-      document.getElementById("lbl-dm-target-name").innerText = `💬 ${targetName}`;
+    /* DM Modal Açma */
+    function openDMModal(targetUID, targetName) {
+      activeDMTargetUID = targetUID;
+      document.getElementById("lbl-dm-target").innerText = `💬 ${targetName}`;
       document.getElementById("modal-dm").style.display = "flex";
 
       const u = getActiveUser();
       const myUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
       const chatID = myUID < targetUID ? `${myUID}_${targetUID}` : `${targetUID}_${myUID}`;
 
-      if (dmListener) db.ref("direct_messages/" + chatID).off();
+      if (dmListenerRef) db.ref("direct_messages/" + chatID).off();
 
-      const container = document.getElementById("dm-messages-box");
+      const container = document.getElementById("dm-box");
       container.innerHTML = "";
 
-      dmListener = db.ref("direct_messages/" + chatID).limitToLast(40);
-      dmListener.on("value", snap => {
+      dmListenerRef = db.ref("direct_messages/" + chatID).limitToLast(30);
+      dmListenerRef.on("value", snap => {
         container.innerHTML = "";
         if (!snap.exists()) {
-          container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:10px;'>Henüz özel mesaj yok. Merhaba de!</div>";
+          container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:10px;'>Henüz mesaj yok. Merhaba de!</div>";
           return;
         }
 
@@ -394,14 +333,14 @@
       });
     }
 
-    function sendDMMessage() {
-      const input = document.getElementById("in-dm-text");
+    function sendDMSingle() {
+      const input = document.getElementById("in-dm-msg");
       const text = input.value.trim();
-      if (!text || !currentDMTargetUID) return;
+      if (!text || !activeDMTargetUID) return;
 
       const u = getActiveUser();
       const myUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
-      const chatID = myUID < currentDMTargetUID ? `${myUID}_${currentDMTargetUID}` : `${currentDMTargetUID}_${myUID}`;
+      const chatID = myUID < activeDMTargetUID ? `${myUID}_${activeDMTargetUID}` : `${activeDMTargetUID}_${myUID}`;
 
       db.ref("direct_messages/" + chatID).push({
         senderUID: myUID,
@@ -413,20 +352,12 @@
     }
 
     function closeDM() {
-      if (dmListener && currentDMTargetUID) {
-        const u = getActiveUser();
-        const myUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
-        const chatID = myUID < currentDMTargetUID ? `${myUID}_${currentDMTargetUID}` : `${currentDMTargetUID}_${myUID}`;
-        db.ref("direct_messages/" + chatID).off();
-      }
       document.getElementById("modal-dm").style.display = "none";
-      currentDMTargetUID = null;
+      activeDMTargetUID = null;
     }
 
-    function escapeHtml(string) {
-      return String(string).replace(/[&<>"']/g, function (s) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s];
-      });
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
   </script>
 </body>
