@@ -2,100 +2,216 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profilim</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Profil Düzenle & İstatistikler</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+    html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #020617; font-family: system-ui, sans-serif; color: #fff; }
+
+    .user-layout {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 100dvh;
+      margin: 0 auto;
+      background: #030712;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-header {
+      flex-shrink: 0;
+      background: #090d1a;
+      border-bottom: 2px solid #1e293b;
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .user-scroll-area {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .user-scroll-area::-webkit-scrollbar { width: 3px; }
+    .user-scroll-area::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
+
+    .profile-banner-card {
+      background: linear-gradient(135deg, #1e1b4b, #0f172a);
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stat-box-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .stat-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+  </style>
 </head>
 <body>
-  <div class="app-container" style="justify-content:space-between;">
-    <div>
-      <div class="top-header">
-        <a href="menu.html" class="icon-btn" style="border-color:var(--danger);">‹ Lobi</a>
-        <div style="font-weight:bold; font-size:12px;">👤 Oyuncu Profili</div>
-        <div></div>
-      </div>
+  <div class="user-layout">
+    
+    <!-- Üst Başlık -->
+    <div class="user-header">
+      <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
+      <div style="font-weight:900; font-size:12px; color:var(--neon-gold);">👤 Profil & Ayarlar</div>
+      <button type="button" class="icon-btn" style="background:#16a34a; padding:2px 8px; font-size:9.5px;" onclick="saveAllProfileChanges()">Kaydet</button>
+    </div>
 
-      <div class="profile-badge-card">
-        <div style="font-size:38px; margin-bottom:2px;" id="u-avatar-icon">👤</div>
-        <h2 id="u-fullname" style="color:var(--neon-blue); font-size:15px;">...</h2>
-        <div id="u-title-badge" style="color:var(--neon-gold); font-size:10px;">[Çaylak]</div>
-        <div style="font-size:9px; color:#94a3b8; margin-top:4px;" id="u-created-at">Hesap Oluşturma: -</div>
-
-        <div class="profile-stats-grid">
-          <div class="stat-mini-box"><span class="stat-mini-val" id="u-total-played" style="color:var(--neon-blue);">0</span><span class="stat-mini-lbl">Oynanan</span></div>
-          <div class="stat-mini-box"><span class="stat-mini-val" id="u-total-wins" style="color:var(--neon-green);">0</span><span class="stat-mini-lbl">Kazanma</span></div>
-          <div class="stat-mini-box"><span class="stat-mini-val" id="u-total-losses" style="color:var(--danger);">0</span><span class="stat-mini-lbl">Kaybetme</span></div>
-          <div class="stat-mini-box"><span class="stat-mini-val" id="u-total-winrate" style="color:var(--neon-gold);">%0</span><span class="stat-mini-lbl">Genel Oran</span></div>
+    <!-- İçerik -->
+    <div class="user-scroll-area">
+      
+      <!-- Profil Kartı -->
+      <div class="profile-banner-card">
+        <div style="font-size:36px; background:#0b1120; border:2px solid var(--neon-gold); border-radius:50%; width:56px; height:56px; display:flex; align-items:center; justify-content:center;" id="p-avatar-preview">👤</div>
+        <div>
+          <div style="font-weight:bold; font-size:13px; color:#fff;" id="p-full-tag">Oyuncu#0000</div>
+          <div style="font-size:9.5px; color:#38bdf8;" id="p-title-badge">Çaylak</div>
+          <div style="font-size:8.5px; color:#94a3b8; margin-top:2px;">Kayıt Tarihi: <span id="p-join-date">-</span></div>
         </div>
       </div>
 
-      <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-bottom:4px;">📊 Mod Bazlı İstatistikler & Kazanma Oranları:</div>
-      <div id="stats-table-box" style="display:flex; flex-direction:column; gap:4px; max-height:220px; overflow-y:auto;"></div>
+      <!-- Kullanıcı Adı & Unvan Değiştirme -->
+      <div style="background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:8px; display:flex; flex-direction:column; gap:6px;">
+        <div style="font-size:9.5px; font-weight:bold; color:var(--neon-gold);">✏️ Kullanıcı Bilgilerini Düzenle:</div>
+        
+        <div>
+          <label style="font-size:8px; color:#94a3b8;">Kullanıcı Adı:</label>
+          <input type="text" id="in-profile-name" class="input-field" style="margin-top:2px; font-size:10px; padding:6px;" placeholder="Yeni adınız...">
+        </div>
+
+        <div>
+          <label style="font-size:8px; color:#94a3b8;">Unvan Seç:</label>
+          <select id="sel-profile-title" class="input-field" style="margin-top:2px; font-size:10px; padding:6px; background:#1e293b;">
+            <option value="Çaylak">🌱 Çaylak Kasa Açıcı</option>
+            <option value="Usta">⚔️ Kasa Ustası</option>
+            <option value="Efsane">🔥 Efsanevi Açıcı</option>
+            <option value="Kral">👑 Kasa Kralı</option>
+            <option value="Hükümdar">⚡ Kutu Hükümdarı</option>
+            <option value="Çiftçi">🌾 Usta Çiftçi</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Avatar Seçici -->
+      <div style="background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:8px;">
+        <div style="font-size:9.5px; font-weight:bold; color:var(--neon-blue); margin-bottom:6px;">🎭 Avatarını Seç:</div>
+        <div class="avatar-grid" id="profile-avatar-box"></div>
+      </div>
+
+      <!-- Kişisel Mod Rekorları -->
+      <div style="font-size:9.5px; font-weight:bold; color:#cbd5e1;">🏆 Kişisel En İyi Rekorların:</div>
+      <div class="stat-box-grid">
+        <div class="stat-card">
+          <span style="font-size:7.5px; color:#94a3b8;">⚔️ Normal Kasa:</span>
+          <b style="font-size:10.5px; color:var(--neon-green);" id="st-norm">0 P</b>
+        </div>
+        <div class="stat-card">
+          <span style="font-size:7.5px; color:#94a3b8;">🎯 Yakala & Aç:</span>
+          <b style="font-size:10.5px; color:var(--neon-green);" id="st-catch">0 P</b>
+        </div>
+        <div class="stat-card">
+          <span style="font-size:7.5px; color:#94a3b8;">💣 Mayın Tarlası:</span>
+          <b style="font-size:10.5px; color:var(--neon-green);" id="st-mines">0 P</b>
+        </div>
+        <div class="stat-card">
+          <span style="font-size:7.5px; color:#94a3b8;">⚡ Speedrun (Süre):</span>
+          <b style="font-size:10.5px; color:var(--neon-gold);" id="st-speed">-</b>
+        </div>
+      </div>
+
     </div>
+
   </div>
 
   <script src="app.js"></script>
   <script>
+    let currentSelectedAvatar = "👤";
+
     window.onload = () => {
       const u = getActiveUser();
-      if (!u) return window.location.href = "index.html";
+      if (!u) return location.href = "index.html";
 
-      document.getElementById("u-avatar-icon").innerText = u.avatar || "👤";
-      document.getElementById("u-fullname").innerText = `${u.name}${u.tag}`;
-      document.getElementById("u-title-badge").innerText = `[${u.title || 'Çaylak'}]`;
-      document.getElementById("u-created-at").innerText = `Hesap Oluşturma: ${u.createdAt || '-'}`;
+      currentSelectedAvatar = u.avatar || "👤";
+      document.getElementById("p-avatar-preview").innerText = currentSelectedAvatar;
+      document.getElementById("p-full-tag").innerText = `${u.name}${u.tag || ''}`;
+      document.getElementById("p-title-badge").innerText = u.title || "Çaylak";
+      document.getElementById("in-profile-name").value = u.name || "";
+      document.getElementById("sel-profile-title").value = u.title || "Çaylak";
+      document.getElementById("p-join-date").innerText = u.joinDate || "2026";
 
-      const stats = u.stats || {};
-      let totalGames = 0, totalWins = 0, totalLosses = 0;
-
-      const modNames = {
-        standard: "Normal Kasa",
-        ten_cases: "10 Kutu Modu",
-        catch_basket: "Tut & Aç (Sepet)",
-        catch_open: "Yakala & Aç",
-        mines_mode: "Mayınlı Kasa",
-        mega_mode: "Mega Kasa",
-        speedrun_mode: "Speedrun Yarışı",
-        bomb_mode: "Zaman Bombası",
-        double_mode: "Çift Rulet",
-        temple_mode: "Gizli Tapınak"
-      };
-
-      const box = document.getElementById("stats-table-box");
-      box.innerHTML = "";
-
-      for (let k in modNames) {
-        const s = stats[k] || { played: 0, wins: 0, losses: 0, best: 0, bestTime: null };
-        totalGames += s.played || 0;
-        totalWins += s.wins || 0;
-        totalLosses += s.losses || 0;
-
-        const winRate = s.played > 0 ? Math.round((s.wins / s.played) * 100) : 0;
-        const recVal = k === 'speedrun_mode' 
-          ? (s.bestTime ? `${s.bestTime}s` : "-") 
-          : `${s.best || 0} P`;
-
-        box.innerHTML += `
-          <div class="rank-card" style="font-size:9.5px; min-height:40px; padding:5px 8px;">
-            <div>
-              <b style="color:#fff;">${modNames[k]}</b><br>
-              <span style="color:#94a3b8;">${s.played} Maç (${s.wins} Galibiyet / ${s.losses || 0} Mağlubiyet)</span><br>
-              <b style="color:var(--neon-green); font-size:8.5px;">Kazanma Oranı: %${winRate}</b>
-            </div>
-            <div style="text-align:right;">
-              <b style="color:var(--neon-gold); font-size:11px;">${recVal}</b>
-            </div>
-          </div>
-        `;
-      }
-
-      document.getElementById("u-total-played").innerText = totalGames;
-      document.getElementById("u-total-wins").innerText = totalWins;
-      document.getElementById("u-total-losses").innerText = totalLosses;
-      document.getElementById("u-total-winrate").innerText = totalGames > 0 ? `%${Math.round((totalWins / totalGames) * 100)}` : "%0";
+      renderAvatarSelection();
+      loadUserStats();
     };
+
+    function renderAvatarSelection() {
+      const box = document.getElementById("profile-avatar-box");
+      box.innerHTML = "";
+      AVATAR_LIST.forEach(av => {
+        const div = document.createElement("div");
+        div.className = "avatar-option" + (av === currentSelectedAvatar ? " selected" : "");
+        div.innerText = av;
+        div.onclick = () => {
+          currentSelectedAvatar = av;
+          document.getElementById("p-avatar-preview").innerText = av;
+          renderAvatarSelection();
+        };
+        box.appendChild(div);
+      });
+    }
+
+    function loadUserStats() {
+      try {
+        const scores = JSON.parse(localStorage.getItem("kutu_local_scores")) || {};
+        document.getElementById("st-norm").innerText = (scores["standard"] || 0) + " P";
+        document.getElementById("st-catch").innerText = (scores["catch_open"] || 0) + " P";
+        document.getElementById("st-mines").innerText = (scores["mines_mode"] || 0) + " P";
+        document.getElementById("st-speed").innerText = scores["speedrun_mode"] ? scores["speedrun_mode"] + " sn" : "-";
+      } catch (e) {}
+    }
+
+    function saveAllProfileChanges() {
+      const newName = document.getElementById("in-profile-name").value.trim();
+      const newTitle = document.getElementById("sel-profile-title").value;
+
+      if (!newName) return alert("Kullanıcı adı boş bırakılamaz!");
+
+      let u = getActiveUser();
+      if (!u) return;
+
+      u.name = newName;
+      u.title = newTitle;
+      u.avatar = currentSelectedAvatar;
+
+      setActiveUser(u);
+      alert("✅ Profiliniz başarıyla güncellendi!");
+      location.href = "menu.html";
+    }
   </script>
 </body>
 </html>
