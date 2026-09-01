@@ -7,6 +7,7 @@ const firebaseConfig = {
   messagingSenderId: "483395048462",
   appId: "1:483395048462:web:450f18178e682a4a2f985f"
 };
+
 if (typeof firebase !== "undefined") {
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
@@ -50,15 +51,14 @@ function setActiveUser(userObj) {
   }
 }
 
-// 🎯 KUSURSUZ SKOR KAYDETME MOTORU
+// GARANTİLİ SKOR KAYIT FONKSİYONU
 function saveScore(rawMode, scoreVal) {
-  const u = getActiveUser();
+  let u = getActiveUser();
   if (!u) {
-    console.warn("Kullanıcı oturumu bulunamadı!");
-    return;
+    u = { name: "Oyuncu", tag: "#" + Math.floor(1000 + Math.random() * 9000), uid: "guest_" + Date.now(), avatar: "👤", title: "Çaylak" };
+    setActiveUser(u);
   }
 
-  // Mod isimlerini sıralama tablosunun beklediği standarda çevir
   let mode = rawMode;
   if (mode === "normal" || mode === "klasik") mode = "standard";
   if (mode === "catch" || mode === "yakala") mode = "catch_open";
@@ -75,6 +75,7 @@ function saveScore(rawMode, scoreVal) {
   const scorePayload = {
     uid: cleanUID,
     username: `${u.name}${u.tag || ""}`,
+    name: u.name,
     avatar: u.avatar || "👤",
     title: u.title || "Çaylak",
     gameMode: mode,
@@ -86,7 +87,7 @@ function saveScore(rawMode, scoreVal) {
     date: new Date().toLocaleDateString("tr-TR")
   };
 
-  // Localstorage kaydı
+  // 1. Yerel Depolamaya Kaydet
   try {
     let localScores = JSON.parse(localStorage.getItem("kutu_local_scores")) || {};
     if (mode === "speedrun_mode") {
@@ -97,26 +98,31 @@ function saveScore(rawMode, scoreVal) {
     localStorage.setItem("kutu_local_scores", JSON.stringify(localScores));
   } catch (e) {}
 
-  // Firebase Veritabanına Anında Yaz
+  // 2. Firebase Veritabanına Yaz (Doğrudan Yazma ve Skor Karşılaştırması)
   if (db) {
-    const refPath = db.ref("game_scores/" + recordKey);
-    refPath.once("value").then(snap => {
-      let shouldUpdate = true;
-      if (snap.exists()) {
-        const oldScore = parseFloat(snap.val().score || snap.val().points || snap.val().time || 0);
-        if (mode === "speedrun_mode") {
-          shouldUpdate = oldScore === 0 || numScore < oldScore;
-        } else {
-          shouldUpdate = numScore > oldScore;
-        }
+    db.ref("game_scores/" + recordKey).transaction(currentData => {
+      if (!currentData) {
+        return scorePayload;
       }
+      const oldScore = parseFloat(currentData.score || currentData.points || currentData.time || 0);
+      if (mode === "speedrun_mode") {
+        if (oldScore === 0 || numScore < oldScore) return scorePayload;
+      } else {
+        if (numScore > oldScore) return scorePayload;
+      }
+      return currentData;
+    });
 
-      if (shouldUpdate) {
-        refPath.set(scorePayload);
-        db.ref("scores/" + recordKey).set(scorePayload);
-        console.log(`[Skor Başarıyla Kaydedildi] Mod: ${mode}, Skor: ${numScore}`);
+    db.ref("scores/" + recordKey).transaction(currentData => {
+      if (!currentData) return scorePayload;
+      const oldScore = parseFloat(currentData.score || currentData.points || currentData.time || 0);
+      if (mode === "speedrun_mode") {
+        if (oldScore === 0 || numScore < oldScore) return scorePayload;
+      } else {
+        if (numScore > oldScore) return scorePayload;
       }
-    }).catch(err => console.error("Firebase Skor Yazma Hatası:", err));
+      return currentData;
+    });
   }
 }
 
