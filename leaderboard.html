@@ -3,229 +3,336 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Oyuncu Profili</title>
+  <title>Liderlik Tablosu & Sıralama</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="app.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
     html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #020617; font-family: system-ui, sans-serif; color: #fff; }
 
-    .user-layout { width: 100%; max-width: 480px; height: 100dvh; margin: 0 auto; background: #030712; display: flex; flex-direction: column; }
-    .user-header { background: #090d1a; border-bottom: 2px solid #1e293b; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
-    .user-content { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .lb-layout { width: 100%; max-width: 480px; height: 100dvh; margin: 0 auto; background: #030712; display: flex; flex-direction: column; position: relative; }
+    .lb-header { flex-shrink: 0; background: #090d1a; border-bottom: 2px solid #1e293b; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+    .lb-modes-scroll { flex-shrink: 0; background: #0b1120; border-bottom: 1px solid #1e293b; display: flex; gap: 4px; padding: 5px 8px; overflow-x: auto; scrollbar-width: none; }
+    .lb-modes-scroll::-webkit-scrollbar { display: none; }
 
-    .profile-card { background: linear-gradient(135deg, #1e1b4b, #0f172a); border: 1px solid #334155; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; }
-    .profile-avatar { width: 56px; height: 56px; background: #060913; border: 2px solid var(--neon-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; flex-shrink: 0; }
+    .lb-chip { padding: 4px 8px; background: #1e293b; border: 1px solid #334155; color: #94a3b8; font-size: 8.5px; font-weight: bold; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+    .lb-chip.active { background: #4338ca; border-color: var(--neon-gold); color: #fff; }
 
-    .stat-section-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .stat-box { background: #0b1329; border: 1px solid #1e293b; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+    .lb-list-area { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .rank-item-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 6px; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; cursor: pointer; }
 
-    /* Kayar Çekmece */
-    .settings-drawer { position: absolute; top: 0; right: -100%; width: 82%; max-width: 350px; height: 100%; background: #090d1a; border-left: 2px solid #334155; z-index: 300; display: flex; flex-direction: column; transition: right 0.28s ease; }
-    .settings-drawer.active { right: 0; }
-    .drawer-backdrop { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 200; }
-    .drawer-backdrop.active { display: block; }
-    .drawer-header { padding: 12px; background: #050814; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
-    .drawer-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-    .avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; background: #030712; padding: 6px; border-radius: 6px; }
-    .avatar-cell { font-size: 18px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; text-align: center; padding: 3px 0; cursor: pointer; }
-    .avatar-cell.active { border-color: var(--neon-gold); background: #1e1b4b; }
+    /* Modallar kesinlikle ilk açılışta kapalıdır */
+    .custom-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 14px;
+    }
+    .custom-modal-card {
+      background: #0b1329;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 12px;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+    }
   </style>
 </head>
 <body>
-  <div class="user-layout">
-    <div class="user-header">
-      <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:3px 8px; font-size:10px; text-decoration:none;">‹ Lobi</a>
-      <div style="font-weight:bold; font-size:11.5px; color:#38bdf8;">👤 Profilim</div>
-      <button class="icon-btn" style="border-color:var(--neon-gold); padding:3px 8px; font-size:10px;" onclick="openDrawer(true)">⚙️ Ayarlar</button>
+  <div class="lb-layout">
+    <div class="lb-header">
+      <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
+      <div style="font-weight:900; font-size:11px; color:#38bdf8;">🏆 Liderlik Sıralamaları</div>
+      <div id="lbl-my-score" style="font-size:8.5px; color:var(--neon-gold); font-weight:bold;">-</div>
     </div>
 
-    <div class="user-content">
-      <div class="profile-card">
-        <div class="profile-avatar" id="p-avatar">👤</div>
-        <div style="flex:1;">
-          <div style="font-size:14px; font-weight:900;" id="p-username">-</div>
-          <div style="font-size:10px; font-weight:bold; color:var(--neon-gold);" id="p-title">[Çaylak]</div>
-          <div style="font-size:8px; color:#94a3b8; margin-top:4px;">
-            🗓️ <span id="p-date">-</span> <span style="color:#64748b;" id="p-ago"></span>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div class="stat-section-title">📊 Toplam Oynama</div>
-        <div class="stat-box" style="align-items:center; text-align:center; padding:10px;">
-          <b style="font-size:18px; color:#38bdf8;" id="st-total">0 Maç</b>
-        </div>
-      </div>
-
-      <div>
-        <div class="stat-section-title">💣 Mayın Tarlası Karnesi</div>
-        <div class="stat-grid">
-          <div class="stat-box">
-            <span style="font-size:7.5px; color:#94a3b8;">OYNAMA / KAZANMA</span>
-            <b style="font-size:12px; color:#f87171;" id="st-mines-record">0 / 0</b>
-          </div>
-          <div class="stat-box">
-            <span style="font-size:7.5px; color:#94a3b8;">KAZANMA ORANI</span>
-            <b style="font-size:12px; color:var(--neon-green);" id="st-mines-rate">%0</b>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div class="stat-section-title">🎮 Bütün Modlar Oynama Sayısı</div>
-        <div style="display:flex; flex-direction:column; gap:3px; background:#070d1e; padding:6px; border-radius:6px; font-size:9px;">
-          <div style="display:flex; justify-content:space-between;"><span>⚔️ Normal Kasa:</span><b id="c-std">0</b></div>
-          <div style="display:flex; justify-content:space-between;"><span>🎯 Yakala & Aç:</span><b id="c-cat">0</b></div>
-          <div style="display:flex; justify-content:space-between;"><span>💣 Mayın Tarlası:</span><b id="c-min">0</b></div>
-          <div style="display:flex; justify-content:space-between;"><span>⚡ Speedrun:</span><b id="c-spd">0</b></div>
-          <div style="display:flex; justify-content:space-between;"><span>🎰 Çift Rulet:</span><b id="c-dbl">0</b></div>
-        </div>
-      </div>
+    <div class="lb-modes-scroll">
+      <button class="lb-chip active" id="btn-all" onclick="switchMode('all')">🌟 Genel (Tümü)</button>
+      <button class="lb-chip" id="btn-standard" onclick="switchMode('standard')">⚔️ Normal Kasa</button>
+      <button class="lb-chip" id="btn-catch_open" onclick="switchMode('catch_open')">🎯 Yakala & Aç</button>
+      <button class="lb-chip" id="btn-mines_mode" onclick="switchMode('mines_mode')">💣 Mayın Tarlası</button>
+      <button class="lb-chip" id="btn-speedrun_mode" onclick="switchMode('speedrun_mode')">⚡ Speedrun (Süre)</button>
+      <button class="lb-chip" id="btn-double_mode" onclick="switchMode('double_mode')">🎰 Çift Rulet</button>
     </div>
 
-    <div class="drawer-backdrop" id="backdrop" onclick="openDrawer(false)"></div>
+    <div class="lb-list-area" id="lb-container"></div>
+  </div>
 
-    <!-- SAĞDAN KAYAR AYARLAR ÇEKMECESİ -->
-    <div class="settings-drawer" id="drawer">
-      <div class="drawer-header">
-        <div style="font-weight:bold; font-size:11px; color:var(--neon-gold);">⚙️ Profil Ayarları</div>
-        <button class="icon-btn" onclick="openDrawer(false)">✕</button>
-      </div>
-      <div class="drawer-body">
-        <div>
-          <label style="font-size:8px; color:#94a3b8; font-weight:bold;">KULLANICI ADI DEĞİŞTİR</label>
-          <input type="text" id="set-name" class="input-field" style="margin-top:3px; font-size:10px; padding:6px;">
-        </div>
-
-        <div>
-          <label style="font-size:8px; color:#94a3b8; font-weight:bold;">UNVAN SEÇ</label>
-          <select id="set-title" class="input-field" style="margin-top:3px; font-size:9.5px; padding:6px; background:#0f172a;">
-            <option value="Çaylak">🌱 Çaylak</option>
-            <option value="Usta">⚔️ Kasa Ustası</option>
-            <option value="Efsane">🔥 Efsanevi Açıcı</option>
-            <option value="Kral">👑 Kasa Kralı</option>
-            <option value="Mayın Avcısı">💣 Mayın Avcısı</option>
-          </select>
-        </div>
-
-        <div>
-          <label style="font-size:8px; color:#94a3b8; font-weight:bold; display:block; margin-bottom:3px;">AVATAR SEÇ</label>
-          <div class="avatar-grid" id="set-avatar-grid"></div>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:8px; border-radius:6px;">
-          <span style="font-size:9.5px;">Sistem Sesleri</span>
-          <input type="checkbox" id="set-sound">
-        </div>
-
-        <button class="btn-start" style="background:#16a34a; font-size:10px; padding:8px;" onclick="saveSettings()">💾 Değişiklikleri Kaydet</button>
-        <hr style="border:0; border-top:1px solid #1e293b;">
-        <button class="icon-btn" style="background:#334155; justify-content:center; padding:7px; font-size:9.5px;" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
-      </div>
+  <!-- 1. AŞAMA: OYUN SKOR DETAY MODALI -->
+  <div id="modal-score-detail" class="custom-modal-overlay">
+    <div class="custom-modal-card">
+      <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">Oyuncunun Profilini Açmak İçin İsme Tıkla:</div>
+      <h3 id="det-name-clickable" style="color:var(--neon-blue); font-size:14px; cursor:pointer; text-decoration:underline; margin-bottom:4px;">-</h3>
+      <div id="det-mode" style="font-size:10px; color:var(--neon-gold); margin-bottom:2px;">-</div>
+      <div id="det-date" style="font-size:8.5px; color:#64748b; margin-bottom:6px;">-</div>
+      <div style="font-size:9.5px; font-weight:bold; color:#fff; margin-bottom:4px;">📦 Çıkan Eşyalar:</div>
+      <div id="det-drops" style="max-height:120px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
+      <button type="button" class="btn-close" style="width:100%; padding:6px;" onclick="closeModal('modal-score-detail')">Kapat</button>
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- 2. AŞAMA: KULLANICI PROFİL MODALI + ARKADAŞLIK SİSTEMİ -->
+  <div id="modal-user-profile" class="custom-modal-overlay">
+    <div class="custom-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="font-size:11px; font-weight:bold; color:#94a3b8;">Oyuncu Kartı</div>
+        <div id="friend-action-container"></div>
+      </div>
+
+      <div style="text-align:center; margin-bottom:10px;">
+        <div id="uprof-avatar" style="font-size:36px;">👤</div>
+        <div id="uprof-name" style="font-size:14px; font-weight:bold; color:var(--neon-blue); margin-top:2px;">-</div>
+        <div id="uprof-title" style="font-size:10px; color:var(--neon-gold);">[Çaylak]</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
+        <div style="background:#070d1e; border:1px solid #1e293b; border-radius:6px; padding:6px; text-align:center;">
+          <div style="font-size:8px; color:#94a3b8;">TOPLAM OYNAMA</div>
+          <b style="font-size:12px; color:#38bdf8;" id="uprof-played">0 Maç</b>
+        </div>
+        <div style="background:#070d1e; border:1px solid #1e293b; border-radius:6px; padding:6px; text-align:center;">
+          <div style="font-size:8px; color:#94a3b8;">MAYIN ORANI</div>
+          <b style="font-size:12px; color:var(--neon-green);" id="uprof-mines">%0</b>
+        </div>
+      </div>
+
+      <button type="button" class="btn-close" style="width:100%; padding:6px;" onclick="closeModal('modal-user-profile')">Geri Dön</button>
+    </div>
+  </div>
+
   <script>
-    let tempAvatar = "👤";
+    let curMode = 'all';
 
-    window.onload = () => loadProfile();
+    window.onload = () => {
+      // Başlangıçta modalların kesin kapalı olduğundan emin ol
+      closeModal('modal-score-detail');
+      closeModal('modal-user-profile');
+      switchMode('all');
+    };
 
-    function openDrawer(o) {
-      document.getElementById("drawer").classList.toggle("active", o);
-      document.getElementById("backdrop").classList.toggle("active", o);
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
     }
 
-    function formatExactDate(t) {
-      const d = new Date(t);
-      const days = ["Paz","Pzt","Sal","Çar","Per","Cum","Cts"];
-      return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()} ${days[d.getDay()]} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+    function switchMode(m) {
+      curMode = m;
+      document.querySelectorAll(".lb-chip").forEach(c => c.classList.remove("active"));
+      const btn = document.getElementById("btn-" + m);
+      if (btn) btn.classList.add("active");
+      loadData(m);
     }
 
-    function timeAgo(t) {
-      const diff = Date.now() - t;
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      return d === 0 ? "(Bugün)" : `(${d} gün önce)`;
-    }
-
-    function loadProfile() {
+    function loadData(filterKey) {
+      const box = document.getElementById("lb-container");
+      box.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Yükleniyor...</div>";
       const u = getActiveUser();
-      if (!u) return location.href = "index.html";
+      const myKey = u ? String(u.username || u.name).trim().toLowerCase() : "";
 
-      tempAvatar = u.avatar || "👤";
-      document.getElementById("p-avatar").innerText = tempAvatar;
-      document.getElementById("p-username").innerText = u.displayName || u.username;
-      document.getElementById("p-title").innerText = `[${u.title || 'Çaylak'}]`;
+      db.ref("leaderboards").once("value", snap => {
+        box.innerHTML = "";
+        let usersMap = {};
 
-      const reg = u.createdAt || Date.now();
-      document.getElementById("p-date").innerText = formatExactDate(reg);
-      document.getElementById("p-ago").innerText = timeAgo(reg);
+        if (snap.exists()) {
+          snap.forEach(mSnap => {
+            const mKey = mSnap.key;
+            mSnap.forEach(uSnap => {
+              const r = uSnap.val();
+              const uname = String(r.username || uSnap.key).toLowerCase();
+              if (!usersMap[uname]) {
+                usersMap[uname] = {
+                  username: uname,
+                  displayName: r.displayName || r.name || r.username || 'Oyuncu',
+                  avatar: r.avatar || '👤',
+                  title: r.title || 'Çaylak',
+                  modes: {},
+                  lastRecord: r
+                };
+              }
+              if (mKey === 'speedrun_mode') {
+                const t = parseFloat(r.time) || 0;
+                if (t > 4.0) usersMap[uname].modes[mKey] = t;
+              } else {
+                const s = parseFloat(r.score) || 0;
+                if (s > 0) usersMap[uname].modes[mKey] = s;
+              }
+            });
+          });
+        }
 
-      document.getElementById("set-name").value = u.displayName || u.username;
-      document.getElementById("set-title").value = u.title || "Çaylak";
-      document.getElementById("set-sound").checked = u.sound !== false;
+        let list = Object.keys(usersMap).map(k => {
+          const d = usersMap[k];
+          const std = d.modes["standard"] || 0;
+          const cat = d.modes["catch_open"] || 0;
+          const min = d.modes["mines_mode"] || 0;
+          return {
+            username: d.username,
+            displayName: d.displayName,
+            avatar: d.avatar,
+            title: d.title,
+            std: std, cat: cat, min: min,
+            top3Sum: std + cat + min,
+            speedTime: d.modes["speedrun_mode"] || 0,
+            singleScore: d.modes[filterKey] || 0,
+            rawRec: d.lastRecord
+          };
+        });
 
-      renderAvatars();
+        if (filterKey === 'all') {
+          list = list.filter(i => i.top3Sum > 0);
+          list.sort((a, b) => b.top3Sum - a.top3Sum);
+        } else if (filterKey === 'speedrun_mode') {
+          list = list.filter(i => i.speedTime > 0);
+          list.sort((a, b) => a.speedTime - b.speedTime);
+        } else {
+          list = list.filter(i => i.singleScore > 0);
+          list.sort((a, b) => b.singleScore - a.singleScore);
+        }
 
-      const cleanUser = String(u.username).trim().toLowerCase();
-      db.ref("accounts/" + cleanUser + "/stats").once("value").then(snap => {
-        const stats = snap.val() || {};
-        const std = (stats["standard"] && stats["standard"].played) || 0;
-        const cat = (stats["catch_open"] && stats["catch_open"].played) || 0;
-        const min = (stats["mines_mode"] && stats["mines_mode"].played) || 0;
-        const minW = (stats["mines_mode"] && stats["mines_mode"].wins) || 0;
-        const spd = (stats["speedrun_mode"] && stats["speedrun_mode"].played) || 0;
-        const dbl = (stats["double_mode"] && stats["double_mode"].played) || 0;
+        const me = list.find(i => i.username === myKey);
+        const myLbl = document.getElementById("lbl-my-score");
+        if (me) {
+          if (filterKey === 'all') myLbl.innerText = `Toplamım: ${me.top3Sum}P`;
+          else if (filterKey === 'speedrun_mode') myLbl.innerText = `Sürem: ${me.speedTime.toFixed(1)}s`;
+          else myLbl.innerText = `Skorum: ${me.singleScore}P`;
+        } else myLbl.innerText = "-";
 
-        document.getElementById("st-total").innerText = `${std + cat + min + spd + dbl} Maç`;
-        document.getElementById("c-std").innerText = std;
-        document.getElementById("c-cat").innerText = cat;
-        document.getElementById("c-min").innerText = min;
-        document.getElementById("c-spd").innerText = spd;
-        document.getElementById("c-dbl").innerText = dbl;
+        if (list.length === 0) {
+          box.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Kayıt yok.</div>";
+          return;
+        }
 
-        const rate = min > 0 ? Math.round((minW / min) * 100) : 0;
-        document.getElementById("st-mines-record").innerText = `${min} / ${minW}`;
-        document.getElementById("st-mines-rate").innerText = `%${rate}`;
+        list.slice(0, 50).forEach((item, idx) => {
+          const div = document.createElement("div");
+          div.className = "rank-item-card";
+          let badge = idx === 0 ? "🥇" : (idx === 1 ? "🥈" : (idx === 2 ? "🥉" : `#${idx+1}`));
+
+          let scoreTxt = filterKey === 'all' 
+            ? `<b style="color:var(--neon-green); font-size:10px;">${item.top3Sum} P</b>`
+            : (filterKey === 'speedrun_mode' ? `<b style="color:var(--neon-gold); font-size:10px;">⚡ ${item.speedTime.toFixed(1)}s</b>` : `<b style="color:var(--neon-green); font-size:10px;">${item.singleScore} P</b>`);
+
+          div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="font-weight:bold; width:18px;">${badge}</span>
+              <span>${item.avatar}</span>
+              <div>
+                <b>${item.displayName}</b>
+                <div style="color:#64748b; font-size:6.5px;">${item.title}</div>
+              </div>
+            </div>
+            <div>${scoreTxt}</div>
+          `;
+
+          div.onclick = () => openScoreModal(item.rawRec, item.displayName, item.username);
+          box.appendChild(div);
+        });
       });
     }
 
-    function renderAvatars() {
-      const box = document.getElementById("set-avatar-grid");
-      box.innerHTML = "";
-      AVATAR_LIST.forEach(av => {
-        const d = document.createElement("div");
-        d.className = "avatar-cell" + (av === tempAvatar ? " active" : "");
-        d.innerText = av;
-        d.onclick = () => { tempAvatar = av; renderAvatars(); };
-        box.appendChild(d);
-      });
-    }
+    function openScoreModal(rec, dispName, uname) {
+      if (!rec) return;
+      document.getElementById("det-name-clickable").innerText = dispName;
+      document.getElementById("det-mode").innerText = "Mod: " + (rec.modeName || rec.gameMode);
+      document.getElementById("det-date").innerText = "Tarih: " + (rec.date || '-');
 
-    function saveSettings() {
-      const u = getActiveUser();
-      const newName = document.getElementById("set-name").value.trim();
-      u.title = document.getElementById("set-title").value;
-      u.sound = document.getElementById("set-sound").checked;
-      u.avatar = tempAvatar;
-
-      if (newName && newName !== (u.displayName || u.username)) {
-        changeUsernameGlobal(newName);
+      const dBox = document.getElementById("det-drops");
+      dBox.innerHTML = "";
+      if (rec.drops && rec.drops.length > 0) {
+        rec.drops.forEach(d => {
+          dBox.innerHTML += `
+            <div style="background:#070212; padding:3px 6px; border-radius:4px; display:flex; justify-content:space-between; font-size:8px;">
+              <span><b style="color:${d.c || '#fff'};">[${d.tier}]</b> ${d.item}</span>
+              <b style="color:var(--neon-green);">+${d.pts}P</b>
+            </div>`;
+        });
       } else {
-        setActiveUser(u);
-        alert("Ayarlar kaydedildi.");
-        openDrawer(false);
-        loadProfile();
+        dBox.innerHTML = "<div style='color:#64748b; font-size:8px;'>Eşya bilgisi yok.</div>";
       }
+
+      document.getElementById("det-name-clickable").onclick = () => {
+        closeModal("modal-score-detail");
+        openOtherUserProfile(uname, dispName);
+      };
+
+      document.getElementById("modal-score-detail").style.display = "flex";
     }
 
-    function logout() {
-      localStorage.removeItem("kutu_active_session");
-      location.href = "index.html";
+    function openOtherUserProfile(targetUsername, displayName) {
+      const u = getActiveUser();
+      const myKey = u ? String(u.username || u.name).trim().toLowerCase() : "";
+
+      db.ref("accounts/" + targetUsername).once("value").then(snap => {
+        const data = snap.val() || {};
+        document.getElementById("uprof-avatar").innerText = data.avatar || "👤";
+        document.getElementById("uprof-name").innerText = displayName;
+        document.getElementById("uprof-title").innerText = `[${data.title || 'Çaylak'}]`;
+
+        const stats = data.stats || {};
+        let totalP = 0;
+        for (let m in stats) totalP += (stats[m].played || 0);
+        document.getElementById("uprof-played").innerText = `${totalP} Maç`;
+
+        const mines = stats["mines_mode"] || { played: 0, wins: 0 };
+        const mRate = (mines.played || 0) > 0 ? Math.round(((mines.wins || 0) / mines.played) * 100) : 0;
+        document.getElementById("uprof-mines").innerText = `%${mRate}`;
+
+        renderFriendButton(myKey, targetUsername);
+        document.getElementById("modal-user-profile").style.display = "flex";
+      });
+    }
+
+    function renderFriendButton(myKey, targetKey) {
+      const box = document.getElementById("friend-action-container");
+      box.innerHTML = "";
+      if (!myKey || myKey === targetKey) return;
+
+      db.ref(`friends/${myKey}/${targetKey}`).once("value").then(fSnap => {
+        if (fSnap.exists() && fSnap.val() === true) {
+          box.innerHTML = `<button type="button" class="icon-btn" style="background:#0284c7; color:#fff; font-size:8.5px; padding:4px 8px;" onclick="removeFriendProcess('${myKey}', '${targetKey}')">👤 Arkadaşın</button>`;
+          return;
+        }
+
+        db.ref(`friend_requests/${targetKey}/${myKey}`).once("value").then(reqSnap => {
+          if (reqSnap.exists()) {
+            box.innerHTML = `<button type="button" class="icon-btn" style="background:#ca8a04; color:#fff; font-size:8.5px; padding:4px 8px;" disabled>⏳ İstek Bekleniyor</button>`;
+          } else {
+            box.innerHTML = `<button type="button" class="icon-btn" style="background:#16a34a; color:#fff; font-size:8.5px; padding:4px 8px;" onclick="sendFriendRequest('${myKey}', '${targetKey}')">➕ Arkadaş Ekle</button>`;
+          }
+        });
+      });
+    }
+
+    function sendFriendRequest(myKey, targetKey) {
+      const u = getActiveUser();
+      db.ref(`friend_requests/${targetKey}/${myKey}`).set({
+        from: myKey,
+        name: u.displayName || u.name || u.username,
+        avatar: u.avatar || "👤",
+        time: Date.now()
+      }).then(() => {
+        alert("Arkadaşlık isteği iletildi!");
+        renderFriendButton(myKey, targetKey);
+      });
+    }
+
+    function removeFriendProcess(myKey, targetKey) {
+      if (confirm("Arkadaşlıktan çıkarmak istiyor musunuz?")) {
+        if (confirm("Emin misiniz? (İki taraftan da silinecek)")) {
+          db.ref(`friends/${myKey}/${targetKey}`).remove();
+          db.ref(`friends/${targetKey}/${myKey}`).remove().then(() => {
+            alert("Arkadaşlıktan çıkarıldı.");
+            renderFriendButton(myKey, targetKey);
+          });
+        }
+      }
     }
   </script>
 </body>
