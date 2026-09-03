@@ -21,9 +21,9 @@
     .lb-chip.active { background: #4338ca; border-color: var(--neon-gold); color: #fff; }
 
     .lb-list-area { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
-    .rank-item-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 6px; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; cursor: pointer; }
+    .rank-item-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 6px; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; }
 
-    /* Modallar kesinlikle ilk açılışta kapalıdır */
+    /* Açılır Pencereler */
     .custom-modal-overlay {
       display: none;
       position: fixed;
@@ -66,10 +66,10 @@
     <div class="lb-list-area" id="lb-container"></div>
   </div>
 
-  <!-- 1. AŞAMA: OYUN SKOR DETAY MODALI -->
+  <!-- 1. AŞAMA: OYUN MODU DETAY MODALI (Sadece tekli modlarda açılır) -->
   <div id="modal-score-detail" class="custom-modal-overlay">
     <div class="custom-modal-card">
-      <div style="font-size:9px; color:#94a3b8; margin-bottom:2px;">Oyuncunun Profilini Açmak İçin İsme Tıkla:</div>
+      <div style="font-size:8.5px; color:#94a3b8; margin-bottom:2px;">Oyuncunun Profilini Açmak İçin İsme Tıkla:</div>
       <h3 id="det-name-clickable" style="color:var(--neon-blue); font-size:14px; cursor:pointer; text-decoration:underline; margin-bottom:4px;">-</h3>
       <div id="det-mode" style="font-size:10px; color:var(--neon-gold); margin-bottom:2px;">-</div>
       <div id="det-date" style="font-size:8.5px; color:#64748b; margin-bottom:6px;">-</div>
@@ -79,7 +79,7 @@
     </div>
   </div>
 
-  <!-- 2. AŞAMA: KULLANICI PROFİL MODALI + ARKADAŞLIK SİSTEMİ -->
+  <!-- 2. AŞAMA: KULLANICI PROFİL MODALI + ARKADAŞLIK -->
   <div id="modal-user-profile" class="custom-modal-overlay">
     <div class="custom-modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -112,7 +112,6 @@
     let curMode = 'all';
 
     window.onload = () => {
-      // Başlangıçta modalların kesin kapalı olduğundan emin ol
       closeModal('modal-score-detail');
       closeModal('modal-user-profile');
       switchMode('all');
@@ -154,9 +153,12 @@
                   avatar: r.avatar || '👤',
                   title: r.title || 'Çaylak',
                   modes: {},
-                  lastRecord: r
+                  records: {}
                 };
               }
+
+              usersMap[uname].records[mKey] = r;
+
               if (mKey === 'speedrun_mode') {
                 const t = parseFloat(r.time) || 0;
                 if (t > 4.0) usersMap[uname].modes[mKey] = t;
@@ -182,10 +184,11 @@
             top3Sum: std + cat + min,
             speedTime: d.modes["speedrun_mode"] || 0,
             singleScore: d.modes[filterKey] || 0,
-            rawRec: d.lastRecord
+            modeRecord: d.records[filterKey]
           };
         });
 
+        // SIRALAMA HESABI
         if (filterKey === 'all') {
           list = list.filter(i => i.top3Sum > 0);
           list.sort((a, b) => b.top3Sum - a.top3Sum);
@@ -206,32 +209,58 @@
         } else myLbl.innerText = "-";
 
         if (list.length === 0) {
-          box.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Kayıt yok.</div>";
+          box.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Kayıt bulunamadı.</div>";
           return;
         }
 
         list.slice(0, 50).forEach((item, idx) => {
           const div = document.createElement("div");
           div.className = "rank-item-card";
-          let badge = idx === 0 ? "🥇" : (idx === 1 ? "🥈" : (idx === 2 ? "🥉" : `#${idx+1}`));
+          let badge = idx === 0 ? "🥇 1." : (idx === 1 ? "🥈 2." : (idx === 2 ? "🥉 3." : `#${idx+1}`));
 
-          let scoreTxt = filterKey === 'all' 
-            ? `<b style="color:var(--neon-green); font-size:10px;">${item.top3Sum} P</b>`
-            : (filterKey === 'speedrun_mode' ? `<b style="color:var(--neon-gold); font-size:10px;">⚡ ${item.speedTime.toFixed(1)}s</b>` : `<b style="color:var(--neon-green); font-size:10px;">${item.singleScore} P</b>`);
-
-          div.innerHTML = `
-            <div style="display:flex; align-items:center; gap:6px;">
-              <span style="font-weight:bold; width:18px;">${badge}</span>
-              <span>${item.avatar}</span>
-              <div>
-                <b>${item.displayName}</b>
-                <div style="color:#64748b; font-size:6.5px;">${item.title}</div>
+          if (filterKey === 'all') {
+            // 🌟 TÜMÜ KATEGORİSİ: 3 MODUN DÖKÜMÜNÜ GÖSTERİR, TIKLANMAZ (PANEL AÇILMAZ)
+            div.style.cursor = "default";
+            div.innerHTML = `
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span style="font-weight:bold; color:#38bdf8; width:24px;">${badge}</span>
+                <span>${item.avatar}</span>
+                <div>
+                  <b style="color:#fff;">${item.displayName}</b>
+                  <div style="color:#94a3b8; font-size:6.5px;">
+                    ⚔️ Normal: <span style="color:#38bdf8;">${item.std}</span> | 
+                    🎯 Yakala: <span style="color:#c084fc;">${item.cat}</span> | 
+                    💣 Mayın: <span style="color:#f87171;">${item.min}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div>${scoreTxt}</div>
-          `;
+              <div style="text-align:right;">
+                <div style="font-weight:900; color:var(--neon-green); font-size:10.5px;">${item.top3Sum} P</div>
+                <small style="color:#64748b; font-size:6px;">Genel Toplam</small>
+              </div>
+            `;
+          } else {
+            // 🎯 TEKLİ MODLAR: KARTA BASINCA O MODUN SKOR DETAYI AÇILIR
+            div.style.cursor = "pointer";
+            let scoreValTxt = filterKey === 'speedrun_mode' 
+              ? `<b style="color:var(--neon-gold); font-size:10px;">⚡ ${item.speedTime.toFixed(1)}s</b>` 
+              : `<b style="color:var(--neon-green); font-size:10px;">${item.singleScore} P</b>`;
 
-          div.onclick = () => openScoreModal(item.rawRec, item.displayName, item.username);
+            div.innerHTML = `
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span style="font-weight:bold; color:#38bdf8; width:24px;">${badge}</span>
+                <span>${item.avatar}</span>
+                <div>
+                  <b>${item.displayName}</b>
+                  <div style="color:#64748b; font-size:6.5px;">${item.title}</div>
+                </div>
+              </div>
+              <div>${scoreValTxt}</div>
+            `;
+
+            div.onclick = () => openScoreModal(item.modeRecord, item.displayName, item.username);
+          }
+
           box.appendChild(div);
         });
       });
@@ -257,6 +286,7 @@
         dBox.innerHTML = "<div style='color:#64748b; font-size:8px;'>Eşya bilgisi yok.</div>";
       }
 
+      // Detay penceresindeki isme tıklayınca profili ve arkadaş eklemeyi açar
       document.getElementById("det-name-clickable").onclick = () => {
         closeModal("modal-score-detail");
         openOtherUserProfile(uname, dispName);
