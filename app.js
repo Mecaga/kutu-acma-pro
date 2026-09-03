@@ -57,7 +57,7 @@ function setActiveUser(u) {
   }
 }
 
-// 🎯 HATA TEMİZLEYİCİ VE YENİ SKOR YAZICI MOTOR
+// 🎯 GARANTİLİ SKOR VE İSTATİSTİK SAYACI
 function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime) {
   let u = getActiveUser();
   if (!u) return;
@@ -71,64 +71,69 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime
 
   let numVal = parseFloat(scoreVal) || 0;
 
-  // Speedrun için süreyi al
+  // Speedrun süre kontrolü
   let finalSpeedrunTime = 0;
   if (mode === "speedrun_mode") {
-    if (customTime !== undefined && customTime !== null) {
-      finalSpeedrunTime = parseFloat(customTime);
-    } else {
-      finalSpeedrunTime = numVal;
-    }
+    finalSpeedrunTime = (customTime !== undefined && customTime !== null) ? parseFloat(customTime) : numVal;
   }
 
   const cleanUID = String(u.uid || u.name).replace(/[.#$\[\]]/g, "_");
   const fullName = `${u.name}${u.tag || ""}`;
 
-  const recordPayload = {
-    uid: cleanUID,
-    fullName: fullName,
-    username: fullName,
-    name: u.name,
-    avatar: u.avatar || "👤",
-    title: u.title || "Çaylak",
-    modeName: modeTitle || mode,
-    gameMode: mode,
-    score: numVal,
-    points: numVal,
-    time: mode === "speedrun_mode" ? finalSpeedrunTime : numVal,
-    drops: drops || [],
-    isWin: isWin !== undefined ? isWin : true,
-    date: new Date().toLocaleDateString("tr-TR"),
-    timestamp: Date.now()
-  };
+  // 1. İSTATİSTİK ARTTIRMA (KAZANSA DA KAYBETSE DE OYNANDI SAYILIR)
+  if (db) {
+    const statRef = db.ref(`users/${cleanUID}/stats/${mode}`);
+    statRef.transaction(current => {
+      let st = current || { played: 0, wins: 0, losses: 0 };
+      st.played = (st.played || 0) + 1;
+      if (isWin === false) {
+        st.losses = (st.losses || 0) + 1;
+      } else {
+        st.wins = (st.wins || 0) + 1;
+      }
+      return st;
+    });
+  }
 
-  // 1. Yerel Kaydı Güncelle
+  // 2. EN İYİ SKORLARI YERELDE SAKLA
   try {
     let localScores = JSON.parse(localStorage.getItem("kutu_local_scores")) || {};
     if (mode === "speedrun_mode") {
-      localScores[mode] = finalSpeedrunTime;
+      if (!localScores[mode] || finalSpeedrunTime < localScores[mode]) localScores[mode] = finalSpeedrunTime;
     } else {
       if (!localScores[mode] || numVal > localScores[mode]) localScores[mode] = numVal;
     }
     localStorage.setItem("kutu_local_scores", JSON.stringify(localScores));
   } catch (e) {}
 
-  // 2. Firebase'e Yazma
-  if (db) {
+  // 3. FIREBASE LİDERLİK TABLOSUNA YAZMA (0 Puanlar Liderliğe Yazılmaz ama İstatistiğe Sayılır)
+  if (db && (numVal > 0 || mode === "speedrun_mode")) {
+    const recordPayload = {
+      uid: cleanUID,
+      fullName: fullName,
+      username: fullName,
+      name: u.name,
+      avatar: u.avatar || "👤",
+      title: u.title || "Çaylak",
+      modeName: modeTitle || mode,
+      gameMode: mode,
+      score: numVal,
+      points: numVal,
+      time: mode === "speedrun_mode" ? finalSpeedrunTime : numVal,
+      drops: drops || [],
+      isWin: isWin !== undefined ? isWin : true,
+      date: new Date().toLocaleDateString("tr-TR"),
+      timestamp: Date.now()
+    };
+
     const lbRef = db.ref(`leaderboards/${mode}/${cleanUID}`);
-    
     lbRef.once("value").then(snap => {
       let shouldUpdate = true;
       if (snap.exists()) {
         const old = snap.val();
         if (mode === "speedrun_mode") {
           const oldTime = parseFloat(old.time) || 0;
-          // KRİTİK DÜZELTME: Eski hatalı 1s ve imkansız dereceleri (<= 5s) zorla eziyoruz
-          if (oldTime <= 5.0) {
-            shouldUpdate = true;
-          } else {
-            shouldUpdate = finalSpeedrunTime < oldTime;
-          }
+          shouldUpdate = oldTime <= 5.0 || finalSpeedrunTime < oldTime;
         } else {
           const oldScore = parseFloat(old.score || old.points) || 0;
           shouldUpdate = numVal > oldScore;
@@ -136,12 +141,10 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime
       }
 
       if (shouldUpdate) {
-        lbRef.set(recordPayload).then(() => {
-          console.log(`✅ Liderlik tablosu güncellendi: ${finalSpeedrunTime || numVal}`);
-        });
+        lbRef.set(recordPayload);
         db.ref(`game_scores/${cleanUID}_${mode}`).set(recordPayload).catch(() => {});
       }
-    }).catch(err => console.error("Skor kayıt hatası:", err));
+    });
   }
 }
 
