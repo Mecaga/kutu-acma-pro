@@ -37,9 +37,9 @@
   <div class="app-container" style="justify-content:space-between;">
     <div>
       <div class="top-header">
-        <!-- İsme tıklayınca profile gider, ekstra ayarlar/profil butonu yok -->
+        <!-- İsme tıklayınca profile gider -->
         <div class="app-title" style="cursor:pointer;" onclick="location.href='user.html'" title="Profile Git">
-          <span id="lbl-avatar">👤</span> <span id="lbl-username">Giriş Yapılmadı</span>
+          <span id="lbl-avatar">👤</span> <span id="lbl-username">Oyuncu</span>
         </div>
         <div style="display:flex; gap:3px;">
           <a href="leaderboard.html" class="icon-btn">🏆 Sıralama</a>
@@ -48,7 +48,7 @@
         </div>
       </div>
 
-      <!-- Üst Hızlı Erişim Butonları -->
+      <!-- Üst Butonlar -->
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-bottom:4px;">
         <a href="chat.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:5px; font-size:10px; text-decoration:none;">💬 Sohbet</a>
         <a href="friends.html" class="mode-btn" style="text-align:center; font-weight:bold; color:#fff; padding:5px; font-size:10px; text-decoration:none;">👥 Arkadaşlar</a>
@@ -68,12 +68,12 @@
 
     <!-- Admin Paneli Bölümü -->
     <div id="admin-panel-section" style="display:none; border:1px solid var(--danger); border-radius:8px; padding:6px; background:rgba(239, 68, 68, 0.1); margin-bottom:4px;">
-      <div style="font-size:10px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:3px;">🛑 ADMIN SİLME YETKİLERİ</div>
+      <div style="font-size:10px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:3px;">🛑 ADMIN YETKİLERİ</div>
       <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:3px;">
-        <button class="icon-btn" style="background:var(--danger); font-size:8px; padding:3px;" onclick="adminClearAllUsers()">Hesapları Sil</button>
-        <button class="icon-btn" style="background:var(--danger); font-size:8px; padding:3px;" onclick="adminClearAllScores()">Skorları Sil</button>
-        <button class="icon-btn" style="background:var(--danger); font-size:8px; padding:3px;" onclick="adminClearAllChannels()">Chati Sil</button>
-        <button class="icon-btn" style="background:#7f1d1d; border-color:var(--danger); font-size:8px; padding:3px;" onclick="adminWipeEverything()">🔥 TÜMÜ</button>
+        <button type="button" class="icon-btn" style="background:var(--danger); font-size:8px; padding:3px;" onclick="adminClearAllUsers()">Hesapları Sil</button>
+        <button type="button" class="icon-btn" style="background:var(--danger); font-size:8px; padding:3px;" onclick="adminClearAllScores()">Skorları Sil</button>
+        <button type="button" class="icon-btn" style="background:var(--danger); font-size:8px; padding:3px;" onclick="adminClearAllChannels()">Chati Sil</button>
+        <button type="button" class="icon-btn" style="background:#7f1d1d; border-color:var(--danger); font-size:8px; padding:3px;" onclick="adminWipeEverything()">🔥 TÜMÜ</button>
       </div>
     </div>
 
@@ -86,7 +86,7 @@
   <!-- DUYURULAR MODALI -->
   <div id="modal-announcements" class="modal-overlay">
     <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">📢 Duyurular & Oylama</div>
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">📢 Duyurular</div>
       <div id="announcements-feed" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
       <button type="button" class="btn-close" onclick="document.getElementById('modal-announcements').style.display='none'">Kapat</button>
     </div>
@@ -102,7 +102,7 @@
         <div><b>💣 Mayınlı Kasa:</b> 9 kutudan mayına basmadan ödül topla.</div>
         <div><b>⚡ Speedrun:</b> En hızlı sürede 1000 puana ulaş!</div>
         <div><b>🎰 Çift Rulet:</b> Eşya ve x1-x10 çarpan kazan.</div>
-        <div><b>🌾 Kasa Çiftliği:</b> Tarla ek, hasat topla ve pazar yerinde kazan.</div>
+        <div><b>🌾 Kasa Çiftliği:</b> Tarla ek, hasat topla ve kazan.</div>
       </div>
       <button type="button" class="btn-close" onclick="document.getElementById('modal-guide').style.display='none'">Kapat</button>
     </div>
@@ -125,12 +125,14 @@
       const u = getActiveUser();
       if (!u) return window.location.href = "index.html";
 
+      const showName = u.displayName || u.name || u.username || "Oyuncu";
       document.getElementById("lbl-avatar").innerText = u.avatar || "👤";
-      document.getElementById("lbl-username").innerText = u.displayName || u.username;
+      document.getElementById("lbl-username").innerText = showName;
 
       // Admin Kontrolü
-      if (u.isAdmin || (u.username && u.username.toLowerCase() === "admin")) {
-        document.getElementById("admin-panel-section").style.display = "block";
+      if (u.isAdmin || showName.toLowerCase() === "admin") {
+        const adm = document.getElementById("admin-panel-section");
+        if (adm) adm.style.display = "block";
       }
 
       renderRates('standard');
