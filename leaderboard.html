@@ -88,14 +88,12 @@
 <body>
   <div class="lb-layout">
     
-    <!-- Üst Başlık -->
     <div class="lb-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
       <div style="font-weight:900; font-size:11px; color:#38bdf8;">🏆 Liderlik Sıralamaları</div>
       <div id="lbl-my-current-score" style="font-size:8.5px; color:var(--neon-gold); font-weight:bold;">Durumum: -</div>
     </div>
 
-    <!-- Mod Kategorileri Şeridi -->
     <div class="lb-modes-scroll">
       <button type="button" class="lb-chip active" id="chip-all_top3" onclick="switchLBMode('all_top3')">🌟 Genel (Tümü)</button>
       <button type="button" class="lb-chip" id="chip-standard" onclick="switchLBMode('standard')">⚔️ Normal Kasa</button>
@@ -105,7 +103,6 @@
       <button type="button" class="lb-chip" id="chip-double_mode" onclick="switchLBMode('double_mode')">🎰 Çift Rulet</button>
     </div>
 
-    <!-- Sıralama Listesi -->
     <div class="lb-list-area" id="leaderboard-container">
       <div style="color:#64748b; font-size:8px; text-align:center; padding:15px;">Sıralama yükleniyor...</div>
     </div>
@@ -115,16 +112,15 @@
   <script>
     let currentMode = 'all_top3';
 
-    // Speedrun süresini ondalıklı saniyeye çeviren yardımcı fonksiyon
-    function formatSpeedrunTime(val) {
+    // Speedrun Süre Düzelticisi: Milisaniye ise 1000'e böler, saniye ise direkt yazar
+    function parseSpeedrunTime(val) {
       let num = parseFloat(val) || 0;
-      if (num <= 0) return "-";
-      // Eğer süre 100'den büyük geliyorsa milisaniyedir (örn: 11330 ms veya 1133 ms)
+      if (num <= 0) return 0;
+      // 100'den büyükse milisaniyedir (örn: 20400ms -> 20.4s)
       if (num > 100) {
-        num = num / 100; // veya 1000'e göre ölçekle
-        if (num > 100) num = num / 10;
+        num = num / 1000;
       }
-      return num.toFixed(1) + "s";
+      return parseFloat(num.toFixed(1));
     }
 
     window.onload = () => {
@@ -159,9 +155,7 @@
         if (snap.exists()) {
           snap.forEach(c => {
             const val = c.val();
-            if (typeof val === "object" && val !== null) {
-              rawRecords.push(val);
-            }
+            if (val && typeof val === "object") rawRecords.push(val);
           });
         }
 
@@ -174,24 +168,24 @@
         let userMap = {};
 
         rawRecords.forEach(s => {
-          if (!s || typeof s !== "object") return;
+          if (!s) return;
           const uid = String(s.uid || s.username || 'guest').replace(/[.#$\[\]]/g, "_");
-          const username = String(s.username || s.name || 'Oyuncu').replace(/true|false/gi, "Oyuncu");
-          
-          let scoreRaw = s.score !== undefined ? s.score : (s.points !== undefined ? s.points : s.time);
-          let score = parseFloat(scoreRaw) || 0;
+          let rawName = String(s.username || s.name || 'Oyuncu');
+          if (rawName.toLowerCase() === "true" || rawName.toLowerCase() === "false") rawName = "Oyuncu";
+
+          let scoreVal = parseFloat(s.score !== undefined ? s.score : (s.points !== undefined ? s.points : s.time)) || 0;
           let mode = String(s.gameMode || s.mode || 'standard').toLowerCase().trim();
 
-          // Mod isim eşitleme
+          // Mod eşleştirme (Mayın ve diğerleri için garantiye alıyoruz)
           if (mode === "normal" || mode === "klasik") mode = "standard";
           if (mode === "catch" || mode === "yakala") mode = "catch_open";
-          if (mode === "mines" || mode === "mayin") mode = "mines_mode";
-          if (mode === "speedrun") mode = "speedrun_mode";
+          if (mode === "mines" || mode === "mayin" || mode === "mines_mode") mode = "mines_mode";
+          if (mode === "speedrun" || mode === "speedrun_mode") mode = "speedrun_mode";
           if (mode === "double" || mode === "rulet") mode = "double_mode";
 
           if (!userMap[uid]) {
             userMap[uid] = {
-              name: username,
+              name: rawName,
               avatar: s.avatar || '👤',
               title: s.title || 'Çaylak',
               modeScores: {}
@@ -199,14 +193,15 @@
           }
 
           if (mode === 'speedrun_mode') {
-            if (score > 0) {
-              if (!userMap[uid].modeScores[mode] || score < userMap[uid].modeScores[mode]) {
-                userMap[uid].modeScores[mode] = score;
+            let sTime = parseSpeedrunTime(scoreVal);
+            if (sTime > 0) {
+              if (!userMap[uid].modeScores[mode] || sTime < userMap[uid].modeScores[mode]) {
+                userMap[uid].modeScores[mode] = sTime;
               }
             }
           } else {
-            if (!userMap[uid].modeScores[mode] || score > userMap[uid].modeScores[mode]) {
-              userMap[uid].modeScores[mode] = score;
+            if (!userMap[uid].modeScores[mode] || scoreVal > userMap[uid].modeScores[mode]) {
+              userMap[uid].modeScores[mode] = scoreVal;
             }
           }
         });
@@ -236,7 +231,7 @@
           list.sort((a, b) => b.top3Total - a.top3Total);
         } else if (modeKey === 'speedrun_mode') {
           list = list.filter(item => item.modeScore > 0);
-          list.sort((a, b) => a.modeScore - b.modeScore);
+          list.sort((a, b) => a.modeScore - b.modeScore); // En az süre en başta
         } else {
           list = list.filter(item => item.modeScore > 0);
           list.sort((a, b) => b.modeScore - a.modeScore);
@@ -247,7 +242,7 @@
           if (modeKey === 'all_top3') {
             document.getElementById("lbl-my-current-score").innerText = `Toplam: ${myItem.top3Total} P`;
           } else if (modeKey === 'speedrun_mode') {
-            document.getElementById("lbl-my-current-score").innerText = `Sürem: ${formatSpeedrunTime(myItem.modeScore)}`;
+            document.getElementById("lbl-my-current-score").innerText = `Sürem: ${myItem.modeScore}s`;
           } else {
             document.getElementById("lbl-my-current-score").innerText = `Puanım: ${myItem.modeScore} P`;
           }
@@ -300,7 +295,7 @@
                   <div style="color:#94a3b8; font-size:6.5px;">${item.title}</div>
                 </div>
               </div>
-              <div style="font-weight:bold; color:var(--neon-gold); font-size:10px;">⚡ ${formatSpeedrunTime(item.modeScore)}</div>
+              <div style="font-weight:bold; color:var(--neon-gold); font-size:10px;">⚡ ${item.modeScore}s</div>
             `;
           } else {
             div.innerHTML = `
