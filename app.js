@@ -22,7 +22,6 @@ const AVATAR_LIST = [
   "🌾", "🧑‍🌾", "🐔", "🐮", "🪙", "⚔️", "🛡️", "🎯"
 ];
 
-// 2. KULLANICI BİLGİLERİ
 function getActiveUser() {
   const sessionData = localStorage.getItem("kutu_active_session") || localStorage.getItem("kutu_active_user");
   if (!sessionData) {
@@ -37,11 +36,7 @@ function getActiveUser() {
     setActiveUser(guest);
     return guest;
   }
-  try {
-    return JSON.parse(sessionData);
-  } catch (e) {
-    return null;
-  }
+  try { return JSON.parse(sessionData); } catch (e) { return null; }
 }
 
 function setActiveUser(u) {
@@ -62,12 +57,11 @@ function setActiveUser(u) {
   }
 }
 
-// 3. İLK VERSİYONUN ORİJİNAL SKOR MOTORU (LEADERBOARDS TABLOSUNA DOĞRUDAN YAZAR)
-function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin) {
+// 🎯 DÜZELTİLEN SKOR MOTORU (6. PARAMETREDEKİ SÜREYİ YAKALAR)
+function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime) {
   let u = getActiveUser();
   if (!u) return;
 
-  // Mod adını orijinal formata eşitle
   let mode = String(gameMode).toLowerCase().trim();
   if (mode === "normal" || mode === "klasik") mode = "standard";
   if (mode === "catch" || mode === "yakala") mode = "catch_open";
@@ -77,10 +71,14 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin) {
 
   let numVal = parseFloat(scoreVal) || 0;
 
-  // Speedrun için süreyi saniyeye çevir (örn: 1133ms -> 11.3s)
-  let speedrunSeconds = numVal;
-  if (mode === "speedrun_mode" && speedrunSeconds > 100) {
-    speedrunSeconds = parseFloat((speedrunSeconds / 1000).toFixed(1));
+  // SPEEDRUN SÜRE AYARI: customTime varsa onu al, yoksa scoreVal'e bak
+  let finalSpeedrunTime = 0;
+  if (mode === "speedrun_mode") {
+    if (customTime !== undefined && customTime !== null) {
+      finalSpeedrunTime = parseFloat(customTime);
+    } else {
+      finalSpeedrunTime = numVal;
+    }
   }
 
   const cleanUID = String(u.uid || u.name).replace(/[.#$\[\]]/g, "_");
@@ -97,47 +95,35 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin) {
     gameMode: mode,
     score: numVal,
     points: numVal,
-    time: mode === "speedrun_mode" ? speedrunSeconds : numVal,
+    time: mode === "speedrun_mode" ? finalSpeedrunTime : numVal,
     drops: drops || [],
     isWin: isWin !== undefined ? isWin : true,
     date: new Date().toLocaleDateString("tr-TR"),
     timestamp: Date.now()
   };
 
-  // 1. LocalStorage Yedekleme
+  // 1. LocalStorage Kaydı
   try {
     let localScores = JSON.parse(localStorage.getItem("kutu_local_scores")) || {};
     if (mode === "speedrun_mode") {
-      if (!localScores[mode] || speedrunSeconds < localScores[mode]) localScores[mode] = speedrunSeconds;
+      localScores[mode] = finalSpeedrunTime;
     } else {
       if (!localScores[mode] || numVal > localScores[mode]) localScores[mode] = numVal;
     }
     localStorage.setItem("kutu_local_scores", JSON.stringify(localScores));
   } catch (e) {}
 
-  // 2. Kullanıcının Kendi İstatistiklerini Güncelle (Oyun/Kazanma/Kaybetme)
+  // 2. Firebase Kaydı
   if (db) {
-    const userStatRef = db.ref(`users/${cleanUID}/stats/${mode}`);
-    userStatRef.once("value").then(s => {
-      const st = s.val() || { played: 0, wins: 0, losses: 0 };
-      st.played = (st.played || 0) + 1;
-      if (isWin === false) {
-        st.losses = (st.losses || 0) + 1;
-      } else {
-        st.wins = (st.wins || 0) + 1;
-      }
-      userStatRef.set(st);
-    }).catch(() => {});
-
-    // 3. Sıralama Tablosuna (leaderboards/{mode}/{uid}) Yaz
     const lbRef = db.ref(`leaderboards/${mode}/${cleanUID}`);
     lbRef.once("value").then(snap => {
       let shouldUpdate = true;
       if (snap.exists()) {
         const old = snap.val();
         if (mode === "speedrun_mode") {
-          const oldTime = parseFloat(old.time) || 9999;
-          shouldUpdate = speedrunSeconds < oldTime;
+          const oldTime = parseFloat(old.time) || 0;
+          // Eski hatalı 1.0 saniyeleri ezmek için kontrol
+          shouldUpdate = oldTime <= 1.5 || finalSpeedrunTime < oldTime;
         } else {
           const oldScore = parseFloat(old.score || old.points) || 0;
           shouldUpdate = numVal > oldScore;
@@ -146,14 +132,12 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin) {
 
       if (shouldUpdate) {
         lbRef.set(recordPayload);
-        // Yedek tablolara da aynı anda yaz
         db.ref(`game_scores/${cleanUID}_${mode}`).set(recordPayload).catch(() => {});
       }
     }).catch(err => console.error("Skor kayıt hatası:", err));
   }
 }
 
-// Eski çağrılar için köprü fonksiyon
 function saveScore(rawMode, scoreVal) {
   recordGameScore(rawMode, rawMode, scoreVal, [], true);
 }
