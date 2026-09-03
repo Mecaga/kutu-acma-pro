@@ -1,4 +1,4 @@
-// 1. FIREBASE YAPILANDIRMASI
+// 1. FIREBASE BAŞLATMA
 const firebaseConfig = {
   apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
   authDomain: "kutu-acma-pro.firebaseapp.com",
@@ -20,39 +20,55 @@ const AVATAR_LIST = [
   "🌾", "🧑‍🌾", "🐔", "🐮", "🪙", "⚔️", "🛡️", "🎯"
 ];
 
-// Aktif Oturum Alma (Otomatik sahte kullanıcı üretimi KAPATILDI)
+// Aktif Kullanıcı (Undefined hatasını önleyen akıllı okuyucu)
 function getActiveUser() {
-  const session = localStorage.getItem("kutu_active_session");
+  const session = localStorage.getItem("kutu_active_session") || localStorage.getItem("kutu_active_user");
   if (!session) return null;
-  try { return JSON.parse(session); } catch (e) { return null; }
+  try {
+    let u = JSON.parse(session);
+    let realName = u.displayName || u.name || u.username || "Oyuncu";
+    u.displayName = realName;
+    u.name = realName;
+    u.username = String(u.username || realName).toLowerCase().replace(/[^a-z0-9_]/gi, "");
+    return u;
+  } catch (e) {
+    return null;
+  }
 }
 
 function setActiveUser(u) {
   if (!u) {
     localStorage.removeItem("kutu_active_session");
+    localStorage.removeItem("kutu_active_user");
     return;
   }
+  if (!u.displayName) u.displayName = u.name || u.username || "Oyuncu";
+  if (!u.username) u.username = String(u.displayName).toLowerCase().replace(/[^a-z0-9_]/gi, "");
+  u.name = u.displayName;
+
   localStorage.setItem("kutu_active_session", JSON.stringify(u));
+  localStorage.setItem("kutu_active_user", JSON.stringify(u));
+
   if (db && u.username) {
-    const cleanUser = String(u.username).trim().toLowerCase();
-    db.ref("accounts/" + cleanUser).update({
-      displayName: u.displayName || u.username,
+    db.ref("accounts/" + u.username).update({
+      displayName: u.displayName,
       avatar: u.avatar || "👤",
       title: u.title || "Çaylak",
       sound: u.sound !== false,
       lastOnline: Date.now()
-    }).catch(e => console.warn("Sync:", e));
+    }).catch(() => {});
   }
 }
 
-// 🎯 KULLANICI ADI DEĞİŞTİRME (Şifreyi korur, eski kaydı silip yenisine taşır)
+// Kullanıcı Adı Değiştirme (Verileri yeni isme taşır)
 function changeUsernameGlobal(newRawName) {
   const u = getActiveUser();
   if (!u) return alert("Oturum bulunamadı!");
   const newName = newRawName.trim();
   if (!newName) return alert("Kullanıcı adı boş olamaz!");
+
   const oldKey = String(u.username).trim().toLowerCase();
-  const newKey = newName.toLowerCase();
+  const newKey = newName.toLowerCase().replace(/[^a-z0-9_]/gi, "");
 
   if (oldKey === newKey) {
     u.displayName = newName;
@@ -65,25 +81,24 @@ function changeUsernameGlobal(newRawName) {
       return alert("Bu kullanıcı adı zaten kullanımda!");
     }
 
-    // Eski hesaptaki tüm verileri oku ve yeni hesaba taşı
     db.ref("accounts/" + oldKey).once("value").then(oldSnap => {
       const data = oldSnap.val() || {};
       data.username = newKey;
       data.displayName = newName;
 
       db.ref("accounts/" + newKey).set(data).then(() => {
-        db.ref("accounts/" + oldKey).remove(); // Eski kaydı temizle
+        db.ref("accounts/" + oldKey).remove();
         u.username = newKey;
         u.displayName = newName;
         setActiveUser(u);
-        alert("Kullanıcı adınız başarıyla " + newName + " olarak değiştirildi! Girişlerde bu adı kullanınız.");
+        alert("Kullanıcı adınız başarıyla " + newName + " yapıldı!");
         location.reload();
       });
     });
   });
 }
 
-// 🎯 SKOR VE İSTATİSTİK SAYACI (Mayın Tarlası Oynama & Skor Garantili)
+// Skor Kaydetme Motoru
 function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime) {
   let u = getActiveUser();
   if (!u) return;
@@ -99,9 +114,9 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime
   let finalSpeedrunTime = (mode === "speedrun_mode" && customTime !== undefined) ? parseFloat(customTime) : numVal;
 
   const userKey = String(u.username).trim().toLowerCase();
-  const displayName = u.displayName || u.username;
+  const displayName = u.displayName || u.name || "Oyuncu";
 
-  // 1. İstatistik Sayacı (Oynama ve Galibiyet)
+  // 1. İstatistikleri Güncelle (Kazanma / Kaybetme / Oynama)
   if (db) {
     const statRef = db.ref(`accounts/${userKey}/stats/${mode}`);
     statRef.transaction(current => {
@@ -147,7 +162,7 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime
   }
 }
 
-// 🛑 ADMIN VERİ SİLME YETKİLERİ
+// Admin İşlemleri
 function adminClearAllUsers() {
   if (confirm("Tüm kullanıcı hesaplarını silmek istediğinize emin misiniz?")) {
     db.ref("accounts").remove().then(() => alert("Kullanıcılar silindi."));
