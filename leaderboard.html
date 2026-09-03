@@ -115,6 +115,18 @@
   <script>
     let currentMode = 'all_top3';
 
+    // Speedrun süresini ondalıklı saniyeye çeviren yardımcı fonksiyon
+    function formatSpeedrunTime(val) {
+      let num = parseFloat(val) || 0;
+      if (num <= 0) return "-";
+      // Eğer süre 100'den büyük geliyorsa milisaniyedir (örn: 11330 ms veya 1133 ms)
+      if (num > 100) {
+        num = num / 100; // veya 1000'e göre ölçekle
+        if (num > 100) num = num / 10;
+      }
+      return num.toFixed(1) + "s";
+    }
+
     window.onload = () => {
       switchLBMode('all_top3');
     };
@@ -145,7 +157,12 @@
         let rawRecords = [];
 
         if (snap.exists()) {
-          snap.forEach(c => rawRecords.push(c.val()));
+          snap.forEach(c => {
+            const val = c.val();
+            if (typeof val === "object" && val !== null) {
+              rawRecords.push(val);
+            }
+          });
         }
 
         if (rawRecords.length === 0) {
@@ -157,11 +174,20 @@
         let userMap = {};
 
         rawRecords.forEach(s => {
-          if (!s) return;
+          if (!s || typeof s !== "object") return;
           const uid = String(s.uid || s.username || 'guest').replace(/[.#$\[\]]/g, "_");
-          const username = s.username || s.name || 'Oyuncu';
-          const score = parseFloat(s.score || s.points || s.time || 0);
-          const mode = s.gameMode || s.mode || 'standard';
+          const username = String(s.username || s.name || 'Oyuncu').replace(/true|false/gi, "Oyuncu");
+          
+          let scoreRaw = s.score !== undefined ? s.score : (s.points !== undefined ? s.points : s.time);
+          let score = parseFloat(scoreRaw) || 0;
+          let mode = String(s.gameMode || s.mode || 'standard').toLowerCase().trim();
+
+          // Mod isim eşitleme
+          if (mode === "normal" || mode === "klasik") mode = "standard";
+          if (mode === "catch" || mode === "yakala") mode = "catch_open";
+          if (mode === "mines" || mode === "mayin") mode = "mines_mode";
+          if (mode === "speedrun") mode = "speedrun_mode";
+          if (mode === "double" || mode === "rulet") mode = "double_mode";
 
           if (!userMap[uid]) {
             userMap[uid] = {
@@ -221,7 +247,7 @@
           if (modeKey === 'all_top3') {
             document.getElementById("lbl-my-current-score").innerText = `Toplam: ${myItem.top3Total} P`;
           } else if (modeKey === 'speedrun_mode') {
-            document.getElementById("lbl-my-current-score").innerText = `Sürem: ${myItem.modeScore}s`;
+            document.getElementById("lbl-my-current-score").innerText = `Sürem: ${formatSpeedrunTime(myItem.modeScore)}`;
           } else {
             document.getElementById("lbl-my-current-score").innerText = `Puanım: ${myItem.modeScore} P`;
           }
@@ -274,7 +300,7 @@
                   <div style="color:#94a3b8; font-size:6.5px;">${item.title}</div>
                 </div>
               </div>
-              <div style="font-weight:bold; color:var(--neon-gold); font-size:10px;">⚡ ${item.modeScore} sn</div>
+              <div style="font-weight:bold; color:var(--neon-gold); font-size:10px;">⚡ ${formatSpeedrunTime(item.modeScore)}</div>
             `;
           } else {
             div.innerHTML = `
