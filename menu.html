@@ -33,13 +33,20 @@
     }
 
     .modal-box-scroll { max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .poll-reaction-btn {
+      background: #1e293b; border: 1px solid #334155; border-radius: 12px;
+      padding: 3px 8px; font-size: 11px; cursor: pointer; color: #fff;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .poll-reaction-btn.voted {
+      background: #1d4ed8; border-color: #60a5fa; font-weight: bold;
+    }
   </style>
 </head>
 <body class="bg-standard">
   <div class="app-container" style="justify-content:space-between;">
     <div>
       <div class="top-header" style="align-items:flex-start;">
-        <!-- Sol: Kullanıcı Adı (Profilimize gider) -->
         <div class="app-title" style="cursor:pointer; margin-top:2px;" onclick="location.href='user.html'" title="Profilime Git">
           <span id="lbl-avatar">👤</span> <span id="lbl-username">Oyuncu</span>
         </div>
@@ -47,7 +54,7 @@
         <!-- Sağ: 2x2 Buton Grubu -->
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
           <a href="leaderboard.html" class="icon-btn" style="text-align:center; padding:3px 6px; font-size:9.5px; text-decoration:none;">🏆 Sıralama</a>
-          <button type="button" class="icon-btn" style="border-color:var(--neon-gold); padding:3px 6px; font-size:9.5px;" onclick="openModal('modal-announcements')">📢 Duyurular</button>
+          <button type="button" class="icon-btn" style="border-color:var(--neon-gold); padding:3px 6px; font-size:9.5px;" onclick="openAnnouncements()">📢 Duyurular</button>
           <button type="button" class="icon-btn" style="padding:3px 6px; font-size:9.5px;" onclick="openModal('modal-guide')">ℹ️ Rehber</button>
           <button type="button" class="icon-btn" style="border-color:#38bdf8; padding:3px 6px; font-size:9.5px;" onclick="openModal('modal-settings')">⚙️ Ayarlar</button>
         </div>
@@ -83,38 +90,30 @@
       <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:8px;">⚙️ Genel Ayarlar</div>
       
       <div class="modal-box-scroll">
-        <!-- Ses & Titreşim & Grafik -->
         <div style="background:#0f172a; padding:8px; border-radius:6px; border:1px solid #1e293b; display:flex; flex-direction:column; gap:6px;">
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px;">
             <span>🔊 Oyun İçi Sesler</span>
             <input type="checkbox" id="set-sound" onchange="toggleSoundSetting(this.checked)">
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px;">
-            <span>📳 Titreşim & Dokunsal Geri Bildirim</span>
-            <input type="checkbox" id="set-vibrate" checked>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px;">
-            <span>✨ Parlama & Efekt Kalitesi</span>
-            <select style="background:#030712; color:#fff; font-size:9px; padding:2px; border:1px solid #334155; border-radius:4px;">
-              <option value="high">Yüksek (Full FX)</option>
-              <option value="low">Düşük (Performans)</option>
-            </select>
+            <span>📳 Titreşim Geri Bildirimi</span>
+            <input type="checkbox" id="set-vibrate" checked onchange="triggerVibrate()">
           </div>
         </div>
 
-        <!-- Şifre Değiştirme (Facebook Tarzı) -->
-        <div style="background:#0f172a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
+        <!-- Normal Kullanıcılar İçin Şifre Değiştirme (Admin ise gizlenir) -->
+        <div id="user-password-change-box" style="background:#0f172a; padding:8px; border-radius:6px; border:1px solid #1e293b;">
           <div style="font-size:10px; font-weight:bold; color:#38bdf8; margin-bottom:4px;">🔑 Şifre Değiştir</div>
           <input type="password" id="pwd-current" class="input-field" style="margin-bottom:4px; font-size:10px; padding:5px;" placeholder="Mevcut Şifre">
           <input type="password" id="pwd-new" class="input-field" style="margin-bottom:4px; font-size:10px; padding:5px;" placeholder="Yeni Şifre">
           <button type="button" class="icon-btn" style="background:#16a34a; width:100%; justify-content:center; padding:5px; font-size:9px;" onclick="changePasswordUser()">Şifreyi Güncelle</button>
         </div>
 
-        <!-- ADMİNE ÖZEL: ÜYE YÖNETİMİ & SAHTE OYUNCU EKLEME -->
+        <!-- ADMİNE ÖZEL KONTROL ALANI -->
         <div id="admin-exclusive-panel" style="display:none; border:2px solid var(--danger); border-radius:8px; padding:8px; background:rgba(239, 68, 68, 0.08);">
-          <div style="font-size:11px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:6px;">🛡️ ADMIN KONTROLÜ</div>
+          <div style="font-size:11px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:6px;">🛑 ADMIN YÖNETİMİ</div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:6px;">
-            <button type="button" class="icon-btn" style="background:#3b82f6; justify-content:center; font-size:8.5px;" onclick="openModal('modal-admin-fake-user')">🤖 Sahte Üye Simülatörü</button>
+            <button type="button" class="icon-btn" style="background:#3b82f6; justify-content:center; font-size:8.5px;" onclick="openModal('modal-admin-fake-user')">🤖 Sahte Üye Yönetimi</button>
             <button type="button" class="icon-btn" style="background:#8b5cf6; justify-content:center; font-size:8.5px;" onclick="openMembersManager()">👥 Kayıtlı Üyeler</button>
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
@@ -130,54 +129,91 @@
     </div>
   </div>
 
-  <!-- ADMIN: SAHTE ÜYE EKLEME / SİMÜLASYON MODALI -->
+  <!-- ADMIN: GELİŞMİŞ SAHTE ÜYE YÖNETİMİ -->
   <div id="modal-admin-fake-user" class="modal-overlay">
     <div class="modal-card">
-      <div style="font-size:12px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">🤖 Sahte Oyuncu Ekle / Güncelle</div>
+      <div style="font-size:12px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">🤖 Sahte Oyuncu Ekle / Düzenle</div>
       <div class="modal-box-scroll">
-        <input type="text" id="fake-username" class="input-field" style="padding:6px; font-size:10px;" placeholder="Sahte Oyuncu Adı (Örn: ProHunter)">
-        <select id="fake-title" class="input-field" style="padding:6px; font-size:10px; background:#0f172a;">
-          <option value="Usta">⚔️ Kasa Ustası</option>
-          <option value="Efsane">🔥 Efsanevi Açıcı</option>
-          <option value="Kral">👑 Kasa Kralı</option>
-          <option value="Speedrunner">⚡ Speedrunner</option>
-        </select>
-        <select id="fake-avatar" class="input-field" style="padding:6px; font-size:10px; background:#0f172a;">
-          <option value="🦁">🦁 Aslan</option>
-          <option value="👑">👑 Kral Tacı</option>
-          <option value="🤖">🤖 Robot</option>
-          <option value="🔥">🔥 Alev</option>
-          <option value="⚡">⚡ Şimşek</option>
-        </select>
-        <select id="fake-mode" class="input-field" style="padding:6px; font-size:10px; background:#0f172a;">
+        <div style="display:flex; gap:4px;">
+          <input type="text" id="fake-username" class="input-field" style="flex:2; padding:6px; font-size:10px;" placeholder="Oyuncu Adı (Örn: ProHunter)">
+          <input type="text" id="fake-tag" class="input-field" style="flex:1; padding:6px; font-size:10px;" placeholder="#Etiket (#7777)">
+        </div>
+
+        <div style="display:flex; gap:4px;">
+          <select id="fake-avatar" class="input-field" style="flex:1; padding:6px; font-size:10px; background:#0f172a;">
+            <option value="👤">👤 Standart</option>
+            <option value="🦁">🦁 Aslan</option>
+            <option value="👑">👑 Kral</option>
+            <option value="🤖">🤖 Robot</option>
+            <option value="🔥">🔥 Alev</option>
+            <option value="⚡">⚡ Şimşek</option>
+          </select>
+          <select id="fake-title" class="input-field" style="flex:1; padding:6px; font-size:10px; background:#0f172a;">
+            <option value="Çaylak">🌱 Çaylak</option>
+            <option value="Usta">⚔️ Kasa Ustası</option>
+            <option value="Efsane">🔥 Efsanevi</option>
+            <option value="Kral">👑 Kasa Kralı</option>
+          </select>
+        </div>
+
+        <label style="font-size:8px; color:#94a3b8; font-weight:bold;">MOD VE DEĞER SEÇİMİ</label>
+        <select id="fake-mode" class="input-field" style="padding:6px; font-size:10px; background:#0f172a;" onchange="updateFakeTierSelection()">
           <option value="standard">⚔️ Normal Kasa</option>
           <option value="catch_open">🎯 Yakala & Aç</option>
           <option value="mines_mode">💣 Mayın Tarlası</option>
           <option value="speedrun_mode">⚡ Speedrun (Süre)</option>
           <option value="double_mode">🎰 Çift Rulet</option>
         </select>
-        <input type="number" id="fake-score" class="input-field" style="padding:6px; font-size:10px;" placeholder="Puan (Speedrun ise saniye girin, örn: 14.5)">
-        <button type="button" class="btn-start" style="background:#16a34a; padding:7px; font-size:10px;" onclick="submitFakeUser()">✅ Sahte Üye Skorunu Tabloya İşle</button>
+
+        <div id="fake-tier-container" style="background:#070d1e; padding:6px; border-radius:6px; font-size:8.5px;"></div>
+
+        <input type="number" id="fake-score" class="input-field" style="padding:6px; font-size:10px;" placeholder="Puan (Speedrun ise saniye girin, örn: 12.4)">
+
+        <button type="button" class="btn-start" style="background:#16a34a; padding:7px; font-size:10px;" onclick="submitFakeUser()">💾 Sahte Üyeyi Sıralamaya Ekle / Güncelle</button>
       </div>
       <button type="button" class="btn-close" style="margin-top:6px;" onclick="closeModal('modal-admin-fake-user')">Geri</button>
     </div>
   </div>
 
-  <!-- ADMIN: KAYITLI ÜYELER VE ŞİFRE SIFIRLAMA MODALI -->
+  <!-- ADMIN: KAYITLI ÜYELER (ŞİFRE GÖRÜNTÜLEME VE DETAYLAR) -->
   <div id="modal-admin-members" class="modal-overlay">
     <div class="modal-card" style="max-width:360px;">
-      <div style="font-size:12px; font-weight:bold; color:#38bdf8; text-align:center; margin-bottom:6px;">👥 Kayıtlı Üyeler Yönetimi</div>
+      <div style="font-size:12px; font-weight:bold; color:#38bdf8; text-align:center; margin-bottom:6px;">👥 Kayıtlı Üyeler</div>
       <div id="admin-members-list" class="modal-box-scroll"></div>
       <button type="button" class="btn-close" style="margin-top:6px;" onclick="closeModal('modal-admin-members')">Kapat</button>
     </div>
   </div>
 
-  <!-- DUYURULAR MODALI -->
+  <!-- DUYURULAR VE OYLAMA MODALI -->
   <div id="modal-announcements" class="modal-overlay">
     <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">📢 Duyurular</div>
-      <div id="announcements-feed" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
-      <button type="button" class="btn-close" onclick="closeModal('modal-announcements')">Kapat</button>
+      <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">📢 Duyurular & Oylama</div>
+      
+      <!-- Sadece Admin Görebileceği Yayın Formu -->
+      <div id="admin-broadcast-area" style="display:none; border:1px solid var(--neon-purple); padding:6px; border-radius:6px; margin-bottom:8px;">
+        <div style="display:flex; gap:4px; margin-bottom:4px;">
+          <button type="button" class="icon-btn" id="btn-tab-ann" style="flex:1; background:#3b82f6; font-size:8.5px;" onclick="switchBroadcastType('ann')">📢 Duyuru Yap</button>
+          <button type="button" class="icon-btn" id="btn-tab-poll" style="flex:1; background:#1e293b; font-size:8.5px;" onclick="switchBroadcastType('poll')">🗳️ Oylama Başlat</button>
+        </div>
+
+        <textarea id="in-announce-txt" class="input-field" style="width:100%; height:45px; font-size:10px; resize:none;" placeholder="Duyuru veya Oylama Sorusu yazın..."></textarea>
+
+        <div id="poll-emojis-selector" style="display:none; margin:4px 0;">
+          <div style="font-size:8px; color:#94a3b8; margin-bottom:2px;">Tepki Emojilerini Seç:</div>
+          <div style="display:flex; gap:4px;">
+            <label><input type="checkbox" value="👍" class="chk-poll-emoji" checked> 👍</label>
+            <label><input type="checkbox" value="👎" class="chk-poll-emoji" checked> 👎</label>
+            <label><input type="checkbox" value="❤️" class="chk-poll-emoji"> ❤️</label>
+            <label><input type="checkbox" value="🔥" class="chk-poll-emoji"> 🔥</label>
+            <label><input type="checkbox" value="🎉" class="chk-poll-emoji"> 🎉</label>
+          </div>
+        </div>
+
+        <button type="button" class="btn-start" style="background:#16a34a; padding:6px; font-size:9.5px; margin-top:4px;" onclick="publishPost()">🚀 Yayınla</button>
+      </div>
+
+      <div id="announcements-feed" style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
+      <button type="button" class="btn-close" style="margin-top:6px;" onclick="closeModal('modal-announcements')">Kapat</button>
     </div>
   </div>
 
@@ -187,22 +223,22 @@
       <div style="font-size:13px; font-weight:bold; color:var(--neon-blue); text-align:center; margin-bottom:6px;">ℹ️ Kapsamlı Mod Rehberi</div>
       <div style="font-size:9.5px; color:#cbd5e1; line-height:1.6; max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
         <div style="background:#070d1e; padding:5px; border-radius:4px; border-left:3px solid #38bdf8;">
-          <b style="color:#38bdf8;">⚔️ Normal Kasa:</b> 30 saniye boyunca rulet tarzında kutu açarsınız. Godly eşya (%0.2) 500-1000 puan kazandırır!
+          <b style="color:#38bdf8;">⚔️ Normal Kasa:</b> 30 saniyelik klasik kasa açma modudur. Godly eşya (%0.2) 500-1000 puan verir.
         </div>
         <div style="background:#070d1e; padding:5px; border-radius:4px; border-left:3px solid #c084fc;">
-          <b style="color:#c084fc;">🎯 Yakala & Aç:</b> 20 saniye boyunca ekrandan aşağı süzülen kutulara tıklayarak toplarsınız.
+          <b style="color:#c084fc;">🎯 Yakala & Aç:</b> 20 saniye boyunca ekrandan süzülen kutulara tıklayarak puan toplarsınız.
         </div>
         <div style="background:#070d1e; padding:5px; border-radius:4px; border-left:3px solid #f87171;">
-          <b style="color:#f87171;">💣 Mayın Tarlası:</b> 9 kutudan 1'inde bomba saklıdır. Her açtığınız kutuda puan katlanır. Bombaya basmadan "Puanı Al ve Çık" derseniz kazanırsınız!
+          <b style="color:#f87171;">💣 Mayın Tarlası:</b> 9 kutudan 1'inde bomba saklıdır. Bomba patlamadan önce "Puanı Al ve Çık" diyerek çekilin.
         </div>
         <div style="background:#070d1e; padding:5px; border-radius:4px; border-left:3px solid #fb923c;">
-          <b style="color:#fb923c;">⚡ 1000P Speedrun:</b> Süre kısıtlaması yok; amaç en hızlı şekilde 1000 puana ulaşmaktır. En kısa saniyede bitiren 1. olur.
+          <b style="color:#fb923c;">⚡ 1000P Speedrun:</b> Süre kısıtlaması yok; amaç en kısa sürede 1000 puana ulaşmaktır.
         </div>
         <div style="background:#070d1e; padding:5px; border-radius:4px; border-left:3px solid #a855f7;">
-          <b style="color:#a855f7;">🎰 Çift Rulet:</b> İki ayrı çark döner: Soldaki eşyayı, sağdaki ise x1'den x10'a kadar çarpanı belirler.
+          <b style="color:#a855f7;">🎰 Çift Rulet:</b> İki çark döner; soldaki eşyayı, sağdaki x1-x10 arası puan katlayıcı çarpanı belirler.
         </div>
         <div style="background:#070d1e; padding:5px; border-radius:4px; border-left:3px solid #10b981;">
-          <b style="color:#10b981;">🌾 Kasa Çiftliği:</b> Ekin ekin, hayvan besleyin, mahsulleri pazarda bozdurarak altın biriktirin.
+          <b style="color:#10b981;">🌾 Kasa Çiftliği:</b> Ekin ekin, hasat toplayın ve pazarda altına dönüştürün.
         </div>
       </div>
       <button type="button" class="btn-close" onclick="closeModal('modal-guide')">Kapat</button>
@@ -212,6 +248,7 @@
   <script src="app.js"></script>
   <script>
     let targetPage = 'normal.html';
+    let currentBroadcastType = 'ann';
 
     const MODE_RATES = {
       standard: { bg: "bg-standard", title: "NORMAL KASA", tiers: [{name:"Classic (%58)",pts:"1-3P",c:"#fff"},{name:"Super (%29)",pts:"4-10P",c:"#38bdf8"},{name:"Ultra (%10)",pts:"12-30P",c:"#c084fc"},{name:"Omega (%2.8)",pts:"35-120P",c:"#fb923c"},{name:"Godly (%0.2)",pts:"500-1000P",c:"#f43f5e"}] },
@@ -231,12 +268,13 @@
       document.getElementById("lbl-username").innerText = showName;
       document.getElementById("set-sound").checked = u.sound !== false;
 
-      // Admin Kontrolü
-      if (u.isAdmin || showName.toLowerCase() === "admin") {
-        const adm = document.getElementById("admin-exclusive-panel");
-        if (adm) adm.style.display = "block";
+      const isAdmin = u.isAdmin || showName.toLowerCase() === "admin";
+      if (isAdmin) {
+        document.getElementById("admin-exclusive-panel").style.display = "block";
+        document.getElementById("user-password-change-box").style.display = "none";
       }
 
+      updateFakeTierSelection();
       renderRates('standard');
     };
 
@@ -264,6 +302,10 @@
 
     function launchGame() { window.location.href = targetPage; }
 
+    function triggerVibrate() {
+      if (navigator.vibrate) navigator.vibrate(40);
+    }
+
     function toggleSoundSetting(val) {
       let u = getActiveUser();
       u.sound = val;
@@ -273,16 +315,15 @@
     function changePasswordUser() {
       const cur = document.getElementById("pwd-current").value.trim();
       const nw = document.getElementById("pwd-new").value.trim();
-      if (!cur || !nw) return alert("Lütfen mevcut ve yeni şifrenizi girin!");
+      if (!cur || !nw) return alert("Mevcut ve yeni şifrenizi girin!");
 
       const u = getActiveUser();
       const uKey = String(u.username).toLowerCase();
 
       db.ref("accounts/" + uKey).once("value").then(snap => {
         const d = snap.val() || {};
-        if (d.password && d.password !== cur) {
-          return alert("Mevcut şifreniz hatalı!");
-        }
+        if (d.password && d.password !== cur) return alert("Mevcut şifreniz hatalı!");
+
         db.ref("accounts/" + uKey).update({ password: nw }).then(() => {
           alert("Şifreniz başarıyla değiştirildi!");
           document.getElementById("pwd-current").value = "";
@@ -291,55 +332,71 @@
       });
     }
 
-    // SAHTE OYUNCU SİMÜLASYONU
-    function submitFakeUser() {
-      const fName = document.getElementById("fake-username").value.trim();
-      const fTitle = document.getElementById("fake-title").value;
-      const fAvatar = document.getElementById("fake-avatar").value;
-      const fMode = document.getElementById("fake-mode").value;
-      const fScore = parseFloat(document.getElementById("fake-score").value) || 0;
+    // SAHTE ÜYE İÇİN ÖĞE SEÇİM ARAYÜZÜ
+    function updateFakeTierSelection() {
+      const mode = document.getElementById("fake-mode").value;
+      const box = document.getElementById("fake-tier-container");
+      const info = MODE_RATES[mode] || MODE_RATES['standard'];
 
-      if (!fName || fScore <= 0) return alert("Geçerli bir sahte isim ve puan girin!");
-      const fakeKey = "fake_" + fName.toLowerCase().replace(/[^a-z0-9_]/gi, "");
+      let html = `<div style="font-weight:bold; color:var(--neon-gold); margin-bottom:3px;">Mümkün Eşya Değerleri:</div>`;
+      info.tiers.forEach(t => {
+        html += `<div style="color:${t.c}; display:flex; justify-content:space-between;"><span>${t.name}</span><b>${t.pts}</b></div>`;
+      });
+      box.innerHTML = html;
+    }
+
+    function submitFakeUser() {
+      const name = document.getElementById("fake-username").value.trim();
+      const tag = document.getElementById("fake-tag").value.trim() || "#" + Math.floor(1000 + Math.random() * 9000);
+      const avatar = document.getElementById("fake-avatar").value;
+      const title = document.getElementById("fake-title").value;
+      const mode = document.getElementById("fake-mode").value;
+      const score = parseFloat(document.getElementById("fake-score").value) || 0;
+
+      if (!name || score <= 0) return alert("İsim ve puan alanlarını doldurun!");
+      const fakeKey = "fake_" + name.toLowerCase().replace(/[^a-z0-9_]/gi, "");
 
       const now = new Date();
-      const dateStr = `${now.toLocaleDateString("tr-TR")} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+      const days = ["Paz","Pzt","Sal","Çar","Per","Cum","Cts"];
+      const dateStr = `${days[now.getDay()]} ${now.toLocaleDateString("tr-TR")} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
-      // Sahte hesabı accounts tablosuna kaydet/güncelle
+      // Accounts altına tam profil olarak yaz
       db.ref("accounts/" + fakeKey).set({
         username: fakeKey,
-        displayName: fName,
-        avatar: fAvatar,
-        title: fTitle,
+        displayName: `${name} ${tag}`,
+        avatar: avatar,
+        title: title,
+        password: "fake_user_pwd",
         isFake: true,
+        createdAt: Date.now(),
         stats: {
-          [fMode]: {
-            played: Math.floor(Math.random() * 20) + 5,
-            wins: Math.floor(Math.random() * 10) + 3,
-            bestScore: fMode === "speedrun_mode" ? 0 : fScore,
-            bestTime: fMode === "speedrun_mode" ? fScore : 9999
+          [mode]: {
+            played: Math.floor(Math.random() * 25) + 5,
+            wins: Math.floor(Math.random() * 12) + 2,
+            bestScore: mode === "speedrun_mode" ? 0 : score,
+            bestTime: mode === "speedrun_mode" ? score : 9999
           }
         }
       });
 
-      // Liderlik tablosuna gerçekçi kayıt bas
-      db.ref(`leaderboards/${fMode}/${fakeKey}`).set({
+      // Liderlik tablosuna ekle
+      db.ref(`leaderboards/${mode}/${fakeKey}`).set({
         username: fakeKey,
-        displayName: fName,
-        avatar: fAvatar,
-        title: fTitle,
-        score: fScore,
-        time: fScore,
-        drops: [{ tier: "Godly", item: "Simüle Edilmiş Hazine", pts: fScore, c: "#f43f5e" }],
+        displayName: `${name} ${tag}`,
+        avatar: avatar,
+        title: title,
+        score: score,
+        time: score,
+        drops: [{ tier: "Özel Sandık", item: "Simüle Edilmiş Parça", pts: score, c: "#fbbf24" }],
         date: dateStr,
         timestamp: Date.now()
       }).then(() => {
-        alert("Sahte oyuncu başarıyla sıralamaya ve veritabanına eklendi!");
+        alert("Sahte üye başarıyla tabloya işlendi!");
         closeModal('modal-admin-fake-user');
       });
     }
 
-    // KAYITLI ÜYELERİ LİSTELEME VE ŞİFREYİ 12345 YAPMA
+    // KAYITLI ÜYELER YÖNETİMİ
     function openMembersManager() {
       const listEl = document.getElementById("admin-members-list");
       listEl.innerHTML = "<div style='color:#888; font-size:9px; text-align:center;'>Yükleniyor...</div>";
@@ -347,58 +404,175 @@
 
       db.ref("accounts").once("value", snap => {
         listEl.innerHTML = "";
-        if (!snap.exists()) {
-          listEl.innerHTML = "<div style='color:#888; font-size:9px;'>Kullanıcı bulunamadı.</div>";
-          return;
-        }
+        if (!snap.exists()) return listEl.innerHTML = "<div style='color:#888; font-size:9px;'>Kullanıcı bulunamadı.</div>";
 
         snap.forEach(c => {
           const acc = c.val();
           const uname = c.key;
-          const disp = acc.displayName || acc.username || uname;
+          const disp = acc.displayName || uname;
           const pass = acc.password || "Bilinmiyor";
 
-          const card = document.createElement("div");
-          card.style.background = "#070d1e";
-          card.style.border = "1px solid #1e293b";
-          card.style.borderRadius = "6px";
-          card.style.padding = "6px";
-          card.style.display = "flex";
-          card.style.flexDirection = "column";
-          card.style.gap = "4px";
+          const div = document.createElement("div");
+          div.style.background = "#070d1e";
+          div.style.border = "1px solid #1e293b";
+          div.style.borderRadius = "6px";
+          div.style.padding = "6px";
+          div.style.display = "flex";
+          div.style.flexDirection = "column";
+          div.style.gap = "4px";
 
-          card.innerHTML = `
+          div.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span style="font-size:11px; font-weight:bold; color:#38bdf8;">${acc.avatar || '👤'} ${disp}</span>
-              <span style="font-size:8px; color:#94a3b8;">Şifre: <b style="color:#fbbf24;">${pass}</b></span>
+              <span style="font-size:8.5px; color:#94a3b8;">Şifre: <b style="color:#fbbf24;">${pass}</b></span>
             </div>
-            <div style="display:flex; gap:4px; margin-top:2px;">
+            <div style="display:flex; gap:3px;">
               <button type="button" class="icon-btn" style="flex:1; background:#0284c7; font-size:8px; padding:3px; justify-content:center;" onclick="adminResetPassword('${uname}')">🔑 Şifreyi 12345 Yap</button>
+              ${acc.isFake ? `<button type="button" class="icon-btn" style="background:#ca8a04; font-size:8px; padding:3px; justify-content:center;" onclick="editFakeUserPreset('${uname}', '${disp}')">✏️ Düzenle</button>` : ''}
               <button type="button" class="icon-btn" style="background:#7f1d1d; border-color:var(--danger); font-size:8px; padding:3px; justify-content:center;" onclick="adminDeleteSpecificUser('${uname}')">🗑️ Sil</button>
             </div>
           `;
-          listEl.appendChild(card);
+          listEl.appendChild(div);
         });
       });
     }
 
+    function editFakeUserPreset(uname, disp) {
+      closeModal('modal-admin-members');
+      openModal('modal-admin-fake-user');
+      const parts = disp.split(" ");
+      document.getElementById("fake-username").value = parts[0] || "";
+      document.getElementById("fake-tag").value = parts[1] || "";
+    }
+
     function adminResetPassword(uname) {
-      if (confirm(`@${uname} kullanıcısının şifresi '12345' olarak sıfırlansın mı?`)) {
+      if (confirm(`@${uname} kullanıcısının şifresi '12345' yapılsın mı?`)) {
         db.ref("accounts/" + uname).update({ password: "12345" }).then(() => {
-          alert(`@${uname} şifresi 12345 olarak güncellendi.`);
+          alert(`@${uname} şifresi 12345 yapıldı.`);
           openMembersManager();
         });
       }
     }
 
     function adminDeleteSpecificUser(uname) {
-      if (confirm(`@${uname} kullanıcısı ve tüm verileri tamamen silinsin mi?`)) {
+      if (confirm(`@${uname} kullanıcısı ve tüm verileri silinsin mi?`)) {
         db.ref("accounts/" + uname).remove();
         const modes = ['standard', 'catch_open', 'mines_mode', 'speedrun_mode', 'double_mode'];
         modes.forEach(m => db.ref(`leaderboards/${m}/${uname}`).remove());
         alert("Kullanıcı silindi.");
         openMembersManager();
       }
+    }
+
+    // DUYURU & EMOJİLİ OYLAMA YÖNETİMİ
+    function openAnnouncements() {
+      const u = getActiveUser();
+      const isAdmin = u && (u.isAdmin || (u.displayName || u.username).toLowerCase() === "admin");
+      document.getElementById("admin-broadcast-area").style.display = isAdmin ? "block" : "none";
+      openModal('modal-announcements');
+      loadAnnouncements();
+    }
+
+    function switchBroadcastType(t) {
+      currentBroadcastType = t;
+      document.getElementById("btn-tab-ann").style.background = t === 'ann' ? "#3b82f6" : "#1e293b";
+      document.getElementById("btn-tab-poll").style.background = t === 'poll' ? "#3b82f6" : "#1e293b";
+      document.getElementById("poll-emojis-selector").style.display = t === 'poll' ? "block" : "none";
+    }
+
+    function publishPost() {
+      const text = document.getElementById("in-announce-txt").value.trim();
+      if (!text) return alert("Bir mesaj metni girin!");
+
+      const u = getActiveUser();
+      const now = new Date();
+      const days = ["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+      const timeStr = `${days[now.getDay()]} ${now.toLocaleDateString("tr-TR")} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+      let postData = {
+        author: u.displayName || u.username,
+        text: text,
+        date: timeStr,
+        isPoll: currentBroadcastType === 'poll',
+        timestamp: Date.now()
+      };
+
+      if (currentBroadcastType === 'poll') {
+        const selectedEmojis = [];
+        document.querySelectorAll(".chk-poll-emoji:checked").forEach(cb => selectedEmojis.push(cb.value));
+        if (selectedEmojis.length === 0) selectedEmojis.push("👍", "👎");
+        postData.emojis = selectedEmojis;
+      }
+
+      db.ref("announcements").push(postData).then(() => {
+        document.getElementById("in-announce-txt").value = "";
+        alert("Yayınlandı!");
+      });
+    }
+
+    function loadAnnouncements() {
+      const feed = document.getElementById("announcements-feed");
+      const u = getActiveUser();
+      const myKey = u ? String(u.username).toLowerCase() : "";
+
+      db.ref("announcements").on("value", snap => {
+        feed.innerHTML = "";
+        if (!snap.exists()) return feed.innerHTML = "<div style='color:#888; font-size:9px; text-align:center;'>Duyuru yok.</div>";
+
+        snap.forEach(c => {
+          const item = c.val();
+          const pId = c.key;
+          const votes = item.reactions || {};
+
+          let reactionButtons = "";
+          if (item.isPoll && item.emojis) {
+            reactionButtons = `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">`;
+            item.emojis.forEach(emo => {
+              const emoVoters = votes[emo] || {};
+              const count = Object.keys(emoVoters).length;
+              const hasVoted = !!emoVoters[myKey];
+
+              reactionButtons += `
+                <button type="button" class="poll-reaction-btn ${hasVoted ? 'voted' : ''}" onclick="toggleReaction('${pId}', '${emo}')">
+                  <span>${emo}</span> <b>${count}</b>
+                </button>
+              `;
+            });
+            reactionButtons += `</div>`;
+          }
+
+          const card = document.createElement("div");
+          card.style.background = "#070d1e";
+          card.style.border = "1px solid #1e293b";
+          card.style.borderRadius = "6px";
+          card.style.padding = "6px 8px";
+
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:8.5px; margin-bottom:2px;">
+              <span style="color:var(--danger); font-weight:bold;">🛡️ Admin</span>
+              <span style="color:#94a3b8;">${item.date}</span>
+            </div>
+            <div style="font-size:10.5px; color:#fff; line-height:1.4;">${item.text}</div>
+            ${reactionButtons}
+          `;
+          feed.prepend(card);
+        });
+      });
+    }
+
+    function toggleReaction(postId, emoji) {
+      const u = getActiveUser();
+      if (!u) return;
+      const myKey = String(u.username).toLowerCase();
+      const voteRef = db.ref(`announcements/${postId}/reactions/${emoji}/${myKey}`);
+
+      voteRef.once("value").then(s => {
+        if (s.exists()) {
+          voteRef.remove(); // Tekrar basarsa tepkiyi geri çeker
+        } else {
+          voteRef.set(true); // Tepkiyi ekler
+        }
+      });
     }
 
     function logout() {
