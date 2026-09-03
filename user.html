@@ -45,7 +45,6 @@
     .user-content::-webkit-scrollbar { width: 3px; }
     .user-content::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
 
-    /* Profil Kartı */
     .profile-card {
       background: linear-gradient(135deg, #1e1b4b, #0f172a);
       border: 1px solid #334155;
@@ -230,6 +229,33 @@
         </div>
       </div>
 
+      <!-- En İyi Rekorlar & Skorlar -->
+      <div>
+        <div class="stat-section-title">🏆 En İyi Skorların & Rekorların</div>
+        <div class="stat-grid">
+          <div class="stat-card stat-box">
+            <span style="font-size:7.5px; color:#94a3b8;">⚔️ Normal Kasa:</span>
+            <b style="font-size:11px; color:#38bdf8;" id="rec-norm">0 P</b>
+          </div>
+          <div class="stat-card stat-box">
+            <span style="font-size:7.5px; color:#94a3b8;">🎯 Yakala & Aç:</span>
+            <b style="font-size:11px; color:#c084fc;" id="rec-catch">0 P</b>
+          </div>
+          <div class="stat-card stat-box">
+            <span style="font-size:7.5px; color:#94a3b8;">💣 Mayın Tarlası:</span>
+            <b style="font-size:11px; color:#f87171;" id="rec-mines">0 P</b>
+          </div>
+          <div class="stat-card stat-box">
+            <span style="font-size:7.5px; color:#94a3b8;">🎰 Çift Rulet:</span>
+            <b style="font-size:11px; color:#34d399;" id="rec-double">0 P</b>
+          </div>
+          <div class="stat-card stat-box" style="grid-column: span 2;">
+            <span style="font-size:7.5px; color:#94a3b8;">⚡ Speedrun En İyi Süre:</span>
+            <b style="font-size:12px; color:var(--neon-gold);" id="rec-speed">-</b>
+          </div>
+        </div>
+      </div>
+
       <!-- Bütün Modların Oynama Sayıları -->
       <div>
         <div class="stat-section-title">🎮 Bütün Modların Oynama Sayıları</div>
@@ -350,7 +376,7 @@
       document.getElementById("set-sound").checked = u.sound !== false;
 
       renderAvatarGrid();
-      loadUserStats(u);
+      loadUserRecordsAndStats(u);
     }
 
     function renderAvatarGrid() {
@@ -368,7 +394,18 @@
       });
     }
 
-    function loadUserStats(u) {
+    function loadUserRecordsAndStats(u) {
+      // 1. En İyi Skorları Yerelden Oku
+      try {
+        const local = JSON.parse(localStorage.getItem("kutu_local_scores")) || {};
+        document.getElementById("rec-norm").innerText = (local["standard"] || 0) + " P";
+        document.getElementById("rec-catch").innerText = (local["catch_open"] || 0) + " P";
+        document.getElementById("rec-mines").innerText = (local["mines_mode"] || 0) + " P";
+        document.getElementById("rec-double").innerText = (local["double_mode"] || 0) + " P";
+        document.getElementById("rec-speed").innerText = local["speedrun_mode"] ? parseFloat(local["speedrun_mode"]).toFixed(1) + " sn" : "-";
+      } catch (e) {}
+
+      // 2. Firebase'den Gerçek İstatistikleri Oku
       if (!db || !u.uid) return;
 
       const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
@@ -388,14 +425,14 @@
         // Toplam Oynama
         document.getElementById("st-total-all-played").innerText = `${totalAll} Maç`;
 
-        // Modların Tek Tek Oynanma Sayıları
+        // Modların Oynanma Sayıları
         document.getElementById("cnt-standard").innerText = `${stdPlayed} Oynama`;
         document.getElementById("cnt-catch").innerText = `${catchPlayed} Oynama`;
         document.getElementById("cnt-mines").innerText = `${minesPlayed} Oynama`;
         document.getElementById("cnt-speedrun").innerText = `${speedrunPlayed} Oynama`;
         document.getElementById("cnt-double").innerText = `${doublePlayed} Oynama`;
 
-        // Mayın Tarlası Oynama / Kazanma ve Oran
+        // Mayın Tarlası Oranı
         const winRate = minesPlayed > 0 ? Math.round((minesWins / minesPlayed) * 100) : 0;
         document.getElementById("st-mines-record").innerText = `${minesPlayed} / ${minesWins}`;
         document.getElementById("st-mines-rate").innerText = `%${winRate}`;
@@ -427,6 +464,19 @@
       if (confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
         localStorage.removeItem("kutu_active_session");
         localStorage.removeItem("kutu_active_user");
+        location.href = "index.html";
+      }
+    }
+
+    function deleteAccountPermanently() {
+      if (confirm("DİKKAT! Hesabınız ve tüm verileriniz kalıcı olarak silinecek. Emin misiniz?")) {
+        let u = getActiveUser();
+        if (db && u && u.uid) {
+          const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+          db.ref(`users/${cleanUID}`).remove();
+        }
+        localStorage.clear();
+        alert("Hesabınız silindi.");
         location.href = "index.html";
       }
     }
