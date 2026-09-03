@@ -1,4 +1,4 @@
-// 1. FIREBASE BAŞLATMA (ORİJİNAL ÇALIŞAN HALİ)
+// 1. FIREBASE BAŞLATMA
 const firebaseConfig = {
   apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
   authDomain: "kutu-acma-pro.firebaseapp.com",
@@ -22,7 +22,7 @@ const AVATAR_LIST = [
   "🌾", "🧑‍🌾", "🐔", "🐮", "🪙", "⚔️", "🛡️", "🎯"
 ];
 
-// 2. KULLANICI BİLGİSİ
+// 2. KULLANICI BİLGİLERİ
 function getActiveUser() {
   const sessionData = localStorage.getItem("kutu_active_session") || localStorage.getItem("kutu_active_user");
   if (!sessionData) {
@@ -58,81 +58,104 @@ function setActiveUser(u) {
       title: u.title || "Çaylak",
       sound: u.sound !== false,
       lastOnline: Date.now()
-    }).catch(e => console.warn("User update hatası:", e));
+    }).catch(e => console.warn("User update:", e));
   }
 }
 
-// 3. OYUNLARIN ÇAĞIRDIĞI RECORDGAMESCORE FONKSİYONU
+// 3. İLK VERSİYONUN ORİJİNAL SKOR MOTORU (LEADERBOARDS TABLOSUNA DOĞRUDAN YAZAR)
 function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin) {
-  saveScore(gameMode, scoreVal);
-}
-
-// 4. SKOR KAYDETME MOTORU (HEM LOCAL HEM FIREBASE)
-function saveScore(rawMode, scoreVal) {
   let u = getActiveUser();
   if (!u) return;
 
-  let mode = String(rawMode).toLowerCase().trim();
+  // Mod adını orijinal formata eşitle
+  let mode = String(gameMode).toLowerCase().trim();
   if (mode === "normal" || mode === "klasik") mode = "standard";
   if (mode === "catch" || mode === "yakala") mode = "catch_open";
   if (mode === "mines" || mode === "mayin") mode = "mines_mode";
   if (mode === "speedrun") mode = "speedrun_mode";
   if (mode === "double" || mode === "rulet") mode = "double_mode";
 
-  const numScore = parseFloat(scoreVal) || 0;
-  if (numScore <= 0 && mode !== "speedrun_mode") return;
+  let numVal = parseFloat(scoreVal) || 0;
+
+  // Speedrun için süreyi saniyeye çevir (örn: 1133ms -> 11.3s)
+  let speedrunSeconds = numVal;
+  if (mode === "speedrun_mode" && speedrunSeconds > 100) {
+    speedrunSeconds = parseFloat((speedrunSeconds / 1000).toFixed(1));
+  }
 
   const cleanUID = String(u.uid || u.name).replace(/[.#$\[\]]/g, "_");
-  const recordKey = `${cleanUID}_${mode}`;
+  const fullName = `${u.name}${u.tag || ""}`;
 
-  const scorePayload = {
+  const recordPayload = {
     uid: cleanUID,
-    username: `${u.name}${u.tag || ""}`,
+    fullName: fullName,
+    username: fullName,
     name: u.name,
     avatar: u.avatar || "👤",
     title: u.title || "Çaylak",
+    modeName: modeTitle || mode,
     gameMode: mode,
-    mode: mode,
-    score: numScore,
-    points: numScore,
-    time: numScore,
-    timestamp: Date.now(),
-    date: new Date().toLocaleDateString("tr-TR")
+    score: numVal,
+    points: numVal,
+    time: mode === "speedrun_mode" ? speedrunSeconds : numVal,
+    drops: drops || [],
+    isWin: isWin !== undefined ? isWin : true,
+    date: new Date().toLocaleDateString("tr-TR"),
+    timestamp: Date.now()
   };
 
-  // Localstorage kaydı
+  // 1. LocalStorage Yedekleme
   try {
     let localScores = JSON.parse(localStorage.getItem("kutu_local_scores")) || {};
     if (mode === "speedrun_mode") {
-      if (!localScores[mode] || numScore < localScores[mode]) localScores[mode] = numScore;
+      if (!localScores[mode] || speedrunSeconds < localScores[mode]) localScores[mode] = speedrunSeconds;
     } else {
-      if (!localScores[mode] || numScore > localScores[mode]) localScores[mode] = numScore;
+      if (!localScores[mode] || numVal > localScores[mode]) localScores[mode] = numVal;
     }
     localStorage.setItem("kutu_local_scores", JSON.stringify(localScores));
   } catch (e) {}
 
-  // Firebase Veritabanına Anında Kaydet
+  // 2. Kullanıcının Kendi İstatistiklerini Güncelle (Oyun/Kazanma/Kaybetme)
   if (db) {
-    const targetRef = db.ref("game_scores/" + recordKey);
-    targetRef.once("value").then(snap => {
-      let shouldSave = true;
+    const userStatRef = db.ref(`users/${cleanUID}/stats/${mode}`);
+    userStatRef.once("value").then(s => {
+      const st = s.val() || { played: 0, wins: 0, losses: 0 };
+      st.played = (st.played || 0) + 1;
+      if (isWin === false) {
+        st.losses = (st.losses || 0) + 1;
+      } else {
+        st.wins = (st.wins || 0) + 1;
+      }
+      userStatRef.set(st);
+    }).catch(() => {});
+
+    // 3. Sıralama Tablosuna (leaderboards/{mode}/{uid}) Yaz
+    const lbRef = db.ref(`leaderboards/${mode}/${cleanUID}`);
+    lbRef.once("value").then(snap => {
+      let shouldUpdate = true;
       if (snap.exists()) {
-        const oldScore = parseFloat(snap.val().score || snap.val().points || snap.val().time || 0);
+        const old = snap.val();
         if (mode === "speedrun_mode") {
-          shouldSave = oldScore <= 0 || numScore < oldScore;
+          const oldTime = parseFloat(old.time) || 9999;
+          shouldUpdate = speedrunSeconds < oldTime;
         } else {
-          shouldSave = numScore > oldScore;
+          const oldScore = parseFloat(old.score || old.points) || 0;
+          shouldUpdate = numVal > oldScore;
         }
       }
 
-      if (shouldSave) {
-        targetRef.set(scorePayload);
-        db.ref("scores/" + recordKey).set(scorePayload);
+      if (shouldUpdate) {
+        lbRef.set(recordPayload);
+        // Yedek tablolara da aynı anda yaz
+        db.ref(`game_scores/${cleanUID}_${mode}`).set(recordPayload).catch(() => {});
       }
-    }).catch(err => {
-      console.error("Firebase kayıt hatası:", err);
-    });
+    }).catch(err => console.error("Skor kayıt hatası:", err));
   }
+}
+
+// Eski çağrılar için köprü fonksiyon
+function saveScore(rawMode, scoreVal) {
+  recordGameScore(rawMode, rawMode, scoreVal, [], true);
 }
 
 function updateAvatarGlobal(newAvatar) {
