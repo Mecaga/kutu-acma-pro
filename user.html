@@ -22,13 +22,13 @@
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .stat-box { background: #0b1329; border: 1px solid #1e293b; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
 
-    /* Kayar Çekmece */
     .settings-drawer { position: absolute; top: 0; right: -100%; width: 82%; max-width: 350px; height: 100%; background: #090d1a; border-left: 2px solid #334155; z-index: 300; display: flex; flex-direction: column; transition: right 0.28s ease; }
     .settings-drawer.active { right: 0; }
     .drawer-backdrop { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 200; }
     .drawer-backdrop.active { display: block; }
     .drawer-header { padding: 12px; background: #050814; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
     .drawer-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    
     .avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; background: #030712; padding: 6px; border-radius: 6px; }
     .avatar-cell { font-size: 18px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; text-align: center; padding: 3px 0; cursor: pointer; }
     .avatar-cell.active { border-color: var(--neon-gold); background: #1e1b4b; }
@@ -39,7 +39,8 @@
     <div class="user-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:3px 8px; font-size:10px; text-decoration:none;">‹ Lobi</a>
       <div style="font-weight:bold; font-size:11.5px; color:#38bdf8;">👤 Profilim</div>
-      <button type="button" class="icon-btn" style="border-color:var(--neon-gold); padding:3px 8px; font-size:10px;" onclick="openDrawer(true)">⚙️ Ayarlar</button>
+      <!-- 6. Kural: Buton "Profili Düzenle" olarak ayarlandı -->
+      <button type="button" class="icon-btn" style="border-color:var(--neon-gold); padding:3px 8px; font-size:10px;" onclick="openDrawer(true)">✏️ Profili Düzenle</button>
     </div>
 
     <div class="user-content">
@@ -54,6 +55,7 @@
         </div>
       </div>
 
+      <!-- Toplam Oynama -->
       <div>
         <div class="stat-section-title">📊 Toplam Oynama</div>
         <div class="stat-box" style="align-items:center; text-align:center; padding:10px;">
@@ -61,6 +63,7 @@
         </div>
       </div>
 
+      <!-- Mayın Karnesi -->
       <div>
         <div class="stat-section-title">💣 Mayın Tarlası Karnesi</div>
         <div class="stat-grid">
@@ -75,8 +78,36 @@
         </div>
       </div>
 
+      <!-- 2. Kural: Bütün Modların En Yüksek Skorları -->
       <div>
-        <div class="stat-section-title">🎮 Bütün Modlar Oynama Sayısı</div>
+        <div class="stat-section-title">🏆 En Yüksek Skorların</div>
+        <div class="stat-grid">
+          <div class="stat-box">
+            <span style="font-size:7.5px; color:#94a3b8;">⚔️ Normal Kasa:</span>
+            <b style="font-size:11px; color:#38bdf8;" id="best-std">0 P</b>
+          </div>
+          <div class="stat-box">
+            <span style="font-size:7.5px; color:#94a3b8;">🎯 Yakala & Aç:</span>
+            <b style="font-size:11px; color:#c084fc;" id="best-cat">0 P</b>
+          </div>
+          <div class="stat-box">
+            <span style="font-size:7.5px; color:#94a3b8;">💣 Mayın Tarlası:</span>
+            <b style="font-size:11px; color:#f87171;" id="best-min">0 P</b>
+          </div>
+          <div class="stat-box">
+            <span style="font-size:7.5px; color:#94a3b8;">🎰 Çift Rulet:</span>
+            <b style="font-size:11px; color:#34d399;" id="best-dbl">0 P</b>
+          </div>
+          <div class="stat-box" style="grid-column: span 2;">
+            <span style="font-size:7.5px; color:#94a3b8;">⚡ Speedrun En İyi Süre:</span>
+            <b style="font-size:12px; color:var(--neon-gold);" id="best-spd">-</b>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mod Oynanma Sayıları -->
+      <div>
+        <div class="stat-section-title">🎮 Mod Oynama Sayıları</div>
         <div style="display:flex; flex-direction:column; gap:3px; background:#070d1e; padding:6px; border-radius:6px; font-size:9px;">
           <div style="display:flex; justify-content:space-between;"><span>⚔️ Normal Kasa:</span><b id="c-std">0</b></div>
           <div style="display:flex; justify-content:space-between;"><span>🎯 Yakala & Aç:</span><b id="c-cat">0</b></div>
@@ -89,10 +120,10 @@
 
     <div class="drawer-backdrop" id="backdrop" onclick="openDrawer(false)"></div>
 
-    <!-- SAĞDAN KAYAR AYARLAR ÇEKMECESİ -->
+    <!-- SAĞDAN KAYAR DÜZENLEME ÇEKMECESİ (Ses Ayarı Çıkarılmıştır) -->
     <div class="settings-drawer" id="drawer">
       <div class="drawer-header">
-        <div style="font-weight:bold; font-size:11px; color:var(--neon-gold);">⚙️ Profil Ayarları</div>
+        <div style="font-weight:bold; font-size:11px; color:var(--neon-gold);">✏️ Profili Düzenle</div>
         <button type="button" class="icon-btn" onclick="openDrawer(false)">✕</button>
       </div>
       <div class="drawer-body">
@@ -109,22 +140,16 @@
             <option value="Efsane">🔥 Efsanevi Açıcı</option>
             <option value="Kral">👑 Kasa Kralı</option>
             <option value="Mayın Avcısı">💣 Mayın Avcısı</option>
+            <option value="Speedrunner">⚡ Speedrunner</option>
           </select>
         </div>
 
         <div>
-          <label style="font-size:8px; color:#94a3b8; font-weight:bold; display:block; margin-bottom:3px;">AVATAR SEÇ</label>
+          <label style="font-size:8px; color:#94a3b8; font-weight:bold; display:block; margin-bottom:3px;">AVATARINI SEÇ</label>
           <div class="avatar-grid" id="set-avatar-grid"></div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:8px; border-radius:6px;">
-          <span style="font-size:9.5px;">Sistem Sesleri</span>
-          <input type="checkbox" id="set-sound">
-        </div>
-
-        <button type="button" class="btn-start" style="background:#16a34a; font-size:10px; padding:8px;" onclick="saveSettings()">💾 Değişiklikleri Kaydet</button>
-        <hr style="border:0; border-top:1px solid #1e293b;">
-        <button type="button" class="icon-btn" style="background:#334155; justify-content:center; padding:7px; font-size:9.5px;" onclick="logout()">🚪 Güvenli Çıkış Yap</button>
+        <button type="button" class="btn-start" style="background:#16a34a; font-size:10px; padding:8px; margin-top:6px;" onclick="saveProfileChanges()">💾 Bilgileri Güncelle</button>
       </div>
     </div>
   </div>
@@ -167,15 +192,13 @@
 
       document.getElementById("set-name").value = u.displayName || u.name || u.username;
       document.getElementById("set-title").value = u.title || "Çaylak";
-      document.getElementById("set-sound").checked = u.sound !== false;
 
       renderAvatars();
 
       const cleanUser = String(u.username || u.name).trim().toLowerCase();
-
-      // Hem accounts hem de users yolundan istatistikleri garantili oku
       db.ref("accounts/" + cleanUser).once("value").then(snap => {
-        let stats = (snap.val() && snap.val().stats) || {};
+        const d = snap.val() || {};
+        const stats = d.stats || {};
 
         const std = (stats["standard"] && stats["standard"].played) || 0;
         const cat = (stats["catch_open"] && stats["catch_open"].played) || 0;
@@ -194,6 +217,14 @@
         const rate = min > 0 ? Math.round((minW / min) * 100) : 0;
         document.getElementById("st-mines-record").innerText = `${min} / ${minW}`;
         document.getElementById("st-mines-rate").innerText = `%${rate}`;
+
+        // En Yüksek Skorlar
+        document.getElementById("best-std").innerText = ((stats["standard"] && stats["standard"].bestScore) || 0) + " P";
+        document.getElementById("best-cat").innerText = ((stats["catch_open"] && stats["catch_open"].bestScore) || 0) + " P";
+        document.getElementById("best-min").innerText = ((stats["mines_mode"] && stats["mines_mode"].bestScore) || 0) + " P";
+        document.getElementById("best-dbl").innerText = ((stats["double_mode"] && stats["double_mode"].bestScore) || 0) + " P";
+        const bSpeed = stats["speedrun_mode"] && stats["speedrun_mode"].bestTime;
+        document.getElementById("best-spd").innerText = (bSpeed && bSpeed < 999) ? parseFloat(bSpeed).toFixed(1) + "s" : "-";
       });
     }
 
@@ -209,26 +240,11 @@
       });
     }
 
-    function saveSettings() {
-      const u = getActiveUser();
+    function saveProfileChanges() {
       const newName = document.getElementById("set-name").value.trim();
-      u.title = document.getElementById("set-title").value;
-      u.sound = document.getElementById("set-sound").checked;
-      u.avatar = tempAvatar;
-
-      if (newName && newName !== (u.displayName || u.name)) {
-        changeUsernameGlobal(newName);
-      } else {
-        setActiveUser(u);
-        alert("Ayarlar kaydedildi.");
-        openDrawer(false);
-        loadProfile();
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem("kutu_active_session");
-      location.href = "index.html";
+      const newTitle = document.getElementById("set-title").value;
+      if (!newName) return alert("İsim boş olamaz!");
+      updateProfileGlobal(newName, tempAvatar, newTitle);
     }
   </script>
 </body>
