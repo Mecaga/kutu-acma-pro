@@ -8,79 +8,23 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
-    /* Hem PC hem Mobilde 100dvh Akıcı Geçiş */
     html, body {
-      width: 100%;
-      height: 100%;
-      min-height: 100dvh;
-      margin: 0;
-      padding: 0;
-      transition: background 0.35s ease, background-color 0.35s ease;
-      background-attachment: fixed;
+      width: 100%; height: 100%; min-height: 100dvh; margin: 0; padding: 0;
+      transition: background 0.35s ease; background-attachment: fixed;
     }
-
-    /* Mobilde arkaplanı görebilmek için konteyneri yarı-saydam yapıyoruz */
     .app-container {
       background: rgba(3, 7, 18, 0.72) !important;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
-      transition: box-shadow 0.35s ease, border-color 0.35s ease;
     }
+    body.bg-standard { background: radial-gradient(circle at 50% 30%, #312e81 0%, #030712 90%) !important; }
+    body.bg-catch_open { background: radial-gradient(circle at 50% 30%, #0e7490 0%, #020617 90%) !important; }
+    body.bg-mines_mode { background: radial-gradient(circle at 50% 30%, #7f1d1d 0%, #030202 90%) !important; }
+    body.bg-speedrun_mode { background: radial-gradient(circle at 50% 30%, #c2410c 0%, #0a0402 90%) !important; }
+    body.bg-double_mode { background: radial-gradient(circle at 50% 30%, #6b21a8 0%, #08020d 90%) !important; }
+    body.bg-farm_mode { background: radial-gradient(circle at 50% 30%, #065f46 0%, #01140b 90%) !important; }
 
-    /* 1. Normal Kasa (Neon Mavi / Mor) */
-    body.bg-standard {
-      background: radial-gradient(circle at 50% 30%, #312e81 0%, #030712 90%) !important;
-    }
-    body.bg-standard .app-container {
-      box-shadow: inset 0 0 50px rgba(99, 102, 241, 0.25);
-    }
-
-    /* 2. Yakala & Aç (Kozmik Camgöbeği) */
-    body.bg-catch_open {
-      background: radial-gradient(circle at 50% 30%, #0e7490 0%, #020617 90%) !important;
-    }
-    body.bg-catch_open .app-container {
-      box-shadow: inset 0 0 50px rgba(6, 182, 212, 0.25);
-    }
-
-    /* 3. Mayınlı Kasa (Tehlike Kırmızı / Lav) */
-    body.bg-mines_mode {
-      background: radial-gradient(circle at 50% 30%, #7f1d1d 0%, #030202 90%) !important;
-    }
-    body.bg-mines_mode .app-container {
-      box-shadow: inset 0 0 50px rgba(239, 68, 68, 0.3);
-    }
-
-    /* 4. Speedrun (Elektrik Turuncusu) */
-    body.bg-speedrun_mode {
-      background: radial-gradient(circle at 50% 30%, #c2410c 0%, #0a0402 90%) !important;
-    }
-    body.bg-speedrun_mode .app-container {
-      box-shadow: inset 0 0 50px rgba(249, 115, 22, 0.3);
-    }
-
-    /* 5. Çift Rulet (Mistik Mor) */
-    body.bg-double_mode {
-      background: radial-gradient(circle at 50% 30%, #6b21a8 0%, #08020d 90%) !important;
-    }
-    body.bg-double_mode .app-container {
-      box-shadow: inset 0 0 50px rgba(168, 85, 247, 0.3);
-    }
-
-    /* 6. Kasa Çiftliği (Zümrüt Yeşili) */
-    body.bg-farm_mode {
-      background: radial-gradient(circle at 50% 30%, #065f46 0%, #01140b 90%) !important;
-    }
-    body.bg-farm_mode .app-container {
-      box-shadow: inset 0 0 50px rgba(16, 185, 129, 0.3);
-    }
-
-    /* Seçili Buton Parlaması */
-    .mode-card-8 {
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
+    .mode-card-8 { transition: all 0.2s ease; cursor: pointer; }
     .mode-card-8.active {
       border-color: var(--neon-gold) !important;
       box-shadow: 0 0 14px rgba(251, 191, 36, 0.45) !important;
@@ -93,14 +37,14 @@
   <div class="app-container" style="justify-content:space-between;">
     <div>
       <div class="top-header">
+        <!-- İsme tıklayınca profile gider, ekstra ayarlar/profil butonu yok -->
         <div class="app-title" style="cursor:pointer;" onclick="location.href='user.html'" title="Profile Git">
-          <span id="lbl-avatar">👤</span> <span id="lbl-username">...</span>
+          <span id="lbl-avatar">👤</span> <span id="lbl-username">Giriş Yapılmadı</span>
         </div>
         <div style="display:flex; gap:3px;">
           <a href="leaderboard.html" class="icon-btn">🏆 Sıralama</a>
           <button type="button" class="icon-btn" style="border-color:var(--neon-gold);" onclick="openAnnouncementsModal()">📢 Duyurular</button>
           <button type="button" class="icon-btn" onclick="openGuideModal()">ℹ️ Rehber</button>
-          <a href="user.html" class="icon-btn" style="border-color:#38bdf8; text-decoration:none;">👤 Profil</a>
         </div>
       </div>
 
@@ -112,7 +56,7 @@
       </div>
     </div>
 
-    <!-- AKTİF OYUN MODLARI IZGARASI -->
+    <!-- OYUN MODLARI -->
     <div class="mode-grid-8" style="grid-template-rows: repeat(3, 1fr); max-height:270px; overflow-y:auto;">
       <div class="mode-card-8 active" onclick="selectGameMode('standard', this, 'normal.html')"><b>⚔️ Normal Kasa</b><span>30s Klasik</span></div>
       <div class="mode-card-8" onclick="selectGameMode('catch_open', this, 'catch.html')"><b>🎯 Yakala & Aç</b><span>Kutuları Yakala</span></div>
@@ -122,23 +66,27 @@
       <div class="mode-card-8" onclick="selectGameMode('farm_mode', this, 'farm.html')"><b>🌾 Kasa Çiftliği</b><span>Ekin & Hayvan</span></div>
     </div>
 
+    <!-- Admin Paneli Bölümü -->
+    <div id="admin-panel-section" style="display:none; border:1px solid var(--danger); border-radius:8px; padding:6px; background:rgba(239, 68, 68, 0.1); margin-bottom:4px;">
+      <div style="font-size:10px; font-weight:bold; color:var(--danger); text-align:center; margin-bottom:3px;">🛑 ADMIN SİLME YETKİLERİ</div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:3px;">
+        <button class="icon-btn" style="background:var(--danger); font-size:8px; padding:3px;" onclick="adminClearAllUsers()">Hesapları Sil</button>
+        <button class="icon-btn" style="background:var(--danger); font-size:8px; padding:3px;" onclick="adminClearAllScores()">Skorları Sil</button>
+        <button class="icon-btn" style="background:var(--danger); font-size:8px; padding:3px;" onclick="adminClearAllChannels()">Chati Sil</button>
+        <button class="icon-btn" style="background:#7f1d1d; border-color:var(--danger); font-size:8px; padding:3px;" onclick="adminWipeEverything()">🔥 TÜMÜ</button>
+      </div>
+    </div>
+
     <div>
       <div class="menu-preview-box" id="rates-preview-box"></div>
       <button class="btn-start" onclick="launchGame()">OYUNA BAŞLA</button>
     </div>
   </div>
 
-  <!-- DUYURULAR & OYLAMA MODALI -->
+  <!-- DUYURULAR MODALI -->
   <div id="modal-announcements" class="modal-overlay">
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:var(--neon-gold); text-align:center; margin-bottom:6px;">📢 Duyurular & Oylama</div>
-      <div id="admin-broadcast-box" style="display:none; border:1px solid var(--neon-purple); padding:6px; border-radius:6px; margin-bottom:6px;">
-        <input type="text" id="in-announce-txt" class="input-field" style="margin:4px 0;" placeholder="Duyuru veya Oylama Sorusu...">
-        <div style="display:flex; gap:4px;">
-          <button type="button" class="icon-btn" style="flex:1; background:var(--neon-blue);" onclick="publishAnnouncement(false)">📢 Paylaş</button>
-          <button type="button" class="icon-btn" style="flex:1; background:var(--neon-gold); color:#000;" onclick="publishAnnouncement(true)">🗳️ Oylama</button>
-        </div>
-      </div>
       <div id="announcements-feed" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
       <button type="button" class="btn-close" onclick="document.getElementById('modal-announcements').style.display='none'">Kapat</button>
     </div>
@@ -178,11 +126,11 @@
       if (!u) return window.location.href = "index.html";
 
       document.getElementById("lbl-avatar").innerText = u.avatar || "👤";
-      document.getElementById("lbl-username").innerText = `${u.name}${u.tag || ''}`;
+      document.getElementById("lbl-username").innerText = u.displayName || u.username;
 
-      if (u.isAdmin || (u.name && u.name.toLowerCase() === "admin")) {
-        const adminBox = document.getElementById("admin-broadcast-box");
-        if (adminBox) adminBox.style.display = "block";
+      // Admin Kontrolü
+      if (u.isAdmin || (u.username && u.username.toLowerCase() === "admin")) {
+        document.getElementById("admin-panel-section").style.display = "block";
       }
 
       renderRates('standard');
@@ -207,56 +155,9 @@
       document.getElementById("rates-preview-box").innerHTML = html;
     }
 
-    function launchGame() {
-      window.location.href = targetPage;
-    }
-
-    function openAnnouncementsModal() {
-      document.getElementById("modal-announcements").style.display = "flex";
-      loadAnnouncements();
-    }
-
-    function openGuideModal() {
-      document.getElementById("modal-guide").style.display = "flex";
-    }
-
-    function publishAnnouncement(isPoll) {
-      const txt = document.getElementById("in-announce-txt").value.trim();
-      if (!txt || !db) return;
-      const u = getActiveUser();
-      db.ref("announcements").push({
-        author: `${u.name}${u.tag || ''}`,
-        text: txt,
-        isPoll: isPoll,
-        votesYes: 0,
-        votesNo: 0,
-        date: new Date().toLocaleDateString("tr-TR")
-      });
-      document.getElementById("in-announce-txt").value = "";
-    }
-
-    function loadAnnouncements() {
-      if (!db) return;
-      db.ref("announcements").on("value", snap => {
-        const feed = document.getElementById("announcements-feed");
-        feed.innerHTML = "";
-        if (!snap.exists()) {
-          feed.innerHTML = "<div style='color:#666; font-size:10px; padding:6px;'>Duyuru bulunmuyor.</div>";
-          return;
-        }
-        snap.forEach(c => {
-          const a = c.val();
-          feed.innerHTML += `
-            <div class="rank-card" style="flex-direction:column; align-items:flex-start; gap:4px;">
-              <div style="display:flex; justify-content:space-between; width:100%; font-size:9px; color:var(--neon-gold);">
-                <b>${a.isPoll ? '🗳️ OYLAMA' : '📢 DUYURU'} (${a.author})</b><span>${a.date}</span>
-              </div>
-              <div style="font-size:11px; color:#fff;">${a.text}</div>
-            </div>
-          `;
-        });
-      });
-    }
+    function launchGame() { window.location.href = targetPage; }
+    function openAnnouncementsModal() { document.getElementById("modal-announcements").style.display = "flex"; }
+    function openGuideModal() { document.getElementById("modal-guide").style.display = "flex"; }
   </script>
 </body>
 </html>
