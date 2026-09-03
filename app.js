@@ -1,4 +1,3 @@
-// 1. FIREBASE BAŞLATMA
 const firebaseConfig = {
   apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
   authDomain: "kutu-acma-pro.firebaseapp.com",
@@ -8,10 +7,9 @@ const firebaseConfig = {
   appId: "1:483395048462:web:450f18178e682a4a2f985f"
 };
 
-if (typeof firebase !== "undefined") {
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+if (typeof firebase !== "undefined" && !firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
 }
-
 var db = (typeof firebase !== "undefined" && firebase.database) ? firebase.database() : null;
 
 const AVATAR_LIST = [
@@ -20,7 +18,6 @@ const AVATAR_LIST = [
   "🌾", "🧑‍🌾", "🐔", "🐮", "🪙", "⚔️", "🛡️", "🎯"
 ];
 
-// Aktif Kullanıcı (Undefined hatasını önleyen akıllı okuyucu)
 function getActiveUser() {
   const session = localStorage.getItem("kutu_active_session") || localStorage.getItem("kutu_active_user");
   if (!session) return null;
@@ -60,45 +57,80 @@ function setActiveUser(u) {
   }
 }
 
-// Kullanıcı Adı Değiştirme (Verileri yeni isme taşır)
-function changeUsernameGlobal(newRawName) {
+// 🎯 İSİM VE AVATAR DEĞİŞTİĞİNDE HER YERDE GÜNCELLEME
+function updateProfileGlobal(newNameRaw, newAvatar, newTitle) {
   const u = getActiveUser();
-  if (!u) return alert("Oturum bulunamadı!");
-  const newName = newRawName.trim();
-  if (!newName) return alert("Kullanıcı adı boş olamaz!");
+  if (!u) return;
 
   const oldKey = String(u.username).trim().toLowerCase();
-  const newKey = newName.toLowerCase().replace(/[^a-z0-9_]/gi, "");
+  const newDisp = newNameRaw.trim();
+  const newKey = newDisp.toLowerCase().replace(/[^a-z0-9_]/gi, "");
+  const avatar = newAvatar || u.avatar || "👤";
+  const title = newTitle || u.title || "Çaylak";
 
   if (oldKey === newKey) {
-    u.displayName = newName;
+    u.displayName = newDisp;
+    u.avatar = avatar;
+    u.title = title;
     setActiveUser(u);
-    return alert("İsim güncellendi.");
+
+    // Liderlik tablolarındaki isim ve avatarı senkronize et
+    const modes = ['standard', 'catch_open', 'mines_mode', 'speedrun_mode', 'double_mode', 'farm_mode'];
+    modes.forEach(m => {
+      db.ref(`leaderboards/${m}/${oldKey}`).update({
+        displayName: newDisp,
+        avatar: avatar,
+        title: title
+      }).catch(() => {});
+    });
+    alert("Profil bilgileriniz güncellendi!");
+    location.reload();
+    return;
   }
 
+  // Kullanıcı adı değiştiyse hesabı yeni anahtara taşı
   db.ref("accounts/" + newKey).once("value").then(snap => {
-    if (snap.exists()) {
-      return alert("Bu kullanıcı adı zaten kullanımda!");
-    }
+    if (snap.exists()) return alert("Bu kullanıcı adı zaten alınmış!");
 
     db.ref("accounts/" + oldKey).once("value").then(oldSnap => {
       const data = oldSnap.val() || {};
       data.username = newKey;
-      data.displayName = newName;
+      data.displayName = newDisp;
+      data.avatar = avatar;
+      data.title = title;
 
       db.ref("accounts/" + newKey).set(data).then(() => {
         db.ref("accounts/" + oldKey).remove();
+
+        // Liderlikteki eski kayıtları yeni anahtara taşı
+        const modes = ['standard', 'catch_open', 'mines_mode', 'speedrun_mode', 'double_mode', 'farm_mode'];
+        modes.forEach(m => {
+          db.ref(`leaderboards/${m}/${oldKey}`).once("value").then(lSnap => {
+            if (lSnap.exists()) {
+              const lData = lSnap.val();
+              lData.username = newKey;
+              lData.displayName = newDisp;
+              lData.avatar = avatar;
+              lData.title = title;
+              db.ref(`leaderboards/${m}/${newKey}`).set(lData);
+              db.ref(`leaderboards/${m}/${oldKey}`).remove();
+            }
+          });
+        });
+
         u.username = newKey;
-        u.displayName = newName;
+        u.displayName = newDisp;
+        u.avatar = avatar;
+        u.title = title;
         setActiveUser(u);
-        alert("Kullanıcı adınız başarıyla " + newName + " yapıldı!");
+        alert("Kullanıcı adınız başarıyla değiştirildi! Yeni adınız: " + newDisp);
         location.reload();
       });
     });
   });
 }
 
-// Skor Kaydetme Motoru
+// 🎯 SKOR VE İSTATİSTİK SAYACI
 function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime) {
   let u = getActiveUser();
   if (!u) return;
@@ -116,19 +148,28 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime
   const userKey = String(u.username).trim().toLowerCase();
   const displayName = u.displayName || u.name || "Oyuncu";
 
-  // 1. İstatistikleri Güncelle (Kazanma / Kaybetme / Oynama)
   if (db) {
+    // 1. İstatistik Sayacı
     const statRef = db.ref(`accounts/${userKey}/stats/${mode}`);
     statRef.transaction(current => {
-      let st = current || { played: 0, wins: 0, losses: 0 };
+      let st = current || { played: 0, wins: 0, losses: 0, bestScore: 0, bestTime: 9999 };
       st.played = (st.played || 0) + 1;
       if (isWin === false) st.losses = (st.losses || 0) + 1;
       else st.wins = (st.wins || 0) + 1;
+
+      if (mode === "speedrun_mode") {
+        if (finalSpeedrunTime > 4.0 && finalSpeedrunTime < (st.bestTime || 9999)) st.bestTime = finalSpeedrunTime;
+      } else {
+        if (numVal > (st.bestScore || 0)) st.bestScore = numVal;
+      }
       return st;
     });
 
-    // 2. Liderlik Tablosuna Yaz
+    // 2. Liderlik Tablosuna Yazma (Saatli Tarih Eklenmiştir)
     if (numVal > 0 || mode === "speedrun_mode") {
+      const now = new Date();
+      const dateStr = `${now.toLocaleDateString("tr-TR")} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
       const payload = {
         username: userKey,
         displayName: displayName,
@@ -140,7 +181,7 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime
         time: mode === "speedrun_mode" ? finalSpeedrunTime : numVal,
         drops: drops || [],
         isWin: isWin !== undefined ? isWin : true,
-        date: new Date().toLocaleDateString("tr-TR"),
+        date: dateStr,
         timestamp: Date.now()
       };
 
@@ -159,30 +200,5 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime
         if (update) lbRef.set(payload);
       });
     }
-  }
-}
-
-// Admin İşlemleri
-function adminClearAllUsers() {
-  if (confirm("Tüm kullanıcı hesaplarını silmek istediğinize emin misiniz?")) {
-    db.ref("accounts").remove().then(() => alert("Kullanıcılar silindi."));
-  }
-}
-function adminClearAllScores() {
-  if (confirm("Tüm liderlik skorlarını silmek istediğinize emin misiniz?")) {
-    db.ref("leaderboards").remove().then(() => alert("Skorlar sıfırlandı."));
-  }
-}
-function adminClearAllChannels() {
-  if (confirm("Tüm sohbet kanallarını silmek istediğinize emin misiniz?")) {
-    db.ref("messages").remove().then(() => alert("Sohbetler temizlendi."));
-  }
-}
-function adminWipeEverything() {
-  if (prompt("BÜTÜN VERİLERİ SİLMEK İÇİN 'ONAY' YAZIN:") === "ONAY") {
-    db.ref().remove().then(() => {
-      alert("Sistem tamamen sıfırlandı!");
-      location.reload();
-    });
   }
 }
