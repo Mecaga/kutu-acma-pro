@@ -21,29 +21,20 @@
     .lb-chip.active { background: #4338ca; border-color: var(--neon-gold); color: #fff; }
 
     .lb-list-area { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
-    .rank-item-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 6px; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; }
+    
+    /* SIRALAMAYA GÖRE RENKLENDİRME */
+    .rank-card-base { border-radius: 6px; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 8.5px; }
+    .rank-1 { background: linear-gradient(135deg, rgba(234, 179, 8, 0.25), #0f172a); border: 1px solid #eab308; box-shadow: inset 0 0 10px rgba(234, 179, 8, 0.2); }
+    .rank-2 { background: linear-gradient(135deg, rgba(203, 213, 225, 0.2), #0f172a); border: 1px solid #94a3b8; }
+    .rank-3 { background: linear-gradient(135deg, rgba(180, 83, 9, 0.2), #0f172a); border: 1px solid #b45309; }
+    .rank-default { background: #0f172a; border: 1px solid #1e293b; }
 
-    /* Açılır Pencereler */
     .custom-modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(4px);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      padding: 14px;
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 9999;
+      justify-content: center; align-items: center; padding: 14px;
     }
-    .custom-modal-card {
-      background: #0b1329;
-      border: 1px solid #1e293b;
-      border-radius: 10px;
-      padding: 12px;
-      width: 100%;
-      max-width: 320px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.8);
-    }
+    .custom-modal-card { background: #0b1329; border: 1px solid #1e293b; border-radius: 10px; padding: 12px; width: 100%; max-width: 320px; box-shadow: 0 8px 30px rgba(0,0,0,0.8); }
   </style>
 </head>
 <body>
@@ -66,42 +57,53 @@
     <div class="lb-list-area" id="lb-container"></div>
   </div>
 
-  <!-- 1. AŞAMA: OYUN MODU DETAY MODALI (Sadece tekli modlarda açılır) -->
+  <!-- 1. MAÇ SKOR DETAY MODALI (Tarih ve Saat Birlikte) -->
   <div id="modal-score-detail" class="custom-modal-overlay">
     <div class="custom-modal-card">
       <div style="font-size:8.5px; color:#94a3b8; margin-bottom:2px;">Oyuncunun Profilini Açmak İçin İsme Tıkla:</div>
       <h3 id="det-name-clickable" style="color:var(--neon-blue); font-size:14px; cursor:pointer; text-decoration:underline; margin-bottom:4px;">-</h3>
       <div id="det-mode" style="font-size:10px; color:var(--neon-gold); margin-bottom:2px;">-</div>
-      <div id="det-date" style="font-size:8.5px; color:#64748b; margin-bottom:6px;">-</div>
+      <div id="det-date" style="font-size:9px; color:#cbd5e1; font-weight:bold; margin-bottom:6px;">-</div>
       <div style="font-size:9.5px; font-weight:bold; color:#fff; margin-bottom:4px;">📦 Çıkan Eşyalar:</div>
       <div id="det-drops" style="max-height:120px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; margin-bottom:8px;"></div>
       <button type="button" class="btn-close" style="width:100%; padding:6px;" onclick="closeModal('modal-score-detail')">Kapat</button>
     </div>
   </div>
 
-  <!-- 2. AŞAMA: KULLANICI PROFİL MODALI + ARKADAŞLIK -->
+  <!-- 2. OYUNCU PROFİLİ (BİZDEKİ GİBİ BÜTÜN EN İYİ SKORLARI SUNAR) -->
   <div id="modal-user-profile" class="custom-modal-overlay">
-    <div class="custom-modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <div style="font-size:11px; font-weight:bold; color:#94a3b8;">Oyuncu Kartı</div>
+    <div class="custom-modal-card" style="max-height:90vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div style="font-size:10px; font-weight:bold; color:#94a3b8;">Oyuncu Kartı</div>
         <div id="friend-action-container"></div>
       </div>
 
-      <div style="text-align:center; margin-bottom:10px;">
-        <div id="uprof-avatar" style="font-size:36px;">👤</div>
-        <div id="uprof-name" style="font-size:14px; font-weight:bold; color:var(--neon-blue); margin-top:2px;">-</div>
-        <div id="uprof-title" style="font-size:10px; color:var(--neon-gold);">[Çaylak]</div>
+      <div style="text-align:center; margin-bottom:8px;">
+        <div id="uprof-avatar" style="font-size:32px;">👤</div>
+        <div id="uprof-name" style="font-size:13px; font-weight:bold; color:var(--neon-blue);">Oyuncu</div>
+        <div id="uprof-title" style="font-size:9px; color:var(--neon-gold);">[Çaylak]</div>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
-        <div style="background:#070d1e; border:1px solid #1e293b; border-radius:6px; padding:6px; text-align:center;">
-          <div style="font-size:8px; color:#94a3b8;">TOPLAM OYNAMA</div>
-          <b style="font-size:12px; color:#38bdf8;" id="uprof-played">0 Maç</b>
+      <!-- Genel İstatistikler -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:6px;">
+        <div style="background:#070d1e; padding:5px; border-radius:4px; text-align:center;">
+          <div style="font-size:7.5px; color:#94a3b8;">TOPLAM OYNAMA</div>
+          <b style="font-size:11px; color:#38bdf8;" id="uprof-played">0 Maç</b>
         </div>
-        <div style="background:#070d1e; border:1px solid #1e293b; border-radius:6px; padding:6px; text-align:center;">
-          <div style="font-size:8px; color:#94a3b8;">MAYIN ORANI</div>
-          <b style="font-size:12px; color:var(--neon-green);" id="uprof-mines">%0</b>
+        <div style="background:#070d1e; padding:5px; border-radius:4px; text-align:center;">
+          <div style="font-size:7.5px; color:#94a3b8;">MAYIN ORANI</div>
+          <b style="font-size:11px; color:var(--neon-green);" id="uprof-mines">%0</b>
         </div>
+      </div>
+
+      <!-- En Yüksek Skorlar -->
+      <div style="font-size:8px; font-weight:bold; color:#94a3b8; text-transform:uppercase; margin-bottom:3px;">🏆 En İyi Skorları</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:8px; font-size:8px;">
+        <div style="background:#070d1e; padding:4px 6px; border-radius:4px;">Normal: <b style="color:#38bdf8;" id="uprof-std">0 P</b></div>
+        <div style="background:#070d1e; padding:4px 6px; border-radius:4px;">Yakala: <b style="color:#c084fc;" id="uprof-cat">0 P</b></div>
+        <div style="background:#070d1e; padding:4px 6px; border-radius:4px;">Mayın: <b style="color:#f87171;" id="uprof-min">0 P</b></div>
+        <div style="background:#070d1e; padding:4px 6px; border-radius:4px;">Rulet: <b style="color:#34d399;" id="uprof-dbl">0 P</b></div>
+        <div style="grid-column: span 2; background:#070d1e; padding:4px 6px; border-radius:4px;">Speedrun En İyi: <b style="color:var(--neon-gold);" id="uprof-spd">-</b></div>
       </div>
 
       <button type="button" class="btn-close" style="width:100%; padding:6px;" onclick="closeModal('modal-user-profile')">Geri Dön</button>
@@ -117,10 +119,7 @@
       switchMode('all');
     };
 
-    function closeModal(id) {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "none";
-    }
+    function closeModal(id) { document.getElementById(id).style.display = "none"; }
 
     function switchMode(m) {
       curMode = m;
@@ -156,7 +155,6 @@
                   records: {}
                 };
               }
-
               usersMap[uname].records[mKey] = r;
 
               if (mKey === 'speedrun_mode') {
@@ -188,7 +186,6 @@
           };
         });
 
-        // SIRALAMA HESABI
         if (filterKey === 'all') {
           list = list.filter(i => i.top3Sum > 0);
           list.sort((a, b) => b.top3Sum - a.top3Sum);
@@ -215,15 +212,15 @@
 
         list.slice(0, 50).forEach((item, idx) => {
           const div = document.createElement("div");
-          div.className = "rank-item-card";
+          let rankCls = idx === 0 ? "rank-1" : (idx === 1 ? "rank-2" : (idx === 2 ? "rank-3" : "rank-default"));
+          div.className = `rank-card-base ${rankCls}`;
           let badge = idx === 0 ? "🥇 1." : (idx === 1 ? "🥈 2." : (idx === 2 ? "🥉 3." : `#${idx+1}`));
 
           if (filterKey === 'all') {
-            // 🌟 TÜMÜ KATEGORİSİ: 3 MODUN DÖKÜMÜNÜ GÖSTERİR, TIKLANMAZ (PANEL AÇILMAZ)
             div.style.cursor = "default";
             div.innerHTML = `
               <div style="display:flex; align-items:center; gap:5px;">
-                <span style="font-weight:bold; color:#38bdf8; width:24px;">${badge}</span>
+                <span style="font-weight:bold; width:26px;">${badge}</span>
                 <span>${item.avatar}</span>
                 <div>
                   <b style="color:#fff;">${item.displayName}</b>
@@ -240,7 +237,6 @@
               </div>
             `;
           } else {
-            // 🎯 TEKLİ MODLAR: KARTA BASINCA O MODUN SKOR DETAYI AÇILIR
             div.style.cursor = "pointer";
             let scoreValTxt = filterKey === 'speedrun_mode' 
               ? `<b style="color:var(--neon-gold); font-size:10px;">⚡ ${item.speedTime.toFixed(1)}s</b>` 
@@ -248,19 +244,17 @@
 
             div.innerHTML = `
               <div style="display:flex; align-items:center; gap:5px;">
-                <span style="font-weight:bold; color:#38bdf8; width:24px;">${badge}</span>
+                <span style="font-weight:bold; width:26px;">${badge}</span>
                 <span>${item.avatar}</span>
                 <div>
                   <b>${item.displayName}</b>
-                  <div style="color:#64748b; font-size:6.5px;">${item.title}</div>
+                  <div style="color:#94a3b8; font-size:6.5px;">${item.title}</div>
                 </div>
               </div>
               <div>${scoreValTxt}</div>
             `;
-
             div.onclick = () => openScoreModal(item.modeRecord, item.displayName, item.username);
           }
-
           box.appendChild(div);
         });
       });
@@ -270,7 +264,7 @@
       if (!rec) return;
       document.getElementById("det-name-clickable").innerText = dispName;
       document.getElementById("det-mode").innerText = "Mod: " + (rec.modeName || rec.gameMode);
-      document.getElementById("det-date").innerText = "Tarih: " + (rec.date || '-');
+      document.getElementById("det-date").innerText = "📅 Tarih & Saat: " + (rec.date || '-');
 
       const dBox = document.getElementById("det-drops");
       dBox.innerHTML = "";
@@ -286,7 +280,6 @@
         dBox.innerHTML = "<div style='color:#64748b; font-size:8px;'>Eşya bilgisi yok.</div>";
       }
 
-      // Detay penceresindeki isme tıklayınca profili ve arkadaş eklemeyi açar
       document.getElementById("det-name-clickable").onclick = () => {
         closeModal("modal-score-detail");
         openOtherUserProfile(uname, dispName);
@@ -314,11 +307,20 @@
         const mRate = (mines.played || 0) > 0 ? Math.round(((mines.wins || 0) / mines.played) * 100) : 0;
         document.getElementById("uprof-mines").innerText = `%${mRate}`;
 
+        // En İyi Skorlar
+        document.getElementById("uprof-std").innerText = ((stats["standard"] && stats["standard"].bestScore) || 0) + " P";
+        document.getElementById("uprof-cat").innerText = ((stats["catch_open"] && stats["catch_open"].bestScore) || 0) + " P";
+        document.getElementById("uprof-min").innerText = ((stats["mines_mode"] && stats["mines_mode"].bestScore) || 0) + " P";
+        document.getElementById("uprof-dbl").innerText = ((stats["double_mode"] && stats["double_mode"].bestScore) || 0) + " P";
+        const bSpeed = stats["speedrun_mode"] && stats["speedrun_mode"].bestTime;
+        document.getElementById("uprof-spd").innerText = (bSpeed && bSpeed < 999) ? parseFloat(bSpeed).toFixed(1) + "s" : "-";
+
         renderFriendButton(myKey, targetUsername);
         document.getElementById("modal-user-profile").style.display = "flex";
       });
     }
 
+    // 1. Kural: Kendimize bakınca buton tamamen gizlenir
     function renderFriendButton(myKey, targetKey) {
       const box = document.getElementById("friend-action-container");
       box.innerHTML = "";
@@ -326,15 +328,15 @@
 
       db.ref(`friends/${myKey}/${targetKey}`).once("value").then(fSnap => {
         if (fSnap.exists() && fSnap.val() === true) {
-          box.innerHTML = `<button type="button" class="icon-btn" style="background:#0284c7; color:#fff; font-size:8.5px; padding:4px 8px;" onclick="removeFriendProcess('${myKey}', '${targetKey}')">👤 Arkadaşın</button>`;
+          box.innerHTML = `<button type="button" class="icon-btn" style="background:#0284c7; color:#fff; font-size:8px; padding:3px 6px;" onclick="removeFriendProcess('${myKey}', '${targetKey}')">👤 Arkadaşın</button>`;
           return;
         }
 
         db.ref(`friend_requests/${targetKey}/${myKey}`).once("value").then(reqSnap => {
           if (reqSnap.exists()) {
-            box.innerHTML = `<button type="button" class="icon-btn" style="background:#ca8a04; color:#fff; font-size:8.5px; padding:4px 8px;" disabled>⏳ İstek Bekleniyor</button>`;
+            box.innerHTML = `<button type="button" class="icon-btn" style="background:#ca8a04; color:#fff; font-size:8px; padding:3px 6px;" disabled>⏳ İstek Bekleniyor</button>`;
           } else {
-            box.innerHTML = `<button type="button" class="icon-btn" style="background:#16a34a; color:#fff; font-size:8.5px; padding:4px 8px;" onclick="sendFriendRequest('${myKey}', '${targetKey}')">➕ Arkadaş Ekle</button>`;
+            box.innerHTML = `<button type="button" class="icon-btn" style="background:#16a34a; color:#fff; font-size:8px; padding:3px 6px;" onclick="sendFriendRequest('${myKey}', '${targetKey}')">➕ Arkadaş Ekle</button>`;
           }
         });
       });
