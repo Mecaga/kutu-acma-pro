@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Profil Düzenle & İstatistikler</title>
+  <title>Profil & Ayarlar</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -26,178 +26,402 @@
       flex-shrink: 0;
       background: #090d1a;
       border-bottom: 2px solid #1e293b;
-      padding: 6px 10px;
+      padding: 8px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       z-index: 100;
     }
 
-    .user-scroll-area {
+    .user-content {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      padding: 10px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       -webkit-overflow-scrolling: touch;
     }
-    .user-scroll-area::-webkit-scrollbar { width: 3px; }
-    .user-scroll-area::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
+    .user-content::-webkit-scrollbar { width: 3px; }
+    .user-content::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
 
-    .profile-banner-card {
-      background: linear-gradient(135deg, #1e1b4b, #0f172a);
+    /* Profil Üst Alanı */
+    .profile-hero-card {
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
       border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 12px;
+      border-radius: 12px;
+      padding: 14px;
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .stat-box-grid {
+    .profile-avatar-circle {
+      width: 58px;
+      height: 58px;
+      background: #0b1120;
+      border: 2px solid var(--neon-gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+
+    /* İstatistik Tabloları */
+    .section-title {
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .stat-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
     }
 
     .stat-card {
-      background: #0f172a;
+      background: #0b1329;
       border: 1px solid #1e293b;
-      border-radius: 6px;
-      padding: 8px;
+      border-radius: 8px;
+      padding: 8px 10px;
       display: flex;
       flex-direction: column;
       gap: 2px;
+    }
+
+    .stat-card.full {
+      grid-column: span 2;
+    }
+
+    /* Sağdan Kayar Ayarlar Menüsü (Drawer) */
+    .settings-drawer {
+      position: absolute;
+      top: 0;
+      right: -100%;
+      width: 85%;
+      max-width: 380px;
+      height: 100%;
+      background: #090d1a;
+      border-left: 2px solid #1e293b;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.28s ease-in-out;
+      box-shadow: -8px 0 25px rgba(0,0,0,0.7);
+    }
+    .settings-drawer.open {
+      right: 0;
+    }
+
+    .drawer-header {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #050814;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .drawer-backdrop {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.65);
+      z-index: 150;
+    }
+    .drawer-backdrop.active {
+      display: block;
+    }
+
+    .avatar-picker-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      background: #030712;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+    }
+
+    .avatar-pick-item {
+      font-size: 20px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      text-align: center;
+      padding: 4px 0;
+      cursor: pointer;
+    }
+    .avatar-pick-item.selected {
+      border-color: var(--neon-gold);
+      background: #1e1b4b;
+    }
+
+    .toggle-switch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 10px;
     }
   </style>
 </head>
 <body>
   <div class="user-layout">
     
-    <!-- Üst Başlık -->
+    <!-- Üst Başlık Barı -->
     <div class="user-header">
-      <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
-      <div style="font-weight:900; font-size:12px; color:var(--neon-gold);">👤 Profil & Ayarlar</div>
-      <button type="button" class="icon-btn" style="background:#16a34a; padding:2px 8px; font-size:9.5px;" onclick="saveAllProfileChanges()">Kaydet</button>
+      <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:3px 8px; font-size:10px; text-decoration:none;">‹ Lobi</a>
+      <div style="font-weight:900; font-size:12px; color:var(--neon-gold);">👤 Oyuncu Profili</div>
+      <button type="button" class="icon-btn" style="border-color:#38bdf8; padding:3px 8px; font-size:10px;" onclick="toggleSettingsDrawer(true)">⚙️ Ayarlar</button>
     </div>
 
-    <!-- İçerik -->
-    <div class="user-scroll-area">
+    <!-- Salt Profil Görüntüleme Alanı -->
+    <div class="user-content">
       
-      <!-- Profil Kartı -->
-      <div class="profile-banner-card">
-        <div style="font-size:36px; background:#0b1120; border:2px solid var(--neon-gold); border-radius:50%; width:56px; height:56px; display:flex; align-items:center; justify-content:center;" id="p-avatar-preview">👤</div>
-        <div>
-          <div style="font-weight:bold; font-size:13px; color:#fff;" id="p-full-tag">Oyuncu#0000</div>
-          <div style="font-size:9.5px; color:#38bdf8;" id="p-title-badge">Çaylak</div>
-          <div style="font-size:8.5px; color:#94a3b8; margin-top:2px;">Kayıt Tarihi: <span id="p-join-date">-</span></div>
+      <!-- Ana Profil Bilgisi -->
+      <div class="profile-hero-card">
+        <div class="profile-avatar-circle" id="prof-avatar">👤</div>
+        <div style="flex:1;">
+          <div style="font-weight:900; font-size:14px; color:#fff;" id="prof-name">Oyuncu#0000</div>
+          <div style="font-size:10px; color:var(--neon-gold); font-weight:bold; margin-top:2px;" id="prof-title">[Çaylak]</div>
         </div>
       </div>
 
-      <!-- Kullanıcı Adı & Unvan Değiştirme -->
-      <div style="background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:8px; display:flex; flex-direction:column; gap:6px;">
-        <div style="font-size:9.5px; font-weight:bold; color:var(--neon-gold);">✏️ Kullanıcı Bilgilerini Düzenle:</div>
+      <!-- Genel İstatistikler -->
+      <div>
+        <div class="section-title">📊 Oyun İstatistikleri</div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span style="font-size:8px; color:#94a3b8;">TOPLAM OYNAMA</span>
+            <b style="font-size:14px; color:#38bdf8;" id="stat-total-played">0 Maç</b>
+          </div>
+          <div class="stat-card">
+            <span style="font-size:8px; color:#94a3b8;">GENEL KAZANMA</span>
+            <b style="font-size:14px; color:var(--neon-green);" id="stat-total-wins">0 Galibiyet</b>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mayın Tarlası Özel İstatistiği -->
+      <div>
+        <div class="section-title">💣 Mayın Tarlası Karnesi</div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span style="font-size:8px; color:#94a3b8;">OYNAMA / KAZANMA</span>
+            <b style="font-size:13px; color:#f87171;" id="stat-mines-record">0 / 0</b>
+          </div>
+          <div class="stat-card">
+            <span style="font-size:8px; color:#94a3b8;">KAZANMA ORANI</span>
+            <b style="font-size:13px; color:var(--neon-gold);" id="stat-mines-rate">%0</b>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mod Rekorları -->
+      <div>
+        <div class="section-title">🏆 En İyi Skorların</div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <span style="font-size:7.5px; color:#94a3b8;">⚔️ Normal Kasa:</span>
+            <b style="font-size:11px; color:var(--neon-green);" id="st-norm">0 P</b>
+          </div>
+          <div class="stat-card">
+            <span style="font-size:7.5px; color:#94a3b8;">🎯 Yakala & Aç:</span>
+            <b style="font-size:11px; color:var(--neon-green);" id="st-catch">0 P</b>
+          </div>
+          <div class="stat-card">
+            <span style="font-size:7.5px; color:#94a3b8;">💣 Mayın Tarlası:</span>
+            <b style="font-size:11px; color:var(--neon-green);" id="st-mines">0 P</b>
+          </div>
+          <div class="stat-card">
+            <span style="font-size:7.5px; color:#94a3b8;">⚡ Speedrun:</span>
+            <b style="font-size:11px; color:var(--neon-gold);" id="st-speed">-</b>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Karartma Arka Planı -->
+    <div class="drawer-backdrop" id="settings-backdrop" onclick="toggleSettingsDrawer(false)"></div>
+
+    <!-- Sağdan Kayar Ayarlar Penceresi (Drawer) -->
+    <div class="settings-drawer" id="settings-drawer">
+      <div class="drawer-header">
+        <div style="font-weight:bold; font-size:11.5px; color:#38bdf8;">⚙️ Profil Ayarları</div>
+        <button class="icon-btn" style="border-color:#64748b; padding:2px 6px; font-size:9px;" onclick="toggleSettingsDrawer(false)">✕ Kapat</button>
+      </div>
+
+      <div class="drawer-body">
         
+        <!-- İsim Değiştirme -->
         <div>
-          <label style="font-size:8px; color:#94a3b8;">Kullanıcı Adı:</label>
-          <input type="text" id="in-profile-name" class="input-field" style="margin-top:2px; font-size:10px; padding:6px;" placeholder="Yeni adınız...">
+          <label style="font-size:8.5px; color:#94a3b8; font-weight:bold;">KULLANICI ADI</label>
+          <input type="text" id="setting-input-name" class="input-field" style="margin-top:4px; font-size:10.5px; padding:7px;" placeholder="Yeni adınız...">
         </div>
 
+        <!-- Unvan Seçme -->
         <div>
-          <label style="font-size:8px; color:#94a3b8;">Unvan Seç:</label>
-          <select id="sel-profile-title" class="input-field" style="margin-top:2px; font-size:10px; padding:6px; background:#1e293b;">
-            <option value="Çaylak">🌱 Çaylak Kasa Açıcı</option>
+          <label style="font-size:8.5px; color:#94a3b8; font-weight:bold;">UNVAN SEÇ</label>
+          <select id="setting-select-title" class="input-field" style="margin-top:4px; font-size:10px; padding:7px; background:#0f172a;">
+            <option value="Çaylak">🌱 Çaylak</option>
             <option value="Usta">⚔️ Kasa Ustası</option>
             <option value="Efsane">🔥 Efsanevi Açıcı</option>
             <option value="Kral">👑 Kasa Kralı</option>
-            <option value="Hükümdar">⚡ Kutu Hükümdarı</option>
-            <option value="Çiftçi">🌾 Usta Çiftçi</option>
+            <option value="Speedrunner">⚡ Şimşek Hızlısı</option>
+            <option value="Mayın Avcısı">💣 Mayın Avcısı</option>
           </select>
         </div>
-      </div>
 
-      <!-- Avatar Seçici -->
-      <div style="background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:8px;">
-        <div style="font-size:9.5px; font-weight:bold; color:var(--neon-blue); margin-bottom:6px;">🎭 Avatarını Seç:</div>
-        <div class="avatar-grid" id="profile-avatar-box"></div>
-      </div>
+        <!-- Avatar Seçme -->
+        <div>
+          <label style="font-size:8.5px; color:#94a3b8; font-weight:bold; margin-bottom:4px; display:block;">AVATARINI SEÇ</label>
+          <div class="avatar-picker-grid" id="settings-avatar-grid"></div>
+        </div>
 
-      <!-- Kişisel Mod Rekorları -->
-      <div style="font-size:9.5px; font-weight:bold; color:#cbd5e1;">🏆 Kişisel En İyi Rekorların:</div>
-      <div class="stat-box-grid">
-        <div class="stat-card">
-          <span style="font-size:7.5px; color:#94a3b8;">⚔️ Normal Kasa:</span>
-          <b style="font-size:10.5px; color:var(--neon-green);" id="st-norm">0 P</b>
+        <!-- Sistem Sesleri Aç/Kapa -->
+        <div class="toggle-switch-row">
+          <div>
+            <div style="font-size:9.5px; font-weight:bold; color:#fff;">Sistem Sesleri</div>
+            <div style="font-size:7.5px; color:#94a3b8;">Kasa açma ve uyarı sesleri</div>
+          </div>
+          <input type="checkbox" id="setting-chk-sound" style="width:16px; height:16px; cursor:pointer;" checked>
         </div>
-        <div class="stat-card">
-          <span style="font-size:7.5px; color:#94a3b8;">🎯 Yakala & Aç:</span>
-          <b style="font-size:10.5px; color:var(--neon-green);" id="st-catch">0 P</b>
-        </div>
-        <div class="stat-card">
-          <span style="font-size:7.5px; color:#94a3b8;">💣 Mayın Tarlası:</span>
-          <b style="font-size:10.5px; color:var(--neon-green);" id="st-mines">0 P</b>
-        </div>
-        <div class="stat-card">
-          <span style="font-size:7.5px; color:#94a3b8;">⚡ Speedrun (Süre):</span>
-          <b style="font-size:10.5px; color:var(--neon-gold);" id="st-speed">-</b>
-        </div>
-      </div>
 
+        <button type="button" class="btn-start" style="background:#16a34a; padding:10px; font-weight:bold; font-size:11px;" onclick="applyProfileSettings()">💾 Değişiklikleri Kaydet</button>
+
+        <hr style="border:0; border-top:1px solid #1e293b; margin:4px 0;">
+
+        <!-- Çıkış ve Hesap Silme Butonları -->
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <button type="button" class="icon-btn" style="background:#334155; border:none; justify-content:center; padding:8px; font-size:10px;" onclick="safeLogout()">🚪 Güvenli Çıkış Yap</button>
+          <button type="button" class="icon-btn" style="background:#7f1d1d; border:1px solid var(--danger); justify-content:center; padding:8px; font-size:10px; color:#fca5a5;" onclick="deleteAccountPermanently()">⚠️ Hesabı Hepten Sil</button>
+        </div>
+
+      </div>
     </div>
 
   </div>
 
   <script src="app.js"></script>
   <script>
-    let currentSelectedAvatar = "👤";
+    let tempSelectedAvatar = "👤";
 
     window.onload = () => {
-      const u = getActiveUser();
-      if (!u) return location.href = "index.html";
-
-      currentSelectedAvatar = u.avatar || "👤";
-      document.getElementById("p-avatar-preview").innerText = currentSelectedAvatar;
-      document.getElementById("p-full-tag").innerText = `${u.name}${u.tag || ''}`;
-      document.getElementById("p-title-badge").innerText = u.title || "Çaylak";
-      document.getElementById("in-profile-name").value = u.name || "";
-      document.getElementById("sel-profile-title").value = u.title || "Çaylak";
-      document.getElementById("p-join-date").innerText = u.joinDate || "2026";
-
-      renderAvatarSelection();
-      loadUserStats();
+      loadProfileData();
     };
 
-    function renderAvatarSelection() {
-      const box = document.getElementById("profile-avatar-box");
+    function toggleSettingsDrawer(open) {
+      const drawer = document.getElementById("settings-drawer");
+      const backdrop = document.getElementById("settings-backdrop");
+      if (open) {
+        drawer.classList.add("open");
+        backdrop.classList.add("active");
+      } else {
+        drawer.classList.remove("open");
+        backdrop.classList.remove("active");
+      }
+    }
+
+    function loadProfileData() {
+      const u = getActiveUser();
+      if (!u) {
+        location.href = "index.html";
+        return;
+      }
+
+      tempSelectedAvatar = u.avatar || "👤";
+      document.getElementById("prof-avatar").innerText = tempSelectedAvatar;
+      document.getElementById("prof-name").innerText = `${u.name}${u.tag || ''}`;
+      document.getElementById("prof-title").innerText = `[${u.title || 'Çaylak'}]`;
+
+      // Ayarlar Formunu Doldur
+      document.getElementById("setting-input-name").value = u.name || "";
+      document.getElementById("setting-select-title").value = u.title || "Çaylak";
+      document.getElementById("setting-chk-sound").checked = u.sound !== false;
+
+      renderAvatarGrid();
+      loadStatsFromFirebase(u);
+    }
+
+    function renderAvatarGrid() {
+      const box = document.getElementById("settings-avatar-grid");
       box.innerHTML = "";
       AVATAR_LIST.forEach(av => {
-        const div = document.createElement("div");
-        div.className = "avatar-option" + (av === currentSelectedAvatar ? " selected" : "");
-        div.innerText = av;
-        div.onclick = () => {
-          currentSelectedAvatar = av;
-          document.getElementById("p-avatar-preview").innerText = av;
-          renderAvatarSelection();
+        const item = document.createElement("div");
+        item.className = "avatar-pick-item" + (av === tempSelectedAvatar ? " selected" : "");
+        item.innerText = av;
+        item.onclick = () => {
+          tempSelectedAvatar = av;
+          renderAvatarGrid();
         };
-        box.appendChild(div);
+        box.appendChild(item);
       });
     }
 
-    function loadUserStats() {
+    function loadStatsFromFirebase(u) {
+      // Yerel skorlar
       try {
-        const scores = JSON.parse(localStorage.getItem("kutu_local_scores")) || {};
-        document.getElementById("st-norm").innerText = (scores["standard"] || 0) + " P";
-        document.getElementById("st-catch").innerText = (scores["catch_open"] || 0) + " P";
-        document.getElementById("st-mines").innerText = (scores["mines_mode"] || 0) + " P";
-        document.getElementById("st-speed").innerText = scores["speedrun_mode"] ? scores["speedrun_mode"] + " sn" : "-";
+        const local = JSON.parse(localStorage.getItem("kutu_local_scores")) || {};
+        document.getElementById("st-norm").innerText = (local["standard"] || 0) + " P";
+        document.getElementById("st-catch").innerText = (local["catch_open"] || 0) + " P";
+        document.getElementById("st-mines").innerText = (local["mines_mode"] || 0) + " P";
+        document.getElementById("st-speed").innerText = local["speedrun_mode"] ? local["speedrun_mode"] + " sn" : "-";
       } catch (e) {}
+
+      // Firebase İstatistikleri (Toplam oynama, kazanma ve mayın oranı)
+      if (db && u.uid) {
+        const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+        db.ref(`users/${cleanUID}/stats`).once("value").then(snap => {
+          const stats = snap.val() || {};
+          let totalPlayed = 0, totalWins = 0;
+
+          for (let m in stats) {
+            totalPlayed += (stats[m].played || 0);
+            totalWins += (stats[m].wins || 0);
+          }
+
+          document.getElementById("stat-total-played").innerText = `${totalPlayed} Maç`;
+          document.getElementById("stat-total-wins").innerText = `${totalWins} Galibiyet`;
+
+          // Mayın Tarlası Özeli
+          const mStats = stats["mines_mode"] || { played: 0, wins: 0 };
+          const mPlayed = mStats.played || 0;
+          const mWins = mStats.wins || 0;
+          const mRate = mPlayed > 0 ? Math.round((mWins / mPlayed) * 100) : 0;
+
+          document.getElementById("stat-mines-record").innerText = `${mPlayed} / ${mWins}`;
+          document.getElementById("stat-mines-rate").innerText = `%${mRate}`;
+        });
+      }
     }
 
-    function saveAllProfileChanges() {
-      const newName = document.getElementById("in-profile-name").value.trim();
-      const newTitle = document.getElementById("sel-profile-title").value;
+    function applyProfileSettings() {
+      const newName = document.getElementById("setting-input-name").value.trim();
+      const newTitle = document.getElementById("setting-select-title").value;
+      const soundVal = document.getElementById("setting-chk-sound").checked;
 
       if (!newName) return alert("Kullanıcı adı boş bırakılamaz!");
 
@@ -206,11 +430,21 @@
 
       u.name = newName;
       u.title = newTitle;
-      u.avatar = currentSelectedAvatar;
+      u.avatar = tempSelectedAvatar;
+      u.sound = soundVal;
 
       setActiveUser(u);
-      alert("✅ Profiliniz başarıyla güncellendi!");
-      location.href = "menu.html";
+      alert("✅ Ayarlarınız başarıyla kaydedildi!");
+      toggleSettingsDrawer(false);
+      loadProfileData();
+    }
+
+    function safeLogout() {
+      if (confirm("Oturumu kapatıp çıkmak istediğinize emin misiniz?")) {
+        localStorage.removeItem("kutu_active_session");
+        localStorage.removeItem("kutu_active_user");
+        location.href = "index.html";
+      }
     }
   </script>
 </body>
