@@ -88,21 +88,24 @@
 <body>
   <div class="lb-layout">
     
+    <!-- Üst Başlık -->
     <div class="lb-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 8px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
       <div style="font-weight:900; font-size:11px; color:#38bdf8;">🏆 Liderlik Sıralamaları</div>
       <div id="lbl-my-current-score" style="font-size:8.5px; color:var(--neon-gold); font-weight:bold;">Durumum: -</div>
     </div>
 
+    <!-- Mod Kategorileri Şeridi -->
     <div class="lb-modes-scroll">
-      <button type="button" class="lb-chip active" id="chip-all_top3" onclick="switchLBMode('all_top3')">🌟 Genel (Tümü)</button>
-      <button type="button" class="lb-chip" id="chip-standard" onclick="switchLBMode('standard')">⚔️ Normal Kasa</button>
-      <button type="button" class="lb-chip" id="chip-catch_open" onclick="switchLBMode('catch_open')">🎯 Yakala & Aç</button>
-      <button type="button" class="lb-chip" id="chip-mines_mode" onclick="switchLBMode('mines_mode')">💣 Mayın Tarlası</button>
-      <button type="button" class="lb-chip" id="chip-speedrun_mode" onclick="switchLBMode('speedrun_mode')">⚡ Speedrun (Süre)</button>
-      <button type="button" class="lb-chip" id="chip-double_mode" onclick="switchLBMode('double_mode')">🎰 Çift Rulet</button>
+      <button type="button" class="lb-chip active" id="chip-all" onclick="switchLB('all')">🌟 Genel (Tümü)</button>
+      <button type="button" class="lb-chip" id="chip-standard" onclick="switchLB('standard')">⚔️ Normal Kasa</button>
+      <button type="button" class="lb-chip" id="chip-catch_open" onclick="switchLB('catch_open')">🎯 Yakala & Aç</button>
+      <button type="button" class="lb-chip" id="chip-mines_mode" onclick="switchLB('mines_mode')">💣 Mayın Tarlası</button>
+      <button type="button" class="lb-chip" id="chip-speedrun_mode" onclick="switchLB('speedrun_mode')">⚡ Speedrun (Süre)</button>
+      <button type="button" class="lb-chip" id="chip-double_mode" onclick="switchLB('double_mode')">🎰 Çift Rulet</button>
     </div>
 
+    <!-- Sıralama Listesi -->
     <div class="lb-list-area" id="leaderboard-container">
       <div style="color:#64748b; font-size:8px; text-align:center; padding:15px;">Sıralama yükleniyor...</div>
     </div>
@@ -110,33 +113,22 @@
   </div>
 
   <script>
-    let currentMode = 'all_top3';
-
-    // Speedrun Süre Düzelticisi: Milisaniye ise 1000'e böler, saniye ise direkt yazar
-    function parseSpeedrunTime(val) {
-      let num = parseFloat(val) || 0;
-      if (num <= 0) return 0;
-      // 100'den büyükse milisaniyedir (örn: 20400ms -> 20.4s)
-      if (num > 100) {
-        num = num / 1000;
-      }
-      return parseFloat(num.toFixed(1));
-    }
+    let currentFilter = 'all';
 
     window.onload = () => {
-      switchLBMode('all_top3');
+      switchLB('all');
     };
 
-    function switchLBMode(modeKey) {
-      currentMode = modeKey;
+    function switchLB(filterKey) {
+      currentFilter = filterKey;
       document.querySelectorAll(".lb-chip").forEach(c => c.classList.remove("active"));
-      const activeEl = document.getElementById(`chip-${modeKey}`);
-      if (activeEl) activeEl.classList.add("active");
+      const activeBtn = document.getElementById(`chip-${filterKey}`);
+      if (activeBtn) activeBtn.classList.add("active");
 
-      loadLeaderboard(modeKey);
+      renderLeaderboard(filterKey);
     }
 
-    function loadLeaderboard(modeKey) {
+    function renderLeaderboard(filterKey) {
       const container = document.getElementById("leaderboard-container");
       container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Yükleniyor...</div>";
 
@@ -144,176 +136,181 @@
       const myUID = u ? String(u.uid || u.name).replace(/[.#$\[\]]/g, "_") : "";
 
       if (!db) {
-        container.innerHTML = "<div style='color:var(--danger); font-size:8px; text-align:center; padding:15px;'>Veritabanı bağlantısı kurulamadı.</div>";
+        container.innerHTML = "<div style='color:var(--danger); font-size:8px; text-align:center; padding:15px;'>Veritabanı bağlantısı yok.</div>";
         return;
       }
 
-      db.ref("game_scores").on("value", snap => {
+      // Hem leaderboards hem de game_scores düğümlerini birlikte çekiyoruz
+      Promise.all([
+        db.ref("leaderboards").once("value"),
+        db.ref("game_scores").once("value")
+      ]).then(([snapLB, snapGS]) => {
         container.innerHTML = "";
-        let rawRecords = [];
+        let usersMap = {};
 
-        if (snap.exists()) {
-          snap.forEach(c => {
-            const val = c.val();
-            if (val && typeof val === "object") rawRecords.push(val);
-          });
-        }
+        function processRecord(rec) {
+          if (!rec || typeof rec !== "object") return;
+          const uid = String(rec.uid || rec.fullName || 'guest').replace(/[.#$\[\]]/g, "_");
+          const name = rec.fullName || rec.username || rec.name || 'Oyuncu';
+          const avatar = rec.avatar || '👤';
+          const title = rec.title || 'Çaylak';
 
-        if (rawRecords.length === 0) {
-          container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Kayıtlı skor bulunamadı.</div>";
-          document.getElementById("lbl-my-current-score").innerText = "Durumum: -";
-          return;
-        }
-
-        let userMap = {};
-
-        rawRecords.forEach(s => {
-          if (!s) return;
-          const uid = String(s.uid || s.username || 'guest').replace(/[.#$\[\]]/g, "_");
-          let rawName = String(s.username || s.name || 'Oyuncu');
-          if (rawName.toLowerCase() === "true" || rawName.toLowerCase() === "false") rawName = "Oyuncu";
-
-          let scoreVal = parseFloat(s.score !== undefined ? s.score : (s.points !== undefined ? s.points : s.time)) || 0;
-          let mode = String(s.gameMode || s.mode || 'standard').toLowerCase().trim();
-
-          // Mod eşleştirme (Mayın ve diğerleri için garantiye alıyoruz)
+          let mode = String(rec.gameMode || rec.mode || 'standard').toLowerCase().trim();
           if (mode === "normal" || mode === "klasik") mode = "standard";
           if (mode === "catch" || mode === "yakala") mode = "catch_open";
-          if (mode === "mines" || mode === "mayin" || mode === "mines_mode") mode = "mines_mode";
-          if (mode === "speedrun" || mode === "speedrun_mode") mode = "speedrun_mode";
+          if (mode === "mines" || mode === "mayin") mode = "mines_mode";
+          if (mode === "speedrun") mode = "speedrun_mode";
           if (mode === "double" || mode === "rulet") mode = "double_mode";
 
-          if (!userMap[uid]) {
-            userMap[uid] = {
-              name: rawName,
-              avatar: s.avatar || '👤',
-              title: s.title || 'Çaylak',
-              modeScores: {}
+          if (!usersMap[uid]) {
+            usersMap[uid] = {
+              uid: uid,
+              name: name,
+              avatar: avatar,
+              title: title,
+              modes: {}
             };
           }
 
-          if (mode === 'speedrun_mode') {
-            let sTime = parseSpeedrunTime(scoreVal);
-            if (sTime > 0) {
-              if (!userMap[uid].modeScores[mode] || sTime < userMap[uid].modeScores[mode]) {
-                userMap[uid].modeScores[mode] = sTime;
+          if (mode === "speedrun_mode") {
+            let t = parseFloat(rec.time !== undefined ? rec.time : rec.score) || 0;
+            // Eski hatalı 1 saniyelik veya imkansız kayıtları yoksay
+            if (t > 4.0) {
+              if (!usersMap[uid].modes[mode] || t < usersMap[uid].modes[mode]) {
+                usersMap[uid].modes[mode] = t;
               }
             }
           } else {
-            if (!userMap[uid].modeScores[mode] || scoreVal > userMap[uid].modeScores[mode]) {
-              userMap[uid].modeScores[mode] = scoreVal;
+            let p = parseFloat(rec.score !== undefined ? rec.score : rec.points) || 0;
+            if (p > 0) {
+              if (!usersMap[uid].modes[mode] || p > usersMap[uid].modes[mode]) {
+                usersMap[uid].modes[mode] = p;
+              }
             }
           }
-        });
+        }
 
-        let list = Object.keys(userMap).map(uid => {
-          const d = userMap[uid];
-          const std = d.modeScores['standard'] || 0;
-          const catchOp = d.modeScores['catch_open'] || 0;
-          const mines = d.modeScores['mines_mode'] || 0;
-          const top3Total = std + catchOp + mines;
+        if (snapLB.exists()) {
+          snapLB.forEach(mSnap => {
+            mSnap.forEach(uSnap => processRecord(uSnap.val()));
+          });
+        }
+
+        if (snapGS.exists()) {
+          snapGS.forEach(gSnap => processRecord(gSnap.val()));
+        }
+
+        let userList = Object.keys(usersMap).map(id => {
+          const d = usersMap[id];
+          const normP = d.modes["standard"] || 0;
+          const catchP = d.modes["catch_open"] || 0;
+          const minesP = d.modes["mines_mode"] || 0;
+          const top3Sum = normP + catchP + minesP;
 
           return {
-            uid: uid,
+            uid: id,
             name: d.name,
             avatar: d.avatar,
             title: d.title,
-            stdScore: std,
-            catchScore: catchOp,
-            minesScore: mines,
-            top3Total: top3Total,
-            modeScore: d.modeScores[modeKey] || 0
+            normP: normP,
+            catchP: catchP,
+            minesP: minesP,
+            top3Sum: top3Sum,
+            speedrunTime: d.modes["speedrun_mode"] || 0,
+            singleScore: d.modes[filterKey] || 0
           };
         });
 
-        if (modeKey === 'all_top3') {
-          list = list.filter(item => item.top3Total > 0);
-          list.sort((a, b) => b.top3Total - a.top3Total);
-        } else if (modeKey === 'speedrun_mode') {
-          list = list.filter(item => item.modeScore > 0);
-          list.sort((a, b) => a.modeScore - b.modeScore); // En az süre en başta
+        // SIRALAMA MANTIĞI
+        if (filterKey === 'all') {
+          userList = userList.filter(u => u.top3Sum > 0);
+          userList.sort((a, b) => b.top3Sum - a.top3Sum);
+        } else if (filterKey === 'speedrun_mode') {
+          userList = userList.filter(u => u.speedrunTime > 0);
+          userList.sort((a, b) => a.speedrunTime - b.speedrunTime); // En kısa süre birinci
         } else {
-          list = list.filter(item => item.modeScore > 0);
-          list.sort((a, b) => b.modeScore - a.modeScore);
+          userList = userList.filter(u => u.singleScore > 0);
+          userList.sort((a, b) => b.singleScore - a.singleScore);
         }
 
-        const myItem = list.find(l => l.uid === myUID);
-        if (myItem) {
-          if (modeKey === 'all_top3') {
-            document.getElementById("lbl-my-current-score").innerText = `Toplam: ${myItem.top3Total} P`;
-          } else if (modeKey === 'speedrun_mode') {
-            document.getElementById("lbl-my-current-score").innerText = `Sürem: ${myItem.modeScore}s`;
-          } else {
-            document.getElementById("lbl-my-current-score").innerText = `Puanım: ${myItem.modeScore} P`;
-          }
+        // Oyuncunun kendi durumunu üstte göster
+        const me = userList.find(u => u.uid === myUID);
+        const myScoreEl = document.getElementById("lbl-my-current-score");
+        if (me) {
+          if (filterKey === 'all') myScoreEl.innerText = `Toplamım: ${me.top3Sum} P`;
+          else if (filterKey === 'speedrun_mode') myScoreEl.innerText = `Sürem: ${me.speedrunTime.toFixed(1)} sn`;
+          else myScoreEl.innerText = `Puanım: ${me.singleScore} P`;
         } else {
-          document.getElementById("lbl-my-current-score").innerText = `Durumum: -`;
+          myScoreEl.innerText = "Durumum: -";
         }
 
-        if (list.length === 0) {
-          container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Bu kategoride henüz skor kaydedilmemiş.</div>";
+        if (userList.length === 0) {
+          container.innerHTML = "<div style='color:#64748b; font-size:8px; text-align:center; padding:15px;'>Bu kategoride kayıt bulunamadı.</div>";
           return;
         }
 
-        list.slice(0, 50).forEach((item, idx) => {
-          const isMe = item.uid === myUID;
+        userList.slice(0, 50).forEach((item, idx) => {
           const div = document.createElement("div");
           div.className = "rank-item-card";
-          if (isMe) div.style.borderColor = "var(--neon-gold)";
+          if (item.uid === myUID) div.style.borderColor = "var(--neon-gold)";
 
-          let rankBadge = `#${idx + 1}`;
-          if (idx === 0) rankBadge = "🥇 1.";
-          else if (idx === 1) rankBadge = "🥈 2.";
-          else if (idx === 2) rankBadge = "🥉 3.";
+          let badge = `#${idx + 1}`;
+          if (idx === 0) badge = "🥇 1.";
+          else if (idx === 1) badge = "🥈 2.";
+          else if (idx === 2) badge = "🥉 3.";
 
-          if (modeKey === 'all_top3') {
+          if (filterKey === 'all') {
+            // TÜMÜ KATEGORİSİ (Normal + Yakala + Mayın Dökümü)
             div.innerHTML = `
               <div style="display:flex; align-items:center; gap:5px;">
-                <span style="font-weight:bold; color:#38bdf8; width:22px;">${rankBadge}</span>
+                <span style="font-weight:bold; color:#38bdf8; width:22px;">${badge}</span>
                 <span>${item.avatar}</span>
                 <div>
                   <b style="color:#fff;">${item.name}</b>
                   <div style="color:#94a3b8; font-size:6.5px;">
-                    ⚔️ Normal: <span style="color:#38bdf8;">${item.stdScore}</span> | 
-                    🎯 Yakala: <span style="color:#c084fc;">${item.catchScore}</span> | 
-                    💣 Mayın: <span style="color:#f87171;">${item.minesScore}</span>
+                    ⚔️ Normal: <span style="color:#38bdf8;">${item.normP}</span> | 
+                    🎯 Yakala: <span style="color:#c084fc;">${item.catchP}</span> | 
+                    💣 Mayın: <span style="color:#f87171;">${item.minesP}</span>
                   </div>
                 </div>
               </div>
               <div style="text-align:right;">
-                <div style="font-weight:900; color:var(--neon-green); font-size:10.5px;">${item.top3Total} P</div>
+                <div style="font-weight:900; color:var(--neon-green); font-size:10.5px;">${item.top3Sum} P</div>
                 <small style="color:#64748b; font-size:6px;">Genel Toplam</small>
               </div>
             `;
-          } else if (modeKey === 'speedrun_mode') {
+          } else if (filterKey === 'speedrun_mode') {
+            // SPEEDRUN KATEGORİSİ (Süre Bazlı)
             div.innerHTML = `
               <div style="display:flex; align-items:center; gap:5px;">
-                <span style="font-weight:bold; color:#38bdf8; width:22px;">${rankBadge}</span>
+                <span style="font-weight:bold; color:#38bdf8; width:22px;">${badge}</span>
                 <span>${item.avatar}</span>
                 <div>
-                  <b>${item.name}</b>
+                  <b style="color:#fff;">${item.name}</b>
                   <div style="color:#94a3b8; font-size:6.5px;">${item.title}</div>
                 </div>
               </div>
-              <div style="font-weight:bold; color:var(--neon-gold); font-size:10px;">⚡ ${item.modeScore}s</div>
+              <div style="font-weight:bold; color:var(--neon-gold); font-size:10px;">⚡ ${item.speedrunTime.toFixed(1)} sn</div>
             `;
           } else {
+            // DİĞER TEKLİ MODLAR
             div.innerHTML = `
               <div style="display:flex; align-items:center; gap:5px;">
-                <span style="font-weight:bold; color:#38bdf8; width:22px;">${rankBadge}</span>
+                <span style="font-weight:bold; color:#38bdf8; width:22px;">${badge}</span>
                 <span>${item.avatar}</span>
                 <div>
-                  <b>${item.name}</b>
+                  <b style="color:#fff;">${item.name}</b>
                   <div style="color:#94a3b8; font-size:6.5px;">${item.title}</div>
                 </div>
               </div>
-              <div style="font-weight:bold; color:var(--neon-green); font-size:10px;">${item.modeScore} P</div>
+              <div style="font-weight:bold; color:var(--neon-green); font-size:10px;">${item.singleScore} P</div>
             `;
           }
 
           container.appendChild(div);
         });
-      }, err => {
+
+      }).catch(err => {
         container.innerHTML = `<div style='color:var(--danger); font-size:8px; text-align:center; padding:15px;'>Hata: ${err.message}</div>`;
       });
     }
