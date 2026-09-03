@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Profil & Ayarlar</title>
+  <title>Oyuncu Profili</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -30,74 +30,66 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 100;
+      z-index: 50;
     }
 
     .user-content {
       flex: 1;
-      min-height: 0;
       overflow-y: auto;
-      padding: 12px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      -webkit-overflow-scrolling: touch;
     }
-    .user-content::-webkit-scrollbar { width: 3px; }
-    .user-content::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
 
-    /* Profil Üst Alanı */
-    .profile-hero-card {
-      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+    /* Profil Kartı */
+    .profile-card {
+      background: linear-gradient(135deg, #1e1b4b, #0f172a);
       border: 1px solid #334155;
       border-radius: 12px;
-      padding: 14px;
+      padding: 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
 
-    .profile-avatar-circle {
-      width: 58px;
-      height: 58px;
-      background: #0b1120;
+    .profile-avatar {
+      width: 62px;
+      height: 62px;
+      background: #060913;
       border: 2px solid var(--neon-gold);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
+      font-size: 34px;
       flex-shrink: 0;
     }
 
-    /* İstatistik Tabloları */
-    .section-title {
-      font-size: 10.5px;
+    /* İstatistik Blokları */
+    .stat-section-title {
+      font-size: 10px;
       font-weight: 800;
       color: #94a3b8;
-      letter-spacing: 0.5px;
       text-transform: uppercase;
-      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
     }
 
-    .stat-grid {
+    .stat-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .stat-card {
+    .stat-box {
       background: #0b1329;
       border: 1px solid #1e293b;
       border-radius: 8px;
-      padding: 8px 10px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
-    }
-
-    .stat-card.full {
-      grid-column: span 2;
+      gap: 3px;
     }
 
     /* Sağdan Kayar Ayarlar Menüsü (Drawer) */
@@ -105,28 +97,42 @@
       position: absolute;
       top: 0;
       right: -100%;
-      width: 85%;
-      max-width: 380px;
+      width: 82%;
+      max-width: 360px;
       height: 100%;
       background: #090d1a;
-      border-left: 2px solid #1e293b;
-      z-index: 200;
+      border-left: 2px solid #334155;
+      z-index: 300;
       display: flex;
       flex-direction: column;
-      transition: right 0.28s ease-in-out;
-      box-shadow: -8px 0 25px rgba(0,0,0,0.7);
+      transition: right 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: -8px 0 25px rgba(0,0,0,0.8);
     }
-    .settings-drawer.open {
+    .settings-drawer.active {
       right: 0;
     }
 
+    .drawer-backdrop {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.65);
+      z-index: 200;
+    }
+    .drawer-backdrop.active {
+      display: block;
+    }
+
     .drawer-header {
-      padding: 10px 12px;
+      padding: 12px;
+      background: #050814;
       border-bottom: 1px solid #1e293b;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #050814;
     }
 
     .drawer-body {
@@ -138,21 +144,7 @@
       gap: 12px;
     }
 
-    .drawer-backdrop {
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.65);
-      z-index: 150;
-    }
-    .drawer-backdrop.active {
-      display: block;
-    }
-
-    .avatar-picker-grid {
+    .avatar-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       gap: 6px;
@@ -162,7 +154,7 @@
       border: 1px solid #1e293b;
     }
 
-    .avatar-pick-item {
+    .avatar-cell {
       font-size: 20px;
       background: #0f172a;
       border: 1px solid #334155;
@@ -171,93 +163,60 @@
       padding: 4px 0;
       cursor: pointer;
     }
-    .avatar-pick-item.selected {
+    .avatar-cell.active {
       border-color: var(--neon-gold);
       background: #1e1b4b;
-    }
-
-    .toggle-switch-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 8px;
-      padding: 10px;
     }
   </style>
 </head>
 <body>
   <div class="user-layout">
     
-    <!-- Üst Başlık Barı -->
+    <!-- Üst Bar -->
     <div class="user-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:3px 8px; font-size:10px; text-decoration:none;">‹ Lobi</a>
-      <div style="font-weight:900; font-size:12px; color:var(--neon-gold);">👤 Oyuncu Profili</div>
-      <button type="button" class="icon-btn" style="border-color:#38bdf8; padding:3px 8px; font-size:10px;" onclick="toggleSettingsDrawer(true)">⚙️ Ayarlar</button>
+      <div style="font-weight:bold; font-size:11.5px; color:#38bdf8;">👤 Oyuncu Profili</div>
+      <button type="button" class="icon-btn" style="border-color:var(--neon-gold); padding:3px 8px; font-size:10px;" onclick="openDrawer(true)">⚙️ Ayarlar</button>
     </div>
 
-    <!-- Salt Profil Görüntüleme Alanı -->
+    <!-- 1. BÖLÜM: YALNIZCA PROFİL VE İSTATİSTİKLER (HERKES AYNI GÖRÜR) -->
     <div class="user-content">
       
-      <!-- Ana Profil Bilgisi -->
-      <div class="profile-hero-card">
-        <div class="profile-avatar-circle" id="prof-avatar">👤</div>
-        <div style="flex:1;">
-          <div style="font-weight:900; font-size:14px; color:#fff;" id="prof-name">Oyuncu#0000</div>
-          <div style="font-size:10px; color:var(--neon-gold); font-weight:bold; margin-top:2px;" id="prof-title">[Çaylak]</div>
+      <!-- Profil Başlığı -->
+      <div class="profile-card">
+        <div class="profile-avatar" id="p-avatar">👤</div>
+        <div>
+          <div style="font-size:15px; font-weight:900; color:#fff;" id="p-username">Oyuncu#0000</div>
+          <div style="font-size:11px; font-weight:bold; color:var(--neon-gold); margin-top:2px;" id="p-title">[Çaylak]</div>
         </div>
       </div>
 
-      <!-- Genel İstatistikler -->
+      <!-- Genel İstatistik -->
       <div>
-        <div class="section-title">📊 Oyun İstatistikleri</div>
-        <div class="stat-grid">
-          <div class="stat-card">
-            <span style="font-size:8px; color:#94a3b8;">TOPLAM OYNAMA</span>
-            <b style="font-size:14px; color:#38bdf8;" id="stat-total-played">0 Maç</b>
+        <div class="stat-section-title">📊 Oyun İstatistikleri</div>
+        <div class="stat-row">
+          <div class="stat-box">
+            <span style="font-size:8.5px; color:#94a3b8;">TOPLAM OYNAMA</span>
+            <b style="font-size:14px; color:#38bdf8;" id="st-total-played">0 Maç</b>
           </div>
-          <div class="stat-card">
-            <span style="font-size:8px; color:#94a3b8;">GENEL KAZANMA</span>
-            <b style="font-size:14px; color:var(--neon-green);" id="stat-total-wins">0 Galibiyet</b>
-          </div>
-        </div>
-      </div>
-
-      <!-- Mayın Tarlası Özel İstatistiği -->
-      <div>
-        <div class="section-title">💣 Mayın Tarlası Karnesi</div>
-        <div class="stat-grid">
-          <div class="stat-card">
-            <span style="font-size:8px; color:#94a3b8;">OYNAMA / KAZANMA</span>
-            <b style="font-size:13px; color:#f87171;" id="stat-mines-record">0 / 0</b>
-          </div>
-          <div class="stat-card">
-            <span style="font-size:8px; color:#94a3b8;">KAZANMA ORANI</span>
-            <b style="font-size:13px; color:var(--neon-gold);" id="stat-mines-rate">%0</b>
+          <div class="stat-box">
+            <span style="font-size:8.5px; color:#94a3b8;">TOPLAM KAZANMA</span>
+            <b style="font-size:14px; color:var(--neon-green);" id="st-total-wins">0 Galibiyet</b>
           </div>
         </div>
       </div>
 
-      <!-- Mod Rekorları -->
+      <!-- Mayın Tarlası Özel Bölümü -->
       <div>
-        <div class="section-title">🏆 En İyi Skorların</div>
-        <div class="stat-grid">
-          <div class="stat-card">
-            <span style="font-size:7.5px; color:#94a3b8;">⚔️ Normal Kasa:</span>
-            <b style="font-size:11px; color:var(--neon-green);" id="st-norm">0 P</b>
+        <div class="stat-section-title">💣 Mayın Tarlası Karnesi</div>
+        <div class="stat-row">
+          <div class="stat-box">
+            <span style="font-size:8.5px; color:#94a3b8;">OYNAMA / KAZANMA</span>
+            <b style="font-size:13px; color:#f87171;" id="st-mines-record">0 / 0</b>
           </div>
-          <div class="stat-card">
-            <span style="font-size:7.5px; color:#94a3b8;">🎯 Yakala & Aç:</span>
-            <b style="font-size:11px; color:var(--neon-green);" id="st-catch">0 P</b>
-          </div>
-          <div class="stat-card">
-            <span style="font-size:7.5px; color:#94a3b8;">💣 Mayın Tarlası:</span>
-            <b style="font-size:11px; color:var(--neon-green);" id="st-mines">0 P</b>
-          </div>
-          <div class="stat-card">
-            <span style="font-size:7.5px; color:#94a3b8;">⚡ Speedrun:</span>
-            <b style="font-size:11px; color:var(--neon-gold);" id="st-speed">-</b>
+          <div class="stat-box">
+            <span style="font-size:8.5px; color:#94a3b8;">KAZANMA ORANI</span>
+            <b style="font-size:13px; color:var(--neon-gold);" id="st-mines-rate">%0</b>
           </div>
         </div>
       </div>
@@ -265,58 +224,59 @@
     </div>
 
     <!-- Karartma Arka Planı -->
-    <div class="drawer-backdrop" id="settings-backdrop" onclick="toggleSettingsDrawer(false)"></div>
+    <div class="drawer-backdrop" id="backdrop" onclick="openDrawer(false)"></div>
 
-    <!-- Sağdan Kayar Ayarlar Penceresi (Drawer) -->
-    <div class="settings-drawer" id="settings-drawer">
+    <!-- 2. BÖLÜM: SAĞDAN AÇILAN AYARLAR ÇEKMECESİ -->
+    <div class="settings-drawer" id="drawer">
       <div class="drawer-header">
-        <div style="font-weight:bold; font-size:11.5px; color:#38bdf8;">⚙️ Profil Ayarları</div>
-        <button class="icon-btn" style="border-color:#64748b; padding:2px 6px; font-size:9px;" onclick="toggleSettingsDrawer(false)">✕ Kapat</button>
+        <div style="font-weight:bold; font-size:12px; color:var(--neon-gold);">⚙️ Ayarlar</div>
+        <button class="icon-btn" style="border-color:#64748b; padding:2px 6px; font-size:9.5px;" onclick="openDrawer(false)">✕</button>
       </div>
 
       <div class="drawer-body">
         
-        <!-- İsim Değiştirme -->
+        <!-- 1. İsim Değiştirme -->
         <div>
-          <label style="font-size:8.5px; color:#94a3b8; font-weight:bold;">KULLANICI ADI</label>
-          <input type="text" id="setting-input-name" class="input-field" style="margin-top:4px; font-size:10.5px; padding:7px;" placeholder="Yeni adınız...">
+          <label style="font-size:8.5px; color:#94a3b8; font-weight:bold;">KULLANICI ADI DEĞİŞTİR</label>
+          <input type="text" id="set-name" class="input-field" style="margin-top:4px; font-size:11px; padding:7px;" placeholder="Yeni ad...">
         </div>
 
-        <!-- Unvan Seçme -->
+        <!-- 2. Unvan Seçme -->
         <div>
           <label style="font-size:8.5px; color:#94a3b8; font-weight:bold;">UNVAN SEÇ</label>
-          <select id="setting-select-title" class="input-field" style="margin-top:4px; font-size:10px; padding:7px; background:#0f172a;">
+          <select id="set-title" class="input-field" style="margin-top:4px; font-size:10px; padding:7px; background:#0f172a;">
             <option value="Çaylak">🌱 Çaylak</option>
             <option value="Usta">⚔️ Kasa Ustası</option>
             <option value="Efsane">🔥 Efsanevi Açıcı</option>
             <option value="Kral">👑 Kasa Kralı</option>
-            <option value="Speedrunner">⚡ Şimşek Hızlısı</option>
             <option value="Mayın Avcısı">💣 Mayın Avcısı</option>
+            <option value="Speedrunner">⚡ Speedrunner</option>
           </select>
         </div>
 
-        <!-- Avatar Seçme -->
+        <!-- 3. Avatar Seçme -->
         <div>
-          <label style="font-size:8.5px; color:#94a3b8; font-weight:bold; margin-bottom:4px; display:block;">AVATARINI SEÇ</label>
-          <div class="avatar-picker-grid" id="settings-avatar-grid"></div>
+          <label style="font-size:8.5px; color:#94a3b8; font-weight:bold; display:block; margin-bottom:4px;">AVATAR SEÇ</label>
+          <div class="avatar-grid" id="set-avatar-grid"></div>
         </div>
 
-        <!-- Sistem Sesleri Aç/Kapa -->
-        <div class="toggle-switch-row">
+        <!-- 4. Sistem Sesleri Aç/Kapa -->
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:10px; border:1px solid #1e293b; border-radius:8px;">
           <div>
-            <div style="font-size:9.5px; font-weight:bold; color:#fff;">Sistem Sesleri</div>
-            <div style="font-size:7.5px; color:#94a3b8;">Kasa açma ve uyarı sesleri</div>
+            <div style="font-size:10px; font-weight:bold; color:#fff;">Sistem Sesleri</div>
+            <div style="font-size:7.5px; color:#94a3b8;">Kasa açılış & efekt sesleri</div>
           </div>
-          <input type="checkbox" id="setting-chk-sound" style="width:16px; height:16px; cursor:pointer;" checked>
+          <input type="checkbox" id="set-sound" style="width:17px; height:17px; cursor:pointer;">
         </div>
 
-        <button type="button" class="btn-start" style="background:#16a34a; padding:10px; font-weight:bold; font-size:11px;" onclick="applyProfileSettings()">💾 Değişiklikleri Kaydet</button>
+        <!-- Kaydet Butonu -->
+        <button type="button" class="btn-start" style="background:#16a34a; padding:10px; font-weight:bold; font-size:11px; margin-top:4px;" onclick="saveDrawerSettings()">💾 Ayarları Kaydet</button>
 
         <hr style="border:0; border-top:1px solid #1e293b; margin:4px 0;">
 
-        <!-- Çıkış ve Hesap Silme Butonları -->
+        <!-- 5. Güvenli Çıkış & 6. Hesabı Silme -->
         <div style="display:flex; flex-direction:column; gap:6px;">
-          <button type="button" class="icon-btn" style="background:#334155; border:none; justify-content:center; padding:8px; font-size:10px;" onclick="safeLogout()">🚪 Güvenli Çıkış Yap</button>
+          <button type="button" class="icon-btn" style="background:#334155; border:none; justify-content:center; padding:8px; font-size:10px;" onclick="safeLogout()">🚪 Güvenli Hesaptan Çıkış</button>
           <button type="button" class="icon-btn" style="background:#7f1d1d; border:1px solid var(--danger); justify-content:center; padding:8px; font-size:10px; color:#fca5a5;" onclick="deleteAccountPermanently()">⚠️ Hesabı Hepten Sil</button>
         </div>
 
@@ -327,101 +287,86 @@
 
   <script src="app.js"></script>
   <script>
-    let tempSelectedAvatar = "👤";
+    let selectedAvatar = "👤";
 
     window.onload = () => {
-      loadProfileData();
+      loadProfileScreen();
     };
 
-    function toggleSettingsDrawer(open) {
-      const drawer = document.getElementById("settings-drawer");
-      const backdrop = document.getElementById("settings-backdrop");
-      if (open) {
-        drawer.classList.add("open");
-        backdrop.classList.add("active");
-      } else {
-        drawer.classList.remove("open");
-        backdrop.classList.remove("active");
-      }
+    function openDrawer(isOpen) {
+      document.getElementById("drawer").classList.toggle("active", isOpen);
+      document.getElementById("backdrop").classList.toggle("active", isOpen);
     }
 
-    function loadProfileData() {
+    function loadProfileScreen() {
       const u = getActiveUser();
       if (!u) {
         location.href = "index.html";
         return;
       }
 
-      tempSelectedAvatar = u.avatar || "👤";
-      document.getElementById("prof-avatar").innerText = tempSelectedAvatar;
-      document.getElementById("prof-name").innerText = `${u.name}${u.tag || ''}`;
-      document.getElementById("prof-title").innerText = `[${u.title || 'Çaylak'}]`;
+      // Profil Bilgilerini Ekrana Bas
+      selectedAvatar = u.avatar || "👤";
+      document.getElementById("p-avatar").innerText = selectedAvatar;
+      document.getElementById("p-username").innerText = `${u.name}${u.tag || ''}`;
+      document.getElementById("p-title").innerText = `[${u.title || 'Çaylak'}]`;
 
-      // Ayarlar Formunu Doldur
-      document.getElementById("setting-input-name").value = u.name || "";
-      document.getElementById("setting-select-title").value = u.title || "Çaylak";
-      document.getElementById("setting-chk-sound").checked = u.sound !== false;
+      // Ayarlar Çekmecesini Doldur
+      document.getElementById("set-name").value = u.name || "";
+      document.getElementById("set-title").value = u.title || "Çaylak";
+      document.getElementById("set-sound").checked = u.sound !== false;
 
       renderAvatarGrid();
-      loadStatsFromFirebase(u);
+      loadUserStats(u);
     }
 
     function renderAvatarGrid() {
-      const box = document.getElementById("settings-avatar-grid");
+      const box = document.getElementById("set-avatar-grid");
       box.innerHTML = "";
       AVATAR_LIST.forEach(av => {
-        const item = document.createElement("div");
-        item.className = "avatar-pick-item" + (av === tempSelectedAvatar ? " selected" : "");
-        item.innerText = av;
-        item.onclick = () => {
-          tempSelectedAvatar = av;
+        const cell = document.createElement("div");
+        cell.className = "avatar-cell" + (av === selectedAvatar ? " active" : "");
+        cell.innerText = av;
+        cell.onclick = () => {
+          selectedAvatar = av;
           renderAvatarGrid();
         };
-        box.appendChild(item);
+        box.appendChild(cell);
       });
     }
 
-    function loadStatsFromFirebase(u) {
-      // Yerel skorlar
-      try {
-        const local = JSON.parse(localStorage.getItem("kutu_local_scores")) || {};
-        document.getElementById("st-norm").innerText = (local["standard"] || 0) + " P";
-        document.getElementById("st-catch").innerText = (local["catch_open"] || 0) + " P";
-        document.getElementById("st-mines").innerText = (local["mines_mode"] || 0) + " P";
-        document.getElementById("st-speed").innerText = local["speedrun_mode"] ? local["speedrun_mode"] + " sn" : "-";
-      } catch (e) {}
+    function loadUserStats(u) {
+      if (!db || !u.uid) return;
 
-      // Firebase İstatistikleri (Toplam oynama, kazanma ve mayın oranı)
-      if (db && u.uid) {
-        const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
-        db.ref(`users/${cleanUID}/stats`).once("value").then(snap => {
-          const stats = snap.val() || {};
-          let totalPlayed = 0, totalWins = 0;
+      const cleanUID = String(u.uid).replace(/[.#$\[\]]/g, "_");
+      db.ref(`users/${cleanUID}/stats`).once("value").then(snap => {
+        const stats = snap.val() || {};
+        let totalPlayed = 0;
+        let totalWins = 0;
 
-          for (let m in stats) {
-            totalPlayed += (stats[m].played || 0);
-            totalWins += (stats[m].wins || 0);
-          }
+        for (let m in stats) {
+          totalPlayed += (stats[m].played || 0);
+          totalWins += (stats[m].wins || 0);
+        }
 
-          document.getElementById("stat-total-played").innerText = `${totalPlayed} Maç`;
-          document.getElementById("stat-total-wins").innerText = `${totalWins} Galibiyet`;
+        document.getElementById("st-total-played").innerText = `${totalPlayed} Maç`;
+        document.getElementById("st-total-wins").innerText = `${totalWins} Galibiyet`;
 
-          // Mayın Tarlası Özeli
-          const mStats = stats["mines_mode"] || { played: 0, wins: 0 };
-          const mPlayed = mStats.played || 0;
-          const mWins = mStats.wins || 0;
-          const mRate = mPlayed > 0 ? Math.round((mWins / mPlayed) * 100) : 0;
+        // Mayın Tarlası Karnesi
+        const mData = stats["mines_mode"] || { played: 0, wins: 0 };
+        const mPlayed = mData.played || 0;
+        const mWins = mData.wins || 0;
+        const mRate = mPlayed > 0 ? Math.round((mWins / mPlayed) * 100) : 0;
 
-          document.getElementById("stat-mines-record").innerText = `${mPlayed} / ${mWins}`;
-          document.getElementById("stat-mines-rate").innerText = `%${mRate}`;
-        });
-      }
+        document.getElementById("st-mines-record").innerText = `${mPlayed} / ${mWins}`;
+        document.getElementById("st-mines-rate").innerText = `%${mRate}`;
+      });
     }
 
-    function applyProfileSettings() {
-      const newName = document.getElementById("setting-input-name").value.trim();
-      const newTitle = document.getElementById("setting-select-title").value;
-      const soundVal = document.getElementById("setting-chk-sound").checked;
+    function saveDrawerSettings() {
+      const newName = document.getElementById("set-name").value.trim();
+      const newTitle = document.getElementById("set-title").value;
+      const soundVal = document.getElementById("set-sound").checked;
 
       if (!newName) return alert("Kullanıcı adı boş bırakılamaz!");
 
@@ -430,17 +375,17 @@
 
       u.name = newName;
       u.title = newTitle;
-      u.avatar = tempSelectedAvatar;
+      u.avatar = selectedAvatar;
       u.sound = soundVal;
 
       setActiveUser(u);
-      alert("✅ Ayarlarınız başarıyla kaydedildi!");
-      toggleSettingsDrawer(false);
-      loadProfileData();
+      alert("✅ Ayarlar kaydedildi!");
+      openDrawer(false);
+      loadProfileScreen();
     }
 
     function safeLogout() {
-      if (confirm("Oturumu kapatıp çıkmak istediğinize emin misiniz?")) {
+      if (confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
         localStorage.removeItem("kutu_active_session");
         localStorage.removeItem("kutu_active_user");
         location.href = "index.html";
