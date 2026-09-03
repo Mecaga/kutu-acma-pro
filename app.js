@@ -183,3 +183,24 @@ function updateUsernameGlobal(newName) {
   alert("Kullanıcı adı güncellendi: " + newName);
   location.reload();
 }
+
+
+// TEST BAĞLANTISI
+if (db) {
+  db.ref(".info/connected").on("value", snap => {
+    if (snap.val() === true) {
+      console.log("🟢 Firebase sunucusuna BAĞLANDI!");
+    } else {
+      console.warn("🔴 Firebase sunucusuna BAĞLANAMIYOR! (databaseURL veya internet kontrol et)");
+    }
+  });
+
+  db.ref("test_kayit").set({ zaman: Date.now() })
+    .then(() => console.log("✅ Veri yazma izni AÇIK, başarıyla yazıldı!"))
+    .catch(err => {
+      alert("⚠️ Firebase Yazma Engellendi: " + err.message);
+      console.error("Firebase Hata Kodu:", err);
+    });
+} else {
+  alert("❌ db nesnesi null! Firebase kütüphanesi yüklenemedi.");
+}
