@@ -6,7 +6,7 @@
   <title>PvP Lobisi - Kutu Açma Pro</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Firebase SDK -->
+  <!-- Firebase SDK (v8 Standart) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="app.js"></script>
@@ -123,7 +123,7 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.85);
       display: none;
       align-items: center;
       justify-content: center;
@@ -174,9 +174,9 @@
     
     <!-- Üst Bar -->
     <div class="menu-nav">
-      <a href="menu.html" class="icon-btn" style="border-color:#ef4444; color:#ef4444; padding:3px 8px; font-size:10px; text-decoration:none; border-radius:4px; border:1px solid;">‹ Ana Menü</a>
+      <a href="menu.html" style="border: 1px solid #ef4444; color:#ef4444; padding:3px 8px; font-size:10px; text-decoration:none; border-radius:4px;">‹ Ana Menü</a>
       <div style="font-weight:900; font-size:12.5px; color:#f59e0b;">⚔️ 1v1 PvP Lobisi</div>
-      <div style="font-size:8.5px; color:#22c55e;">● Canlı Lobi</div>
+      <div id="status-tag" style="font-size:8.5px; color:#22c55e;">● Bağlı</div>
     </div>
 
     <div class="menu-body">
@@ -190,15 +190,15 @@
         </div>
         <div class="mode-card" id="card-battleship" onclick="setMode('battleship')">
           <b style="font-size:11px; color:#38bdf8;">🚢 Amiral Battı</b>
-          <span style="font-size:8px; color:#94a3b8;">Kasa açarak filoyu batır</span>
+          <span style="font-size:8px; color:#94a3b8;">Kasa açarak filoyu yok et</span>
         </div>
         <div class="mode-card" id="card-classic" onclick="setMode('classic')">
           <b style="font-size:11px; color:#38bdf8;">⚔️ Normal Kasa</b>
-          <span style="font-size:8px; color:#94a3b8;">30s içinde en yüksek puan</span>
+          <span style="font-size:8px; color:#94a3b8;">30s içinde en çok puan</span>
         </div>
         <div class="mode-card" id="card-mines" onclick="setMode('mines')">
           <b style="font-size:11px; color:#38bdf8;">💣 Mayın Tarlası</b>
-          <span style="font-size:8px; color:#94a3b8;">Risk al, çarpanı katla</span>
+          <span style="font-size:8px; color:#94a3b8;">Risk al, bombadan kaç</span>
         </div>
       </div>
 
@@ -215,7 +215,7 @@
       <!-- 4. CANLI AÇIK ODALAR -->
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
         <div class="sec-tag">Canlı Açık Odalar</div>
-        <button type="button" class="icon-btn" style="padding:2px 6px; font-size:8px; background:none; border:1px solid #334155; color:#94a3b8; border-radius:4px;" onclick="streamRooms()">Yenile 🔄</button>
+        <button type="button" style="padding:2px 6px; font-size:8px; background:none; border:1px solid #334155; color:#94a3b8; border-radius:4px; cursor:pointer;" onclick="streamRooms()">Yenile 🔄</button>
       </div>
       <div id="rooms-list-container" style="display:flex; flex-direction:column; gap:6px;">
         <div style="color:#64748b; font-size:9.5px; text-align:center; padding:15px;">Odalar taranıyor...</div>
@@ -252,7 +252,193 @@
     </div>
   </div>
 
-  <!-- Ayrıştırılmış Lobi Mantığı -->
-  <script src="pvp-lobby.js"></script>
+  <script>
+    // 1. Veritabanı ve Kullanıcı Tanımlama
+    let rtdb = null;
+    let activeUser = null;
+    let selectedMode = 'speedrun';
+
+    // Firebase anahtarını temizleme (Nokta, boşluk vb. yasaklı semboller önlenir)
+    function sanitizeUserKey(username) {
+      if (!username) return "anonim_" + Math.floor(Math.random() * 1000);
+      return String(username).toLowerCase().replace(/[.#$\[\]\/ ]/g, "_");
+    }
+
+    function initDatabase() {
+      if (window.db) return window.db;
+      if (window.database) return window.database;
+      if (typeof firebase !== "undefined" && firebase.apps.length > 0) {
+        return firebase.database();
+      }
+      return null;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      rtdb = initDatabase();
+
+      // Aktif kullanıcıyı bul
+      if (typeof getActiveUser === "function") {
+        activeUser = getActiveUser();
+      }
+      if (!activeUser) {
+        activeUser = JSON.parse(localStorage.getItem("active_user") || localStorage.getItem("currentUser") || "null");
+      }
+
+      // Kullanıcı yoksa oturum ekranına at
+      if (!activeUser) {
+        alert("Lütfen önce giriş yapın!");
+        return location.href = "index.html";
+      }
+
+      if (!rtdb) {
+        document.getElementById("status-tag").innerText = "⚠️ Veritabanı Hatası";
+        document.getElementById("status-tag").style.color = "#ef4444";
+        console.error("Firebase Realtime Database başlatılamadı. app.js konfigürasyonunu kontrol edin.");
+        return;
+      }
+
+      streamRooms();
+    });
+
+    function setMode(m) {
+      selectedMode = m;
+      document.querySelectorAll(".mode-card").forEach(c => c.classList.remove("selected"));
+      const card = document.getElementById("card-" + m);
+      if (card) card.classList.add("selected");
+      document.getElementById("sel-modal-room-mode").value = m;
+    }
+
+    // Canlı Açık Odaları Dinleme
+    function streamRooms() {
+      const container = document.getElementById("rooms-list-container");
+      if (!rtdb) return;
+
+      rtdb.ref("pvp_rooms").on("value", snap => {
+        container.innerHTML = "";
+        if (!snap.exists()) {
+          container.innerHTML = "<div style='color:#64748b; font-size:9.5px; text-align:center; padding:15px;'>Henüz açık oda bulunmuyor. İlk odayı sen aç!</div>";
+          return;
+        }
+
+        const myKey = sanitizeUserKey(activeUser.username);
+        snap.forEach(c => {
+          const room = c.val();
+          const rId = c.key;
+          const players = room.players || {};
+          const pKeys = Object.keys(players);
+
+          // Dolu ve içinde bulunmadığımız odaları listeleme
+          if (pKeys.length >= 2 && !players[myKey]) return;
+          if (room.state === "finished") return;
+
+          const modeTitles = {
+            speedrun: "⚡ Speedrun",
+            battleship: "🚢 Amiral Battı",
+            classic: "⚔️ Normal Kasa",
+            mines: "💣 Mayın Tarlası"
+          };
+
+          const card = document.createElement("div");
+          card.className = "room-item-card";
+          card.innerHTML = `
+            <div>
+              <b style="font-size:11px; color:#38bdf8;">${room.roomName || (room.hostName + ' Odası')}</b> 
+              <span style="font-size:9px; color:#f59e0b; font-weight:bold;">${room.roomTag || ''}</span>
+              <div style="font-size:8px; color:#94a3b8; margin-top:2px;">${modeTitles[room.mode] || room.mode} • Hedef: ${room.targetScore || 100}P</div>
+            </div>
+            <button type="button" class="btn-start" style="width:auto; padding:6px 12px; font-size:9px; background:#0284c7;" onclick="joinRoomDirect('${rId}')">Katıl (${pKeys.length}/2) ›</button>
+          `;
+          container.appendChild(card);
+        });
+      });
+    }
+
+    // Doğrudan Odaya Katılma ve Kullanıcıyı Yazma
+    function joinRoomDirect(roomId) {
+      if (!rtdb || !activeUser) return;
+      const myKey = sanitizeUserKey(activeUser.username);
+
+      rtdb.ref(`pvp_rooms/${roomId}/players/${myKey}`).set({
+        name: activeUser.displayName || activeUser.username,
+        avatar: activeUser.avatar || "👤",
+        score: 0,
+        joinedAt: Date.now()
+      }).then(() => {
+        redirectToArena(roomId);
+      }).catch(err => {
+        alert("Odaya katılırken hata oluştu: " + err.message);
+      });
+    }
+
+    // Kod veya Başlıkla Odaya Giriş
+    function joinByCode() {
+      const raw = document.getElementById("in-room-search").value.trim().toLowerCase();
+      if (!raw) return alert("Lütfen oda adı veya #ID girin!");
+
+      rtdb.ref("pvp_rooms").once("value", snap => {
+        let matchedKey = null;
+        if (snap.exists()) {
+          snap.forEach(c => {
+            const r = c.val();
+            const tag = String(r.roomTag || '').toLowerCase();
+            const name = String(r.roomName || '').toLowerCase();
+            if (c.key.toLowerCase() === raw || tag === raw || tag === ('#' + raw) || name === raw) {
+              matchedKey = c.key;
+            }
+          });
+        }
+        if (matchedKey) joinRoomDirect(matchedKey);
+        else alert("Girdiğiniz #ID veya ada sahip açık oda bulunamadı!");
+      });
+    }
+
+    function openCreateModal() {
+      const uName = activeUser.displayName || activeUser.username;
+      document.getElementById("in-modal-room-name").value = `${uName} Arenası`;
+      document.getElementById("modal-create-room").style.display = "flex";
+    }
+
+    // Oda Kurma (Kullanıcı ismine bağlı veri tabanı düğümü ile)
+    function executeCreateRoom() {
+      const uName = activeUser.displayName || activeUser.username;
+      const rName = document.getElementById("in-modal-room-name").value.trim() || `${uName} Odası`;
+      const mode = document.getElementById("sel-modal-room-mode").value;
+      const target = parseInt(document.getElementById("sel-modal-room-target").value) || 100;
+      const myKey = sanitizeUserKey(activeUser.username);
+      const generatedTag = "#" + Math.floor(1000 + Math.random() * 9000);
+      const rId = "room_" + Date.now().toString(36);
+
+      const payload = {
+        hostUserKey: myKey,
+        hostName: uName,
+        roomName: rName,
+        roomTag: generatedTag,
+        mode: mode,
+        targetScore: target,
+        maxPlayers: 2,
+        state: "waiting",
+        createdAt: Date.now(),
+        players: {
+          [myKey]: {
+            name: uName,
+            avatar: activeUser.avatar || "👤",
+            score: 0,
+            isHost: true
+          }
+        }
+      };
+
+      rtdb.ref("pvp_rooms/" + rId).set(payload).then(() => {
+        document.getElementById("modal-create-room").style.display = "none";
+        redirectToArena(rId);
+      }).catch(err => {
+        alert("Oda oluşturulamadı: " + err.message);
+      });
+    }
+
+    function redirectToArena(roomId) {
+      window.location.href = `pvp-arena.html?roomId=${roomId}`;
+    }
+  </script>
 </body>
 </html>
