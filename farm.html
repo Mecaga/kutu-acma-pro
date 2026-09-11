@@ -11,131 +11,264 @@
   <script src="app.js"></script>
 
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+    *, *::before, *::after { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
 
+    /* MOBİL VE TABLET KİLİT DÜZENİ */
     html, body {
-      width: 100%; height: 100dvh; min-height: -webkit-fill-available;
-      overflow: hidden; background: #022c22; font-family: system-ui, -apple-system, sans-serif; color: #fff;
+      width: 100vw !important;
+      height: 100% !important;
+      height: 100dvh !important;
+      min-height: -webkit-fill-available;
+      overflow: hidden !important;
+      overscroll-behavior: none !important;
+      background: #022c22;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #fff;
     }
 
     .farm-shell {
-      max-width: 650px; height: 100dvh; margin: 0 auto;
-      background: #064e3b; display: flex; flex-direction: column;
-      position: relative; border-left: 1px solid #047857; border-right: 1px solid #047857;
+      width: 100% !important;
+      max-width: min(100vw, 650px) !important;
+      height: 100dvh !important;
+      height: -webkit-fill-available !important;
+      margin: 0 auto !important;
+      background: #064e3b;
+      display: flex !important;
+      flex-direction: column !important;
+      position: relative;
+      border-left: 1px solid #047857;
+      border-right: 1px solid #047857;
       box-shadow: 0 0 35px rgba(0,0,0,0.85);
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
-    /* ÜST PANEL */
+    /* ÜST SABİT NAV */
     .farm-nav {
-      flex-shrink: 0; background: #022c22; border-bottom: 2px solid #047857;
-      padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; z-index: 30;
-    }
-    .stats-bar {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; font-size: 10px; font-weight: bold;
-      background: #044434; padding: 6px 10px; border-bottom: 1px solid #059669; text-align: center;
+      flex-shrink: 0;
+      background: #022c22;
+      border-bottom: 2px solid #047857;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 30;
     }
 
-    /* GÖVDE & KAYDIRMA */
-    .farm-body {
-      flex: 1; min-height: 0; overflow-y: auto; padding: 8px;
-      display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch;
+    .stats-bar {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      background: #044434;
+      padding: 8px 10px;
+      border-bottom: 1px solid #059669;
+      text-align: center;
     }
-    .farm-body::-webkit-scrollbar { width: 4px; }
+
+    /* KAYDIRILABİLİR İÇ GÖVDE */
+    .farm-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+    }
+    .farm-body::-webkit-scrollbar { width: 3px; }
     .farm-body::-webkit-scrollbar-thumb { background: #059669; border-radius: 4px; }
 
-    /* SAĞA-SOLA KAYAN TOHUM & ENVANTER MENÜSÜ */
+    /* SAĞA-SOLA KAYAN ŞERİTLER */
     .scroll-tray-wrap {
-      display: flex; flex-direction: column; gap: 3px; background: #022c22;
-      padding: 6px; border-radius: 8px; border: 1px solid #047857;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #022c22;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid #047857;
     }
     .scroll-tray {
-      display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
-      -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
     }
-    .scroll-tray::-webkit-scrollbar { height: 4px; }
+    .scroll-tray::-webkit-scrollbar { height: 3px; }
     .scroll-tray::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
 
     .tray-item-card {
-      flex-shrink: 0; width: 68px; height: 74px; background: #064e3b;
-      border: 1px solid #059669; border-radius: 8px; display: flex;
-      flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 10px; position: relative; transition: 0.15s;
+      flex-shrink: 0;
+      width: 72px;
+      height: 78px;
+      background: #064e3b;
+      border: 1px solid #059669;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 10px;
+      position: relative;
+      transition: transform 0.15s ease;
     }
-    .tray-item-card.selected { border-color: #f59e0b; background: #1e3a2f; transform: scale(1.04); }
-    .tray-item-card.locked { opacity: 0.45; filter: grayscale(1); }
+    .tray-item-card:active { transform: scale(0.95); }
+    .tray-item-card.selected { border-color: #f59e0b; background: #1e3a2f; box-shadow: 0 0 10px rgba(245,158,11,0.4); }
+    .tray-item-card.locked { opacity: 0.4; filter: grayscale(1); }
 
-    /* TARLA PARSELLERİ & GENİŞLETME */
+    /* TARLA PARSELLERİ */
     .plots-zone {
-      background: #3f1d0b; border: 2px solid #78350f; border-radius: 10px; padding: 8px;
+      background: #3f1d0b;
+      border: 2px solid #78350f;
+      border-radius: 10px;
+      padding: 10px;
     }
     .plots-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
     .plot-tile {
-      background: #78350f; border: 2px solid #b45309; border-radius: 8px;
-      height: 72px; display: flex; flex-direction: column; align-items: center;
-      justify-content: center; cursor: pointer; position: relative;
+      background: #78350f;
+      border: 2px solid #b45309;
+      border-radius: 8px;
+      min-height: 75px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      user-select: none;
     }
-    .plot-tile.wet { background: #451a03; border-color: #38bdf8; box-shadow: inset 0 0 10px #0284c7; }
+    .plot-tile:active { transform: scale(0.96); }
+    .plot-tile.wet { background: #451a03; border-color: #38bdf8; box-shadow: inset 0 0 12px #0284c7; }
     .plot-tile.ready { border-color: #22c55e; animation: pulseReady 1.2s infinite alternate; }
     @keyframes pulseReady { from { border-color: #22c55e; } to { border-color: #facc15; } }
 
-    /* AĞIL & HAYVANLAR */
+    /* AĞILLAR */
     .barns-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 8px;
     }
     .barn-card {
-      background: #1e293b; border: 1px solid #475569; border-radius: 8px;
-      padding: 6px; display: flex; align-items: center; justify-content: space-between;
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      justify-content: space-between;
     }
 
-    /* HAY DAY YOL KENARI PAZARI */
+    /* YOL KENARI PAZARI */
     .market-shelf {
-      display: flex; gap: 8px; overflow-x: auto; padding: 10px 4px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 2px;
+      -webkit-overflow-scrolling: touch;
     }
     .market-slot {
-      flex-shrink: 0; width: 88px; height: 110px; background: #78350f;
-      border: 2px dashed #d97706; border-radius: 8px; display: flex;
-      flex-direction: column; align-items: center; justify-content: center;
-      position: relative; font-size: 10px; cursor: pointer; text-align: center;
+      flex-shrink: 0;
+      width: 90px;
+      height: 115px;
+      background: #78350f;
+      border: 2px dashed #d97706;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-size: 10px;
+      cursor: pointer;
+      text-align: center;
     }
-    .market-slot.sold {
-      background: #1e1b4b; border-color: #ef4444; border-style: solid;
-    }
+    .market-slot.sold { background: #1e1b4b; border-color: #ef4444; border-style: solid; }
     .stamp-sold {
-      position: absolute; background: #ef4444; color: #fff; font-size: 9px;
-      font-weight: 900; padding: 2px 4px; border-radius: 3px; transform: rotate(-15deg);
-      box-shadow: 0 0 6px rgba(0,0,0,0.6);
+      position: absolute;
+      background: #ef4444;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 2px 5px;
+      border-radius: 4px;
+      transform: rotate(-15deg);
+      box-shadow: 0 0 8px rgba(0,0,0,0.6);
     }
 
-    /* SU TANKI & GEMİ DOKU */
     .water-bar-box {
-      background: #0f172a; border: 1px solid #38bdf8; border-radius: 8px;
-      padding: 6px 10px; display: flex; align-items: center; justify-content: space-between;
+      background: #0f172a;
+      border: 1px solid #38bdf8;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .btn-action {
-      background: #0284c7; border: none; color: #fff; font-weight: bold;
-      border-radius: 6px; padding: 6px 10px; font-size: 10px; cursor: pointer;
+      background: #0284c7;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
-    .btn-action:active { transform: scale(0.96); }
+    .btn-action:active { transform: scale(0.95); }
 
     /* UÇAN HASAT ANİMASYONU */
     .fly-effect {
-      position: absolute; font-size: 26px; pointer-events: none;
-      animation: floatUp 0.8s ease-out forwards; z-index: 100;
+      position: absolute;
+      font-size: 26px;
+      pointer-events: none;
+      animation: floatUp 0.8s ease-out forwards;
+      z-index: 100;
     }
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0) scale(1); }
       100% { opacity: 0; transform: translateY(-40px) scale(1.4); }
     }
 
-    /* BİLDİRİM TOAST */
     #notif-toast {
-      position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-      background: #1e1b4b; border: 1px solid #f59e0b; color: #fff;
-      padding: 6px 14px; border-radius: 20px; font-size: 10px; font-weight: bold;
-      display: none; z-index: 999; box-shadow: 0 0 15px rgba(0,0,0,0.6);
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e1b4b;
+      border: 1px solid #f59e0b;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      display: none;
+      z-index: 999;
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+      max-width: 90vw;
+      text-align: center;
     }
   </style>
 </head>
@@ -150,7 +283,7 @@
         <button id="btn-back-menu" class="btn-action" style="background:#ef4444;" onclick="handleBackAction()">‹ Menü</button>
         <div id="ui-farm-title" style="font-size:12px; font-weight:900; color:#f59e0b;">🚜 Çiftliğim</div>
       </div>
-      <div style="display:flex; gap:5px;">
+      <div style="display:flex; gap:6px;">
         <button class="btn-action" style="background:#8b5cf6;" onclick="openNeighborsModal()">👥 Sıralama</button>
         <button class="btn-action" style="background:#f59e0b; color:#000;" onclick="openMarketModal()">🏪 Pazar</button>
       </div>
@@ -171,50 +304,50 @@
       <div class="water-bar-box">
         <div>
           <div style="font-size:11px; font-weight:bold; color:#38bdf8;">💧 Basınçlı Su Kulesi</div>
-          <div style="font-size:8.5px; color:#94a3b8;">Sulanan tarlalar %50 daha hızlı büyür.</div>
+          <div style="font-size:9px; color:#94a3b8;">Sulanan tarlalar %50 daha hızlı büyür.</div>
           <div style="font-size:10px; font-weight:bold; margin-top:2px;">Mevcut Su: <span id="lbl-water" style="color:#38bdf8;">30/60L</span></div>
         </div>
         <button class="btn-action" style="background:#0284c7;" onclick="pumpWater()">Kuyu Çek 🪣</button>
       </div>
 
-      <!-- 2. SAĞA-SOLA KAYAN TOHUM & EKİN ÇEKMECESİ -->
+      <!-- 2. SAĞA-SOLA KAYAN TOHUM ÇEKMECESİ -->
       <div class="scroll-tray-wrap">
-        <div style="font-size:8.5px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Ekim Yapılacak Ekinler (Sağa Kaydır)</div>
+        <div style="font-size:9px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Ekim Yapılacak Ekinler (Sağa Kaydır)</div>
         <div class="scroll-tray" id="tray-crops"></div>
       </div>
 
       <!-- 3. TARLA PARSELLERİ & GENİŞLETME -->
       <div class="plots-zone">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <span style="font-size:9.5px; font-weight:bold; color:#fde68a;">TARLALAR (<span id="lbl-plot-count">9</span> Parsel)</span>
-          <button id="btn-expand-land" class="btn-action" style="background:#16a34a; font-size:8.5px;" onclick="expandLand()">➕ Tarla Genişlet (500 Altın)</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:10px; font-weight:bold; color:#fde68a;">TARLALAR (<span id="lbl-plot-count">9</span> Parsel)</span>
+          <button id="btn-expand-land" class="btn-action" style="background:#16a34a; font-size:9px;" onclick="expandLand()">➕ Tarla Genişlet (500A)</button>
         </div>
         <div class="plots-grid" id="grid-plots"></div>
       </div>
 
       <!-- 4. AĞILLAR & ÇİFTLİK HAYVANLARI -->
       <div class="scroll-tray-wrap">
-        <div style="font-size:8.5px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Ağıllar & Üretim Hayvanları</div>
+        <div style="font-size:9px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Ağıllar & Üretim Hayvanları</div>
         <div class="barns-grid" id="grid-barns"></div>
       </div>
 
-      <!-- 5. 6 KASALI HAY DAY TİCARET GEMİSİ -->
-      <div style="background:#022c22; border:2px solid #f59e0b; border-radius:10px; padding:8px;">
+      <!-- 5. 6 KASALI TİCARET GEMİSİ -->
+      <div style="background:#022c22; border:2px solid #f59e0b; border-radius:10px; padding:10px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <b style="font-size:10.5px; color:#f59e0b;">🚢 Liman Ticaret Gemisi</b>
-            <div style="font-size:8px; color:#94a3b8;">Kalkış Sayacı: <span id="lbl-ship-timer" style="color:#ef4444;">04:00</span></div>
+            <b style="font-size:11px; color:#f59e0b;">🚢 Liman Ticaret Gemisi</b>
+            <div style="font-size:9px; color:#94a3b8;">Kalkış Sayacı: <span id="lbl-ship-timer" style="color:#ef4444;">04:00</span></div>
           </div>
-          <button class="btn-action" style="background:#eab308; color:#000; font-size:8.5px;" onclick="sendShipEarly()">Gemiyi Kaldır</button>
+          <button class="btn-action" style="background:#eab308; color:#000; font-size:9px;" onclick="sendShipEarly()">Gemiyi Kaldır</button>
         </div>
-        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; margin-top:6px;" id="ship-crates-box"></div>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-top:8px;" id="ship-crates-box"></div>
       </div>
 
       <!-- 6. PRESTİJ ALANI -->
-      <div style="background:#1e1b4b; border:1px solid #a855f7; border-radius:8px; padding:8px; text-align:center;">
-        <div style="font-size:10px; font-weight:bold; color:#c084fc;">🌟 Prestij & Rebirth</div>
-        <div style="font-size:8px; color:#cbd5e1; margin:2px 0;">Prestij Puanı: <b id="lbl-prestige-pts">0</b> (+%5 Kalıcı Hasat Hızı)</div>
-        <button class="btn-action" style="background:#7c3aed; font-size:9px;" onclick="doPrestige()">Prestij Yap (Gereksinim: Lv.15)</button>
+      <div style="background:#1e1b4b; border:1px solid #a855f7; border-radius:8px; padding:10px; text-align:center;">
+        <div style="font-size:11px; font-weight:bold; color:#c084fc;">🌟 Prestij & Rebirth</div>
+        <div style="font-size:9px; color:#cbd5e1; margin:3px 0;">Prestij Puanı: <b id="lbl-prestige-pts">0</b> (+%5 Kalıcı Hasat Hızı)</div>
+        <button class="btn-action" style="background:#7c3aed; font-size:9.5px;" onclick="doPrestige()">Prestij Yap (Gereksinim: Lv.15)</button>
       </div>
 
     </div>
@@ -222,21 +355,21 @@
 
   <!-- HAY DAY YOL KENARI PAZARI MODALI -->
   <div id="modal-market" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:200; padding:15px;">
-    <div style="background:#451a03; border:2px solid #d97706; border-radius:12px; padding:12px; width:100%; max-width:380px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #78350f; padding-bottom:6px;">
+    <div style="background:#451a03; border:2px solid #d97706; border-radius:12px; padding:14px; width:100%; max-width:380px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #78350f; padding-bottom:8px;">
         <b style="font-size:12px; color:#facc15;" id="lbl-market-title">🏪 Yol Kenarı Pazarı</b>
-        <button class="btn-action" style="background:#ef4444; padding:2px 6px;" onclick="document.getElementById('modal-market').style.display='none'">X</button>
+        <button class="btn-action" style="background:#ef4444; padding:3px 8px;" onclick="document.getElementById('modal-market').style.display='none'">X</button>
       </div>
-      <div style="font-size:8.5px; color:#fde68a; margin-top:4px;">Sağa kaydırarak tezgâhları incele. Boş slota basıp ürün sat!</div>
+      <div style="font-size:9px; color:#fde68a; margin-top:6px;">Sağa kaydırarak tezgâhları incele. Boş slota basıp ürün sat!</div>
       
       <div class="market-shelf" id="shelf-market"></div>
 
       <!-- Ürün Satış Paneli -->
-      <div id="box-create-sale" style="display:none; background:#291305; padding:8px; border-radius:6px; margin-top:8px; border:1px solid #78350f;">
-        <div style="font-size:9.5px; font-weight:bold; color:#f59e0b;">Tezgâha Ürün Ekle</div>
-        <div style="display:flex; gap:6px; margin-top:5px;">
-          <select id="sel-sale-item" class="btn-action" style="background:#0f172a; flex:1;"></select>
-          <input type="number" id="in-sale-price" placeholder="Fiyat (Altın)" style="width:75px; background:#0f172a; color:#fff; border:1px solid #334155; border-radius:4px; font-size:10px; padding:4px;">
+      <div id="box-create-sale" style="display:none; background:#291305; padding:10px; border-radius:8px; margin-top:8px; border:1px solid #78350f;">
+        <div style="font-size:10px; font-weight:bold; color:#f59e0b;">Tezgâha Ürün Ekle</div>
+        <div style="display:flex; gap:6px; margin-top:6px;">
+          <select id="sel-sale-item" class="btn-action" style="background:#0f172a; flex:1; font-size:10px;"></select>
+          <input type="number" id="in-sale-price" placeholder="Fiyat" style="width:70px; background:#0f172a; color:#fff; border:1px solid #334155; border-radius:4px; font-size:10px; padding:6px;">
           <button class="btn-action" style="background:#16a34a;" onclick="confirmAddSale()">Sat</button>
         </div>
       </div>
@@ -245,26 +378,24 @@
 
   <!-- SIRALAMA & KOMŞU ZİYARETİ MODALI -->
   <div id="modal-neighbors" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:200; padding:15px;">
-    <div style="background:#022c22; border:2px solid #059669; border-radius:12px; padding:12px; width:100%; max-width:340px;">
+    <div style="background:#022c22; border:2px solid #059669; border-radius:12px; padding:14px; width:100%; max-width:340px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <b style="font-size:12px; color:#f59e0b;">👥 Çiftçi Sıralaması & Ziyaret</b>
-        <button class="btn-action" style="background:#ef4444; padding:2px 6px;" onclick="document.getElementById('modal-neighbors').style.display='none'">X</button>
+        <button class="btn-action" style="background:#ef4444; padding:3px 8px;" onclick="document.getElementById('modal-neighbors').style.display='none'">X</button>
       </div>
-      <div id="neighbors-list" style="display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:240px; overflow-y:auto;"></div>
+      <div id="neighbors-list" style="display:flex; flex-direction:column; gap:6px; margin-top:10px; max-height:240px; overflow-y:auto;"></div>
     </div>
   </div>
 
   <script>
     let rtdb = null;
     let activeUser = null;
-    let visitingTarget = null; // null ise kendi çiftliğimiz
+    let visitingTarget = null;
     let selectedCropKey = 'wheat';
     let targetSlotIndex = null;
 
-    // BOT ALICI LİSTESİ (Çevrimdışı ya da rastgele alım simülasyonu için)
     const BOT_BUYERS = ["Furkan", "Hüseyin", "Ömer", "İmam", "Ahmet Efe", "Miyasan", "Köy Muhtarı"];
 
-    // KAPSAMLI EKİN LİSTESİ (Seviyeli)
     const CROPS_DEF = {
       wheat:      { name: "Buğday",      icon: "🌾", level: 1,  duration: 8,   minP: 2,  maxP: 8,   xp: 3 },
       corn:       { name: "Mısır",       icon: "🌽", level: 2,  duration: 18,  minP: 5,  maxP: 18,  xp: 7 },
@@ -275,15 +406,13 @@
       pumpkin:    { name: "Balkabağı",   icon: "🎃", level: 15, duration: 240, minP: 70, maxP: 220, xp: 85 }
     };
 
-    // AĞIL HAYVANLARI LİSTESİ
     const BARNS_DEF = {
-      chicken: { name: "Kümes (Tavuk)", icon: "🐔", product: "Yumurta", prodIcon: "🥚", dur: 20, feed: "wheat" },
-      cow:     { name: "Ağıl (İnek)",   icon: "🐄", product: "Süt",     prodIcon: "🥛", dur: 45, feed: "corn" },
-      sheep:   { name: "Koyun Yatağı",  icon: "🐑", product: "Yün",     prodIcon: "🧶", dur: 90, feed: "soy" },
-      bee:     { name: "Arılık",        icon: "🐝", product: "Bal",     prodIcon: "🍯", dur: 140,feed: "strawberry" }
+      chicken: { name: "Kümes", icon: "🐔", product: "Yumurta", prodIcon: "🥚", dur: 20, feed: "wheat" },
+      cow:     { name: "Ağıl",  icon: "🐄", product: "Süt",     prodIcon: "🥛", dur: 45, feed: "corn" },
+      sheep:   { name: "Yatak", icon: "🐑", product: "Yün",     prodIcon: "🧶", dur: 90, feed: "soy" },
+      bee:     { name: "Arılık",icon: "🐝", product: "Bal",     prodIcon: "🍯", dur: 140,feed: "strawberry" }
     };
 
-    // ÇİFTLİK ANA VERİ MODELİ
     let farmState = {
       gold: 250,
       gems: 10,
@@ -312,7 +441,7 @@
           { crop: 'wheat', qty: 6, done: false }
         ]
       },
-      helpTokens: 3, // 1 saatte max 3 yardım
+      helpTokens: 3,
       lastHelpReset: Date.now()
     };
 
@@ -341,12 +470,11 @@
       listenLiveNotifications();
       renderAll();
       setInterval(farmLoop, 1000);
-      setInterval(checkRandomBotMarketPurchase, 15000); // 15 saniyede bir bot pazarı denetler
+      setInterval(checkRandomBotMarketPurchase, 15000);
     });
 
-    // VERİ SENKRONİZASYONU
     function saveFarmData() {
-      if (visitingTarget) return; // Ziyaretteyken başkasının verisini kendi yerelimize yazmayız
+      if (visitingTarget) return;
       localStorage.setItem("kutu_farm_save", JSON.stringify(farmState));
       if (rtdb && activeUser) {
         const myKey = sanitizeUserKey(activeUser.username);
@@ -374,7 +502,6 @@
       }
     }
 
-    // ARAYÜZ ÇİZDİRME MERKEZİ
     function renderAll() {
       document.getElementById("lbl-gold").innerText = farmState.gold;
       document.getElementById("lbl-gems").innerText = farmState.gems;
@@ -393,7 +520,6 @@
       renderShip();
     }
 
-    // SAĞA-SOLA KAYAN TOHUM MENÜSÜ
     function renderCropsTray() {
       const tray = document.getElementById("tray-crops");
       tray.innerHTML = "";
@@ -420,7 +546,6 @@
       });
     }
 
-    // TARLA PARSELLERİ
     function renderPlots() {
       const grid = document.getElementById("grid-plots");
       grid.innerHTML = "";
@@ -475,7 +600,6 @@
         const cropKey = p.crop;
         const c = CROPS_DEF[cropKey];
 
-        // Hasat
         farmState.inventory[cropKey] = (farmState.inventory[cropKey] || 0) + 2;
         addXp(c.xp);
         farmState.plots[idx] = { state: 'empty', crop: null, readyAt: 0, wet: false };
@@ -492,19 +616,17 @@
       farmState.water -= 5;
       const p = farmState.plots[idx];
       const rem = p.readyAt - Date.now();
-      p.readyAt = Date.now() + Math.floor(rem / 2); // %50 Hızlandırma
+      p.readyAt = Date.now() + Math.floor(rem / 2);
       p.wet = true;
       saveFarmData();
       renderAll();
     }
 
-    // TARLA GENİŞLETME (GRID EXPANSION)
     function expandLand() {
       if (visitingTarget) return;
       const cost = farmState.plots.length * 75;
-      if (farmState.gold < cost) return alert(`Yetersiz Altın! Genişletme ücreti: ${cost} Altın.`);
+      if (farmState.gold < cost) return alert(`Yetersiz Altın! Ücret: ${cost} Altın.`);
       farmState.gold -= cost;
-      // 3 yeni tarla parseli ekle
       for (let i = 0; i < 3; i++) {
         farmState.plots.push({ state: 'empty', crop: null, readyAt: 0, wet: false });
       }
@@ -512,7 +634,6 @@
       renderAll();
     }
 
-    // AĞIL VE HAYVANLARIN YÖNETİMİ
     function renderBarns() {
       const box = document.getElementById("grid-barns");
       box.innerHTML = "";
@@ -535,11 +656,11 @@
 
         card.innerHTML = `
           <div>
-            <b style="font-size:9.5px; color:#facc15;">${b.icon} ${b.name}</b>
-            <div style="font-size:7.5px; color:#94a3b8;">Ürün: ${b.prodIcon} ${b.product} (Adet: ${data.count})</div>
-            <div style="font-size:8px; color:#38bdf8; font-weight:bold;">${statusText}</div>
+            <b style="font-size:10px; color:#facc15;">${b.icon} ${b.name}</b>
+            <div style="font-size:8px; color:#94a3b8;">${b.prodIcon} ${b.product} (x${data.count})</div>
+            <div style="font-size:8.5px; color:#38bdf8; font-weight:bold; margin-top:2px;">${statusText}</div>
           </div>
-          <button class="btn-action" style="font-size:8px; padding:3px 6px;" onclick="interactBarn('${k}')">
+          <button class="btn-action" style="font-size:8.5px; padding:4px 8px; width:100%;" onclick="interactBarn('${k}')">
             ${data.count === 0 ? 'Satın Al (200A)' : (data.state === 'ready' ? 'Topla' : 'Yemle')}
           </button>
         `;
@@ -570,7 +691,6 @@
       renderAll();
     }
 
-    // HAY DAY YOL KENARI PAZARI
     function openMarketModal() {
       const shelf = document.getElementById("shelf-market");
       shelf.innerHTML = "";
@@ -592,7 +712,7 @@
             <div style="font-size:22px;">${itemDef.icon}</div>
             <div style="font-size:8.5px; font-weight:bold;">${slot.qty}x ${itemDef.name}</div>
             <div style="font-size:9.5px; color:#facc15; font-weight:bold;">${slot.price} Altın</div>
-            <div style="font-size:7px; color:#94a3b8; margin-top:2px;">${isOwner ? '(Geri Almak İçin Bas)' : '(Satın Al)'}</div>
+            <div style="font-size:7px; color:#94a3b8; margin-top:2px;">${isOwner ? '(Geri Çek)' : '(Satın Al)'}</div>
           `;
           if (isOwner) {
             div.onclick = () => cancelSale(idx);
@@ -665,7 +785,6 @@
       farmState.gold -= slot.price;
       farmState.inventory[slot.item] = (farmState.inventory[slot.item] || 0) + slot.qty;
 
-      // Karşı tarafın Firebase'ine SATILDI olarak işaretle
       const targetUserKey = sanitizeUserKey(visitingTarget.key);
       rtdb.ref(`farm_users/${targetUserKey}/farm/market/${idx}`).update({
         status: 'sold',
@@ -687,7 +806,6 @@
       renderAll();
     }
 
-    // RASTGELE BOT ALIŞVERİŞ SİMÜLASYONU (Pazarda ürün beklemesin)
     function checkRandomBotMarketPurchase() {
       if (visitingTarget) return;
       let changed = false;
@@ -704,7 +822,6 @@
       }
     }
 
-    // SIRALAMA, KOMŞU ZİYARETİ VE YARDIM ETME
     function openNeighborsModal() {
       if (!rtdb) return alert("Veritabanı bağlı değil!");
       const list = document.getElementById("neighbors-list");
@@ -721,7 +838,7 @@
 
           const row = document.createElement("div");
           row.style.background = "#064e3b";
-          row.style.padding = "6px 10px";
+          row.style.padding = "8px 10px";
           row.style.borderRadius = "6px";
           row.style.display = "flex";
           row.style.justifyContent = "space-between";
@@ -730,9 +847,9 @@
           row.innerHTML = `
             <div>
               <b style="font-size:10px; color:#38bdf8;">${uData.profile.name || uKey}</b>
-              <div style="font-size:8px; color:#facc15;">Lv.${uData.profile.level || 1} • ${uData.profile.gold || 0} Altın</div>
+              <div style="font-size:8.5px; color:#facc15;">Lv.${uData.profile.level || 1} • ${uData.profile.gold || 0} Altın</div>
             </div>
-            <button class="btn-action" style="background:#0284c7; font-size:8px;" onclick="visitNeighbor('${uKey}')">Ziyaret Et 🚀</button>
+            <button class="btn-action" style="background:#0284c7; font-size:8.5px;" onclick="visitNeighbor('${uKey}')">Ziyaret Et 🚀</button>
           `;
           list.appendChild(row);
         });
@@ -752,7 +869,6 @@
         document.getElementById("btn-back-menu").innerText = "‹ Çiftliğime Dön";
         document.getElementById("btn-expand-land").style.display = "none";
 
-        // Ziyaret edilen çiftliğin verisini ekrana bas
         farmState.plots = visitingTarget.farm.plots || [];
         renderPlots();
       });
@@ -762,7 +878,6 @@
       if (farmState.helpTokens <= 0) return alert("1 saat içindeki tüm yardım haklarını (3/3) kullandın!");
       farmState.helpTokens--;
 
-      // Karşı tarafın tarlasını %30 hızlandır
       const targetUserKey = sanitizeUserKey(visitingTarget.key);
       const plot = farmState.plots[idx];
       const rem = Math.max(0, plot.readyAt - Date.now());
@@ -770,7 +885,6 @@
 
       rtdb.ref(`farm_users/${targetUserKey}/farm/plots/${idx}`).update({ readyAt: plot.readyAt });
 
-      // Karşı tarafa bildirim gönder
       rtdb.ref(`farm_notifications/${targetUserKey}`).push({
         msg: `${activeUser.displayName || activeUser.username} tarlana yardım ederek ekinini hızlandırdı! 💧`,
         time: Date.now()
@@ -786,14 +900,13 @@
         visitingTarget = null;
         document.getElementById("ui-farm-title").innerText = "🚜 Çiftliğim";
         document.getElementById("btn-back-menu").innerText = "‹ Menü";
-        document.getElementById("btn-expand-land").style.display = "block";
+        document.getElementById("btn-expand-land").style.display = "inline-flex";
         loadFarmData();
       } else {
         location.href = "menu.html";
       }
     }
 
-    // BİLDİRİM VE DİĞER FONKSİYONLAR
     function listenLiveNotifications() {
       if (!rtdb || !activeUser) return;
       const myKey = sanitizeUserKey(activeUser.username);
@@ -850,15 +963,15 @@
         cr.style.background = c.done ? "#064e3b" : "#0f172a";
         cr.style.border = "1px solid " + (c.done ? "#10b981" : "#334155");
         cr.style.borderRadius = "6px";
-        cr.style.padding = "5px";
+        cr.style.padding = "6px";
         cr.style.textAlign = "center";
-        cr.style.fontSize = "8.5px";
+        cr.style.fontSize = "9px";
         cr.style.cursor = "pointer";
 
         const cropDef = CROPS_DEF[c.crop] || { icon: "📦", name: c.crop };
         cr.innerHTML = `
           <div>${cropDef.icon} ${c.qty}x ${cropDef.name}</div>
-          <div style="font-size:7.5px; color:${c.done ? '#6ee7b7' : '#facc15'};">${c.done ? '✓ YÜKLENDİ' : 'Yükle'}</div>
+          <div style="font-size:8px; color:${c.done ? '#6ee7b7' : '#facc15'}; margin-top:2px;">${c.done ? '✓ YÜKLENDİ' : 'Yükle'}</div>
         `;
         if (!c.done && !visitingTarget) cr.onclick = () => fillShipCrate(idx);
         box.appendChild(cr);
@@ -906,7 +1019,6 @@
       let changed = false;
       const now = Date.now();
 
-      // Tarlalar
       farmState.plots.forEach(p => {
         if (p.state === 'growing' && now >= p.readyAt) {
           p.state = 'ready';
@@ -914,7 +1026,6 @@
         }
       });
 
-      // Ağıllar
       Object.keys(farmState.barns).forEach(k => {
         const b = farmState.barns[k];
         if (b.state === 'producing' && now >= b.readyAt) {
@@ -923,7 +1034,6 @@
         }
       });
 
-      // Gemi Sayacı
       if (farmState.ship.timeLeft > 0) {
         farmState.ship.timeLeft--;
         const m = Math.floor(farmState.ship.timeLeft / 60).toString().padStart(2, '0');
