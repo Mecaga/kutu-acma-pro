@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>PvP Arenası - Kutu Açma Pro</title>
+  <title>1v1 PvP Arenası - Kutu Açma Pro</title>
   <link rel="stylesheet" href="style.css">
   
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -62,145 +62,268 @@
     .body-content::-webkit-scrollbar { width: 4px; }
     .body-content::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
 
-    /* Lobi Kartları */
-    .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
     .mode-card {
-      background: #0b1329; border: 1px solid #1e293b; border-radius: 8px;
-      padding: 8px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 2px;
+      background: #0b1329;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
     .mode-card.selected {
-      border-color: #f59e0b !important; background: #1e1b4b !important;
+      border-color: #f59e0b !important;
+      background: #1e1b4b !important;
       box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
     }
+
     .join-row {
-      display: flex; gap: 6px; background: #070d1e; padding: 6px;
-      border-radius: 8px; border: 1px solid #1e293b; align-items: center;
+      display: flex;
+      gap: 6px;
+      background: #070d1e;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+      align-items: center;
     }
+
     .room-item-card {
-      background: #070d1e; border: 1px solid #1e293b; border-radius: 8px;
-      padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;
+      background: #070d1e;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .sec-tag { font-size: 8.5px; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
+
+    .sec-tag {
+      font-size: 8.5px;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     .input-field {
-      width: 100%; background: #030712; border: 1px solid #1e293b; color: #fff;
-      border-radius: 6px; padding: 8px; font-size: 11px; outline: none;
+      width: 100%;
+      background: #030712;
+      border: 1px solid #1e293b;
+      color: #fff;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 11px;
+      outline: none;
     }
+
     .btn-action {
-      border: none; color: #fff; font-weight: bold; border-radius: 6px;
-      cursor: pointer; padding: 8px 12px;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 8px 12px;
     }
     .btn-start {
-      width: 100%; background: #16a34a; font-size: 11px; padding: 11px;
+      width: 100%;
+      background: #16a34a;
+      font-size: 11px;
+      padding: 11px;
       box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4);
     }
 
-    /* Modal */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
-      display: none; align-items: center; justify-content: center; z-index: 100; padding: 15px;
-    }
-    .modal-card {
-      background: #0b1329; border: 1px solid #38bdf8; border-radius: 12px;
-      padding: 16px; width: 100%; max-width: 360px;
-    }
-
     /* Arena */
-    #arena-view { display: none; flex: 1; min-height: 0; flex-direction: column; }
+    #arena-view {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+    }
     .scoreboard {
-      display: grid; grid-template-columns: 1fr auto 1fr; padding: 8px 12px;
-      gap: 8px; background: #070d1e; align-items: center; border-bottom: 1px solid #1e293b;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      padding: 8px 12px;
+      gap: 8px;
+      background: #070d1e;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
     }
     .player-card {
-      background: #0b1329; border: 1px solid #1e293b; border-radius: 8px; padding: 6px; text-align: center;
+      background: #0b1329;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 6px;
+      text-align: center;
     }
-    .player-card.active-turn { border-color: #38bdf8; box-shadow: 0 0 10px rgba(56,189,248,0.4); }
 
-    /* 1. SLOT ÇARKI (KUTU AÇMA) */
+    /* Emoji Reaksiyon Çubuğu */
+    .reaction-bar {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 6px;
+      background: #090d1a;
+      border-top: 1px solid #1e293b;
+    }
+    .react-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .react-btn:active { transform: scale(1.3); }
+
+    .floating-emoji {
+      position: absolute;
+      font-size: 32px;
+      animation: floatUp 1.8s ease-out forwards;
+      pointer-events: none;
+      z-index: 99;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(0.8); }
+      100% { opacity: 0; transform: translateY(-120px) scale(1.4); }
+    }
+
+    /* Slot Çarkı */
     .slot-wrapper {
-      width: 100%; max-width: 320px; height: 110px; background: #070d1e;
-      border: 2px solid #38bdf8; border-radius: 10px; overflow: hidden;
-      position: relative; display: flex; align-items: center; justify-content: center;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+      width: 100%;
+      max-width: 320px;
+      height: 100px;
+      background: #070d1e;
+      border: 2px solid #38bdf8;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .slot-indicator {
-      position: absolute; width: 4px; height: 100%; background: #ef4444; z-index: 10;
-      box-shadow: 0 0 8px #ef4444;
+      position: absolute;
+      width: 3px;
+      height: 100%;
+      background: #ef4444;
+      z-index: 10;
     }
     .slot-track {
-      display: flex; gap: 8px; position: absolute; left: 0;
-      transition: transform 3s cubic-bezier(0.1, 0.9, 0.2, 1);
+      display: flex;
+      gap: 8px;
+      position: absolute;
+      left: 0;
+      transition: transform 2.5s cubic-bezier(0.1, 0.9, 0.2, 1);
     }
     .slot-item {
-      width: 80px; height: 80px; background: #0f172a; border-radius: 8px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      border: 2px solid #334155; flex-shrink: 0; font-size: 24px;
+      width: 75px;
+      height: 75px;
+      background: #0f172a;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #334155;
+      flex-shrink: 0;
+      font-size: 22px;
     }
 
-    /* 2. 3x3 MAYIN TARLASI */
+    /* 3x3 Mayın Tarlası */
     .mines-grid-3x3 {
-      display: grid; grid-template-columns: repeat(3, 75px); gap: 8px; margin: 12px auto;
+      display: grid;
+      grid-template-columns: repeat(3, 75px);
+      gap: 8px;
+      margin: 10px auto;
     }
     .mine-cell {
-      width: 75px; height: 75px; background: #0f172a; border: 2px solid #1e293b;
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      font-size: 26px; cursor: pointer; transition: 0.15s;
+      width: 75px;
+      height: 75px;
+      background: #0f172a;
+      border: 2px solid #1e293b;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
     }
-    .mine-cell:active { transform: scale(0.92); }
     .mine-cell.revealed-gem { background: #064e3b !important; border-color: #10b981 !important; }
     .mine-cell.revealed-bomb { background: #7f1d1d !important; border-color: #ef4444 !important; }
 
-    /* 3. 5x5 AMİRAL BATTI */
+    /* 5x5 Amiral Battı */
     .ship-grid-5x5 {
-      display: grid; grid-template-columns: repeat(5, 42px); gap: 5px; margin: 8px auto;
+      display: grid;
+      grid-template-columns: repeat(5, 42px);
+      gap: 5px;
+      margin: 8px auto;
     }
     .ship-cell {
-      width: 42px; height: 42px; background: #0f172a; border: 1px solid #334155;
-      border-radius: 6px; display: flex; align-items: center; justify-content: center;
-      font-size: 16px; cursor: pointer;
+      width: 42px;
+      height: 42px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
     }
-    .ship-cell.hit { background: #dc2626 !important; border-color: #f87171 !important; }
-    .ship-cell.miss { background: #1e293b !important; border-color: #64748b !important; }
+    .ship-cell.hit { background: #dc2626 !important; }
+    .ship-cell.miss { background: #1e293b !important; }
   </style>
 </head>
 <body>
-  <div class="shell">
+  <div class="shell" id="app-shell">
     
-    <!-- LOBİ EKRANI -->
+    <!-- 1. LOBİ GÖRÜNÜMÜ -->
     <div id="lobby-view" style="display:flex; flex-direction:column; height:100%;">
       <div class="nav-bar">
-        <a href="index.html" style="border: 1px solid #ef4444; color:#ef4444; padding:3px 8px; font-size:10px; text-decoration:none; border-radius:4px;">‹ Ana Menü</a>
+        <!-- menu.html yönlendirmesi sağlandı -->
+        <a href="menu.html" style="border: 1px solid #ef4444; color:#ef4444; padding:3px 8px; font-size:10px; text-decoration:none; border-radius:4px;">‹ Ana Menü</a>
         <div style="font-weight:900; font-size:12.5px; color:#f59e0b;">⚔️ 1v1 PvP Lobisi</div>
         <div id="status-tag" style="font-size:8.5px; color:#22c55e;">● Canlı</div>
       </div>
 
       <div class="body-content">
-        <div class="sec-tag">1. Oyun Modunu Belirle</div>
+        <div class="sec-tag">1. Oyun Modunu Seç</div>
         <div class="mode-grid">
-          <div class="mode-card selected" id="card-speedrun" onclick="setMode('speedrun')">
-            <b style="font-size:11px; color:#38bdf8;">🎰 Slot Kasa Açma</b>
-            <span style="font-size:8px; color:#94a3b8;">Hızlı çevir, nadir eşya tuttur</span>
+          <div class="mode-card selected" id="card-classic" onclick="setMode('classic')">
+            <b style="font-size:11px; color:#38bdf8;">📦 Normal Kasa Açma</b>
+            <span style="font-size:8px; color:#94a3b8;">Klasik kasa yarışı</span>
+          </div>
+          <div class="mode-card" id="card-mega" onclick="setMode('mega')">
+            <b style="font-size:11px; color:#ec4899;">🎁 Mega Kasa Açma</b>
+            <span style="font-size:8px; color:#94a3b8;">Dev çarpanlar & ödüller</span>
+          </div>
+          <div class="mode-card" id="card-speedrun" onclick="setMode('speedrun')">
+            <b style="font-size:11px; color:#f59e0b;">⚡ 1v1 Speedrun</b>
+            <span style="font-size:8px; color:#94a3b8;">Hedefe ilk ulaşan kazanır</span>
           </div>
           <div class="mode-card" id="card-mines" onclick="setMode('mines')">
-            <b style="font-size:11px; color:#38bdf8;">💣 3×3 Mayın Tarlası</b>
-            <span style="font-size:8px; color:#94a3b8;">Elmas bul, çarpanı al çekil</span>
+            <b style="font-size:11px; color:#ef4444;">💣 3×3 Mayın Tarlası</b>
+            <span style="font-size:8px; color:#94a3b8;">Elmas bul, çekil veya patla</span>
           </div>
-          <div class="mode-card" id="card-battleship" onclick="setMode('battleship')">
-            <b style="font-size:11px; color:#38bdf8;">🚢 Amiral Battı</b>
-            <span style="font-size:8px; color:#94a3b8;">Gizli 3 gemiyi sırayla batır</span>
-          </div>
-          <div class="mode-card" id="card-classic" onclick="setMode('classic')">
-            <b style="font-size:11px; color:#38bdf8;">⏱️ 30s Kasa Düellosu</b>
-            <span style="font-size:8px; color:#94a3b8;">Süre bitene kadar en çok puan</span>
+          <div class="mode-card" id="card-battleship" onclick="setMode('battleship')" style="grid-column: span 2;">
+            <b style="font-size:11px; color:#38bdf8;">🚢 Amiral Battı Düellosu</b>
+            <span style="font-size:8px; color:#94a3b8;">Rakibin 3 gizli gemisini ilk vuran kazanır</span>
           </div>
         </div>
 
-        <div class="sec-tag">2. Kanal / Oda #ID Kodu ile Katıl</div>
+        <div class="sec-tag">2. Kanal / Oda #ID ile Katıl</div>
         <div class="join-row">
           <input type="text" id="in-room-search" class="input-field" style="margin:0; font-size:11px; padding:8px; flex:1;" placeholder="Kanal Adı veya #ID (Örn: #5354)">
           <button type="button" class="btn-action" style="background:#0284c7; font-size:10px;" onclick="joinByCode()">Katıl</button>
         </div>
 
-        <button type="button" class="btn-action btn-start" onclick="openCreateModal()">➕ Seçili Modda Oda Kur</button>
+        <!-- MODAL OLMADAN DİREKT ODA KURAN BUTON -->
+        <button type="button" class="btn-action btn-start" onclick="directCreateRoom()">➕ Seçili Modda Hızlı Oda Kur</button>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
           <div class="sec-tag">Canlı Açık Odalar</div>
@@ -212,75 +335,62 @@
       </div>
     </div>
 
-    <!-- ARENA EKRANI -->
+    <!-- 2. ARENA GÖRÜNÜMÜ -->
     <div id="arena-view">
       <div class="nav-bar">
         <button onclick="leaveRoom()" style="background:#ef4444; border:none; color:#fff; padding:4px 10px; border-radius:4px; font-size:10px; cursor:pointer;">‹ Odadan Çık</button>
-        <div id="arena-room-title" style="font-size:12px; font-weight:bold; color:#f59e0b;">Arena</div>
-        <div id="arena-room-tag" style="font-size:9px; color:#94a3b8;">#0000</div>
+        
+        <!-- TAM ORTADA KANAL ADI VE #ID -->
+        <div id="arena-room-header" style="font-size:12px; font-weight:bold; color:#f59e0b; text-align:center;">
+          Kanal #0000
+        </div>
+        
+        <div id="arena-mode-badge" style="font-size:9px; color:#38bdf8; font-weight:bold;">MOD</div>
       </div>
 
-      <!-- Skor Tablosu -->
+      <!-- Skor Paneli -->
       <div class="scoreboard">
-        <div class="player-card" id="box-p1">
+        <div class="player-card" id="card-p1">
           <div id="p1-name" style="font-size:11px; font-weight:bold; color:#38bdf8;">Oyuncu 1</div>
           <div id="p1-score" style="font-size:18px; font-weight:900; color:#fff;">0</div>
+          <div id="p1-ready-status" style="font-size:8.5px; color:#eab308;">Hazır Değil</div>
         </div>
         <div style="font-weight:900; color:#ef4444; font-size:13px;">VS</div>
-        <div class="player-card" id="box-p2">
+        <div class="player-card" id="card-p2">
           <div id="p2-name" style="font-size:11px; font-weight:bold; color:#f87171;">Bekleniyor...</div>
           <div id="p2-score" style="font-size:18px; font-weight:900; color:#fff;">0</div>
+          <div id="p2-ready-status" style="font-size:8.5px; color:#eab308;">Hazır Değil</div>
         </div>
       </div>
 
-      <!-- Ortak Oyun Alanı -->
+      <!-- Oyun Alanı -->
       <div class="body-content" id="arena-dynamic-content" style="align-items:center; justify-content:center;"></div>
+
+      <!-- EMOJİ TEPKİ PANELİ -->
+      <div class="reaction-bar">
+        <button class="react-btn" onclick="sendReaction('🔥')">🔥</button>
+        <button class="react-btn" onclick="sendReaction('😂')">😂</button>
+        <button class="react-btn" onclick="sendReaction('😱')">😱</button>
+        <button class="react-btn" onclick="sendReaction('💀')">💀</button>
+        <button class="react-btn" onclick="sendReaction('👑')">👑</button>
+      </div>
     </div>
 
-  </div>
-
-  <!-- ODA KURMA MODAL -->
-  <div id="modal-create-room" class="modal-overlay">
-    <div class="modal-card">
-      <div style="font-size:13px; font-weight:bold; color:#f59e0b; text-align:center; margin-bottom:8px;">⚔️ Yeni PvP Odası Kur</div>
-      
-      <label class="sec-tag">KANAL / ODA ADI</label>
-      <input type="text" id="in-modal-room-name" class="input-field" style="margin-top:3px; padding:7px;" placeholder="Örn: Kral Arenası">
-
-      <label class="sec-tag" style="margin-top:6px; display:block;">OYUN MODU</label>
-      <select id="sel-modal-room-mode" class="input-field" style="background:#0f172a; margin-top:3px; padding:7px;">
-        <option value="speedrun">🎰 Slot Kasa Açma (Hedef Puan)</option>
-        <option value="mines">💣 3×3 Mayın Tarlası</option>
-        <option value="battleship">🚢 Amiral Battı (3 Gemi)</option>
-        <option value="classic">⏱️ 30s Kasa Düellosu</option>
-      </select>
-
-      <label class="sec-tag" style="margin-top:6px; display:block;">HEDEF PUAN / SÜRE</label>
-      <select id="sel-modal-room-target" class="input-field" style="background:#0f172a; margin-top:3px; padding:7px;">
-        <option value="250">250 Puan (Hızlı)</option>
-        <option value="500">500 Puan (Standart)</option>
-        <option value="1000">1000 Puan (Büyük Kapışma)</option>
-      </select>
-
-      <button type="button" class="btn-action btn-start" style="margin-top:10px;" onclick="executeCreateRoom()">Odayı Aç</button>
-      <button type="button" class="btn-action" style="background:transparent; border:1px solid #ef4444; color:#ef4444; width:100%; margin-top:6px;" onclick="document.getElementById('modal-create-room').style.display='none'">Vazgeç</button>
-    </div>
   </div>
 
   <script>
     let rtdb = null;
     let activeUser = null;
-    let selectedMode = 'speedrun';
+    let selectedMode = 'classic';
     let currentRoomId = null;
     let isHost = false;
-    let isSpinning = false; // Slot kilidi
+    let isSpinning = false;
 
-    // Kasa İtem Havuzu
-    const CS_ITEMS = [
-      { name: "Mavi Skin", icon: "🔫", rarity: "#3b82f6", val: 10 },
-      { name: "Mor Skin", icon: "✨", rarity: "#a855f7", val: 25 },
-      { name: "Pembe Skin", icon: "🎯", rarity: "#ec4899", val: 50 },
-      { name: "Kırmızı Skin", icon: "🔥", rarity: "#ef4444", val: 100 },
+    const REEL_ITEMS = [
+      { name: "Mavi Desen", icon: "🔫", rarity: "#3b82f6", val: 10 },
+      { name: "Mor Desen", icon: "✨", rarity: "#a855f7", val: 25 },
+      { name: "Pembe Desen", icon: "🎯", rarity: "#ec4899", val: 50 },
+      { name: "Kırmızı Desen", icon: "🔥", rarity: "#ef4444", val: 100 },
       { name: "Altın Bıçak", icon: "🔪", rarity: "#f59e0b", val: 250 }
     ];
 
@@ -302,8 +412,8 @@
       if (!activeUser) activeUser = JSON.parse(localStorage.getItem("active_user") || localStorage.getItem("currentUser") || "null");
 
       if (!activeUser) {
-        alert("Lütfen önce giriş yapın!");
-        return location.href = "index.html";
+        // Oturumu yoksa menu.html'ye yönlendir
+        return location.href = "menu.html";
       }
 
       streamRooms();
@@ -314,7 +424,6 @@
       document.querySelectorAll(".mode-card").forEach(c => c.classList.remove("selected"));
       const card = document.getElementById("card-" + m);
       if (card) card.classList.add("selected");
-      document.getElementById("sel-modal-room-mode").value = m;
     }
 
     function streamRooms() {
@@ -341,9 +450,9 @@
           card.className = "room-item-card";
           card.innerHTML = `
             <div>
-              <b style="font-size:11px; color:#38bdf8;">${room.roomName || 'Oda'}</b> 
-              <span style="font-size:9px; color:#f59e0b; font-weight:bold;">${room.roomTag || ''}</span>
-              <div style="font-size:8px; color:#94a3b8; margin-top:2px;">${room.mode.toUpperCase()} • Hedef: ${room.targetScore || 100}P</div>
+              <b style="font-size:11px; color:#38bdf8;">${room.roomName}</b> 
+              <span style="font-size:9px; color:#f59e0b; font-weight:bold;">${room.roomTag}</span>
+              <div style="font-size:8px; color:#94a3b8; margin-top:2px;">${room.mode.toUpperCase()} • Hedef: ${room.targetScore || 250}P</div>
             </div>
             <button type="button" class="btn-action" style="background:#0284c7; font-size:9px;" onclick="joinRoom('${rId}')">Katıl (${pKeys.length}/2)</button>
           `;
@@ -352,38 +461,33 @@
       });
     }
 
-    function openCreateModal() {
+    // MODAL OLMADAN DOĞRUDAN ODA KURULUMU
+    function directCreateRoom() {
       const uName = activeUser.displayName || activeUser.username;
-      document.getElementById("in-modal-room-name").value = `${uName} Arenası`;
-      document.getElementById("modal-create-room").style.display = "flex";
-    }
-
-    function executeCreateRoom() {
-      const uName = activeUser.displayName || activeUser.username;
-      const rName = document.getElementById("in-modal-room-name").value.trim() || `${uName} Odası`;
-      const mode = document.getElementById("sel-modal-room-mode").value;
-      const target = parseInt(document.getElementById("sel-modal-room-target").value) || 250;
-      const myKey = sanitizeUserKey(activeUser.username);
       const generatedTag = "#" + Math.floor(1000 + Math.random() * 9000);
       const rId = "room_" + Date.now().toString(36);
+      const myKey = sanitizeUserKey(activeUser.username);
+
+      let targetScore = 250;
+      if (selectedMode === "mega") targetScore = 500;
+      if (selectedMode === "speedrun") targetScore = 300;
 
       const payload = {
         hostUserKey: myKey,
         hostName: uName,
-        roomName: rName,
+        roomName: `${uName} Kanalı`,
         roomTag: generatedTag,
-        mode: mode,
-        targetScore: target,
+        mode: selectedMode,
+        targetScore: targetScore,
         state: "waiting",
         players: {
-          [myKey]: { name: uName, score: 0, isHost: true }
+          [myKey]: { name: uName, score: 0, ready: true, isHost: true }
         }
       };
 
       const roomRef = rtdb.ref("pvp_rooms/" + rId);
       roomRef.set(payload).then(() => {
         roomRef.onDisconnect().remove();
-        document.getElementById("modal-create-room").style.display = "none";
         isHost = true;
         enterArena(rId);
       });
@@ -401,6 +505,7 @@
         roomRef.child("players/" + myKey).set({
           name: activeUser.displayName || activeUser.username,
           score: 0,
+          ready: isHost ? true : false,
           isHost: isHost
         }).then(() => {
           if (!isHost) roomRef.child("players/" + myKey).onDisconnect().remove();
@@ -411,7 +516,7 @@
 
     function joinByCode() {
       const raw = document.getElementById("in-room-search").value.trim().toLowerCase();
-      if (!raw) return alert("Lütfen kod girin!");
+      if (!raw) return alert("Lütfen oda adı veya #ID kodu girin!");
 
       rtdb.ref("pvp_rooms").once("value", snap => {
         let matchedKey = null;
@@ -419,7 +524,10 @@
           snap.forEach(c => {
             const r = c.val();
             const tag = String(r.roomTag || '').toLowerCase();
-            if (c.key.toLowerCase() === raw || tag === raw || tag === ('#' + raw)) matchedKey = c.key;
+            const name = String(r.roomName || '').toLowerCase();
+            if (c.key.toLowerCase() === raw || tag === raw || tag === ('#' + raw) || name === raw) {
+              matchedKey = c.key;
+            }
           });
         }
         if (matchedKey) joinRoom(matchedKey);
@@ -432,6 +540,7 @@
       document.getElementById("lobby-view").style.display = "none";
       document.getElementById("arena-view").style.display = "flex";
       listenCurrentRoom();
+      listenReactions();
     }
 
     function listenCurrentRoom() {
@@ -440,28 +549,34 @@
 
       roomRef.on("value", snap => {
         if (!snap.exists()) {
-          alert("Oda kapandı!");
+          alert("Oda kapatıldı!");
           return exitArenaToLobby();
         }
 
         const room = snap.val();
-        document.getElementById("arena-room-title").innerText = room.roomName || "PvP";
-        document.getElementById("arena-room-tag").innerText = room.roomTag || "";
+
+        // ORTADA KANAL ADI VE #ID
+        document.getElementById("arena-room-header").innerText = `${room.roomName} ${room.roomTag}`;
+        document.getElementById("arena-mode-badge").innerText = room.mode.toUpperCase();
 
         const pKeys = Object.keys(room.players || {});
-        const p1 = room.players[pKeys[0]] || { name: "Boş", score: 0 };
-        const p2 = room.players[pKeys[1]] || { name: "Bekleniyor...", score: 0 };
+        const p1 = room.players[pKeys[0]] || { name: "Boş", score: 0, ready: false };
+        const p2 = room.players[pKeys[1]] || { name: "Bekleniyor...", score: 0, ready: false };
 
         document.getElementById("p1-name").innerText = p1.name;
         document.getElementById("p1-score").innerText = p1.score;
+        document.getElementById("p1-ready-status").innerText = p1.ready ? "✅ HAZIR" : "⏳ HAZIR DEĞİL";
+        document.getElementById("p1-ready-status").style.color = p1.ready ? "#22c55e" : "#eab308";
+
         document.getElementById("p2-name").innerText = p2.name;
         document.getElementById("p2-score").innerText = p2.score;
+        document.getElementById("p2-ready-status").innerText = p2.ready ? "✅ HAZIR" : "⏳ HAZIR DEĞİL";
+        document.getElementById("p2-ready-status").style.color = p2.ready ? "#22c55e" : "#eab308";
 
         renderArenaEngine(room, myKey, pKeys);
       });
     }
 
-    // OYUN MOTORLARI
     function renderArenaEngine(room, myKey, pKeys) {
       const area = document.getElementById("arena-dynamic-content");
 
@@ -469,24 +584,42 @@
         area.innerHTML = `
           <div style="text-align:center;">
             <div style="font-size:28px; margin-bottom:8px;">⏳</div>
-            <div style="font-size:12px; color:#94a3b8;">Rakip bekleniyor...</div>
-            <div style="font-size:11px; color:#f59e0b; margin-top:4px;">Oda Kodu: <b>${room.roomTag}</b></div>
+            <div style="font-size:12px; color:#94a3b8;">Rakibin odaya katılması bekleniyor...</div>
+            <div style="font-size:13px; color:#f59e0b; margin-top:6px; font-weight:bold;">${room.roomName} ${room.roomTag}</div>
           </div>
         `;
         return;
       }
 
+      // HAZIR VERME VE BAŞLAMA
       if (room.state === "waiting") {
-        if (room.hostUserKey === myKey) {
-          area.innerHTML = `
-            <div style="text-align:center;">
-              <div style="font-size:12px; color:#22c55e; margin-bottom:10px;">Rakip bağlandı!</div>
-              <button class="btn-action btn-start" onclick="startGame()">🎮 Oyunu Başlat</button>
-            </div>
+        const me = room.players[myKey] || {};
+        const p1Ready = room.players[pKeys[0]]?.ready;
+        const p2Ready = room.players[pKeys[1]]?.ready;
+        const allReady = p1Ready && p2Ready;
+
+        let controlsHtml = "";
+        if (!isHost) {
+          controlsHtml = `
+            <button class="btn-action" style="background:${me.ready ? '#ef4444' : '#16a34a'}; width:200px; padding:12px;" onclick="toggleReady(!${me.ready})">
+              ${me.ready ? '❌ Hazır Durumunu Kaldır' : '✅ Hazırım'}
+            </button>
           `;
         } else {
-          area.innerHTML = `<div style="color:#94a3b8; font-size:12px;">Kurucunun oyunu başlatması bekleniyor...</div>`;
+          controlsHtml = `
+            <button class="btn-action btn-start" style="width:200px; padding:12px; opacity:${allReady ? '1' : '0.5'};" ${allReady ? '' : 'disabled'} onclick="startGame()">
+              🎮 Maçı Başlat
+            </button>
+            <div style="font-size:9px; color:#94a3b8; margin-top:5px;">${allReady ? 'Her iki oyuncu da hazır!' : 'Rakibin hazır olması bekleniyor...'}</div>
+          `;
         }
+
+        area.innerHTML = `
+          <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <div style="font-size:12px; color:#38bdf8; font-weight:bold;">Lobi Bekleme Odası</div>
+            ${controlsHtml}
+          </div>
+        `;
         return;
       }
 
@@ -501,8 +634,8 @@
         return;
       }
 
-      // MOD MOTORLARI
-      if (room.mode === "speedrun" || room.mode === "classic") {
+      // OYUN MODLARININ ÇALIŞTIRILMASI
+      if (room.mode === "classic" || room.mode === "mega" || room.mode === "speedrun") {
         if (!document.getElementById("slot-wrapper-box")) setupSlotUI(area, room, myKey);
       } else if (room.mode === "mines") {
         if (!document.getElementById("mines-board")) setupMinesUI(area, room, myKey);
@@ -511,11 +644,15 @@
       }
     }
 
+    function toggleReady(status) {
+      const myKey = sanitizeUserKey(activeUser.username);
+      rtdb.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/ready`).set(status);
+    }
+
     function startGame() {
       const roomRef = rtdb.ref(`pvp_rooms/${currentRoomId}`);
       roomRef.update({ state: "playing" });
 
-      // Amiral Battı için gemi ve sıra başlangıcı
       roomRef.once("value", snap => {
         const r = snap.val();
         if (r.mode === "battleship") {
@@ -537,59 +674,66 @@
       });
     }
 
-    /* 1. MOTOR: SLOT KASA AÇMA */
+    /* KASA AÇMA MOTORU (Normal, Mega ve Speedrun) */
     function setupSlotUI(area, room, myKey) {
+      const isMega = room.mode === "mega";
       area.innerHTML = `
         <div style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;">
-          <div style="font-size:11px; color:#38bdf8; font-weight:bold;">Hedef: ${room.targetScore} Puan</div>
-          <div class="slot-wrapper" id="slot-wrapper-box">
+          <div style="font-size:11px; color:${isMega ? '#ec4899' : '#38bdf8'}; font-weight:bold;">
+            ${isMega ? '🎁 MEGA KASA DÜELLOSU' : '📦 KASA AÇMA YARIŞI'} (Hedef: ${room.targetScore}P)
+          </div>
+          <div class="slot-wrapper" id="slot-wrapper-box" style="${isMega ? 'border-color:#ec4899;' : ''}">
             <div class="slot-indicator"></div>
             <div class="slot-track" id="slot-track-reel"></div>
           </div>
           <div id="slot-result-tag" style="font-size:12px; font-weight:bold; height:18px;"></div>
-          <button class="btn-action" style="background:#0284c7; padding:10px 20px; font-size:12px;" id="btn-spin" onclick="spinSlot()">🎰 Çevir / Kasa Aç</button>
+          <button class="btn-action" style="background:${isMega ? '#db2777' : '#0284c7'}; padding:10px 22px; font-size:12px;" id="btn-spin" onclick="spinSlot('${room.mode}')">
+            🎰 ${isMega ? 'Mega Kasa Aç' : 'Kasa Aç'}
+          </button>
         </div>
       `;
-      fillReel();
+      fillReel(isMega);
     }
 
-    function fillReel() {
+    function fillReel(isMega) {
       const reel = document.getElementById("slot-track-reel");
+      if (!reel) return;
       reel.innerHTML = "";
-      for (let i = 0; i < 30; i++) {
-        const itm = CS_ITEMS[Math.floor(Math.random() * CS_ITEMS.length)];
+      for (let i = 0; i < 28; i++) {
+        const itm = REEL_ITEMS[Math.floor(Math.random() * REEL_ITEMS.length)];
+        const multiplier = isMega ? 2 : 1;
         const div = document.createElement("div");
         div.className = "slot-item";
         div.style.borderColor = itm.rarity;
-        div.innerHTML = `<span>${itm.icon}</span><span style="font-size:8px; color:${itm.rarity}; font-weight:bold; margin-top:2px;">+${itm.val}P</span>`;
+        div.innerHTML = `<span>${itm.icon}</span><span style="font-size:8px; color:${itm.rarity}; font-weight:bold; margin-top:2px;">+${itm.val * multiplier}P</span>`;
         reel.appendChild(div);
       }
     }
 
-    function spinSlot() {
+    function spinSlot(mode) {
       if (isSpinning) return;
       isSpinning = true;
       document.getElementById("btn-spin").disabled = true;
 
+      const isMega = mode === "mega";
       const reel = document.getElementById("slot-track-reel");
-      fillReel();
+      fillReel(isMega);
       reel.style.transition = "none";
       reel.style.transform = "translateX(0px)";
 
       setTimeout(() => {
-        reel.style.transition = "transform 2.5s cubic-bezier(0.1, 0.9, 0.2, 1)";
-        const winningIndex = 22; // Ortadaki hedef öğe
-        const stopPosition = -((winningIndex * 88) - 120);
-        reel.style.transform = `translateX(${stopPosition}px)`;
+        reel.style.transition = "transform 2.2s cubic-bezier(0.1, 0.9, 0.2, 1)";
+        reel.style.transform = "translateX(-1680px)";
 
         setTimeout(() => {
-          const randOutcome = CS_ITEMS[Math.floor(Math.random() * CS_ITEMS.length)];
-          document.getElementById("slot-result-tag").innerHTML = `<span style="color:${randOutcome.rarity}">Çıkan: ${randOutcome.name} (+${randOutcome.val}P)</span>`;
+          const item = REEL_ITEMS[Math.floor(Math.random() * REEL_ITEMS.length)];
+          const finalScore = isMega ? item.val * 2 : item.val;
+
+          document.getElementById("slot-result-tag").innerHTML = `<span style="color:${item.rarity}">${item.name} (+${finalScore}P)</span>`;
 
           const myKey = sanitizeUserKey(activeUser.username);
           const pRef = rtdb.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/score`);
-          
-          pRef.transaction(s => (s || 0) + randOutcome.val, (err, comm, snap) => {
+          pRef.transaction(s => (s || 0) + finalScore, (err, comm, snap) => {
             if (comm) {
               rtdb.ref(`pvp_rooms/${currentRoomId}/targetScore`).once("value", ts => {
                 if (snap.val() >= (ts.val() || 250)) {
@@ -600,11 +744,11 @@
             isSpinning = false;
             document.getElementById("btn-spin").disabled = false;
           });
-        }, 2600);
+        }, 2300);
       }, 50);
     }
 
-    /* 2. MOTOR: 3x3 MAYIN TARLASI (ÇARPAN + KASALA ÇEKİL) */
+    /* 3x3 MAYIN TARLASI MOTORU */
     let currentMineMultiplier = 1.0;
     let currentMinePot = 0;
     let localMines = [];
@@ -613,13 +757,13 @@
       resetMinesRound();
       area.innerHTML = `
         <div style="text-align:center; display:flex; flex-direction:column; align-items:center;" id="mines-board">
-          <div style="font-size:11px; color:#ef4444; font-weight:bold;">💣 3x3 Mayın Düellosu (Hedef: ${room.targetScore}P)</div>
+          <div style="font-size:11px; color:#ef4444; font-weight:bold;">💣 3x3 Mayın Tarlası (Hedef: ${room.targetScore}P)</div>
           <div style="display:flex; justify-content:space-between; width:240px; margin-top:6px; font-size:11px;">
             <div>Çarpan: <b id="lbl-mult" style="color:#22c55e;">1.00x</b></div>
             <div>Kasadaki: <b id="lbl-pot" style="color:#f59e0b;">0P</b></div>
           </div>
           <div class="mines-grid-3x3" id="mine-cells-box"></div>
-          <button class="btn-action" style="background:#16a34a; width:240px;" id="btn-cashout" onclick="cashoutMines()">💰 Kasala / Puanı Al</button>
+          <button class="btn-action" style="background:#16a34a; width:240px;" onclick="cashoutMines()">💰 Puanı Kasala & Çekil</button>
         </div>
       `;
       renderMinesGrid();
@@ -629,7 +773,7 @@
       currentMineMultiplier = 1.0;
       currentMinePot = 20;
       localMines = [];
-      while (localMines.length < 2) { // 9 kutudan 2'si bomba
+      while (localMines.length < 2) {
         let r = Math.floor(Math.random() * 9);
         if (!localMines.includes(r)) localMines.push(r);
       }
@@ -656,13 +800,13 @@
       if (localMines.includes(idx)) {
         el.innerText = "💥";
         el.classList.add("revealed-bomb");
-        alert("BOOM! Mayına bastın! Kasadaki puan yandı.");
+        alert("Mayına bastın! Puanlar yandı.");
         resetMinesRound();
         renderMinesGrid();
       } else {
         el.innerText = "💎";
         el.classList.add("revealed-gem");
-        currentMineMultiplier += 0.45;
+        currentMineMultiplier += 0.5;
         currentMinePot = Math.floor(currentMinePot * currentMineMultiplier);
         document.getElementById("lbl-mult").innerText = currentMineMultiplier.toFixed(2) + "x";
         document.getElementById("lbl-pot").innerText = currentMinePot + "P";
@@ -670,7 +814,7 @@
     }
 
     function cashoutMines() {
-      if (currentMinePot <= 20 && currentMineMultiplier === 1.0) return alert("Önce kutu açarak risk al!");
+      if (currentMinePot <= 20 && currentMineMultiplier === 1.0) return alert("Önce risk alıp kutu açmalısın!");
       const myKey = sanitizeUserKey(activeUser.username);
       const pRef = rtdb.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/score`);
       
@@ -687,7 +831,7 @@
       });
     }
 
-    /* 3. MOTOR: 5x5 AMİRAL BATTI (GERÇEK DÜELLO & SENKRON SIRALI) */
+    /* AMİRAL BATTI MOTORU */
     function setupBattleshipUI(area, room, myKey, pKeys) {
       const bData = room.battleship || {};
       const currentTurn = bData.turn || pKeys[0];
@@ -697,7 +841,7 @@
       area.innerHTML = `
         <div style="text-align:center;">
           <div style="font-size:12px; font-weight:bold; margin-bottom:6px; color:${isMyTurn ? '#22c55e' : '#ef4444'};">
-            ${isMyTurn ? '🎯 Sıra Sende! Rakibin tahtasını bombala!' : '⏳ Rakibin atış yapması bekleniyor...'}
+            ${isMyTurn ? '🎯 Sıra Sende! Atış Yap!' : '⏳ Rakibin atışı bekleniyor...'}
           </div>
           <div class="ship-grid-5x5" id="bs-grid"></div>
         </div>
@@ -709,7 +853,6 @@
       for (let i = 0; i < 25; i++) {
         const cell = document.createElement("div");
         cell.className = "ship-cell";
-        
         if (shots[i] === "hit") {
           cell.innerText = "💥";
           cell.classList.add("hit");
@@ -718,9 +861,7 @@
           cell.classList.add("miss");
         } else {
           cell.innerText = "❓";
-          if (isMyTurn) {
-            cell.onclick = () => shootBattleship(i, enemyKey, myKey);
-          }
+          if (isMyTurn) cell.onclick = () => shootBattleship(i, enemyKey, myKey);
         }
         grid.appendChild(cell);
       }
@@ -736,21 +877,50 @@
         roomRef.child(`battleship/shots/${myKey}/${idx}`).set(result);
 
         if (isHit) {
-          // Vuran kişi puan kazanır ve sıra onda kalır
           const pRef = roomRef.child(`players/${myKey}/score`);
           pRef.transaction(s => (s || 0) + 50, (e, c, snapScore) => {
-            if (snapScore.val() >= 150) { // 3 gemi * 50 = 150 puan = filo battı
-              alert("🏆 Rakibin tüm donanmasını yok ettin!");
+            if (snapScore.val() >= 150) {
+              alert("🏆 Rakibin donanmasını batırdın!");
               roomRef.update({ state: "finished" });
             }
           });
         } else {
-          // Iskalarsa sıra rakibe geçer
           roomRef.child("battleship/turn").set(enemyKey);
         }
       });
     }
 
+    /* CANLI EMOJİ REAKSİYONLARI */
+    function sendReaction(emoji) {
+      if (!currentRoomId || !rtdb) return;
+      const myKey = sanitizeUserKey(activeUser.username);
+      rtdb.ref(`pvp_rooms/${currentRoomId}/reactions`).push({
+        sender: myKey,
+        emoji: emoji,
+        time: Date.now()
+      });
+    }
+
+    function listenReactions() {
+      rtdb.ref(`pvp_rooms/${currentRoomId}/reactions`).limitToLast(1).on("child_added", snap => {
+        const data = snap.val();
+        if (!data || Date.now() - data.time > 4000) return;
+        showFloatingEmoji(data.emoji);
+      });
+    }
+
+    function showFloatingEmoji(emoji) {
+      const shell = document.getElementById("app-shell");
+      const span = document.createElement("span");
+      span.className = "floating-emoji";
+      span.innerText = emoji;
+      span.style.left = (Math.random() * 60 + 20) + "%";
+      span.style.bottom = "80px";
+      shell.appendChild(span);
+      setTimeout(() => span.remove(), 1800);
+    }
+
+    /* ÇIKIŞ İŞLEMLERİ */
     function leaveRoom() {
       if (!currentRoomId) return;
       const myKey = sanitizeUserKey(activeUser.username);
