@@ -279,17 +279,15 @@
       </div>
     </div>
 
-    <!-- Üst Sekmeler (Ziyarette Gizlenir) -->
+    <!-- Üst Sekmeler -->
     <div class="tab-bar" id="ui-tab-bar">
       <button class="tab-btn active" onclick="switchTab('tab-fields')">🌱 7×7 Tarlalar</button>
       <button class="tab-btn" onclick="switchTab('tab-seeds')">🌾 Tohumcu</button>
-      <button class="tab-btn" onclick="switchTab('tab-trees')">🍎 Meyvelik</button>
       <button class="tab-btn" onclick="switchTab('tab-animals')">🐄 Ağıl & Hayvan</button>
-      <button class="tab-btn" onclick="switchTab('tab-kitchen')">🍳 Mutfak</button>
+      <button class="tab-btn" onclick="switchTab('tab-kitchen')">🍳 Mutfak & İmalat</button>
       <button class="tab-btn" onclick="switchTab('tab-truck')">🚚 Kamyonet</button>
-      <button class="tab-btn" onclick="switchTab('tab-ship')">🚢 Gemi</button>
-      <button class="tab-btn" onclick="switchTab('tab-bag')">🎒 Çanta</button>
-      <button class="tab-btn" onclick="switchTab('tab-elmas')">💎 Tom & Çark</button>
+      <button class="tab-btn" onclick="switchTab('tab-ship')">🚢 Gemi Limanı</button>
+      <button class="tab-btn" onclick="switchTab('tab-bag')">🎒 Çanta & Ambar</button>
       <button class="tab-btn" onclick="switchTab('tab-achieve')">🏆 Başarımlar</button>
     </div>
 
@@ -297,9 +295,8 @@
       
       <!-- 1. 7x7 TARLALAR -->
       <div id="tab-fields" class="tab-content active">
-        <div id="box-mystery-chest" style="display:none; background:#7f1d1d; border:1px solid #ef4444; border-radius:6px; padding:6px; justify-content:space-between; align-items:center;">
-          <div style="font-size:9px; color:#fde68a;">🎁 Tarlada Gizemli Hazine Sandığı Bulundu!</div>
-          <button class="btn-action" style="background:#f59e0b; color:#000;" onclick="openMysteryChest()">Aç 🗝️</button>
+        <div id="ui-weather-alert" style="display:none; background:#0284c7; padding:4px 8px; border-radius:6px; font-size:8.5px; text-align:center; font-weight:bold;">
+          🌧️ Sağanak Yağmur Başladı! Tarlalar otomatik sulanıyor.
         </div>
 
         <div id="ui-water-row" style="background:#022c22; border:1px solid #047857; border-radius:8px; padding:6px; display:flex; justify-content:space-between; align-items:center;">
@@ -308,13 +305,13 @@
         </div>
 
         <div id="ui-seeds-tray-wrap">
-          <div style="font-size:8px; font-weight:bold; color:#fde68a;">Ekim Tohumunu Seç (Sağa Kaydır):</div>
+          <div style="font-size:8px; font-weight:bold; color:#fde68a;">Ekim Tohumu Seç (Sağa Kaydır):</div>
           <div style="display:flex; gap:5px; overflow-x:auto; padding-bottom:3px;" id="tray-crops"></div>
         </div>
 
         <div class="grid-7x7-box">
           <div style="display:flex; justify-content:space-between; width:100%; font-size:9px; font-weight:bold; color:#fde68a;">
-            <span>7×7 Tarla (<span id="lbl-unlocked-plots">4</span>/49 Parsel Açık)</span>
+            <span>7×7 Tarla Alanı (<span id="lbl-unlocked-plots">4</span>/49 Parsel Açık)</span>
             <span style="color:#38bdf8;" id="ui-next-plot-tag">Sıradaki Arsa: <b id="lbl-next-plot-cost">50₺</b></span>
           </div>
           <div class="grid-7x7" id="grid-7x7-container"></div>
@@ -327,31 +324,25 @@
         <div id="box-seeds-list" style="display:flex; flex-direction:column; gap:6px;"></div>
       </div>
 
-      <!-- 3. MEYVE BAHÇESİ (AĞAÇLAR) -->
-      <div id="tab-trees" class="tab-content">
-        <b style="font-size:11px; color:#facc15;">🍎 Meyve Bahçesi (Ağaç Dik & Meyve Topla)</b>
-        <div id="box-trees-list" style="display:flex; flex-direction:column; gap:6px;"></div>
-      </div>
-
-      <!-- 4. AĞILLAR & HAYVANLAR -->
+      <!-- 3. AĞILLAR & HAYVANLAR -->
       <div id="tab-animals" class="tab-content">
         <b style="font-size:11px; color:#facc15;">🐄 Hayvan Ağılları</b>
         <div id="box-animals-list" style="display:flex; flex-direction:column; gap:6px;"></div>
       </div>
 
-      <!-- 5. MUTFAK & İMALATHANELER -->
+      <!-- 4. MUTFAK & İMALATHANELER -->
       <div id="tab-kitchen" class="tab-content">
-        <b style="font-size:11px; color:#facc15;">🍳 İmalathaneler (Ekmek, Peynir, Kahve, Dondurma)</b>
+        <b style="font-size:11px; color:#facc15;">🍳 İmalathaneler & Fırın</b>
         <div id="box-machines-list" style="display:flex; flex-direction:column; gap:6px;"></div>
       </div>
 
-      <!-- 6. KAMYONET SİPARİŞLERİ -->
+      <!-- 5. KAMYONET SİPARİŞLERİ -->
       <div id="tab-truck" class="tab-content">
-        <b style="font-size:11px; color:#facc15;">🚚 Kamyonet Panosu (Teslimat Yap)</b>
+        <b style="font-size:11px; color:#facc15;">🚚 Kamyonet Sipariş Panosu</b>
         <div id="box-truck-orders" style="display:flex; flex-direction:column; gap:6px;"></div>
       </div>
 
-      <!-- 7. TİCARET GEMİSİ -->
+      <!-- 6. TİCARET GEMİSİ -->
       <div id="tab-ship" class="tab-content">
         <div style="background:#022c22; border:2px solid #f59e0b; border-radius:10px; padding:10px;">
           <div id="box-ship-active">
@@ -374,44 +365,16 @@
         </div>
       </div>
 
-      <!-- 8. ÇANTA & AMBAR -->
+      <!-- 7. ÇANTA VE AMBAR -->
       <div id="tab-bag" class="tab-content">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <b style="font-size:11px; color:#a7f3d0;">🎒 Ambar ve Siloculuk</b>
-          <button class="btn-action" style="background:#16a34a; font-size:8.5px;" onclick="upgradeBag()">Büyüt (+10 Kapasite - 150₺)</button>
+          <b style="font-size:11px; color:#a7f3d0;">🎒 Ambar ve Silo (<span id="lbl-bag-header-count">0/10</span>)</b>
+          <button class="btn-action" style="background:#16a34a; font-size:8.5px;" onclick="upgradeBagOnlyGold()">Ambarı Büyüt (+10 Kapasite - 150₺)</button>
         </div>
         <div id="box-bag-items" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px;"></div>
       </div>
 
-      <!-- 9. ELMAS KÖŞKÜ (TOM & ÇARK) -->
-      <div id="tab-elmas" class="tab-content">
-        <b style="font-size:11px; color:#38bdf8;">💎 Elmas Hizmetleri & Tom</b>
-        <div style="display:flex; flex-direction:column; gap:6px;">
-          <div class="shop-row-card">
-            <div>
-              <b style="font-size:10px; color:#38bdf8;">👦 Ayak İşleri Çocuğu Tom</b>
-              <div style="font-size:8px; color:#94a3b8;">Tom'u kiralayarak istediğin 5 ürünü anında getirt.</div>
-            </div>
-            <button class="btn-action" style="background:#a855f7;" onclick="hireTom()">Kirala (3 💎)</button>
-          </div>
-          <div class="shop-row-card">
-            <div>
-              <b style="font-size:10px; color:#facc15;">🎡 Günlük Şans Çarkı</b>
-              <div style="font-size:8px; color:#94a3b8;">Çarkı çevirerek büyük ödülleri kazan.</div>
-            </div>
-            <button class="btn-action" style="background:#f59e0b; color:#000;" onclick="spinLuckyWheel()">Çevir (2 💎)</button>
-          </div>
-          <div class="shop-row-card">
-            <div>
-              <b style="font-size:10px; color:#38bdf8;">💧 Su Deposu Güçlendirme (+50L)</b>
-              <div style="font-size:8px; color:#94a3b8;">Su kapasitesini kalıcı artırır ve doldurur.</div>
-            </div>
-            <button class="btn-action" style="background:#0284c7;" onclick="buySuperWater()">Al (4 💎)</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 10. BAŞARIMLAR -->
+      <!-- 8. BAŞARIMLAR -->
       <div id="tab-achieve" class="tab-content">
         <b style="font-size:11px; color:#facc15;">🏆 Çiftlik Başarımları</b>
         <div id="box-achievements" style="display:flex; flex-direction:column; gap:6px;"></div>
@@ -427,7 +390,7 @@
         <b style="font-size:12px; color:#facc15;" id="lbl-market-title">🏪 Yol Kenarı Pazarım</b>
         <button class="btn-action" style="background:#ef4444; padding:2px 6px;" onclick="document.getElementById('modal-market').style.display='none'">X</button>
       </div>
-      <div style="font-size:8px; color:#fde68a; margin-top:3px;">Tezgâhlara ürün koyabilir veya satılanların parasını toplayabilirsin!</div>
+      <div style="font-size:8px; color:#fde68a; margin-top:3px;">Ürün koyduktan 20-30sn sonra botlar satın alır!</div>
       
       <div style="display:flex; gap:6px; overflow-x:auto; padding:8px 0;" id="shelf-market"></div>
 
@@ -481,7 +444,7 @@
     let modalSelectedQty = 1;
     let modalSelectedPrice = 5;
 
-    // BOB AMCA ÇİFTLİK VE PAZAR VERİSİ
+    // BOB AMCA'NIN PAZARI
     const BOB_FARM = {
       profile: { name: "👨‍🌾 Çiftçi Bob", level: 50, prestige: 10, gold: 99999, rankScore: 99999 },
       farm: {
@@ -495,47 +458,35 @@
         market: [
           { item: 'wheat', qty: 10, price: 6, status: 'on_sale' },
           { item: 'bread', qty: 3, price: 15, status: 'on_sale' },
-          { item: 'coffee', qty: 2, price: 30, status: 'on_sale' },
-          { item: 'bolt', qty: 2, price: 10, status: 'on_sale' },
-          { item: 'apple', qty: 4, price: 20, status: 'on_sale' },
-          { item: 'icecream', qty: 1, price: 40, status: 'on_sale' }
+          { item: 'cheese', qty: 2, price: 25, status: 'on_sale' },
+          { item: 'pie', qty: 1, price: 45, status: 'on_sale' },
+          { item: 'soup', qty: 2, price: 35, status: 'on_sale' },
+          { item: 'cornbread', qty: 2, price: 20, status: 'on_sale' }
         ]
       }
     };
 
-    // TÜM ÜRÜNLER HAVUZU
+    // TÜM EŞYALAR VE YENİ EKLENEN TARİFLER
     const ALL_ITEMS = {
       // Ekinler
-      wheat:      { name: "Buğday",       icon: "🌾", type: "crop",    seedCost: 2,   minP: 2,   maxP: 8,   dur: 6,   xp: 2,  level: 1 },
-      corn:       { name: "Mısır",        icon: "🌽", type: "crop",    seedCost: 4,   minP: 4,   maxP: 16,  dur: 14,  xp: 5,  level: 2 },
-      carrot:     { name: "Havuç",        icon: "🥕", type: "crop",    seedCost: 7,   minP: 8,   maxP: 25,  dur: 25,  xp: 8,  level: 3 },
-      soy:        { name: "Soya",         icon: "🌱", type: "crop",    seedCost: 12,  minP: 14,  maxP: 40,  dur: 40,  xp: 12, level: 4 },
-      rice:       { name: "Pirinç",       icon: "🍚", type: "crop",    seedCost: 16,  minP: 18,  maxP: 50,  dur: 50,  xp: 15, level: 5 },
-      coffee_b:   { name: "Kahve Çekirdeği",icon: "☕",type: "crop",    seedCost: 25,  minP: 28,  maxP: 80,  dur: 70,  xp: 20, level: 6 },
-      tomato:     { name: "Domates",      icon: "🍅", type: "crop",    seedCost: 32,  minP: 35,  maxP: 100, dur: 90,  xp: 25, level: 7 },
-      pepper:     { name: "Biber",        icon: "🫑", type: "crop",    seedCost: 45,  minP: 50,  maxP: 140, dur: 120, xp: 35, level: 8 },
-      // Ağaç Meyveleri
-      apple:      { name: "Elma",         icon: "🍎", type: "fruit",   minP: 10,  maxP: 30,  xp: 10, level: 3 },
-      cherry:     { name: "Kiraz",        icon: "🍒", type: "fruit",   minP: 15,  maxP: 45,  xp: 15, level: 5 },
+      wheat:      { name: "Buğday",         icon: "🌾", type: "crop",    seedCost: 2,   minP: 2,   maxP: 8,   dur: 6,   xp: 2,  level: 1 },
+      corn:       { name: "Mısır",          icon: "🌽", type: "crop",    seedCost: 4,   minP: 4,   maxP: 16,  dur: 14,  xp: 5,  level: 2 },
+      carrot:     { name: "Havuç",          icon: "🥕", type: "crop",    seedCost: 7,   minP: 8,   maxP: 25,  dur: 25,  xp: 8,  level: 3 },
+      soy:        { name: "Soya",           icon: "🌱", type: "crop",    seedCost: 12,  minP: 14,  maxP: 40,  dur: 40,  xp: 12, level: 4 },
+      tomato:     { name: "Domates",        icon: "🍅", type: "crop",    seedCost: 20,  minP: 22,  maxP: 65,  dur: 60,  xp: 18, level: 5 },
+      pumpkin:    { name: "Balkabağı",      icon: "🎃", type: "crop",    seedCost: 35,  minP: 35,  maxP: 110, dur: 90,  xp: 25, level: 6 },
       // Hayvansal
-      egg:        { name: "Yumurta",      icon: "🥚", type: "animal",  minP: 5,   maxP: 20,  xp: 6,  level: 2 },
-      milk:       { name: "Süt",          icon: "🥛", type: "animal",  minP: 12,  maxP: 45,  xp: 12, level: 4 },
-      wool:       { name: "Yün",          icon: "🧶", type: "animal",  minP: 25,  maxP: 85,  xp: 22, level: 6 },
-      // İmalat & Yemekler
-      bread:      { name: "Köy Ekmeği",   icon: "🍞", type: "kitchen", minP: 12,  maxP: 45,  xp: 15, level: 2 },
-      cheese:     { name: "Taze Peynir",  icon: "🧀", type: "kitchen", minP: 22,  maxP: 75,  xp: 22, level: 4 },
-      coffee:     { name: "Sıcak Kahve",  icon: "☕", type: "kitchen", minP: 35,  maxP: 110, xp: 30, level: 6 },
-      icecream:   { name: "Meyveli Dondurma",icon:"🍦",type:"kitchen", minP: 45,  maxP: 140, xp: 40, level: 7 },
-      salad:      { name: "Bahçe Salatası",icon: "🥗",type: "kitchen", minP: 55,  maxP: 170, xp: 45, level: 8 },
-      // Siloculuk Malzemeleri
-      bolt:       { name: "Cıvata",       icon: "🔩", type: "material",minP: 10,  maxP: 50,  xp: 5,  level: 1 },
-      plank:      { name: "Ahşap Kalas",  icon: "🪵", type: "material",minP: 10,  maxP: 50,  xp: 5,  level: 1 }
-    };
-
-    // AĞAÇLAR LİSTESİ
-    const TREES_DEF = {
-      apple_tree:  { name: "Elma Ağacı",  icon: "🌳", fruit: "apple",  dur: 40, cost: 150, level: 3 },
-      cherry_tree: { name: "Kiraz Ağacı", icon: "🍒", fruit: "cherry", dur: 70, cost: 300, level: 5 }
+      egg:        { name: "Yumurta",        icon: "🥚", type: "animal",  minP: 5,   maxP: 20,  xp: 6,  level: 2 },
+      milk:       { name: "Süt",            icon: "🥛", type: "animal",  minP: 12,  maxP: 45,  xp: 12, level: 4 },
+      wool:       { name: "Yün",            icon: "🧶", type: "animal",  minP: 25,  maxP: 85,  xp: 22, level: 6 },
+      // Mutfak / Yemekler
+      bread:      { name: "Köy Ekmeği",     icon: "🍞", type: "kitchen", minP: 12,  maxP: 45,  xp: 15, level: 2 },
+      cornbread:  { name: "Mısır Ekmeği",   icon: "🥖", type: "kitchen", minP: 18,  maxP: 55,  xp: 20, level: 3 },
+      cheese:     { name: "Taze Peynir",    icon: "🧀", type: "kitchen", minP: 22,  maxP: 75,  xp: 22, level: 4 },
+      soup:       { name: "Domates Çorbası",icon: "🥣", type: "kitchen", minP: 32,  maxP: 95,  xp: 28, level: 5 },
+      pie:        { name: "Balkabağı Turtası",icon:"🥧",type: "kitchen", minP: 55,  maxP: 180, xp: 45, level: 6 },
+      fabric:     { name: "Dokuma Kumaş",   icon: "🧵", type: "kitchen", minP: 45,  maxP: 150, xp: 40, level: 6 },
+      omelet:     { name: "Biberli Omlet",  icon: "🍳", type: "kitchen", minP: 40,  maxP: 130, xp: 35, level: 5 }
     };
 
     const ANIMAL_HOUSES = {
@@ -545,17 +496,18 @@
     };
 
     const MACHINES_DEF = {
-      bakery: { name: "Ekmek Fırını",   icon: "🍞", cost: 200, inItem: "wheat",   inQty: 3, outItem: "bread",   dur: 20, level: 2 },
-      dairy:  { name: "Mandıra",        icon: "🧀", cost: 400, inItem: "milk",    inQty: 2, outItem: "cheese",  dur: 35, level: 4 },
-      kiosk:  { name: "Kahve Kiosku",   icon: "☕", cost: 700, inItem: "coffee_b",inQty: 2, outItem: "coffee",  dur: 45, level: 6 },
-      ice_cr: { name: "Dondurmacı",     icon: "🍦", cost: 1000,inItem: "milk",    inQty: 2, outItem: "icecream",dur: 60, level: 7 },
-      salad_b:{ name: "Salata Barı",    icon: "🥗", cost: 1300,inItem: "carrot",  inQty: 3, outItem: "salad",   dur: 80, level: 8 }
+      bakery: { name: "Ekmek Fırını",    icon: "🍞", cost: 200, inItem: "wheat",   inQty: 3, outItem: "bread",     dur: 20, level: 2 },
+      corn_bk:{ name: "Taş Fırın",       icon: "🥖", cost: 350, inItem: "corn",    inQty: 2, outItem: "cornbread", dur: 25, level: 3 },
+      dairy:  { name: "Mandıra",         icon: "🧀", cost: 450, inItem: "milk",    inQty: 2, outItem: "cheese",    dur: 35, level: 4 },
+      pot:    { name: "Çorba Kazanı",    icon: "🥣", cost: 650, inItem: "tomato",  inQty: 3, outItem: "soup",      dur: 45, level: 5 },
+      pie_ov: { name: "Turta Fırını",    icon: "🥧", cost: 950, inItem: "pumpkin", inQty: 2, outItem: "pie",       dur: 60, level: 6 },
+      loom:   { name: "Dokuma Tezgahı",  icon: "🧵", cost: 800, inItem: "wool",    inQty: 2, outItem: "fabric",    dur: 50, level: 6 }
     };
 
     const ACHIEVEMENTS_DEF = [
-      { id: "land",    title: "Arsa Ağası",  desc: "10 Parsel arsa aç", goal: 10, reward: 5 },
-      { id: "harvest", title: "Hasat Vakti", desc: "30 Ekin topla",      goal: 30, reward: 5 },
-      { id: "truck",   title: "Usta Nakliyeci",desc: "5 Kamyon gönder",  goal: 5,  reward: 10 }
+      { id: "land",    title: "Arsa Ağası",    desc: "10 Parsel arsa aç", goal: 10, reward: 5 },
+      { id: "harvest", title: "Hasat Vakti",   desc: "30 Ekin topla",      goal: 30, reward: 5 },
+      { id: "truck",   title: "Usta Nakliyeci",desc: "5 Kamyon gönder",    goal: 5,  reward: 10 }
     ];
 
     let farmState = {
@@ -578,10 +530,6 @@
         readyAt: 0,
         wet: false
       })),
-      trees: {
-        apple_tree:  { count: 0, readyAt: 0, state: 'idle' },
-        cherry_tree: { count: 0, readyAt: 0, state: 'idle' }
-      },
       animals: {
         chicken: { count: 0, state: 'idle', readyAt: 0 },
         cow:     { count: 0, state: 'idle', readyAt: 0 },
@@ -589,16 +537,17 @@
       },
       machines: {
         bakery:  { built: false, state: 'idle', readyAt: 0 },
+        corn_bk: { built: false, state: 'idle', readyAt: 0 },
         dairy:   { built: false, state: 'idle', readyAt: 0 },
-        kiosk:   { built: false, state: 'idle', readyAt: 0 },
-        ice_cr:  { built: false, state: 'idle', readyAt: 0 },
-        salad_b: { built: false, state: 'idle', readyAt: 0 }
+        pot:     { built: false, state: 'idle', readyAt: 0 },
+        pie_ov:  { built: false, state: 'idle', readyAt: 0 },
+        loom:    { built: false, state: 'idle', readyAt: 0 }
       },
       truckOrders: [
         { item: 'wheat', qty: 3, reward: 15, xp: 8, status: 'ready' },
         { item: 'corn', qty: 2, reward: 18, xp: 12, status: 'ready' }
       ],
-      market: Array(6).fill(null).map(() => ({ item: null, qty: 0, price: 0, status: 'empty' })),
+      market: Array(6).fill(null).map(() => ({ item: null, qty: 0, price: 0, status: 'empty', botTimer: 0 })),
       ship: {
         dockState: 'active',
         timer: 240,
@@ -632,10 +581,10 @@
       if (!activeUser) activeUser = { username: "mecaga", displayName: "Mecaga" };
 
       loadFarmData();
-      listenMarketSoldEvents();
       renderAll();
       setInterval(farmLoop, 1000);
-      setInterval(simulateRandomCustomerPazarAlimi, 18000); // 18 saniyede bir pazardaki ürüne bot teklifi
+      setInterval(checkMarketBotPurchases, 1000); // 1 saniyede bir pazar sayaçlarını işletir
+      setInterval(triggerRandomWeather, 60000); // 1 dakikada bir yağmur ihtimali
     });
 
     function switchTab(tabId) {
@@ -666,7 +615,7 @@
 
     function saveFarmData() {
       if (visitingTarget) return;
-      localStorage.setItem("kutu_farm_hayday_v5", JSON.stringify(farmState));
+      localStorage.setItem("kutu_farm_hayday_v6", JSON.stringify(farmState));
       if (rtdb && activeUser) {
         const myKey = sanitizeUserKey(activeUser.username);
         const unlockedPlotsCount = farmState.plots.filter(p => p.unlocked).length;
@@ -686,7 +635,7 @@
     }
 
     function loadFarmData() {
-      const local = localStorage.getItem("kutu_farm_hayday_v5");
+      const local = localStorage.getItem("kutu_farm_hayday_v6");
       if (local) {
         try { Object.assign(farmState, JSON.parse(local)); } catch(e){}
       }
@@ -701,20 +650,6 @@
       }
     }
 
-    // PAZAR SATILDI CANLI BİLDİRİMİ
-    function listenMarketSoldEvents() {
-      if (!rtdb || !activeUser) return;
-      const myKey = sanitizeUserKey(activeUser.username);
-      rtdb.ref(`farm_users/${myKey}/farm/market`).on("child_changed", snap => {
-        const val = snap.val();
-        if (val && val.status === 'sold') {
-          showLiveToast("🔔 Pazarında ürünün satıldı! Paranı toplamak için tezgâha tıkla.");
-          loadFarmData();
-          renderAll();
-        }
-      });
-    }
-
     function renderAll() {
       document.getElementById("lbl-gold").innerText = farmState.gold + "₺";
       document.getElementById("lbl-gems").innerText = farmState.gems;
@@ -724,6 +659,7 @@
       
       const bagTotal = getTotalBagCount();
       document.getElementById("lbl-bag-count").innerText = `${bagTotal < 10 ? '0' + bagTotal : bagTotal}/${farmState.bagMax}`;
+      document.getElementById("lbl-bag-header-count").innerText = `${bagTotal}/${farmState.bagMax}`;
 
       const reqXp = farmState.level * 40;
       const pct = Math.min(100, Math.floor((farmState.xp / reqXp) * 100));
@@ -733,7 +669,6 @@
       renderCropsTray();
       render7x7Plots();
       renderSeedsShop();
-      renderTrees();
       renderAnimals();
       renderKitchen();
       renderTruckOrders();
@@ -847,20 +782,6 @@
 
         farmState.inventory[cropKey] = (farmState.inventory[cropKey] || 0) + 2;
         farmState.achProgress.harvest++;
-        
-        // Hasat esnasında hazine sandığı bulma (%5 şans)
-        if (Math.random() < 0.05) {
-          document.getElementById("box-mystery-chest").style.display = "flex";
-          showLiveToast("🎁 Hasat yaparken topraktan Gizemli Sandık çıktı!");
-        }
-
-        // Ambar inşaat malzemesi düşürme (%10 şans)
-        if (Math.random() < 0.10) {
-          const mat = Math.random() < 0.5 ? 'bolt' : 'plank';
-          farmState.inventory[mat] = (farmState.inventory[mat] || 0) + 1;
-          showLiveToast(`🎉 Şanslı Hasat! 1x ${ALL_ITEMS[mat].name} buldun!`);
-        }
-
         addXp(c.xp);
 
         p.state = 'empty';
@@ -930,65 +851,7 @@
       renderAll();
     }
 
-    // 3. MEYVE AĞAÇLARI
-    function renderTrees() {
-      const box = document.getElementById("box-trees-list");
-      box.innerHTML = "";
-      const now = Date.now();
-
-      Object.keys(TREES_DEF).forEach(k => {
-        const t = TREES_DEF[k];
-        const data = farmState.trees[k];
-        const locked = farmState.level < t.level;
-
-        const row = document.createElement("div");
-        row.className = "shop-row-card";
-        row.style.opacity = locked ? "0.45" : "1";
-
-        let st = data.count === 0 ? "Ağaç Dikilmedi" : "Meyve Büyüyor";
-        if (data.state === 'ready') st = "Meyveler Olgunlaştı!";
-        else if (data.count > 0) {
-          const l = Math.max(0, Math.ceil((data.readyAt - now) / 1000));
-          st = `Olgunlaşma: ${l}s`;
-        }
-
-        row.innerHTML = `
-          <div>
-            <b style="font-size:10px; color:#facc15;">${t.icon} ${t.name} (x${data.count})</b>
-            <div style="font-size:8px; color:#94a3b8;">Ürün: ${ALL_ITEMS[t.fruit].icon} ${ALL_ITEMS[t.fruit].name}</div>
-            <div style="font-size:8px; color:#38bdf8; font-weight:bold;">${st}</div>
-            ${locked ? `<span style="font-size:7px; color:#ef4444; font-weight:bold;">Lv.${t.level}'de Açılır</span>` : ''}
-          </div>
-          <button class="btn-action" ${locked ? 'disabled' : ''} onclick="interactTree('${k}')">
-            ${data.count === 0 ? `Dik (${t.cost}₺)` : (data.state === 'ready' ? 'Topla' : 'Bekleniyor')}
-          </button>
-        `;
-        box.appendChild(row);
-      });
-    }
-
-    function interactTree(k) {
-      const t = TREES_DEF[k];
-      const data = farmState.trees[k];
-
-      if (data.count === 0) {
-        if (farmState.gold < t.cost) return alert("Yetersiz Altın!");
-        farmState.gold -= t.cost;
-        data.count = 1;
-        data.state = 'growing';
-        data.readyAt = Date.now() + (t.dur * 1000);
-      } else if (data.state === 'ready') {
-        if (getTotalBagCount() >= farmState.bagMax) return alert("Çantan dolu!");
-        farmState.inventory[t.fruit] = (farmState.inventory[t.fruit] || 0) + 3;
-        data.state = 'growing';
-        data.readyAt = Date.now() + (t.dur * 1000);
-        addXp(ALL_ITEMS[t.fruit].xp);
-      }
-      saveFarmData();
-      renderAll();
-    }
-
-    // 4. AĞILLAR & HAYVANLAR
+    // 3. AĞIL VE HAYVANLAR
     function renderAnimals() {
       const box = document.getElementById("box-animals-list");
       box.innerHTML = "";
@@ -1033,7 +896,7 @@
         farmState.gold -= a.cost;
         data.count = 1;
       } else if (data.state === 'idle') {
-        if ((farmState.inventory[a.feed] || 0) < 1) return alert(`Yem yetersiz! Hasat edilmiş 1x ${ALL_ITEMS[a.feed].name} gerekli.`);
+        if ((farmState.inventory[a.feed] || 0) < 1) return alert(`Yem yetersiz! 1x ${ALL_ITEMS[a.feed].name} gerekli.`);
         farmState.inventory[a.feed]--;
         data.state = 'producing';
         data.readyAt = Date.now() + (a.dur * 1000);
@@ -1047,7 +910,7 @@
       renderAll();
     }
 
-    // 5. MUTFAK & İMALATHANELER
+    // 4. MUTFAK VE İMALATHANELER
     function renderKitchen() {
       const box = document.getElementById("box-machines-list");
       box.innerHTML = "";
@@ -1106,7 +969,7 @@
       renderAll();
     }
 
-    // 6. KAMYONET TESLİMATI
+    // 5. KAMYONET TESLİMATI
     function renderTruckOrders() {
       const box = document.getElementById("box-truck-orders");
       box.innerHTML = "";
@@ -1120,7 +983,12 @@
         if (ord.status === 'ready') {
           btnHtml = `<button class="btn-action" style="background:#16a34a;" onclick="deliverTruckOrder(${idx})">Gönder 🚚</button>`;
         } else if (ord.status === 'delivering') {
-          btnHtml = `<span style="font-size:8px; color:#facc15;">Yolda (${ord.timer}s)</span>`;
+          btnHtml = `
+            <div style="display:flex; gap:4px; align-items:center;">
+              <span style="font-size:8px; color:#facc15;">Yolda (${ord.timer}s)</span>
+              <button class="btn-action" style="background:#a855f7; font-size:7.5px; padding:2px 4px;" onclick="speedUpTruck(${idx})">1💎 Hızlandır</button>
+            </div>
+          `;
         } else if (ord.status === 'arrived') {
           btnHtml = `<button class="btn-action" style="background:#f59e0b; color:#000;" onclick="collectTruckReward(${idx})">Parayı Al (+${ord.reward}₺)</button>`;
         }
@@ -1142,13 +1010,17 @@
       if ((farmState.inventory[ord.item] || 0) < ord.qty) return alert("Yetersiz ürün!");
       farmState.inventory[ord.item] -= ord.qty;
       ord.status = 'delivering';
-      ord.timer = 30; // 30 saniye teslimat süresi
+      ord.timer = 25; // 25 saniye teslimat süresi
 
-      // Kamyon teslimatında sandık bulma şansı (%20)
-      if (Math.random() < 0.20) {
-        document.getElementById("box-mystery-chest").style.display = "flex";
-      }
+      saveFarmData();
+      renderAll();
+    }
 
+    function speedUpTruck(idx) {
+      if (farmState.gems < 1) return alert("Yetersiz Elmas!");
+      farmState.gems -= 1;
+      farmState.truckOrders[idx].timer = 0;
+      farmState.truckOrders[idx].status = 'arrived';
       saveFarmData();
       renderAll();
     }
@@ -1160,8 +1032,7 @@
       farmState.achProgress.truck++;
       showLiveToast(`💰 Kamyon teslimatı tamamlandı: +${ord.reward}₺ ve +${ord.xp} XP!`);
 
-      // Yeni sipariş oluştur
-      const pool = ['wheat', 'corn', 'carrot', 'bread', 'egg', 'milk'];
+      const pool = ['wheat', 'corn', 'carrot', 'bread', 'egg', 'milk', 'cornbread'];
       const randItem = pool[Math.floor(Math.random() * pool.length)];
       farmState.truckOrders[idx] = {
         item: randItem,
@@ -1174,7 +1045,7 @@
       renderAll();
     }
 
-    // 7. GEMİ DÖNGÜSÜ
+    // 6. GEMİ DÖNGÜSÜ
     function renderShipDock() {
       const dActive = document.getElementById("box-ship-active");
       const dWait = document.getElementById("box-ship-waiting");
@@ -1242,11 +1113,12 @@
       }
     }
 
-    // 8. ÇANTA & AMBAR
+    // 7. ÇANTA & AMBAR (KUSURSUZ LİSTELEME)
     function renderBag() {
       const box = document.getElementById("box-bag-items");
       box.innerHTML = "";
 
+      // 1. Tohumlar
       Object.keys(farmState.seeds).forEach(k => {
         const qty = farmState.seeds[k];
         if (qty <= 0) return;
@@ -1263,10 +1135,11 @@
         box.appendChild(card);
       });
 
+      // 2. Hasat ve Fabrika Ürünleri
       Object.keys(farmState.inventory).forEach(k => {
         const qty = farmState.inventory[k];
         if (qty <= 0) return;
-        const itm = ALL_ITEMS[k];
+        const itm = ALL_ITEMS[k] || { name: k, icon: "📦", minP: 5, maxP: 20 };
         const card = document.createElement("div");
         card.className = "shop-row-card";
         card.innerHTML = `
@@ -1281,54 +1154,17 @@
       });
     }
 
-    function upgradeBag() {
-      if (farmState.gold < 150) return alert("Yetersiz Altın! Çantayı büyütmek 150₺.");
+    // SADECE PARA İLE AMBAR BÜYÜTME
+    function upgradeBagOnlyGold() {
+      if (farmState.gold < 150) return alert("Yetersiz Altın! Ambarı büyütmek için 150₺ gereklidir.");
       farmState.gold -= 150;
       farmState.bagMax += 10;
+      showLiveToast("🎉 Ambar başarıyla büyütüldü! Yeni Kapasite: " + farmState.bagMax);
       saveFarmData();
       renderAll();
     }
 
-    // 9. ELMAS HİZMETLERİ (TOM & ÇARK)
-    function hireTom() {
-      if (farmState.gems < 3) return alert("Yetersiz Elmas! Tom için 3 Elmas gereklidir.");
-      const promptItem = prompt("Tom'a ne bulmasını istersin? (Örn: wheat, corn, bread, bolt, plank):", "bread");
-      if (!promptItem || !ALL_ITEMS[promptItem]) return alert("Geçersiz ürün adı!");
-
-      farmState.gems -= 3;
-      farmState.inventory[promptItem] = (farmState.inventory[promptItem] || 0) + 5;
-      alert(`👦 Tom hemen koştu ve 5x ${ALL_ITEMS[promptItem].name} getirip çantana koydu!`);
-      saveFarmData();
-      renderAll();
-    }
-
-    function spinLuckyWheel() {
-      if (farmState.gems < 2) return alert("Yetersiz Elmas! Çark için 2 Elmas gerekli.");
-      farmState.gems -= 2;
-      const rewards = [
-        { msg: "100₺ Altın!", apply: () => farmState.gold += 100 },
-        { msg: "5x Elma!", apply: () => farmState.inventory.apple = (farmState.inventory.apple || 0) + 5 },
-        { msg: "2x Cıvata!", apply: () => farmState.inventory.bolt = (farmState.inventory.bolt || 0) + 2 },
-        { msg: "500₺ Büyük İkramiye!", apply: () => farmState.gold += 500 }
-      ];
-      const win = rewards[Math.floor(Math.random() * rewards.length)];
-      win.apply();
-      alert(`🎡 Şans Çarkı Döndü! Kazandın: ${win.msg}`);
-      saveFarmData();
-      renderAll();
-    }
-
-    function buySuperWater() {
-      if (farmState.gems < 4) return alert("Yetersiz Elmas!");
-      farmState.gems -= 4;
-      farmState.maxWater += 50;
-      farmState.water = farmState.maxWater;
-      alert("💧 Su kulen kalıcı büyüdü ve doldu!");
-      saveFarmData();
-      renderAll();
-    }
-
-    // 10. YOL KENARI PAZARI
+    // 8. YOL KENARI PAZARI (20-30SN BOT ALIMI)
     function openMarketModal() {
       const shelf = document.getElementById("shelf-market");
       shelf.innerHTML = "";
@@ -1362,7 +1198,7 @@
             <div style="font-size:18px;">${itm.icon}</div>
             <b style="font-size:8px;">${slot.qty}x ${itm.name}</b>
             <div style="font-size:9px; color:#facc15; font-weight:bold;">${slot.price}₺</div>
-            ${visitingTarget ? (canBuy ? `<span style="font-size:7px; color:#38bdf8;">Satın Al</span>` : `<span style="font-size:6.5px; color:#ef4444; font-weight:bold;">Lv.${itm.level} Gerekli</span>`) : `<span style="font-size:6.5px; color:#94a3b8;">(Geri Çek)</span>`}
+            ${visitingTarget ? (canBuy ? `<span style="font-size:7px; color:#38bdf8;">Satın Al</span>` : `<span style="font-size:6.5px; color:#ef4444; font-weight:bold;">Lv.${itm.level} Gerekli</span>`) : `<span style="font-size:6.5px; color:#94a3b8;">(${slot.botTimer}s)</span>`}
           `;
           if (visitingTarget) {
             div.onclick = () => buyNeighborMarketItem(idx, slot, canBuy);
@@ -1396,7 +1232,7 @@
         }
       });
 
-      if (sel.children.length === 0) return alert("Ambarında satacak hiç ürün yok!");
+      if (sel.children.length === 0) return alert("Ambarında satacak ürün yok!");
       
       modalSelectedQty = 1;
       onSaleItemSelected();
@@ -1441,7 +1277,18 @@
     function confirmAddSale() {
       const itmKey = document.getElementById("sel-sale-item").value;
       farmState.inventory[itmKey] -= modalSelectedQty;
-      farmState.market[targetSlotIndex] = { item: itmKey, qty: modalSelectedQty, price: modalSelectedPrice, status: 'on_sale' };
+      
+      // 20-30sn rastgele bot alım süresi
+      const randomTimer = Math.floor(Math.random() * 11 + 20);
+
+      farmState.market[targetSlotIndex] = { 
+        item: itmKey, 
+        qty: modalSelectedQty, 
+        price: modalSelectedPrice, 
+        status: 'on_sale',
+        botTimer: randomTimer
+      };
+      
       document.getElementById("box-create-sale").style.display = "none";
       saveFarmData();
       openMarketModal();
@@ -1451,7 +1298,7 @@
     function cancelSale(idx) {
       const slot = farmState.market[idx];
       farmState.inventory[slot.item] = (farmState.inventory[slot.item] || 0) + slot.qty;
-      farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty' };
+      farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty', botTimer: 0 };
       saveFarmData();
       openMarketModal();
       renderAll();
@@ -1460,14 +1307,14 @@
     function collectSoldGold(idx) {
       const slot = farmState.market[idx];
       farmState.gold += slot.price;
-      farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty' };
+      farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty', botTimer: 0 };
       saveFarmData();
       openMarketModal();
       renderAll();
     }
 
     function buyNeighborMarketItem(idx, slot, canBuy) {
-      if (!canBuy) return alert(`Seviyen yetersiz! Bu ürünü satın almak için en az Seviye ${ALL_ITEMS[slot.item].level} olmalısın.`);
+      if (!canBuy) return alert(`Seviyen yetersiz! En az Seviye ${ALL_ITEMS[slot.item].level} olmalısın.`);
       if (getTotalBagCount() >= farmState.bagMax) return alert("Çantan dolu!");
       if (farmState.gold < slot.price) return alert("Yetersiz Altın!");
 
@@ -1480,29 +1327,38 @@
         rtdb.ref(`farm_users/${visitingTarget.key}/farm/market/${idx}`).update({ status: 'sold' });
       }
 
-      alert("Ürün başarıyla çantana eklendi!");
+      showLiveToast("Ürün başarıyla satın alındı ve çantana eklendi!");
       saveFarmData();
       document.getElementById("modal-market").style.display = "none";
       renderAll();
     }
 
-    // BOT SATIN ALMA SİMÜLASYONU
-    function simulateRandomCustomerPazarAlimi() {
+    // 20-30 SANİYE BOT SATIN ALMA DÖNGÜSÜ
+    function checkMarketBotPurchases() {
       if (visitingTarget) return;
       let changed = false;
-      farmState.market.forEach(slot => {
-        if (slot.status === 'on_sale' && Math.random() < 0.45) {
-          slot.status = 'sold';
-          changed = true;
+
+      farmState.market.forEach((slot, idx) => {
+        if (slot.status === 'on_sale') {
+          if (slot.botTimer > 0) {
+            slot.botTimer--;
+          } else {
+            slot.status = 'sold';
+            changed = true;
+            showLiveToast(`🔔 Pazarındaki ${slot.qty}x ${ALL_ITEMS[slot.item].name} botlar tarafından satın alındı!`);
+          }
         }
       });
+
       if (changed) {
         saveFarmData();
-        showLiveToast("🔔 Pazarında ürün satıldı! Tezgâhtan paranı topla.");
+        if (document.getElementById("modal-market").style.display === "flex") {
+          openMarketModal();
+        }
       }
     }
 
-    // 11. SIRALAMA & BOB AMCA
+    // 9. SIRALAMA & BOB AMCA
     function openNeighborsModal() {
       const list = document.getElementById("neighbors-list");
       list.innerHTML = "<div style='font-size:10px; text-align:center;'>Sıralama taranıyor...</div>";
@@ -1594,12 +1450,10 @@
       document.getElementById("btn-back-menu").innerText = "‹ Çiftliğime Dön";
       document.getElementById("btn-open-market").innerText = "🏪 Sahibin Pazarı";
 
-      // ZİYARETTE GEREKSİZ BUTONLARI GİZLE
       document.getElementById("ui-tab-bar").style.display = "none";
       document.getElementById("ui-water-row").style.display = "none";
       document.getElementById("ui-seeds-tray-wrap").style.display = "none";
       document.getElementById("ui-next-plot-tag").style.display = "none";
-      document.getElementById("box-mystery-chest").style.display = "none";
 
       switchTab('tab-fields');
       farmState.plots = visitingTarget.farm?.plots || [];
@@ -1613,7 +1467,6 @@
         document.getElementById("btn-back-menu").innerText = "‹ Menü";
         document.getElementById("btn-open-market").innerText = "🏪 Pazarım";
 
-        // BUTONLARI GERİ GETİR
         document.getElementById("ui-tab-bar").style.display = "flex";
         document.getElementById("ui-water-row").style.display = "flex";
         document.getElementById("ui-seeds-tray-wrap").style.display = "block";
@@ -1626,7 +1479,7 @@
       }
     }
 
-    // 12. BAŞARIMLAR
+    // 10. BAŞARIMLAR
     function renderAchievements() {
       const box = document.getElementById("box-achievements");
       box.innerHTML = "";
@@ -1661,21 +1514,24 @@
       renderAll();
     }
 
-    function openMysteryChest() {
-      document.getElementById("box-mystery-chest").style.display = "none";
-      const r = Math.random();
-      if (r < 0.4) {
-        farmState.gold += 60;
-        alert("🎁 Sandıktan +60₺ Altın çıktı!");
-      } else if (r < 0.7) {
-        farmState.gems += 2;
-        alert("🎁 Sandıktan +2 Elmas 💎 çıktı!");
-      } else {
-        farmState.inventory.bolt = (farmState.inventory.bolt || 0) + 1;
-        alert("🎁 Sandıktan 1x Cıvata 🔩 çıktı!");
+    // RASTGELE YAĞMUR HAVA DURUMU BONUSU
+    function triggerRandomWeather() {
+      if (visitingTarget) return;
+      if (Math.random() < 0.3) {
+        document.getElementById("ui-weather-alert").style.display = "block";
+        farmState.plots.forEach(p => {
+          if (p.unlocked && p.state === 'growing' && !p.wet) {
+            p.wet = true;
+            const rem = p.readyAt - Date.now();
+            p.readyAt = Date.now() + Math.floor(rem / 2);
+          }
+        });
+        showLiveToast("🌧️ Yağmur başladı! Tüm tarlaların sulandı.");
+        render7x7Plots();
+        setTimeout(() => {
+          document.getElementById("ui-weather-alert").style.display = "none";
+        }, 12000);
       }
-      saveFarmData();
-      renderAll();
     }
 
     function addXp(val) {
@@ -1685,7 +1541,8 @@
         farmState.xp -= reqXp;
         farmState.level++;
         farmState.gems += 2;
-        alert(`🎉 TEBRİKLER! Seviye Atladın: Lv.${farmState.level}! (+2 Elmas 💎)`);
+        farmState.gold += 50; // Seviye atlama kutlama bonusu
+        alert(`🎉 TEBRİKLER! Seviye Atladın: Lv.${farmState.level}! (+2 Elmas 💎, +50₺ Bonus)`);
       }
     }
 
@@ -1693,7 +1550,6 @@
       let changed = false;
       const now = Date.now();
 
-      // Tarlalar
       farmState.plots.forEach(p => {
         if (p.unlocked && p.state === 'growing' && now >= p.readyAt) {
           p.state = 'ready';
@@ -1701,16 +1557,6 @@
         }
       });
 
-      // Ağaçlar
-      Object.keys(farmState.trees).forEach(k => {
-        const t = farmState.trees[k];
-        if (t.count > 0 && t.state === 'growing' && now >= t.readyAt) {
-          t.state = 'ready';
-          changed = true;
-        }
-      });
-
-      // Hayvanlar
       Object.keys(farmState.animals).forEach(k => {
         const a = farmState.animals[k];
         if (a.state === 'producing' && now >= a.readyAt) {
@@ -1719,7 +1565,6 @@
         }
       });
 
-      // Makineler
       Object.keys(farmState.machines).forEach(k => {
         const m = farmState.machines[k];
         if (m.state === 'producing' && now >= m.readyAt) {
@@ -1728,7 +1573,6 @@
         }
       });
 
-      // Kamyonet Yolda Sayacı
       farmState.truckOrders.forEach(ord => {
         if (ord.status === 'delivering') {
           if (ord.timer > 0) {
@@ -1741,7 +1585,6 @@
         }
       });
 
-      // Gemi Liman Sayacı
       if (farmState.ship.timer > 0) {
         farmState.ship.timer--;
         renderShipDock();
