@@ -1,4 +1,4 @@
-// FIREBASE BAŞLATMA
+// 1. FIREBASE BAŞLATMA
 const firebaseConfig = {
   apiKey: "AIzaSyBrWRQIsPhQqSuiQkhd47HOmxKvsyT_3wc",
   authDomain: "kutu-acma-pro.firebaseapp.com",
@@ -84,12 +84,10 @@ const AVATAR_LIST = [
   "🌾", "🧑‍🌾", "🐔", "🐮", "🪙", "⚔️", "🛡️", "🎯"
 ];
 
-// Benzersiz #ID (Etiket) Üretici
 function generateUserTag() {
   return "#" + Math.floor(1000 + Math.random() * 9000);
 }
 
-// Aktif Kullanıcı Alıcı (Etiket Garantili)
 function getActiveUser() {
   const session = localStorage.getItem("kutu_active_session") || localStorage.getItem("kutu_active_user");
   if (!session) return null;
@@ -131,13 +129,81 @@ function setActiveUser(u) {
   }
 }
 
-// Kalıcı Hesap Silme Motoru
+function updateProfileGlobal(newNameRaw, newAvatar, newTitle) {
+  const u = getActiveUser();
+  if (!u) return;
+
+  const oldKey = String(u.username).trim().toLowerCase();
+  const newDisp = newNameRaw.trim();
+  const newKey = newDisp.toLowerCase().replace(/[^a-z0-9_]/gi, "");
+  const avatar = newAvatar || u.avatar || "👤";
+  const title = newTitle || u.title || "Çaylak";
+
+  if (oldKey === newKey) {
+    u.displayName = newDisp;
+    u.avatar = avatar;
+    u.title = title;
+    setActiveUser(u);
+
+    const modes = ['standard', 'catch_open', 'mines_mode', 'speedrun_mode', 'double_mode', 'farm_mode'];
+    modes.forEach(m => {
+      db.ref(`leaderboards/${m}/${oldKey}`).update({
+        displayName: `${newDisp} ${u.tag}`,
+        avatar: avatar,
+        title: title
+      }).catch(() => {});
+    });
+    alert("Profil bilgileri güncellendi!");
+    location.reload();
+    return;
+  }
+
+  db.ref("accounts/" + newKey).once("value").then(snap => {
+    if (snap.exists()) return alert("Bu kullanıcı adı zaten kullanımda!");
+
+    db.ref("accounts/" + oldKey).once("value").then(oldSnap => {
+      const data = oldSnap.val() || {};
+      data.username = newKey;
+      data.displayName = newDisp;
+      data.avatar = avatar;
+      data.title = title;
+
+      db.ref("accounts/" + newKey).set(data).then(() => {
+        db.ref("accounts/" + oldKey).remove();
+
+        const modes = ['standard', 'catch_open', 'mines_mode', 'speedrun_mode', 'double_mode', 'farm_mode'];
+        modes.forEach(m => {
+          db.ref(`leaderboards/${m}/${oldKey}`).once("value").then(lSnap => {
+            if (lSnap.exists()) {
+              const lData = lSnap.val();
+              lData.username = newKey;
+              lData.displayName = `${newDisp} ${u.tag}`;
+              lData.avatar = avatar;
+              lData.title = title;
+              db.ref(`leaderboards/${m}/${newKey}`).set(lData);
+              db.ref(`leaderboards/${m}/${oldKey}`).remove();
+            }
+          });
+        });
+
+        u.username = newKey;
+        u.displayName = newDisp;
+        u.avatar = avatar;
+        u.title = title;
+        setActiveUser(u);
+        alert("Kullanıcı adınız başarıyla değiştirildi!");
+        location.reload();
+      });
+    });
+  });
+}
+
 function deleteAccountPermanentlyGlobal() {
   const u = getActiveUser();
   if (!u) return;
 
   if (confirm("DİKKAT! Hesabınız, istatistikleriniz, arkadaşlarınız ve mesajlarınız tamamen silinecek. Emin misiniz?")) {
-    if (confirm("Bu işlem geri alınamaz! Son onayınız mı?")) {
+    if (confirm("Bu işlem kesinlikle geri alınamaz! Kalıcı olarak silinsin mi?")) {
       const uKey = String(u.username).toLowerCase();
       if (db) {
         db.ref(`accounts/${uKey}`).remove();
@@ -155,7 +221,6 @@ function deleteAccountPermanentlyGlobal() {
   }
 }
 
-// Skor Kaydetme Motoru
 function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime) {
   let u = getActiveUser();
   if (!u) return;
@@ -191,7 +256,7 @@ function recordGameScore(gameMode, modeTitle, scoreVal, drops, isWin, customTime
 
     if (numVal > 0 || mode === "speedrun_mode") {
       const now = new Date();
-      const dateStr = `${now.toLocaleDateString("tr-TR")} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      const dateStr = `${now.toLocaleDateString("tr-TR")} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
 
       const payload = {
         username: userKey,
