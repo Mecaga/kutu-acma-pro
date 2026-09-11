@@ -243,6 +243,17 @@
       box-shadow: 0 0 15px rgba(0,0,0,0.8);
       text-align: center;
     }
+
+    /* İSTATİSTİK KARTLARI */
+    .stat-card {
+      background: #044434;
+      border: 1px solid #059669;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -290,6 +301,7 @@
       <button class="tab-btn" onclick="switchTab('tab-truck')">🚚 Kamyonet</button>
       <button class="tab-btn" onclick="switchTab('tab-ship')">🚢 Gemi</button>
       <button class="tab-btn" onclick="switchTab('tab-bag')">🎒 Çanta</button>
+      <button class="tab-btn" onclick="switchTab('tab-stats')">📊 İstatistikler</button>
     </div>
 
     <div class="farm-body">
@@ -317,11 +329,11 @@
 
       <!-- 2. TOHUM DÜKKANI -->
       <div id="tab-seeds" class="tab-content">
-        <b style="font-size:11px; color:#facc15;">🌾 Tohum Pazarı (Ekin Satın Al)</b>
+        <b style="font-size:11px; color:#facc15;">🌾 Tohum Pazarı (Tohum Satın Al)</b>
         <div id="box-seeds-list" style="display:flex; flex-direction:column; gap:6px;"></div>
       </div>
 
-      <!-- 3. MEYVE BAHÇESİ (AĞAÇLAR & ÇALILAR) -->
+      <!-- 3. MEYVE BAHÇESİ -->
       <div id="tab-trees" class="tab-content">
         <b style="font-size:11px; color:#facc15;">🍎 Meyve Ağaçları ve Çalılar</b>
         <div id="box-trees-list" style="display:flex; flex-direction:column; gap:6px;"></div>
@@ -335,7 +347,7 @@
 
       <!-- 5. MUTFAK & İMALATHANELER -->
       <div id="tab-kitchen" class="tab-content">
-        <b style="font-size:11px; color:#facc15;">🍳 İmalathaneler & Mutfak Tesisleri</b>
+        <b style="font-size:11px; color:#facc15;">🍳 İmalathaneler & Mutfak</b>
         <div id="box-machines-list" style="display:flex; flex-direction:column; gap:6px;"></div>
       </div>
 
@@ -368,13 +380,28 @@
         </div>
       </div>
 
-      <!-- 8. ÇANTA VE AMBAR (MERKEZİ DEPO) -->
+      <!-- 8. ÇANTA VE AMBAR -->
       <div id="tab-bag" class="tab-content">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:11px; color:#a7f3d0;">🎒 Ambar ve Siloculuk</b>
-          <button class="btn-action" style="background:#16a34a; font-size:8.5px;" onclick="upgradeBag()">Ambarı Büyüt (+10 Kapasite - 150₺)</button>
+          <button class="btn-action" style="background:#16a34a; font-size:8.5px;" onclick="upgradeBag()">Büyüt (+10 Kapasite - 150₺)</button>
         </div>
         <div id="box-bag-items" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px;"></div>
+      </div>
+
+      <!-- 9. İSTATİSTİKLER TABLOSU -->
+      <div id="tab-stats" class="tab-content">
+        <b style="font-size:11.5px; color:#facc15;">📊 Çiftlik Kariyer İstatistikleri</b>
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <div class="stat-card"><span>🌱 Ekilen Tohum Sayısı:</span><b id="st-planted">0</b></div>
+          <div class="stat-card"><span>🌾 Hasat Edilen Ürün Sayısı:</span><b id="st-harvested">0</b></div>
+          <div class="stat-card"><span>🍳 İmal Edilen (Craft) Mamül:</span><b id="st-crafted">0</b></div>
+          <div class="stat-card"><span>🏪 Pazarda Satılan Ürün Sayısı:</span><b id="st-sold">0</b></div>
+          <div class="stat-card"><span>🛍️ Pazardan Satın Alınan Ürün:</span><b id="st-bought">0</b></div>
+          <div class="stat-card"><span>🚢 Tamamlanan Gemi (6/6 Koli):</span><b id="st-ships">0</b></div>
+          <div class="stat-card"><span>🚚 Yapılan Kamyon Teslimatı:</span><b id="st-trucks">0</b></div>
+          <div class="stat-card"><span>🚶 Hizmet Verilen Ziyaretçi:</span><b id="st-visitors">0</b></div>
+        </div>
       </div>
 
     </div>
@@ -387,7 +414,7 @@
         <b style="font-size:12px; color:#facc15;" id="lbl-market-title">🏪 Yol Kenarı Pazarım</b>
         <button class="btn-action" style="background:#ef4444; padding:2px 6px;" onclick="document.getElementById('modal-market').style.display='none'">X</button>
       </div>
-      <div style="font-size:8px; color:#fde68a; margin-top:3px;">Tezgâhlarına ürün koy veya satılanların parasını topla!</div>
+      <div style="font-size:8px; color:#fde68a; margin-top:3px;">Tezgâhlarına ürün koyabilir veya satılanların parasını toplayabilirsin!</div>
       
       <div style="display:flex; gap:6px; overflow-x:auto; padding:8px 0;" id="shelf-market"></div>
 
@@ -458,85 +485,59 @@
           { item: 'coffee', qty: 2, price: 30, status: 'on_sale' },
           { item: 'apple', qty: 4, price: 20, status: 'on_sale' },
           { item: 'icecream', qty: 1, price: 40, status: 'on_sale' },
-          { item: 'soup', qty: 2, price: 35, status: 'on_sale' }
+          { item: 'cheese', qty: 2, price: 25, status: 'on_sale' }
         ]
       }
     };
 
     // 45+ ÇEŞİT ÜRÜN, EKİN, YEMEK, AĞAÇ MEYVESİ LİSTESİ
     const ALL_ITEMS = {
-      // 1. Tohumlar
+      // Tohumlar
       wheat_seed:     { name: "Buğday Tohumu",   icon: "🌾", type: "seed",  cropKey: "wheat",      cost: 2,   minP: 2,   maxP: 6,   level: 1 },
       corn_seed:      { name: "Mısır Tohumu",     icon: "🌽", type: "seed",  cropKey: "corn",       cost: 4,   minP: 3,   maxP: 10,  level: 2 },
       carrot_seed:    { name: "Havuç Tohumu",     icon: "🥕", type: "seed",  cropKey: "carrot",     cost: 6,   minP: 5,   maxP: 16,  level: 3 },
       soy_seed:       { name: "Soya Tohumu",      icon: "🌱", type: "seed",  cropKey: "soy",        cost: 10,  minP: 8,   maxP: 25,  level: 4 },
       sugarcane_seed: { name: "Şeker Kamışı T.",  icon: "🎋", type: "seed",  cropKey: "sugarcane",  cost: 15,  minP: 12,  maxP: 35,  level: 5 },
       rice_seed:      { name: "Pirinç Tohumu",    icon: "🍚", type: "seed",  cropKey: "rice",       cost: 18,  minP: 15,  maxP: 45,  level: 5 },
-      tea_seed:       { name: "Çay Fidesi",       icon: "🍃", type: "seed",  cropKey: "tea",        cost: 22,  minP: 18,  maxP: 55,  level: 6 },
       coffee_b_seed:  { name: "Kahve Fidesi",     icon: "☕", type: "seed",  cropKey: "coffee_b",   cost: 28,  minP: 22,  maxP: 70,  level: 6 },
-      cotton_seed:    { name: "Pamuk Tohumu",     icon: "☁️", type: "seed",  cropKey: "cotton",     cost: 35,  minP: 30,  maxP: 90,  level: 7 },
       tomato_seed:    { name: "Domates Tohumu",   icon: "🍅", type: "seed",  cropKey: "tomato",     cost: 40,  minP: 35,  maxP: 105, level: 7 },
       pepper_seed:    { name: "Biber Tohumu",     icon: "🫑", type: "seed",  cropKey: "pepper",     cost: 50,  minP: 42,  maxP: 130, level: 8 },
-      potato_seed:    { name: "Patates Tohumu",   icon: "🥔", type: "seed",  cropKey: "potato",     cost: 60,  minP: 50,  maxP: 150, level: 8 },
-      strawberry_seed:{ name: "Çilek Fidesi",     icon: "🍓", type: "seed",  cropKey: "strawberry", cost: 75,  minP: 65,  maxP: 190, level: 9 },
-      pumpkin_seed:   { name: "Balkabağı Tohumu", icon: "🎃", type: "seed",  cropKey: "pumpkin",    cost: 95,  minP: 80,  maxP: 240, level: 10 },
 
-      // 2. Hasat Edilen Mahsuller
+      // Mahsuller
       wheat:          { name: "Buğday",           icon: "🌾", type: "crop",  dur: 6,   xp: 2,   minP: 2,   maxP: 8,   level: 1 },
       corn:           { name: "Mısır",            icon: "🌽", type: "crop",  dur: 14,  xp: 5,   minP: 4,   maxP: 16,  level: 2 },
       carrot:         { name: "Havuç",            icon: "🥕", type: "crop",  dur: 25,  xp: 8,   minP: 8,   maxP: 25,  level: 3 },
       soy:            { name: "Soya",             icon: "🌱", type: "crop",  dur: 40,  xp: 12,  minP: 14,  maxP: 40,  level: 4 },
       sugarcane:      { name: "Şeker Kamışı",     icon: "🎋", type: "crop",  dur: 45,  xp: 14,  minP: 16,  maxP: 50,  level: 5 },
       rice:           { name: "Pirinç",           icon: "🍚", type: "crop",  dur: 50,  xp: 15,  minP: 18,  maxP: 55,  level: 5 },
-      tea:            { name: "Çay Yaprağı",      icon: "🍃", type: "crop",  dur: 60,  xp: 18,  minP: 22,  maxP: 70,  level: 6 },
       coffee_b:       { name: "Kahve Çekirdeği",  icon: "☕", type: "crop",  dur: 70,  xp: 20,  minP: 28,  maxP: 85,  level: 6 },
-      cotton:         { name: "Pamuk",            icon: "☁️", type: "crop",  dur: 80,  xp: 22,  minP: 32,  maxP: 95,  level: 7 },
       tomato:         { name: "Domates",          icon: "🍅", type: "crop",  dur: 90,  xp: 25,  minP: 35,  maxP: 110, level: 7 },
       pepper:         { name: "Biber",            icon: "🫑", type: "crop",  dur: 110, xp: 30,  minP: 45,  maxP: 135, level: 8 },
-      potato:         { name: "Patates",          icon: "🥔", type: "crop",  dur: 130, xp: 35,  minP: 55,  maxP: 160, level: 8 },
-      strawberry:     { name: "Çilek",            icon: "🍓", type: "crop",  dur: 160, xp: 45,  minP: 70,  maxP: 210, level: 9 },
-      pumpkin:        { name: "Balkabağı",        icon: "🎃", type: "crop",  dur: 200, xp: 60,  minP: 90,  maxP: 270, level: 10 },
 
-      // 3. Ağaç Meyveleri & Çalılar
+      // Meyveler
       apple:          { name: "Elma",             icon: "🍎", type: "fruit", minP: 10,  maxP: 30,  xp: 10, level: 3 },
       cherry:         { name: "Kiraz",            icon: "🍒", type: "fruit", minP: 15,  maxP: 45,  xp: 15, level: 4 },
       orange:         { name: "Portakal",         icon: "🍊", type: "fruit", minP: 22,  maxP: 65,  xp: 20, level: 5 },
-      peach:          { name: "Şeftali",          icon: "🍑", type: "fruit", minP: 30,  maxP: 90,  xp: 25, level: 6 },
-      cocoa:          { name: "Kakao",            icon: "🍫", type: "fruit", minP: 40,  maxP: 120, xp: 35, level: 7 },
-      raspberry:      { name: "Ahududu",          icon: "🫐", type: "fruit", minP: 45,  maxP: 140, xp: 40, level: 8 },
 
-      // 4. Hayvansal Ürünler
+      // Hayvansal
       egg:            { name: "Yumurta",          icon: "🥚", type: "animal",minP: 5,   maxP: 20,  xp: 6,  level: 2 },
       milk:           { name: "Süt",              icon: "🥛", type: "animal",minP: 12,  maxP: 45,  xp: 12, level: 4 },
       wool:           { name: "Yün",              icon: "🧶", type: "animal",minP: 25,  maxP: 85,  xp: 22, level: 6 },
       bacon:          { name: "Pastırma",         icon: "🥓", type: "animal",minP: 35,  maxP: 120, xp: 30, level: 7 },
-      honey:          { name: "Bal Peteği",       icon: "🍯", type: "animal",minP: 50,  maxP: 160, xp: 45, level: 8 },
 
-      // 5. İmalathane & Mutfak Mamülleri
+      // İmalat & Yemekler
       bread:          { name: "Köy Ekmeği",       icon: "🍞", type: "food",  minP: 12,  maxP: 45,  xp: 15, level: 2 },
-      cornbread:      { name: "Mısır Ekmeği",     icon: "🥖", type: "food",  minP: 18,  maxP: 60,  xp: 20, level: 3 },
-      cookie:         { name: "Kurabiye",         icon: "🍪", type: "food",  minP: 25,  maxP: 80,  xp: 25, level: 4 },
       cheese:         { name: "Taze Peynir",      icon: "🧀", type: "food",  minP: 22,  maxP: 75,  xp: 22, level: 4 },
-      butter:         { name: "Tereyağı",         icon: "🧈", type: "food",  minP: 30,  maxP: 95,  xp: 28, level: 5 },
-      brown_sugar:    { name: "Esmer Şeker",      icon: "🟤", type: "food",  minP: 15,  maxP: 50,  xp: 15, level: 5 },
-      syrup:          { name: "Şeker Şurubu",     icon: "🍯", type: "food",  minP: 25,  maxP: 85,  xp: 25, level: 6 },
       coffee:         { name: "Sıcak Kahve",      icon: "☕", type: "food",  minP: 35,  maxP: 110, xp: 30, level: 6 },
-      latte:          { name: "Sütlü Latte",      icon: "🥤", type: "food",  minP: 45,  maxP: 140, xp: 40, level: 7 },
       icecream:       { name: "Meyveli Dondurma", icon: "🍦", type: "food",  minP: 45,  maxP: 140, xp: 40, level: 7 },
-      cake:           { name: "Meyveli Pasta",    icon: "🍰", type: "food",  minP: 60,  maxP: 210, xp: 50, level: 8 },
-      menemen:        { name: "Acılı Menemen",    icon: "🍳", type: "food",  minP: 45,  maxP: 150, xp: 40, level: 7 },
-      soup:           { name: "Domates Çorbası",  icon: "🥣", type: "food",  minP: 40,  maxP: 130, xp: 35, level: 7 },
-      apple_juice:    { name: "Elma Suyu",        icon: "🧃", type: "food",  minP: 30,  maxP: 90,  xp: 25, level: 4 },
-      orange_juice:   { name: "Portakal Suyu",    icon: "🍹", type: "food",  minP: 45,  maxP: 140, xp: 40, level: 6 }
+      menemen:        { name: "Acılı Menemen",    icon: "🍳", type: "food",  minP: 45,  maxP: 150, xp: 40, level: 7 }
     };
 
     // AĞAÇLAR LİSTESİ
     const TREES_DEF = {
       apple_tree:  { name: "Elma Ağacı",     icon: "🌳", fruit: "apple",     dur: 40, cost: 120, level: 3 },
       cherry_tree: { name: "Kiraz Ağacı",    icon: "🍒", fruit: "cherry",    dur: 60, cost: 250, level: 4 },
-      orange_tree: { name: "Portakal Ağacı", icon: "🍊", fruit: "orange",    dur: 80, cost: 400, level: 5 },
-      peach_tree:  { name: "Şeftali Ağacı",  icon: "🍑", fruit: "peach",     dur: 110,cost: 650, level: 6 },
-      cocoa_tree:  { name: "Kakao Ağacı",    icon: "🍫", fruit: "cocoa",     dur: 150,cost: 900, level: 7 }
+      orange_tree: { name: "Portakal Ağacı", icon: "🍊", fruit: "orange",    dur: 80, cost: 400, level: 5 }
     };
 
     // AĞILLAR
@@ -550,12 +551,10 @@
     // İMALATHANELER
     const MACHINES_DEF = {
       bakery: { name: "Ekmek Fırını",     icon: "🍞", cost: 180, inItem: "wheat",       inQty: 3, outItem: "bread",       dur: 18, level: 2 },
-      sugar_m:{ name: "Şeker Değirmeni",  icon: "🟤", cost: 320, inItem: "sugarcane",   inQty: 2, outItem: "brown_sugar", dur: 25, level: 5 },
       dairy:  { name: "Mandıra",          icon: "🧀", cost: 450, inItem: "milk",        inQty: 2, outItem: "cheese",      dur: 35, level: 4 },
       grill:  { name: "Barbekü Izgara",   icon: "🍳", cost: 650, inItem: "tomato",      inQty: 2, outItem: "menemen",     dur: 45, level: 7 },
       kiosk:  { name: "Kahve Kiosku",     icon: "☕", cost: 850, inItem: "coffee_b",    inQty: 2, outItem: "coffee",      dur: 55, level: 6 },
-      ice_cr: { name: "Dondurmacı",       icon: "🍦", cost: 1100,inItem: "milk",        inQty: 2, outItem: "icecream",    dur: 70, level: 7 },
-      juice:  { name: "Meyve Sıkacağı",   icon: "🧃", cost: 1400,inItem: "apple",       inQty: 3, outItem: "apple_juice", dur: 85, level: 4 }
+      ice_cr: { name: "Dondurmacı",       icon: "🍦", cost: 1100,inItem: "milk",        inQty: 2, outItem: "icecream",    dur: 70, level: 7 }
     };
 
     // OYUNCU ÇİFTLİK MODELİ
@@ -568,7 +567,18 @@
       water: 30,
       maxWater: 50,
       bagMax: 10,
-      inventory: { wheat_seed: 4 }, // SADECE 4 BUĞDAY TOHUMU
+      inventory: { wheat_seed: 4 },
+      // İSTATİSTİK SAYACI
+      stats: {
+        planted: 0,
+        harvested: 0,
+        crafted: 0,
+        sold: 0,
+        bought: 0,
+        ships: 0,
+        trucks: 0,
+        visitors: 0
+      },
       plots: Array(49).fill(null).map((_, i) => ({
         unlocked: i < 4,
         state: 'empty',
@@ -579,9 +589,7 @@
       trees: {
         apple_tree:  { count: 0, readyAt: 0, state: 'idle' },
         cherry_tree: { count: 0, readyAt: 0, state: 'idle' },
-        orange_tree: { count: 0, readyAt: 0, state: 'idle' },
-        peach_tree:  { count: 0, readyAt: 0, state: 'idle' },
-        cocoa_tree:  { count: 0, readyAt: 0, state: 'idle' }
+        orange_tree: { count: 0, readyAt: 0, state: 'idle' }
       },
       animals: {
         chicken: { count: 0, state: 'idle', readyAt: 0 },
@@ -591,18 +599,15 @@
       },
       machines: {
         bakery:  { built: false, state: 'idle', readyAt: 0 },
-        sugar_m: { built: false, state: 'idle', readyAt: 0 },
         dairy:   { built: false, state: 'idle', readyAt: 0 },
         grill:   { built: false, state: 'idle', readyAt: 0 },
         kiosk:   { built: false, state: 'idle', readyAt: 0 },
-        ice_cr:  { built: false, state: 'idle', readyAt: 0 },
-        juice:   { built: false, state: 'idle', readyAt: 0 }
+        ice_cr:  { built: false, state: 'idle', readyAt: 0 }
       },
       truckOrders: [
         { item: 'wheat', qty: 3, reward: 15, xp: 8, status: 'ready', timer: 0 },
         { item: 'corn',  qty: 2, reward: 18, xp: 12, status: 'ready', timer: 0 }
       ],
-      // 6 TEZGÂHIN 6'SI DA TAMAMEN OYUNCUNUN KENDİSİNE AİT
       market: Array(6).fill(null).map(() => ({ item: null, qty: 0, price: 0, status: 'empty' })),
       ship: {
         dockState: 'active',
@@ -640,7 +645,7 @@
       listenMarketSoldEvents();
       renderAll();
       setInterval(farmLoop, 1000);
-      setInterval(simulateSmartPazarPurchases, 4000); // Akıllı bot satın alma denetleyicisi
+      setInterval(simulateSmartPazarPurchases, 4000);
     });
 
     function switchTab(tabId) {
@@ -669,7 +674,7 @@
 
     function saveFarmData() {
       if (visitingTarget) return;
-      localStorage.setItem("kutu_farm_hayday_v6", JSON.stringify(farmState));
+      localStorage.setItem("kutu_farm_hayday_v7", JSON.stringify(farmState));
       if (rtdb && activeUser) {
         const myKey = sanitizeUserKey(activeUser.username);
         const unlockedPlotsCount = farmState.plots.filter(p => p.unlocked).length;
@@ -689,7 +694,7 @@
     }
 
     function loadFarmData() {
-      const local = localStorage.getItem("kutu_farm_hayday_v6");
+      const local = localStorage.getItem("kutu_farm_hayday_v7");
       if (local) {
         try { Object.assign(farmState, JSON.parse(local)); } catch(e){}
       }
@@ -711,6 +716,7 @@
         const val = snap.val();
         if (val && val.status === 'sold') {
           showLiveToast("🔔 Pazarında ürün satıldı! Parayı toplamak için tezgâha bas.");
+          farmState.stats.sold++;
           loadFarmData();
           renderAll();
         }
@@ -741,6 +747,7 @@
       renderTruckOrders();
       renderShipDock();
       renderBag();
+      renderCareerStats();
     }
 
     // 1. 7x7 TARLA
@@ -797,7 +804,7 @@
           } else if (p.state === 'growing') {
             const left = Math.max(0, Math.ceil((p.readyAt - now) / 1000));
             cell.innerHTML = `<span style="font-size:12px;">🌱</span><span style="font-size:6.5px; font-weight:bold;">${left}s</span>`;
-            if (!visitingTarget) cell.onclick = (e) => waterPlot(idx, e);
+            if (!visitingTarget) cell.onclick = (e) => onPlotClick(idx, e);
           } else if (p.state === 'ready') {
             cell.className += " ready";
             cell.innerHTML = `<span style="font-size:14px;">${ALL_ITEMS[p.crop].icon}</span>`;
@@ -837,15 +844,29 @@
         p.crop = s.cropKey;
         p.readyAt = Date.now() + (ALL_ITEMS[s.cropKey].dur * 1000);
         p.wet = false;
+        farmState.stats.planted++;
+        saveFarmData();
+        renderAll();
+      } else if (p.state === 'growing') {
+        // Büyürken basılırsa sulama yapılır
+        if (p.wet) return alert("Bu tarla zaten sulandı!");
+        if (farmState.water < 2) return alert("Su kulesi boş! Yukarıdan su doldur (-10₺).");
+        farmState.water -= 2;
+        const rem = Math.max(0, p.readyAt - Date.now());
+        p.readyAt = Date.now() + Math.floor(rem / 2);
+        p.wet = true;
+        showLiveToast("💧 Tarla sulandı, süre yarıya indi!");
         saveFarmData();
         renderAll();
       } else if (p.state === 'ready') {
+        // Hasat
         if (getTotalBagCount() >= farmState.bagMax) return alert("Çantan dolu! Ürünleri sat veya ambarı büyüt.");
         
         const cropKey = p.crop;
         const c = ALL_ITEMS[cropKey];
 
         farmState.inventory[cropKey] = (farmState.inventory[cropKey] || 0) + 2;
+        farmState.stats.harvested += 2;
         addXp(c.xp);
 
         p.state = 'empty';
@@ -857,19 +878,6 @@
         saveFarmData();
         renderAll();
       }
-    }
-
-    function waterPlot(idx, e) {
-      e.stopPropagation();
-      const p = farmState.plots[idx];
-      if (p.wet) return;
-      if (farmState.water < 2) return alert("Su kulesi boş! Su doldur (-10₺).");
-      farmState.water -= 2;
-      const rem = p.readyAt - Date.now();
-      p.readyAt = Date.now() + Math.floor(rem / 2);
-      p.wet = true;
-      saveFarmData();
-      renderAll();
     }
 
     function pumpWater() {
@@ -967,6 +975,7 @@
         farmState.inventory[t.fruit] = (farmState.inventory[t.fruit] || 0) + 3;
         data.state = 'growing';
         data.readyAt = Date.now() + (t.dur * 1000);
+        farmState.stats.harvested += 3;
         addXp(ALL_ITEMS[t.fruit].xp);
       }
       saveFarmData();
@@ -1026,6 +1035,7 @@
         if (getTotalBagCount() >= farmState.bagMax) return alert("Çantan dolu!");
         farmState.inventory[a.prod] = (farmState.inventory[a.prod] || 0) + (data.count * 2);
         data.state = 'idle';
+        farmState.stats.harvested += (data.count * 2);
         addXp(ALL_ITEMS[a.prod].xp);
       }
       saveFarmData();
@@ -1085,6 +1095,7 @@
         if (getTotalBagCount() >= farmState.bagMax) return alert("Çantan dolu!");
         farmState.inventory[m.outItem] = (farmState.inventory[m.outItem] || 0) + 1;
         data.state = 'idle';
+        farmState.stats.crafted++;
         addXp(ALL_ITEMS[m.outItem].xp);
       }
       saveFarmData();
@@ -1127,7 +1138,7 @@
       if ((farmState.inventory[ord.item] || 0) < ord.qty) return alert("Yetersiz ürün!");
       farmState.inventory[ord.item] -= ord.qty;
       ord.status = 'delivering';
-      ord.timer = 25; // 25 saniye teslimat süresi
+      ord.timer = 25;
       saveFarmData();
       renderAll();
     }
@@ -1136,6 +1147,7 @@
       const ord = farmState.truckOrders[idx];
       farmState.gold += ord.reward;
       addXp(ord.xp);
+      farmState.stats.trucks++;
       showLiveToast(`💰 Kamyon teslimatı tamamlandı: +${ord.reward}₺ ve +${ord.xp} XP!`);
 
       const pool = ['wheat', 'corn', 'carrot', 'bread', 'egg', 'milk', 'cheese', 'apple'];
@@ -1201,9 +1213,10 @@
       farmState.gold += 15;
 
       if (farmState.ship.crates.every(cr => cr.done)) {
-        alert("🎉 6 Kolinin tamamı yüklendi! Gemi düdük çaldı ve ayrıldı (+150₺, +3 Elmas)");
+        alert("🎉 6/6 Koli tamamlandı! Gemi limandan ayrıldı (+150₺, +3 Elmas)");
         farmState.gold += 150;
         farmState.gems += 3;
+        farmState.stats.ships++; // SADECE 6/6 TAMAMLANINCA SAYAR
         farmState.ship.dockState = 'waiting';
         farmState.ship.timer = 120;
       }
@@ -1257,7 +1270,19 @@
       renderAll();
     }
 
-    // 9. YOL KENARI PAZARI
+    // 9. İSTATİSTİK TABLOSU
+    function renderCareerStats() {
+      document.getElementById("st-planted").innerText = farmState.stats.planted || 0;
+      document.getElementById("st-harvested").innerText = farmState.stats.harvested || 0;
+      document.getElementById("st-crafted").innerText = farmState.stats.crafted || 0;
+      document.getElementById("st-sold").innerText = farmState.stats.sold || 0;
+      document.getElementById("st-bought").innerText = farmState.stats.bought || 0;
+      document.getElementById("st-ships").innerText = farmState.stats.ships || 0;
+      document.getElementById("st-trucks").innerText = farmState.stats.trucks || 0;
+      document.getElementById("st-visitors").innerText = farmState.stats.visitors || 0;
+    }
+
+    // 10. YOL KENARI PAZARI
     function openMarketModal() {
       const shelf = document.getElementById("shelf-market");
       shelf.innerHTML = "";
@@ -1369,13 +1394,14 @@
 
     function confirmAddSale() {
       const itmKey = document.getElementById("sel-sale-item").value;
+      // Çantadan anında düşer
       farmState.inventory[itmKey] -= modalSelectedQty;
       farmState.market[targetSlotIndex] = { 
         item: itmKey, 
         qty: modalSelectedQty, 
         price: modalSelectedPrice, 
         status: 'on_sale',
-        placedAt: Date.now() // Fiyata göre bekleme süresi hesabı için
+        placedAt: Date.now()
       };
       document.getElementById("box-create-sale").style.display = "none";
       saveFarmData();
@@ -1385,6 +1411,10 @@
 
     function cancelSale(idx) {
       const slot = farmState.market[idx];
+      // Çantada yer var mı kontrolü
+      if (getTotalBagCount() + slot.qty > farmState.bagMax) {
+        return alert("Çantanda yeterli yer yok! Önce yer aç veya ambarı büyüt.");
+      }
       farmState.inventory[slot.item] = (farmState.inventory[slot.item] || 0) + slot.qty;
       farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty' };
       saveFarmData();
@@ -1403,11 +1433,12 @@
 
     function buyNeighborMarketItem(idx, slot, canBuy) {
       if (!canBuy) return alert(`Seviyen yetersiz! Bu ürünü satın almak için en az Seviye ${ALL_ITEMS[slot.item].level} olmalısın.`);
-      if (getTotalBagCount() >= farmState.bagMax) return alert("Çantan dolu!");
+      if (getTotalBagCount() + slot.qty > farmState.bagMax) return alert("Çantan dolu! Satın alamazsın.");
       if (farmState.gold < slot.price) return alert("Yetersiz Altın!");
 
       farmState.gold -= slot.price;
       farmState.inventory[slot.item] = (farmState.inventory[slot.item] || 0) + slot.qty;
+      farmState.stats.bought++;
 
       if (visitingTarget.key === 'bob_farmer') {
         visitingTarget.farm.market[idx] = { item: null, qty: 0, price: 0, status: 'empty' };
@@ -1421,7 +1452,6 @@
       renderAll();
     }
 
-    // FİYATA GÖRE AKILLI BOT SATIN ALMA
     function simulateSmartPazarPurchases() {
       if (visitingTarget) return;
       const now = Date.now();
@@ -1433,12 +1463,12 @@
           const minPrice = itm.minP * slot.qty;
           const maxPrice = itm.maxP * slot.qty;
           
-          // Fiyat tabana yakınsa 20-30s, tavana yakınsa 45-60s süre ister
           const priceRatio = Math.max(0, Math.min(1, (slot.price - minPrice) / Math.max(1, (maxPrice - minPrice))));
           const requiredWaitMs = (20 + (priceRatio * 35)) * 1000;
 
           if (now - (slot.placedAt || 0) >= requiredWaitMs) {
             slot.status = 'sold';
+            farmState.stats.sold++;
             changed = true;
           }
         }
@@ -1450,7 +1480,7 @@
       }
     }
 
-    // 10. SIRALAMA & BOB AMCA
+    // 11. SIRALAMA & BOB AMCA
     function openNeighborsModal() {
       const list = document.getElementById("neighbors-list");
       list.innerHTML = "<div style='font-size:10px; text-align:center;'>Sıralama taranıyor...</div>";
