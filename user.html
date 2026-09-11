@@ -39,7 +39,6 @@
     <div class="user-header">
       <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:3px 8px; font-size:10px; text-decoration:none;">‹ Lobi</a>
       <div style="font-weight:bold; font-size:11.5px; color:#38bdf8;">👤 Profilim</div>
-      <!-- 6. Kural: Buton "Profili Düzenle" olarak ayarlandı -->
       <button type="button" class="icon-btn" style="border-color:var(--neon-gold); padding:3px 8px; font-size:10px;" onclick="openDrawer(true)">✏️ Profili Düzenle</button>
     </div>
 
@@ -55,7 +54,6 @@
         </div>
       </div>
 
-      <!-- Toplam Oynama -->
       <div>
         <div class="stat-section-title">📊 Toplam Oynama</div>
         <div class="stat-box" style="align-items:center; text-align:center; padding:10px;">
@@ -63,7 +61,6 @@
         </div>
       </div>
 
-      <!-- Mayın Karnesi -->
       <div>
         <div class="stat-section-title">💣 Mayın Tarlası Karnesi</div>
         <div class="stat-grid">
@@ -78,7 +75,6 @@
         </div>
       </div>
 
-      <!-- 2. Kural: Bütün Modların En Yüksek Skorları -->
       <div>
         <div class="stat-section-title">🏆 En Yüksek Skorların</div>
         <div class="stat-grid">
@@ -105,7 +101,6 @@
         </div>
       </div>
 
-      <!-- Mod Oynanma Sayıları -->
       <div>
         <div class="stat-section-title">🎮 Mod Oynama Sayıları</div>
         <div style="display:flex; flex-direction:column; gap:3px; background:#070d1e; padding:6px; border-radius:6px; font-size:9px;">
@@ -120,7 +115,6 @@
 
     <div class="drawer-backdrop" id="backdrop" onclick="openDrawer(false)"></div>
 
-    <!-- SAĞDAN KAYAR DÜZENLEME ÇEKMECESİ (Ses Ayarı Çıkarılmıştır) -->
     <div class="settings-drawer" id="drawer">
       <div class="drawer-header">
         <div style="font-weight:bold; font-size:11px; color:var(--neon-gold);">✏️ Profili Düzenle</div>
@@ -183,7 +177,7 @@
 
       tempAvatar = u.avatar || "👤";
       document.getElementById("p-avatar").innerText = tempAvatar;
-      document.getElementById("p-username").innerText = u.displayName || u.name || u.username;
+      document.getElementById("p-username").innerText = `${u.displayName} ${u.tag || ''}`;
       document.getElementById("p-title").innerText = `[${u.title || 'Çaylak'}]`;
 
       const reg = u.createdAt || Date.now();
@@ -218,7 +212,6 @@
         document.getElementById("st-mines-record").innerText = `${min} / ${minW}`;
         document.getElementById("st-mines-rate").innerText = `%${rate}`;
 
-        // En Yüksek Skorlar
         document.getElementById("best-std").innerText = ((stats["standard"] && stats["standard"].bestScore) || 0) + " P";
         document.getElementById("best-cat").innerText = ((stats["catch_open"] && stats["catch_open"].bestScore) || 0) + " P";
         document.getElementById("best-min").innerText = ((stats["mines_mode"] && stats["mines_mode"].bestScore) || 0) + " P";
