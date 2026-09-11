@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>PvP Lobisi - Kutu Açma Pro</title>
+  <title>1v1 PvP - Kutu Açma Pro</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Firebase SDK (v8 Standart) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="app.js"></script>
@@ -25,7 +24,7 @@
       color: #fff;
     }
 
-    .menu-shell {
+    .shell {
       width: 100% !important;
       max-width: min(98vw, 650px) !important;
       height: 100dvh !important;
@@ -39,7 +38,7 @@
       border-right: 1px solid #1e293b;
     }
 
-    .menu-nav {
+    .nav-bar {
       flex-shrink: 0;
       background: #090d1a;
       border-bottom: 2px solid #1e293b;
@@ -50,7 +49,7 @@
       z-index: 30;
     }
 
-    .menu-body {
+    .body-content {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
@@ -60,10 +59,9 @@
       gap: 10px;
       -webkit-overflow-scrolling: touch;
     }
-    .menu-body::-webkit-scrollbar { width: 4px; }
-    .menu-body::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
+    .body-content::-webkit-scrollbar { width: 4px; }
+    .body-content::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
 
-    /* Mod Seçim Kartları */
     .mode-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -87,7 +85,6 @@
       box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
     }
 
-    /* Odaya Giriş Çubuğu */
     .join-row {
       display: flex;
       gap: 6px;
@@ -98,7 +95,6 @@
       align-items: center;
     }
 
-    /* Canlı Oda Listesi */
     .room-item-card {
       background: #070d1e;
       border: 1px solid #1e293b;
@@ -117,6 +113,32 @@
       color: #94a3b8;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: #030712;
+      border: 1px solid #1e293b;
+      color: #fff;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 11px;
+      outline: none;
+    }
+    .btn-action {
+      border: none;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 8px 12px;
+    }
+    .btn-start {
+      width: 100%;
+      background: #16a34a;
+      font-size: 11px;
+      padding: 11px;
+      box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4);
     }
 
     /* Modal */
@@ -139,89 +161,128 @@
       max-width: 360px;
       box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
     }
-    .input-field {
-      width: 100%;
-      background: #030712;
+
+    /* Arena Görünümü */
+    #arena-view {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+    }
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      padding: 10px;
+      gap: 8px;
+      background: #070d1e;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+    }
+    .player-card {
+      background: #0b1329;
       border: 1px solid #1e293b;
-      color: #fff;
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 8px;
-      font-size: 11px;
-      outline: none;
+      text-align: center;
     }
-    .btn-start {
-      width: 100%;
-      border: none;
-      color: #fff;
-      font-weight: bold;
+    .ship-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 45px);
+      gap: 5px;
+      margin: 10px auto;
+    }
+    .grid-cell {
+      width: 45px;
+      height: 45px;
+      background: #0f172a;
+      border: 1px solid #334155;
       border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
       cursor: pointer;
     }
-    .btn-close {
-      width: 100%;
-      background: transparent;
-      border: 1px solid #ef4444;
-      color: #ef4444;
-      padding: 8px;
-      font-size: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+    .grid-cell.hit { background: #ef4444 !important; }
+    .grid-cell.miss { background: #334155 !important; }
   </style>
 </head>
 <body>
-  <div class="menu-shell">
+  <div class="shell">
     
-    <!-- Üst Bar -->
-    <div class="menu-nav">
-      <a href="menu.html" style="border: 1px solid #ef4444; color:#ef4444; padding:3px 8px; font-size:10px; text-decoration:none; border-radius:4px;">‹ Ana Menü</a>
-      <div style="font-weight:900; font-size:12.5px; color:#f59e0b;">⚔️ 1v1 PvP Lobisi</div>
-      <div id="status-tag" style="font-size:8.5px; color:#22c55e;">● Bağlı</div>
+    <!-- 1. LOBİ EKRANI -->
+    <div id="lobby-view" style="display:flex; flex-direction:column; height:100%;">
+      <div class="nav-bar">
+        <!-- 404 önlemi: index.html -->
+        <a href="index.html" style="border: 1px solid #ef4444; color:#ef4444; padding:3px 8px; font-size:10px; text-decoration:none; border-radius:4px;">‹ Ana Menü</a>
+        <div style="font-weight:900; font-size:12.5px; color:#f59e0b;">⚔️ 1v1 PvP Lobisi</div>
+        <div id="status-tag" style="font-size:8.5px; color:#22c55e;">● Canlı</div>
+      </div>
+
+      <div class="body-content">
+        <div class="sec-tag">1. Oyun Modunu Belirle</div>
+        <div class="mode-grid">
+          <div class="mode-card selected" id="card-speedrun" onclick="setMode('speedrun')">
+            <b style="font-size:11px; color:#38bdf8;">⚡ 1v1 Speedrun</b>
+            <span style="font-size:8px; color:#94a3b8;">Hedefe ilk ulaşan kazanır</span>
+          </div>
+          <div class="mode-card" id="card-battleship" onclick="setMode('battleship')">
+            <b style="font-size:11px; color:#38bdf8;">🚢 Amiral Battı</b>
+            <span style="font-size:8px; color:#94a3b8;">Kasa açarak filoyu yok et</span>
+          </div>
+          <div class="mode-card" id="card-classic" onclick="setMode('classic')">
+            <b style="font-size:11px; color:#38bdf8;">⚔️ Normal Kasa</b>
+            <span style="font-size:8px; color:#94a3b8;">30s içinde en çok puan</span>
+          </div>
+          <div class="mode-card" id="card-mines" onclick="setMode('mines')">
+            <b style="font-size:11px; color:#38bdf8;">💣 Mayın Tarlası</b>
+            <span style="font-size:8px; color:#94a3b8;">Risk al, bombadan kaç</span>
+          </div>
+        </div>
+
+        <div class="sec-tag">2. Kanal / Oda #ID Kodu ile Katıl</div>
+        <div class="join-row">
+          <input type="text" id="in-room-search" class="input-field" style="margin:0; font-size:11px; padding:8px; flex:1;" placeholder="Kanal Adı veya #ID (Örn: #5354)">
+          <button type="button" class="btn-action" style="background:#0284c7; font-size:10px;" onclick="joinByCode()">Katıl</button>
+        </div>
+
+        <button type="button" class="btn-action btn-start" onclick="openCreateModal()">➕ Seçili Modda Oda Kur</button>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <div class="sec-tag">Canlı Açık Odalar</div>
+          <button type="button" style="padding:2px 6px; font-size:8px; background:none; border:1px solid #334155; color:#94a3b8; border-radius:4px; cursor:pointer;" onclick="streamRooms()">Yenile 🔄</button>
+        </div>
+        <div id="rooms-list-container" style="display:flex; flex-direction:column; gap:6px;">
+          <div style="color:#64748b; font-size:9.5px; text-align:center; padding:15px;">Odalar taranıyor...</div>
+        </div>
+      </div>
     </div>
 
-    <div class="menu-body">
-      
-      <!-- 1. MOD SEÇİMİ -->
-      <div class="sec-tag">1. Oyun Modunu Belirle</div>
-      <div class="mode-grid">
-        <div class="mode-card selected" id="card-speedrun" onclick="setMode('speedrun')">
-          <b style="font-size:11px; color:#38bdf8;">⚡ 1v1 Speedrun</b>
-          <span style="font-size:8px; color:#94a3b8;">Hedefe ilk ulaşan kazanır</span>
+    <!-- 2. ARENA EKRANI -->
+    <div id="arena-view">
+      <div class="nav-bar">
+        <button onclick="leaveRoom()" style="background:#ef4444; border:none; color:#fff; padding:4px 10px; border-radius:4px; font-size:10px; cursor:pointer;">‹ Odadan Çık</button>
+        <div id="arena-room-title" style="font-size:12px; font-weight:bold; color:#f59e0b;">Arena</div>
+        <div id="arena-room-tag" style="font-size:9px; color:#94a3b8;">#0000</div>
+      </div>
+
+      <div class="scoreboard">
+        <div class="player-card">
+          <div id="p1-name" style="font-size:11px; font-weight:bold; color:#38bdf8;">Oyuncu 1</div>
+          <div id="p1-score" style="font-size:18px; font-weight:900; color:#fff;">0</div>
         </div>
-        <div class="mode-card" id="card-battleship" onclick="setMode('battleship')">
-          <b style="font-size:11px; color:#38bdf8;">🚢 Amiral Battı</b>
-          <span style="font-size:8px; color:#94a3b8;">Kasa açarak filoyu yok et</span>
-        </div>
-        <div class="mode-card" id="card-classic" onclick="setMode('classic')">
-          <b style="font-size:11px; color:#38bdf8;">⚔️ Normal Kasa</b>
-          <span style="font-size:8px; color:#94a3b8;">30s içinde en çok puan</span>
-        </div>
-        <div class="mode-card" id="card-mines" onclick="setMode('mines')">
-          <b style="font-size:11px; color:#38bdf8;">💣 Mayın Tarlası</b>
-          <span style="font-size:8px; color:#94a3b8;">Risk al, bombadan kaç</span>
+        <div style="font-weight:900; color:#ef4444; font-size:13px;">VS</div>
+        <div class="player-card">
+          <div id="p2-name" style="font-size:11px; font-weight:bold; color:#f87171;">Bekleniyor...</div>
+          <div id="p2-score" style="font-size:18px; font-weight:900; color:#fff;">0</div>
         </div>
       </div>
 
-      <!-- 2. KANAL ADI VEYA #ID İLE GİRİŞ -->
-      <div class="sec-tag">2. Kanal / Oda #ID Kodu ile Katıl</div>
-      <div class="join-row">
-        <input type="text" id="in-room-search" class="input-field" style="margin:0; font-size:11px; padding:8px; flex:1;" placeholder="Kanal Adı veya #ID (Örn: #5354)">
-        <button type="button" class="btn-start" style="width:auto; padding:8px 14px; font-size:10px; background:#0284c7;" onclick="joinByCode()">Katıl</button>
+      <div class="body-content" id="arena-dynamic-content" style="align-items:center; justify-content:center;">
+        <!-- Oyun moduna göre arayüz buraya çizilir -->
       </div>
-
-      <!-- 3. ODA KUR BUTONU -->
-      <button type="button" class="btn-start" style="background:#16a34a; font-size:11px; padding:11px; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4);" onclick="openCreateModal()">➕ Seçili Modda Oda Kur</button>
-
-      <!-- 4. CANLI AÇIK ODALAR -->
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-        <div class="sec-tag">Canlı Açık Odalar</div>
-        <button type="button" style="padding:2px 6px; font-size:8px; background:none; border:1px solid #334155; color:#94a3b8; border-radius:4px; cursor:pointer;" onclick="streamRooms()">Yenile 🔄</button>
-      </div>
-      <div id="rooms-list-container" style="display:flex; flex-direction:column; gap:6px;">
-        <div style="color:#64748b; font-size:9.5px; text-align:center; padding:15px;">Odalar taranıyor...</div>
-      </div>
-
     </div>
+
   </div>
 
   <!-- ODA KURMA MODALI -->
@@ -229,36 +290,36 @@
     <div class="modal-card">
       <div style="font-size:13px; font-weight:bold; color:#f59e0b; text-align:center; margin-bottom:8px;">⚔️ Yeni PvP Odası Kur</div>
       
-      <label style="font-size:8.5px; color:#94a3b8; font-weight:bold;">KANAL / ODA ADI</label>
-      <input type="text" id="in-modal-room-name" class="input-field" style="margin-top:3px; padding:7px; font-size:10px;" placeholder="Örn: Kral Arenası">
+      <label class="sec-tag">KANAL / ODA ADI</label>
+      <input type="text" id="in-modal-room-name" class="input-field" style="margin-top:3px; padding:7px;" placeholder="Örn: Kral Arenası">
 
-      <label style="font-size:8.5px; color:#94a3b8; font-weight:bold; margin-top:6px; display:block;">SEÇİLİ OYUN MODU</label>
-      <select id="sel-modal-room-mode" class="input-field" style="background:#0f172a; margin-top:3px; padding:7px; font-size:10px;">
+      <label class="sec-tag" style="margin-top:6px; display:block;">SEÇİLİ OYUN MODU</label>
+      <select id="sel-modal-room-mode" class="input-field" style="background:#0f172a; margin-top:3px; padding:7px;">
         <option value="speedrun">⚡ 1v1 Speedrun</option>
         <option value="battleship">🚢 1v1 Amiral Battı</option>
         <option value="classic">⚔️ 1v1 Normal Kasa (30s)</option>
         <option value="mines">💣 1v1 Mayın Tarlası</option>
       </select>
 
-      <label style="font-size:8.5px; color:#94a3b8; font-weight:bold; margin-top:6px; display:block;">HEDEF PUAN / SÜRE</label>
-      <select id="sel-modal-room-target" class="input-field" style="background:#0f172a; margin-top:3px; padding:7px; font-size:10px;">
+      <label class="sec-tag" style="margin-top:6px; display:block;">HEDEF PUAN / AYAR</label>
+      <select id="sel-modal-room-target" class="input-field" style="background:#0f172a; margin-top:3px; padding:7px;">
         <option value="100">100 Puan (Hızlı)</option>
         <option value="250">250 Puan (Standart)</option>
         <option value="500">500 Puan (Büyük Düello)</option>
       </select>
 
-      <button type="button" class="btn-start" style="background:#16a34a; padding:10px; font-size:11px; margin-top:8px;" onclick="executeCreateRoom()">Odayı Oluştur & Giriş Yap</button>
-      <button type="button" class="btn-close" style="margin-top:6px;" onclick="document.getElementById('modal-create-room').style.display='none'">Vazgeç</button>
+      <button type="button" class="btn-action btn-start" style="margin-top:10px;" onclick="executeCreateRoom()">Odayı Aç</button>
+      <button type="button" class="btn-action" style="background:transparent; border:1px solid #ef4444; color:#ef4444; width:100%; margin-top:6px;" onclick="document.getElementById('modal-create-room').style.display='none'">Vazgeç</button>
     </div>
   </div>
 
   <script>
-    // 1. Veritabanı ve Kullanıcı Tanımlama
     let rtdb = null;
     let activeUser = null;
     let selectedMode = 'speedrun';
+    let currentRoomId = null;
+    let isHost = false;
 
-    // Firebase anahtarını temizleme (Nokta, boşluk vb. yasaklı semboller önlenir)
     function sanitizeUserKey(username) {
       if (!username) return "anonim_" + Math.floor(Math.random() * 1000);
       return String(username).toLowerCase().replace(/[.#$\[\]\/ ]/g, "_");
@@ -267,33 +328,23 @@
     function initDatabase() {
       if (window.db) return window.db;
       if (window.database) return window.database;
-      if (typeof firebase !== "undefined" && firebase.apps.length > 0) {
-        return firebase.database();
-      }
+      if (typeof firebase !== "undefined" && firebase.apps.length > 0) return firebase.database();
       return null;
     }
 
     window.addEventListener("DOMContentLoaded", () => {
       rtdb = initDatabase();
+      if (typeof getActiveUser === "function") activeUser = getActiveUser();
+      if (!activeUser) activeUser = JSON.parse(localStorage.getItem("active_user") || localStorage.getItem("currentUser") || "null");
 
-      // Aktif kullanıcıyı bul
-      if (typeof getActiveUser === "function") {
-        activeUser = getActiveUser();
-      }
-      if (!activeUser) {
-        activeUser = JSON.parse(localStorage.getItem("active_user") || localStorage.getItem("currentUser") || "null");
-      }
-
-      // Kullanıcı yoksa oturum ekranına at
       if (!activeUser) {
         alert("Lütfen önce giriş yapın!");
         return location.href = "index.html";
       }
 
       if (!rtdb) {
-        document.getElementById("status-tag").innerText = "⚠️ Veritabanı Hatası";
+        document.getElementById("status-tag").innerText = "⚠️ DB Yok";
         document.getElementById("status-tag").style.color = "#ef4444";
-        console.error("Firebase Realtime Database başlatılamadı. app.js konfigürasyonunu kontrol edin.");
         return;
       }
 
@@ -308,15 +359,14 @@
       document.getElementById("sel-modal-room-mode").value = m;
     }
 
-    // Canlı Açık Odaları Dinleme
     function streamRooms() {
-      const container = document.getElementById("rooms-list-container");
       if (!rtdb) return;
+      const container = document.getElementById("rooms-list-container");
 
       rtdb.ref("pvp_rooms").on("value", snap => {
         container.innerHTML = "";
         if (!snap.exists()) {
-          container.innerHTML = "<div style='color:#64748b; font-size:9.5px; text-align:center; padding:15px;'>Henüz açık oda bulunmuyor. İlk odayı sen aç!</div>";
+          container.innerHTML = "<div style='color:#64748b; font-size:9.5px; text-align:center; padding:15px;'>Açık oda bulunmuyor. İlk odayı sen aç!</div>";
           return;
         }
 
@@ -327,68 +377,20 @@
           const players = room.players || {};
           const pKeys = Object.keys(players);
 
-          // Dolu ve içinde bulunmadığımız odaları listeleme
           if (pKeys.length >= 2 && !players[myKey]) return;
-          if (room.state === "finished") return;
-
-          const modeTitles = {
-            speedrun: "⚡ Speedrun",
-            battleship: "🚢 Amiral Battı",
-            classic: "⚔️ Normal Kasa",
-            mines: "💣 Mayın Tarlası"
-          };
 
           const card = document.createElement("div");
           card.className = "room-item-card";
           card.innerHTML = `
             <div>
-              <b style="font-size:11px; color:#38bdf8;">${room.roomName || (room.hostName + ' Odası')}</b> 
+              <b style="font-size:11px; color:#38bdf8;">${room.roomName || 'Oda'}</b> 
               <span style="font-size:9px; color:#f59e0b; font-weight:bold;">${room.roomTag || ''}</span>
-              <div style="font-size:8px; color:#94a3b8; margin-top:2px;">${modeTitles[room.mode] || room.mode} • Hedef: ${room.targetScore || 100}P</div>
+              <div style="font-size:8px; color:#94a3b8; margin-top:2px;">${room.mode.toUpperCase()} • Hedef: ${room.targetScore || 100}P</div>
             </div>
-            <button type="button" class="btn-start" style="width:auto; padding:6px 12px; font-size:9px; background:#0284c7;" onclick="joinRoomDirect('${rId}')">Katıl (${pKeys.length}/2) ›</button>
+            <button type="button" class="btn-action" style="background:#0284c7; font-size:9px;" onclick="joinRoom('${rId}')">Katıl (${pKeys.length}/2)</button>
           `;
           container.appendChild(card);
         });
-      });
-    }
-
-    // Doğrudan Odaya Katılma ve Kullanıcıyı Yazma
-    function joinRoomDirect(roomId) {
-      if (!rtdb || !activeUser) return;
-      const myKey = sanitizeUserKey(activeUser.username);
-
-      rtdb.ref(`pvp_rooms/${roomId}/players/${myKey}`).set({
-        name: activeUser.displayName || activeUser.username,
-        avatar: activeUser.avatar || "👤",
-        score: 0,
-        joinedAt: Date.now()
-      }).then(() => {
-        redirectToArena(roomId);
-      }).catch(err => {
-        alert("Odaya katılırken hata oluştu: " + err.message);
-      });
-    }
-
-    // Kod veya Başlıkla Odaya Giriş
-    function joinByCode() {
-      const raw = document.getElementById("in-room-search").value.trim().toLowerCase();
-      if (!raw) return alert("Lütfen oda adı veya #ID girin!");
-
-      rtdb.ref("pvp_rooms").once("value", snap => {
-        let matchedKey = null;
-        if (snap.exists()) {
-          snap.forEach(c => {
-            const r = c.val();
-            const tag = String(r.roomTag || '').toLowerCase();
-            const name = String(r.roomName || '').toLowerCase();
-            if (c.key.toLowerCase() === raw || tag === raw || tag === ('#' + raw) || name === raw) {
-              matchedKey = c.key;
-            }
-          });
-        }
-        if (matchedKey) joinRoomDirect(matchedKey);
-        else alert("Girdiğiniz #ID veya ada sahip açık oda bulunamadı!");
       });
     }
 
@@ -398,7 +400,6 @@
       document.getElementById("modal-create-room").style.display = "flex";
     }
 
-    // Oda Kurma (Kullanıcı ismine bağlı veri tabanı düğümü ile)
     function executeCreateRoom() {
       const uName = activeUser.displayName || activeUser.username;
       const rName = document.getElementById("in-modal-room-name").value.trim() || `${uName} Odası`;
@@ -415,29 +416,293 @@
         roomTag: generatedTag,
         mode: mode,
         targetScore: target,
-        maxPlayers: 2,
-        state: "waiting",
-        createdAt: Date.now(),
+        state: "waiting", // waiting -> playing -> finished
         players: {
           [myKey]: {
             name: uName,
-            avatar: activeUser.avatar || "👤",
             score: 0,
+            ready: true,
             isHost: true
           }
         }
       };
 
-      rtdb.ref("pvp_rooms/" + rId).set(payload).then(() => {
+      const roomRef = rtdb.ref("pvp_rooms/" + rId);
+      roomRef.set(payload).then(() => {
+        // KURUCU KOPARSA VEYA ÇIKARSA ODA SİLİNSİN
+        roomRef.onDisconnect().remove();
+
         document.getElementById("modal-create-room").style.display = "none";
-        redirectToArena(rId);
-      }).catch(err => {
-        alert("Oda oluşturulamadı: " + err.message);
+        isHost = true;
+        enterArena(rId);
       });
     }
 
-    function redirectToArena(roomId) {
-      window.location.href = `pvp-arena.html?roomId=${roomId}`;
+    function joinRoom(rId) {
+      const myKey = sanitizeUserKey(activeUser.username);
+      const roomRef = rtdb.ref("pvp_rooms/" + rId);
+
+      roomRef.once("value", snap => {
+        if (!snap.exists()) return alert("Oda artık mevcut değil!");
+        
+        const room = snap.val();
+        isHost = (room.hostUserKey === myKey);
+
+        roomRef.child("players/" + myKey).set({
+          name: activeUser.displayName || activeUser.username,
+          score: 0,
+          ready: false,
+          isHost: isHost
+        }).then(() => {
+          if (!isHost) {
+            // Katılan oyuncu çıkarsa sadece kendisi silinsin
+            roomRef.child("players/" + myKey).onDisconnect().remove();
+          }
+          enterArena(rId);
+        });
+      });
+    }
+
+    function joinByCode() {
+      const raw = document.getElementById("in-room-search").value.trim().toLowerCase();
+      if (!raw) return alert("Lütfen oda adı veya #ID kodu girin!");
+
+      rtdb.ref("pvp_rooms").once("value", snap => {
+        let matchedKey = null;
+        if (snap.exists()) {
+          snap.forEach(c => {
+            const r = c.val();
+            const tag = String(r.roomTag || '').toLowerCase();
+            const name = String(r.roomName || '').toLowerCase();
+            if (c.key.toLowerCase() === raw || tag === raw || tag === ('#' + raw) || name === raw) {
+              matchedKey = c.key;
+            }
+          });
+        }
+        if (matchedKey) joinRoom(matchedKey);
+        else alert("Girdiğiniz koda uygun açık oda bulunamadı!");
+      });
+    }
+
+    function enterArena(rId) {
+      currentRoomId = rId;
+      document.getElementById("lobby-view").style.display = "none";
+      document.getElementById("arena-view").style.display = "flex";
+      listenCurrentRoom();
+    }
+
+    function listenCurrentRoom() {
+      const roomRef = rtdb.ref("pvp_rooms/" + currentRoomId);
+      const myKey = sanitizeUserKey(activeUser.username);
+
+      roomRef.on("value", snap => {
+        if (!snap.exists()) {
+          alert("Oda kurucu tarafından kapatıldı!");
+          return exitArenaToLobby();
+        }
+
+        const room = snap.val();
+        document.getElementById("arena-room-title").innerText = room.roomName || "PvP";
+        document.getElementById("arena-room-tag").innerText = room.roomTag || "";
+
+        const pKeys = Object.keys(room.players || {});
+        const p1 = room.players[pKeys[0]] || { name: "Boş", score: 0 };
+        const p2 = room.players[pKeys[1]] || { name: "Bekleniyor...", score: 0 };
+
+        document.getElementById("p1-name").innerText = p1.name;
+        document.getElementById("p1-score").innerText = p1.score;
+        document.getElementById("p2-name").innerText = p2.name;
+        document.getElementById("p2-score").innerText = p2.score;
+
+        renderArenaBody(room, myKey, pKeys);
+      });
+    }
+
+    function renderArenaBody(room, myKey, pKeys) {
+      const area = document.getElementById("arena-dynamic-content");
+
+      // 1. Oyuncu Bekleniyor
+      if (pKeys.length < 2) {
+        area.innerHTML = `
+          <div style="text-align:center;">
+            <div style="font-size:28px; margin-bottom:8px;">⏳</div>
+            <div style="font-size:12px; color:#94a3b8;">Rakip bekleniyor...</div>
+            <div style="font-size:11px; color:#f59e0b; margin-top:4px;">Oda Kodu: <b>${room.roomTag}</b></div>
+          </div>
+        `;
+        return;
+      }
+
+      // 2. Bekleme / Başlama Ekranı (BAŞLA TUŞU)
+      if (room.state === "waiting") {
+        if (room.hostUserKey === myKey) {
+          area.innerHTML = `
+            <div style="text-align:center;">
+              <div style="font-size:12px; color:#22c55e; margin-bottom:10px;">İki oyuncu da bağlandı!</div>
+              <button class="btn-action btn-start" onclick="startGame()">🎮 Oyunu Başlat</button>
+            </div>
+          `;
+        } else {
+          area.innerHTML = `<div style="color:#94a3b8; font-size:12px;">Kurucunun oyunu başlatması bekleniyor...</div>`;
+        }
+        return;
+      }
+
+      // 3. Oyun Başladı
+      if (room.state === "playing") {
+        if (room.mode === "battleship") {
+          renderBattleship(area, room, myKey);
+        } else if (room.mode === "mines") {
+          renderMines(area, room, myKey);
+        } else {
+          renderBoxRace(area, room, myKey);
+        }
+        return;
+      }
+
+      // 4. Oyun Bitti
+      if (room.state === "finished") {
+        area.innerHTML = `
+          <div style="text-align:center;">
+            <div style="font-size:32px;">🏆</div>
+            <div style="font-size:14px; font-weight:bold; color:#f59e0b; margin:6px 0;">MAÇ BİTTİ!</div>
+            <button class="btn-action" style="background:#0284c7; margin-top:8px;" onclick="leaveRoom()">Lobiye Dön</button>
+          </div>
+        `;
+      }
+    }
+
+    function startGame() {
+      rtdb.ref(`pvp_rooms/${currentRoomId}`).update({ state: "playing" });
+    }
+
+    // Oyun İçi: Kutu / Speedrun
+    function renderBoxRace(area, room, myKey) {
+      area.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:12px; color:#38bdf8; margin-bottom:10px; font-weight:bold;">Hedef: ${room.targetScore || 100} Puan</div>
+          <button class="btn-action" style="background:#0284c7; padding:12px 24px; font-size:14px;" onclick="actionOpenBox()">📦 Kutu Aç (+Puan)</button>
+        </div>
+      `;
+    }
+
+    function actionOpenBox() {
+      const myKey = sanitizeUserKey(activeUser.username);
+      const pRef = rtdb.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/score`);
+      
+      pRef.transaction(score => {
+        const newScore = (score || 0) + Math.floor(Math.random() * 15 + 5);
+        return newScore;
+      }, (err, committed, snap) => {
+        if (committed) {
+          rtdb.ref(`pvp_rooms/${currentRoomId}/targetScore`).once("value", targetSnap => {
+            const target = targetSnap.val() || 100;
+            if (snap.val() >= target) {
+              rtdb.ref(`pvp_rooms/${currentRoomId}`).update({ state: "finished" });
+            }
+          });
+        }
+      });
+    }
+
+    // Oyun İçi: Mayın Tarlası
+    function renderMines(area, room, myKey) {
+      area.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:12px; color:#ef4444; margin-bottom:10px; font-weight:bold;">Mayına Basmadan ${room.targetScore || 100} Puana Ulaş!</div>
+          <button class="btn-action" style="background:#dc2626; padding:12px 24px; font-size:13px;" onclick="actionStepMine()">💣 Risk Al (+20 Puan)</button>
+        </div>
+      `;
+    }
+
+    function actionStepMine() {
+      const myKey = sanitizeUserKey(activeUser.username);
+      const isBomb = Math.random() < 0.25; // %25 patlama riski
+
+      if (isBomb) {
+        alert("💥 BOOM! Mayına bastın, puanın sıfırlandı!");
+        rtdb.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/score`).set(0);
+      } else {
+        const pRef = rtdb.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/score`);
+        pRef.transaction(score => (score || 0) + 20, (err, committed, snap) => {
+          if (committed) {
+            rtdb.ref(`pvp_rooms/${currentRoomId}/targetScore`).once("value", targetSnap => {
+              if (snap.val() >= (targetSnap.val() || 100)) {
+                rtdb.ref(`pvp_rooms/${currentRoomId}`).update({ state: "finished" });
+              }
+            });
+          }
+        });
+      }
+    }
+
+    // Oyun İçi: Amiral Battı
+    function renderBattleship(area, room, myKey) {
+      area.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:11px; color:#38bdf8; margin-bottom:6px; font-weight:bold;">Hedef Gemileri Vur!</div>
+          <div class="ship-grid" id="arena-grid"></div>
+        </div>
+      `;
+      const grid = document.getElementById("arena-grid");
+      for (let i = 0; i < 25; i++) {
+        const cell = document.createElement("div");
+        cell.className = "grid-cell";
+        cell.innerText = "🌊";
+        cell.onclick = () => {
+          cell.onclick = null;
+          const hit = Math.random() > 0.55;
+          if (hit) {
+            cell.innerText = "💥";
+            cell.classList.add("hit");
+            actionHitShip();
+          } else {
+            cell.innerText = "❌";
+            cell.classList.add("miss");
+          }
+        };
+        grid.appendChild(cell);
+      }
+    }
+
+    function actionHitShip() {
+      const myKey = sanitizeUserKey(activeUser.username);
+      const pRef = rtdb.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/score`);
+      pRef.transaction(score => (score || 0) + 25, (err, committed, snap) => {
+        if (committed) {
+          rtdb.ref(`pvp_rooms/${currentRoomId}/targetScore`).once("value", targetSnap => {
+            if (snap.val() >= (targetSnap.val() || 100)) {
+              rtdb.ref(`pvp_rooms/${currentRoomId}`).update({ state: "finished" });
+            }
+          });
+        }
+      });
+    }
+
+    // Çıkış Mantığı
+    function leaveRoom() {
+      if (!currentRoomId) return;
+      const myKey = sanitizeUserKey(activeUser.username);
+      const roomRef = rtdb.ref(`pvp_rooms/${currentRoomId}`);
+
+      if (isHost) {
+        // Kurucu çıkarsa odayı komple siler
+        roomRef.remove().then(() => exitArenaToLobby());
+      } else {
+        // İkinci oyuncu çıkarsa sadece kendini siler
+        roomRef.child(`players/${myKey}`).remove().then(() => exitArenaToLobby());
+      }
+    }
+
+    function exitArenaToLobby() {
+      if (currentRoomId && rtdb) {
+        rtdb.ref(`pvp_rooms/${currentRoomId}`).off();
+      }
+      currentRoomId = null;
+      isHost = false;
+      document.getElementById("arena-view").style.display = "none";
+      document.getElementById("lobby-view").style.display = "flex";
+      streamRooms();
     }
   </script>
 </body>
