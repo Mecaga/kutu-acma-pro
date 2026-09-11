@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>PvP Arenası - Kutu Açma Pro</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="app.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+    html, body {
+      width: 100%; height: 100dvh; overflow: hidden;
+      background: #020617; font-family: system-ui, sans-serif; color: #fff;
+    }
+    .arena-shell {
+      max-width: 650px; height: 100dvh; margin: 0 auto;
+      background: #030712; display: flex; flex-direction: column;
+      border-left: 1px solid #1e293b; border-right: 1px solid #1e293b;
+    }
+    .top-bar {
+      padding: 10px 14px; background: #090d1a; border-bottom: 2px solid #1e293b;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .scoreboard {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      padding: 12px; gap: 8px; background: #070d1e; align-items: center;
+      border-bottom: 1px solid #1e293b;
+    }
+    .player-card {
+      background: #0b1329; border: 1px solid #1e293b; border-radius: 8px;
+      padding: 8px; text-align: center;
+    }
+    .player-card.active-turn { border-color: #38bdf8; box-shadow: 0 0 10px rgba(56,189,248,0.3); }
+    .vs-badge { font-weight: 900; color: #ef4444; font-size: 14px; }
+    
+    .arena-main {
+      flex: 1; min-height: 0; overflow-y: auto; padding: 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+
+    /* Amiral Battı Izgarası (5x5) */
+    .ship-grid {
+      display: grid; grid-template-columns: repeat(5, 45px); gap: 6px; margin: 10px auto;
+    }
+    .grid-cell {
+      width: 45px; height: 45px; background: #0f172a; border: 1px solid #334155;
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer; transition: 0.15s;
+    }
+    .grid-cell:active { transform: scale(0.9); }
+    .grid-cell.hit { background: #ef4444; border-color: #f87171; }
+    .grid-cell.miss { background: #334155; border-color: #64748b; }
+
+    /* Mayın ve Kasa Açma Butonları */
+    .btn-action {
+      background: #0284c7; color: #fff; border: none; border-radius: 8px;
+      padding: 12px 24px; font-weight: bold; font-size: 13px; cursor: pointer;
+    }
+    .btn-action:active { transform: scale(0.96); }
+  </style>
+</head>
+<body>
+  <div class="arena-shell">
+    
+    <div class="top-bar">
+      <button onclick="leaveArena()" style="background:#ef4444; border:none; color:#fff; padding:4px 10px; border-radius:4px; font-size:10px; cursor:pointer;">‹ Çıkış</button>
+      <div id="ui-room-name" style="font-size:12px; font-weight:bold; color:#f59e0b;">Yükleniyor...</div>
+      <div id="ui-room-tag" style="font-size:9px; color:#94a3b8;">#0000</div>
+    </div>
+
+    <!-- Skor Tahtası -->
+    <div class="scoreboard">
+      <div class="player-card" id="card-p1">
+        <div id="p1-name" style="font-size:11px; font-weight:bold; color:#38bdf8;">Oyuncu 1</div>
+        <div id="p1-score" style="font-size:18px; font-weight:900; color:#fff; margin-top:2px;">0</div>
+      </div>
+      <div class="vs-badge">VS</div>
+      <div class="player-card" id="card-p2">
+        <div id="p2-name" style="font-size:11px; font-weight:bold; color:#f87171;">Bekleniyor...</div>
+        <div id="p2-score" style="font-size:18px; font-weight:900; color:#fff; margin-top:2px;">0</div>
+      </div>
+    </div>
+
+    <!-- Modun Oynandığı Dinamik Alan -->
+    <div class="arena-main" id="arena-content">
+      <div style="color:#94a3b8; font-size:11px;">Oda verileri senkronize ediliyor...</div>
+    </div>
+
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get("roomId");
+    let activeUser = null;
+    let roomRef = null;
+    let roomData = null;
+
+    window.onload = () => {
+      activeUser = (typeof getActiveUser === "function") ? getActiveUser() : JSON.parse(localStorage.getItem("active_user") || "null");
+      if (!activeUser || !roomId) return location.href = "pvp-lobby.html";
+
+      roomRef = db.ref("pvp_rooms/" + roomId);
+      joinRoom();
+      listenRoom();
+    };
+
+    function joinRoom() {
+      const myKey = String(activeUser.username).toLowerCase();
+      roomRef.child("players/" + myKey).update({
+        name: activeUser.displayName || activeUser.username,
+        avatar: activeUser.avatar || "👤",
+        ready: true
+      });
+      roomRef.child("players/" + myKey).onDisconnect().remove();
+    }
+
+    function listenRoom() {
+      roomRef.on("value", snap => {
+        if (!snap.exists()) {
+          alert("Oda kapatıldı veya maç bitti!");
+          return location.href = "pvp-lobby.html";
+        }
+
+        roomData = snap.val();
+        renderHeader();
+        renderArenaByMode();
+      });
+    }
+
+    function renderHeader() {
+      document.getElementById("ui-room-name").innerText = roomData.roomName || "PvP Arenası";
+      document.getElementById("ui-room-tag").innerText = roomData.roomTag || "";
+
+      const pKeys = Object.keys(roomData.players || {});
+      const p1 = roomData.players[pKeys[0]] || { name: "Boş", score: 0 };
+      const p2 = roomData.players[pKeys[1]] || { name: "Bekleniyor...", score: 0 };
+
+      document.getElementById("p1-name").innerText = p1.name;
+      document.getElementById("p1-score").innerText = p1.score;
+      document.getElementById("p2-name").innerText = p2.name;
+      document.getElementById("p2-score").innerText = p2.score;
+    }
+
+    function renderArenaByMode() {
+      const main = document.getElementById("arena-content");
+      const myKey = String(activeUser.username).toLowerCase();
+      const pCount = Object.keys(roomData.players || {}).length;
+
+      if (pCount < 2) {
+        main.innerHTML = `
+          <div style="text-align:center;">
+            <div style="font-size:30px; margin-bottom:10px;">⏳</div>
+            <div style="font-size:12px; color:#94a3b8;">İkinci oyuncunun katılması bekleniyor...</div>
+            <div style="font-size:10px; color:#f59e0b; margin-top:5px;">Oda Kodunu Arkadaşına Ver: <b>${roomData.roomTag}</b></div>
+          </div>
+        `;
+        return;
+      }
+
+      // MODLARA GÖRE ARAYÜZ
+      if (roomData.mode === "battleship") {
+        renderBattleshipUI(main, myKey);
+      } else if (roomData.mode === "mines") {
+        renderMinesUI(main, myKey);
+      } else {
+        // Speedrun & Classic (Standart Kutu Açma Yarışı)
+        renderBoxOpeningUI(main, myKey);
+      }
+    }
+
+    function renderBoxOpeningUI(container, myKey) {
+      container.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:13px; color:#38bdf8; margin-bottom:12px; font-weight:bold;">
+            Hedef: ${roomData.targetScore || 100} Puan
+          </div>
+          <button class="btn-action" onclick="openPvpBox()">📦 KUTU AÇ (+Puan Kazan)</button>
+        </div>
+      `;
+    }
+
+    function renderBattleshipUI(container, myKey) {
+      container.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:11px; color:#38bdf8; margin-bottom:6px; font-weight:bold;">🚢 Rakibin Izgarasını Bombala</div>
+          <div class="ship-grid" id="ship-grid"></div>
+        </div>
+      `;
+      const grid = document.getElementById("ship-grid");
+      for (let i = 0; i < 25; i++) {
+        const cell = document.createElement("div");
+        cell.className = "grid-cell";
+        cell.innerText = "🌊";
+        cell.onclick = () => fireBattleship(i, cell);
+        grid.appendChild(cell);
+      }
+    }
+
+    function renderMinesUI(container, myKey) {
+      container.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:12px; color:#ef4444; margin-bottom:8px; font-weight:bold;">💣 Mayına Basmadan Puan Topla</div>
+          <button class="btn-action" style="background:#dc2626;" onclick="stepMine()">Risk Al: Sandık Aç</button>
+        </div>
+      `;
+    }
+
+    function openPvpBox() {
+      const myKey = String(activeUser.username).toLowerCase();
+      const currentScore = (roomData.players[myKey].score || 0) + Math.floor(Math.random() * 20 + 5);
+      
+      roomRef.child("players/" + myKey + "/score").set(currentScore);
+
+      if (currentScore >= (roomData.targetScore || 100)) {
+        alert("TEBRİKLER KAZANDIN! 🏆");
+        roomRef.update({ state: "finished" });
+      }
+    }
+
+    function fireBattleship(index, cell) {
+      const myKey = String(activeUser.username).toLowerCase();
+      const hit = Math.random() > 0.6; // Şans faktörü
+      if (hit) {
+        cell.innerText = "💥";
+        cell.classList.add("hit");
+        const newScore = (roomData.players[myKey].score || 0) + 25;
+        roomRef.child("players/" + myKey + "/score").set(newScore);
+      } else {
+        cell.innerText = "❌";
+        cell.classList.add("miss");
+      }
+      cell.onclick = null;
+    }
+
+    function stepMine() {
+      const myKey = String(activeUser.username).toLowerCase();
+      const exploded = Math.random() < 0.2; // %20 patlama riski
+      if (exploded) {
+        alert("BOOM! Mayına bastın, puanların sıfırlandı!");
+        roomRef.child("players/" + myKey + "/score").set(0);
+      } else {
+        const newScore = (roomData.players[myKey].score || 0) + 15;
+        roomRef.child("players/" + myKey + "/score").set(newScore);
+      }
+    }
+
+    function leaveArena() {
+      if (confirm("Maçtan çıkmak istediğine emin misin?")) {
+        const myKey = String(activeUser.username).toLowerCase();
+        roomRef.child("players/" + myKey).remove().then(() => {
+          location.href = "pvp-lobby.html";
+        });
+      }
+    }
+  </script>
+</body>
+</html>
