@@ -13,26 +13,27 @@
     html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #020617; font-family: system-ui, sans-serif; color: #fff; }
 
     .pvp-layout { width: 100%; max-width: 480px; height: 100dvh; margin: 0 auto; background: #030712; display: flex; flex-direction: column; position: relative; }
-    .pvp-header { flex-shrink: 0; background: #090d1a; border-bottom: 2px solid #1e293b; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; }
+    .pvp-header { flex-shrink: 0; background: #090d1a; border-bottom: 2px solid #1e293b; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; z-index: 20; }
     
-    .pvp-content { flex: 1; min-height: 0; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; -webkit-overflow-scrolling: touch; }
+    .pvp-content { flex: 1; min-height: 0; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 8px; -webkit-overflow-scrolling: touch; }
     .pvp-content::-webkit-scrollbar { width: 3px; }
     .pvp-content::-webkit-scrollbar-thumb { background: #3b1d6e; border-radius: 4px; }
 
-    .vs-card { background: linear-gradient(135deg, #1e1b4b, #0f172a); border: 1px solid #334155; border-radius: 10px; padding: 10px; display: flex; justify-content: space-around; align-items: center; }
+    .vs-card { background: linear-gradient(135deg, #1e1b4b, #0f172a); border: 1px solid #334155; border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-around; align-items: center; }
     .player-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
     .player-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--neon-gold); display: flex; align-items: center; justify-content: center; font-size: 22px; background: #060913; }
 
-    /* Mod Seçim Çubuğu */
-    .mode-switch-bar { display: flex; gap: 4px; background: #0b1329; padding: 4px; border-radius: 8px; border: 1px solid #1e293b; }
-    .mode-btn-tab { flex: 1; background: #1e293b; border: 1px solid #334155; color: #94a3b8; font-size: 9px; font-weight: bold; padding: 6px; border-radius: 6px; cursor: pointer; text-align: center; }
-    .mode-btn-tab.active { background: #4338ca; border-color: var(--neon-gold); color: #fff; }
+    /* Mod Seçici Yatay Kaydırma */
+    .mode-scroll-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+    .mode-scroll-tabs::-webkit-scrollbar { display: none; }
+    .mode-tab-btn { flex-shrink: 0; background: #1e293b; border: 1px solid #334155; color: #94a3b8; font-size: 8.5px; font-weight: bold; padding: 5px 8px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+    .mode-tab-btn.active { background: #4338ca; border-color: var(--neon-gold); color: #fff; }
 
     /* Amiral Battı Izgarası */
     .navy-grid-box {
       display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px;
       background: #0b1329; border: 2px solid #1e3a8a; border-radius: 8px; padding: 6px;
-      width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0 auto;
+      width: 100%; max-width: 310px; aspect-ratio: 1; margin: 0 auto;
     }
     .navy-cell {
       background: #0f172a; border: 1px solid #1e293b; border-radius: 4px;
@@ -42,95 +43,176 @@
     .navy-cell.hit { background: #dc2626 !important; border-color: #ef4444; }
     .navy-cell.miss { background: #1e293b !important; color: #64748b; font-weight: bold; }
     .navy-cell.surround { background: #070d1e !important; border-color: #0284c7; }
+
+    /* Mayın & Rulet Kutuları */
+    .mines-pvp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 280px; margin: 0 auto; }
+    .mines-pvp-card { background: #0f172a; border: 1px solid #334155; border-radius: 6px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+
+    /* Sağdan Kayar Oda Ayarları Çekmecesi */
+    .pvp-drawer {
+      position: absolute; top: 0; right: -100%; width: 82%; max-width: 320px; height: 100%;
+      background: #090d1a; border-left: 2px solid #334155; z-index: 300; display: flex; flex-direction: column;
+      transition: right 0.28s ease; box-shadow: -8px 0 25px rgba(0,0,0,0.8);
+    }
+    .pvp-drawer.active { right: 0; }
+    .drawer-backdrop { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 200; }
+    .drawer-backdrop.active { display: block; }
   </style>
 </head>
 <body>
   <div class="pvp-layout">
+    
+    <!-- Üst Bar -->
     <div class="pvp-header">
-      <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 6px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <a href="menu.html" class="icon-btn" style="border-color:var(--danger); padding:2px 6px; font-size:9.5px; text-decoration:none;">‹ Lobi</a>
+        <div id="lbl-timer" style="font-size:9px; color:var(--neon-gold); font-weight:bold;">Süre: 30s</div>
+      </div>
       <div style="font-weight:900; font-size:11.5px; color:var(--neon-gold);">⚔️ 1v1 PvP Arenası</div>
-      <div id="lbl-room-status" style="font-size:8px; color:var(--neon-green);">● Bağlandı</div>
+      <button type="button" class="icon-btn" style="border-color:var(--neon-gold); padding:2px 6px; font-size:9.5px;" onclick="openPvPDrawer(true)">⚙️ Ayarlar</button>
     </div>
 
     <div class="pvp-content">
-      <!-- VS Başlık Kartı -->
+      
+      <!-- Skor & Oyuncu Kartı -->
       <div class="vs-card">
         <div class="player-slot">
           <div class="player-avatar" id="p1-avatar">👤</div>
-          <b id="p1-name" style="font-size:9.5px; color:#38bdf8;">Sen</b>
-          <span id="p1-score" style="font-size:12px; font-weight:bold; color:var(--neon-green);">0</span>
+          <b id="p1-name" style="font-size:9px; color:#38bdf8;">Sen</b>
+          <span id="p1-score" style="font-size:13px; font-weight:bold; color:var(--neon-green);">0</span>
         </div>
         <div style="font-size:16px; font-weight:900; color:var(--danger);">VS</div>
         <div class="player-slot">
           <div class="player-avatar" id="p2-avatar">👤</div>
-          <b id="p2-name" style="font-size:9.5px; color:#f87171;">Rakip</b>
-          <span id="p2-score" style="font-size:12px; font-weight:bold; color:var(--neon-green);">0</span>
+          <b id="p2-name" style="font-size:9px; color:#f87171;">Rakip</b>
+          <span id="p2-score" style="font-size:13px; font-weight:bold; color:var(--neon-green);">0</span>
         </div>
       </div>
 
-      <!-- Mod Değiştirme Butonları -->
-      <div class="mode-switch-bar">
-        <button type="button" class="mode-btn-tab active" id="tab-speed" onclick="switchPvPMode('speedrun')">⚡ 1v1 Speedrun</button>
-        <button type="button" class="mode-btn-tab" id="tab-navy" onclick="switchPvPMode('battleship')">🚢 1v1 Amiral Battı</button>
+      <!-- 5 Mod Seçici Şeridi -->
+      <div class="mode-scroll-tabs">
+        <button type="button" class="mode-tab-btn active" id="tab-speedrun" onclick="selectPvPMode('speedrun')">⚡ Speedrun</button>
+        <button type="button" class="mode-tab-btn" id="tab-battleship" onclick="selectPvPMode('battleship')">🚢 Amiral Battı</button>
+        <button type="button" class="mode-tab-btn" id="tab-classic" onclick="selectPvPMode('classic')">⚔️ Normal Kasa</button>
+        <button type="button" class="mode-tab-btn" id="tab-mines" onclick="selectPvPMode('mines')">💣 Mayın Tarlası</button>
+        <button type="button" class="mode-tab-btn" id="tab-double" onclick="selectPvPMode('double')">🎰 Çift Rulet</button>
       </div>
 
-      <!-- 1. SPEEDRUN OYUN ALANI -->
-      <div id="zone-speedrun" style="display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:10px;">
-        <div id="speed-status" style="font-size:11px; font-weight:bold; color:#cbd5e1; text-align:center;">Hedef: 100 Puan! İlk ulaşan kazanır.</div>
-        <button type="button" id="btn-speed-action" class="btn-start" style="width:85%; padding:14px; font-size:12px; display:none;" onclick="handleSpeedClick()">🔥 KUTU AÇ (+5-15P)</button>
+      <!-- Ortak Oyun Alanı -->
+      <div id="pvp-play-zone" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+        <div id="pvp-status-txt" style="font-size:11px; font-weight:bold; color:#cbd5e1; text-align:center;">Maç Başlatılıyor...</div>
+        
+        <!-- Speedrun & Normal Kasa Butonu -->
+        <button type="button" id="btn-action-main" class="btn-start" style="width:85%; padding:14px; font-size:12px; display:none;" onclick="handleMainAction()">🔥 KUTU AÇ / PUAN KAZAN</button>
+
+        <!-- Amiral Battı Tahtası -->
+        <div id="navy-board-wrap" style="display:none; width:100%;">
+          <div class="navy-grid-box" id="navy-cells-container"></div>
+        </div>
+
+        <!-- Mayın Tarlası Tahtası -->
+        <div id="mines-board-wrap" style="display:none; width:100%;">
+          <div class="mines-pvp-grid" id="mines-cells-container"></div>
+          <button type="button" id="btn-mines-cashout" class="btn-start" style="background:#16a34a; font-size:9.5px; padding:8px; margin-top:6px;" onclick="cashoutMines()">💰 Puanı Al ve Çık</button>
+        </div>
+
+        <!-- Çift Rulet Çark Göstergesi -->
+        <div id="double-roulette-wrap" style="display:none; flex-direction:column; align-items:center; gap:6px; width:100%;">
+          <div style="display:flex; gap:8px; width:100%; justify-content:center;">
+            <div id="spin-item" style="background:#070d1e; border:1px solid #38bdf8; border-radius:6px; padding:10px; font-size:12px; font-weight:bold; min-width:110px; text-align:center;">📦 Eşya: Bekleniyor</div>
+            <div id="spin-mult" style="background:#070d1e; border:1px solid var(--neon-gold); border-radius:6px; padding:10px; font-size:12px; font-weight:bold; min-width:70px; text-align:center; color:var(--neon-gold);">x1</div>
+          </div>
+          <button type="button" class="btn-start" style="width:70%; font-size:10px; padding:10px;" onclick="spinPvPDouble()">🎰 Ruleti Çevir</button>
+        </div>
       </div>
 
-      <!-- 2. AMİRAL BATTI OYUN ALANI -->
-      <div id="zone-battleship" style="display:none; flex-direction:column; align-items:center; gap:6px;">
-        <div id="navy-status" style="font-size:9.5px; font-weight:bold; color:#38bdf8; text-align:center;">Düşman sularına atış yapın!</div>
-        <div class="navy-grid-box" id="pvp-navy-grid"></div>
+      <!-- Bitiş ve Rematch Bölümü -->
+      <div id="pvp-finish-panel" style="display:none; flex-direction:column; gap:6px; margin-top:auto;">
+        <div id="pvp-winner-msg" style="font-size:13px; font-weight:900; color:var(--neon-gold); text-align:center;"></div>
+        <button type="button" id="btn-rematch" class="btn-start" style="background:#16a34a; padding:10px; font-size:11px;" onclick="triggerRematch()">🔄 Tekrar Oyna</button>
       </div>
 
-      <!-- BİTİŞ VE REMATCH (TEKRAR OYNA) BÖLÜMÜ -->
-      <div id="pvp-game-over-box" style="display:none; flex-direction:column; gap:6px; margin-top:auto;">
-        <div id="pvp-winner-txt" style="font-size:13px; font-weight:900; color:var(--neon-gold); text-align:center;"></div>
-        <button type="button" id="btn-rematch" class="btn-start" style="background:#16a34a; padding:10px; font-size:11px;" onclick="requestRematch()">🔄 Tekrar Oyna</button>
+    </div>
+
+    <!-- Karartma & Sağdan Kayar Oda Ayarları -->
+    <div class="drawer-backdrop" id="pvp-backdrop" onclick="openPvPDrawer(false)"></div>
+    
+    <div class="pvp-drawer" id="pvp-drawer">
+      <div style="padding:10px; background:#050814; border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
+        <b style="font-size:11px; color:var(--neon-gold);">⚙️ PvP Oda Ayarları</b>
+        <button type="button" class="icon-btn" onclick="openPvPDrawer(false)">✕</button>
+      </div>
+      <div style="padding:10px; display:flex; flex-direction:column; gap:8px; font-size:9.5px;">
+        <div>
+          <label style="color:#94a3b8; font-weight:bold;">KAZANMA HEDEFİ (SPEEDRUN/KLASİK)</label>
+          <select id="cfg-target" class="input-field" style="margin-top:3px; padding:6px; font-size:9px; background:#0f172a;">
+            <option value="100">100 Puan (Hızlı Maç)</option>
+            <option value="250">250 Puan (Normal)</option>
+            <option value="500">500 Puan (Uzun Seri)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="color:#94a3b8; font-weight:bold;">TUR SÜRESİ (KLASİK/RULET)</label>
+          <select id="cfg-duration" class="input-field" style="margin-top:3px; padding:6px; font-size:9px; background:#0f172a;">
+            <option value="30">30 Saniye</option>
+            <option value="45">45 Saniye</option>
+            <option value="60">60 Saniye</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="color:#94a3b8; font-weight:bold;">ODA GİRİŞ ŞİFRESİ (İSTEĞE BAĞLI)</label>
+          <input type="password" id="cfg-room-pwd" class="input-field" style="margin-top:3px; padding:6px; font-size:9px;" placeholder="Şifresiz için boş bırakın">
+        </div>
+
+        <button type="button" class="btn-start" style="background:#16a34a; padding:8px; font-size:10px; margin-top:6px;" onclick="savePvPRoomSettings()">💾 Ayarları Odaya Uygula</button>
       </div>
     </div>
+
   </div>
 
   <script>
     let activeUser = null;
-    let currentPvPMode = 'speedrun';
-    let currentRoomId = "arena_main_room";
-    let isGameOver = false;
-    let mySpeedScore = 0;
+    let currentMode = 'speedrun';
+    let roomId = "pvp_arena_room";
+    let myScore = 0;
+    let isFinished = false;
+    let roundTimer = null;
+    let secondsRemaining = 30;
 
-    // Amiral Battı Değişkenleri (8x8)
+    // Amiral Battı
     const GRID_SIZE = 8;
     let navyBoard = [];
     let navyShips = [];
 
+    // Mayın Tarlası
+    let minesGrid = [];
+    let accumulatedMinesPts = 0;
+
     window.onload = () => {
       activeUser = getActiveUser();
       if (!activeUser) return location.href = "index.html";
-      initPvPSystem();
+      initRoom();
     };
 
-    function switchPvPMode(m) {
-      if (isGameOver) return alert("Maç bittiğinde tekrar başlatabilirsiniz.");
-      currentPvPMode = m;
-      document.querySelectorAll(".mode-btn-tab").forEach(b => b.classList.remove("active"));
-      if (m === 'speedrun') {
-        document.getElementById("tab-speed").classList.add("active");
-        document.getElementById("zone-speedrun").style.display = "flex";
-        document.getElementById("zone-battleship").style.display = "none";
-      } else {
-        document.getElementById("tab-navy").classList.add("active");
-        document.getElementById("zone-speedrun").style.display = "none";
-        document.getElementById("zone-battleship").style.display = "flex";
-      }
-      startFreshRound();
+    function openPvPDrawer(isOpen) {
+      document.getElementById("pvp-drawer").classList.toggle("active", isOpen);
+      document.getElementById("pvp-backdrop").classList.toggle("active", isOpen);
     }
 
-    function initPvPSystem() {
+    function selectPvPMode(m) {
+      if (isFinished) return alert("Maç bittiğinde modu değiştirebilirsiniz.");
+      currentMode = m;
+      document.querySelectorAll(".mode-tab-btn").forEach(b => b.classList.remove("active"));
+      const tab = document.getElementById("tab-" + m);
+      if (tab) tab.classList.add("active");
+      startNewRound();
+    }
+
+    function initRoom() {
       const myKey = String(activeUser.username).toLowerCase();
-      const roomRef = db.ref(`pvp_rooms/${currentRoomId}`);
+      const roomRef = db.ref(`pvp_rooms/${roomId}`);
 
       roomRef.child("players/" + myKey).set({
         name: activeUser.displayName,
@@ -142,141 +224,180 @@
       roomRef.on("value", snap => {
         const room = snap.val() || {};
         const players = room.players || {};
-        const pKeys = Object.keys(players);
+        const keys = Object.keys(players);
 
-        if (pKeys.length > 0) {
-          const p1 = players[pKeys[0]];
+        if (keys.length > 0) {
+          const p1 = players[keys[0]];
           document.getElementById("p1-name").innerText = p1.name;
           document.getElementById("p1-avatar").innerText = p1.avatar || "👤";
           document.getElementById("p1-score").innerText = p1.score || 0;
         }
-        if (pKeys.length > 1) {
-          const p2 = players[pKeys[1]];
+        if (keys.length > 1) {
+          const p2 = players[keys[1]];
           document.getElementById("p2-name").innerText = p2.name;
           document.getElementById("p2-avatar").innerText = p2.avatar || "👤";
           document.getElementById("p2-score").innerText = p2.score || 0;
         }
 
-        // Rematch Sayacı
+        // Rematch Oy Sayacı
         const votes = room.rematch_votes || {};
-        const voterCount = Object.keys(votes).length;
+        const vCount = Object.keys(votes).length;
 
-        if (voterCount === 1) {
+        if (vCount === 1) {
           if (votes[myKey]) {
             document.getElementById("btn-rematch").innerText = "⏳ Rakibin Onayı Bekleniyor...";
             document.getElementById("btn-rematch").disabled = true;
           } else {
-            document.getElementById("btn-rematch").innerText = "🔥 Rakip Tekrar İstiyor! (Bas ve Başla)";
+            document.getElementById("btn-rematch").innerText = "🔥 Rakip Tekrar İstiyor! (Tıkla ve Başla)";
             document.getElementById("btn-rematch").style.background = "#eab308";
           }
-        } else if (voterCount >= 2) {
+        } else if (vCount >= 2) {
           roomRef.child("rematch_votes").remove();
-          startFreshRound();
+          startNewRound();
         }
 
-        if (room.winner && !isGameOver) {
-          endPvPGame(room.winner);
+        if (room.winner && !isFinished) {
+          concludePvP(room.winner);
         }
       });
 
-      startFreshRound();
+      startNewRound();
     }
 
-    function startFreshRound() {
-      isGameOver = false;
-      mySpeedScore = 0;
-      document.getElementById("pvp-game-over-box").style.display = "none";
+    function startNewRound() {
+      isFinished = false;
+      myScore = 0;
+      accumulatedMinesPts = 0;
+      clearInterval(roundTimer);
+
+      document.getElementById("pvp-finish-panel").style.display = "none";
       document.getElementById("btn-rematch").disabled = false;
       document.getElementById("btn-rematch").innerText = "🔄 Tekrar Oyna";
       document.getElementById("btn-rematch").style.background = "#16a34a";
 
       const myKey = String(activeUser.username).toLowerCase();
-      db.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/score`).set(0);
-      db.ref(`pvp_rooms/${currentRoomId}/winner`).remove();
+      db.ref(`pvp_rooms/${roomId}/players/${myKey}/score`).set(0);
+      db.ref(`pvp_rooms/${roomId}/winner`).remove();
 
-      if (currentPvPMode === 'speedrun') {
-        let count = 3;
-        document.getElementById("speed-status").innerText = `Maç Başlıyor: ${count}`;
-        document.getElementById("btn-speed-action").style.display = "none";
+      // Ekran Alanlarını Gizle/Aç
+      document.getElementById("btn-action-main").style.display = "none";
+      document.getElementById("navy-board-wrap").style.display = "none";
+      document.getElementById("mines-board-wrap").style.display = "none";
+      document.getElementById("double-roulette-wrap").style.display = "none";
 
-        const timer = setInterval(() => {
-          count--;
-          if (count > 0) {
-            document.getElementById("speed-status").innerText = `Maç Başlıyor: ${count}`;
-          } else {
-            clearInterval(timer);
-            document.getElementById("speed-status").innerText = "⚡ Hızlı olan kazanır! (Hedef: 100 Puan)";
-            document.getElementById("btn-speed-action").style.display = "block";
-          }
-        }, 1000);
-      } else {
-        setupNavyGame();
+      let countdown = 3;
+      document.getElementById("pvp-status-txt").innerText = `Maç Başlıyor: ${countdown}`;
+
+      const t = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          document.getElementById("pvp-status-txt").innerText = `Maç Başlıyor: ${countdown}`;
+        } else {
+          clearInterval(t);
+          activateCurrentModeEngine();
+        }
+      }, 1000);
+    }
+
+    function activateCurrentModeEngine() {
+      const targetVal = parseInt(document.getElementById("cfg-target").value) || 100;
+      secondsRemaining = parseInt(document.getElementById("cfg-duration").value) || 30;
+
+      if (currentMode === 'speedrun') {
+        document.getElementById("pvp-status-txt").innerText = `⚡ Hedef: ${targetVal} Puan! İlk ulaşan kazanır.`;
+        document.getElementById("btn-action-main").style.display = "block";
+      } else if (currentMode === 'classic') {
+        document.getElementById("pvp-status-txt").innerText = `⚔️ 30 Saniyede En Yüksek Puanı Topla!`;
+        document.getElementById("btn-action-main").style.display = "block";
+        startDurationTimer();
+      } else if (currentMode === 'battleship') {
+        document.getElementById("pvp-status-txt").innerText = `🚢 Düşman Filosunu Yok Et!`;
+        document.getElementById("navy-board-wrap").style.display = "block";
+        setupNavyBoard();
+      } else if (currentMode === 'mines') {
+        document.getElementById("pvp-status-txt").innerText = `💣 Bombaya Basmadan Puanları Topla!`;
+        document.getElementById("mines-board-wrap").style.display = "block";
+        setupMinesBoard();
+      } else if (currentMode === 'double') {
+        document.getElementById("pvp-status-txt").innerText = `🎰 Eşya + Çarpan! En yüksek skoru yap.`;
+        document.getElementById("double-roulette-wrap").style.display = "flex";
       }
     }
 
-    // SPEEDRUN MOTORU
-    function handleSpeedClick() {
-      if (isGameOver) return;
+    function startDurationTimer() {
+      document.getElementById("lbl-timer").innerText = `Süre: ${secondsRemaining}s`;
+      roundTimer = setInterval(() => {
+        secondsRemaining--;
+        document.getElementById("lbl-timer").innerText = `Süre: ${secondsRemaining}s`;
+        if (secondsRemaining <= 0) {
+          clearInterval(roundTimer);
+          determineHighestScoreWinner();
+        }
+      }, 1000);
+    }
+
+    function handleMainAction() {
+      if (isFinished) return;
       SoundFX.play('open');
-      mySpeedScore += Math.floor(Math.random() * 12) + 5;
+      myScore += Math.floor(Math.random() * 12) + 6;
 
       const myKey = String(activeUser.username).toLowerCase();
-      db.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/score`).set(mySpeedScore);
+      db.ref(`pvp_rooms/${roomId}/players/${myKey}/score`).set(myScore);
 
-      if (mySpeedScore >= 100) {
-        db.ref(`pvp_rooms/${currentRoomId}/winner`).set(activeUser.displayName);
+      const targetVal = parseInt(document.getElementById("cfg-target").value) || 100;
+      if (currentMode === 'speedrun' && myScore >= targetVal) {
+        db.ref(`pvp_rooms/${roomId}/winner`).set(activeUser.displayName);
       }
     }
 
-    // AMİRAL BATTI MOTORU (GEMİ BATINCA ÇEVRESİ OTOMATİK AÇILIR)
-    function setupNavyGame() {
-      document.getElementById("navy-status").innerText = "Düşman sularına atış yapın!";
+    // AMİRAL BATTI VE ÇEVRE KARESİ AÇMA
+    function setupNavyBoard() {
       navyBoard = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
       navyShips = [
         { name: "Kruvazör", size: 3, hits: 0, coords: [] },
         { name: "Hücumbot", size: 2, hits: 0, coords: [] }
       ];
 
-      navyShips.forEach(ship => {
+      navyShips.forEach(s => {
         let placed = false;
         while (!placed) {
           const horiz = Math.random() > 0.5;
-          const r = Math.floor(Math.random() * (horiz ? GRID_SIZE : GRID_SIZE - ship.size));
-          const c = Math.floor(Math.random() * (horiz ? GRID_SIZE - ship.size : GRID_SIZE));
+          const r = Math.floor(Math.random() * (horiz ? GRID_SIZE : GRID_SIZE - s.size));
+          const c = Math.floor(Math.random() * (horiz ? GRID_SIZE - s.size : GRID_SIZE));
 
           let overlap = false;
-          let tempCoords = [];
-          for (let i = 0; i < ship.size; i++) {
+          let temp = [];
+          for (let i = 0; i < s.size; i++) {
             const curR = horiz ? r : r + i;
             const curC = horiz ? c + i : c;
             if (navyBoard[curR][curC]) { overlap = true; break; }
-            tempCoords.push({ r: curR, c: curC });
+            temp.push({ r: curR, c: curC });
           }
 
           if (!overlap) {
-            tempCoords.forEach(pos => { navyBoard[pos.r][pos.c] = ship; });
-            ship.coords = tempCoords;
+            temp.forEach(pos => { navyBoard[pos.r][pos.c] = s; });
+            s.coords = temp;
             placed = true;
           }
         }
       });
 
-      const gridBox = document.getElementById("pvp-navy-grid");
-      gridBox.innerHTML = "";
+      const container = document.getElementById("navy-cells-container");
+      container.innerHTML = "";
       for (let r = 0; r < GRID_SIZE; r++) {
         for (let c = 0; c < GRID_SIZE; c++) {
           const cell = document.createElement("div");
           cell.className = "navy-cell";
           cell.dataset.r = r;
           cell.dataset.c = c;
-          cell.onclick = () => handleNavyShot(r, c, cell);
-          gridBox.appendChild(cell);
+          cell.onclick = () => onNavyCellClick(r, c, cell);
+          container.appendChild(cell);
         }
       }
     }
 
-    function handleNavyShot(r, c, cellEl) {
-      if (isGameOver || cellEl.classList.contains("hit") || cellEl.classList.contains("miss")) return;
+    function onNavyCellClick(r, c, cellEl) {
+      if (isFinished || cellEl.classList.contains("hit") || cellEl.classList.contains("miss")) return;
 
       const target = navyBoard[r][c];
       if (target) {
@@ -285,28 +406,22 @@
         cellEl.innerText = "💥";
         target.hits++;
 
-        // Gemi tamamen battığında çevresini otomatik olarak deniz yap
         if (target.hits >= target.size) {
           revealNavySurroundings(target.coords);
-          document.getElementById("navy-status").innerText = `🔥 TEBRİKLER! Düşman ${target.name} gemisi battı!`;
-        } else {
-          document.getElementById("navy-status").innerText = "🎯 İsabet! Gemi vuruldu.";
+          document.getElementById("pvp-status-txt").innerText = `🔥 ${target.name} gemisi tamamen battı!`;
         }
       } else {
         SoundFX.play('click');
         cellEl.classList.add("miss");
         cellEl.innerText = "•";
-        document.getElementById("navy-status").innerText = "💦 Iska! Boş deniz.";
       }
 
-      // Skor Güncelleme
       const totalHits = navyShips.reduce((acc, s) => acc + s.hits, 0);
       const myKey = String(activeUser.username).toLowerCase();
-      db.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/score`).set(totalHits);
+      db.ref(`pvp_rooms/${roomId}/players/${myKey}/score`).set(totalHits);
 
-      const allSunk = navyShips.every(s => s.hits >= s.size);
-      if (allSunk) {
-        db.ref(`pvp_rooms/${currentRoomId}/winner`).set(activeUser.displayName);
+      if (navyShips.every(s => s.hits >= s.size)) {
+        db.ref(`pvp_rooms/${roomId}/winner`).set(activeUser.displayName);
       }
     }
 
@@ -332,18 +447,107 @@
       });
     }
 
-    function endPvPGame(winnerName) {
-      isGameOver = true;
-      SoundFX.play(winnerName === activeUser.displayName ? 'win' : 'boom');
-      document.getElementById("btn-speed-action").style.display = "none";
-      document.getElementById("pvp-winner-txt").innerText = `🏆 Kazanan: ${winnerName}`;
-      document.getElementById("pvp-game-over-box").style.display = "flex";
+    // MAYIN TARLASI MOTORU
+    function setupMinesBoard() {
+      accumulatedMinesPts = 0;
+      minesGrid = [false, false, false, false, true, false, false, false, false].sort(() => Math.random() - 0.5);
+      const box = document.getElementById("mines-cells-container");
+      box.innerHTML = "";
+
+      minesGrid.forEach((hasBomb, idx) => {
+        const card = document.createElement("div");
+        card.className = "mines-pvp-card";
+        card.innerText = "❓";
+        card.onclick = () => onMinesCardClick(idx, card, hasBomb);
+        box.appendChild(card);
+      });
     }
 
-    function requestRematch() {
+    function onMinesCardClick(idx, el, hasBomb) {
+      if (isFinished || el.innerText !== "❓") return;
+      if (hasBomb) {
+        SoundFX.play('boom');
+        el.innerText = "💣";
+        el.style.borderColor = "#ef4444";
+        accumulatedMinesPts = 0;
+        alert("Mayına bastınız! Tüm tur puanınız sıfırlandı.");
+        setupMinesBoard();
+      } else {
+        SoundFX.play('win');
+        el.innerText = "💎";
+        el.style.borderColor = "#10b981";
+        accumulatedMinesPts += 25;
+      }
+    }
+
+    function cashoutMines() {
+      if (accumulatedMinesPts === 0) return alert("Alınacak puanınız yok!");
+      myScore += accumulatedMinesPts;
+      SoundFX.play('win');
+
+      const myKey = String(activeUser.username).toLowerCase();
+      db.ref(`pvp_rooms/${roomId}/players/${myKey}/score`).set(myScore);
+      setupMinesBoard();
+
+      if (myScore >= 100) {
+        db.ref(`pvp_rooms/${roomId}/winner`).set(activeUser.displayName);
+      }
+    }
+
+    // ÇİFT RULET MOTORU
+    function spinPvPDouble() {
+      if (isFinished) return;
+      SoundFX.play('open');
+      const items = [{n:"Bıçak",p:50},{n:"Eldiven",p:40},{n:"Tüfek",p:20},{n:"Tabanca",p:10}];
+      const multipliers = [1, 1.5, 2, 3, 5];
+
+      const it = items[Math.floor(Math.random() * items.length)];
+      const ml = multipliers[Math.floor(Math.random() * multipliers.length)];
+
+      document.getElementById("spin-item").innerText = `📦 ${it.n} (${it.p}P)`;
+      document.getElementById("spin-mult").innerText = `x${ml}`;
+
+      const gained = Math.round(it.p * ml);
+      myScore += gained;
+
+      const myKey = String(activeUser.username).toLowerCase();
+      db.ref(`pvp_rooms/${roomId}/players/${myKey}/score`).set(myScore);
+
+      if (myScore >= 150) {
+        db.ref(`pvp_rooms/${roomId}/winner`).set(activeUser.displayName);
+      }
+    }
+
+    function determineHighestScoreWinner() {
+      db.ref(`pvp_rooms/${roomId}/players`).once("value", snap => {
+        let bestName = "Berabere", highest = -1;
+        snap.forEach(p => {
+          const s = p.val().score || 0;
+          if (s > highest) { highest = s; bestName = p.val().name; }
+        });
+        db.ref(`pvp_rooms/${roomId}/winner`).set(bestName);
+      });
+    }
+
+    function concludePvP(winnerName) {
+      isFinished = true;
+      clearInterval(roundTimer);
+      SoundFX.play(winnerName === activeUser.displayName ? 'win' : 'boom');
+      document.getElementById("btn-action-main").style.display = "none";
+      document.getElementById("pvp-winner-msg").innerText = `🏆 Maç Bitti! Kazanan: ${winnerName}`;
+      document.getElementById("pvp-finish-panel").style.display = "flex";
+    }
+
+    function triggerRematch() {
       SoundFX.play('click');
       const myKey = String(activeUser.username).toLowerCase();
-      db.ref(`pvp_rooms/${currentRoomId}/rematch_votes/${myKey}`).set(true);
+      db.ref(`pvp_rooms/${roomId}/rematch_votes/${myKey}`).set(true);
+    }
+
+    function savePvPRoomSettings() {
+      alert("Oda ayarları kaydedildi ve tura uygulandı!");
+      openPvPDrawer(false);
+      startNewRound();
     }
   </script>
 </body>
