@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Çiftlik Modu - Kutu Açma Pro</title>
+  <title>Kutu Çiftliği Pro - Hay Day Ekosistemi</title>
   <link rel="stylesheet" href="style.css">
   
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -15,434 +15,939 @@
 
     html, body {
       width: 100%; height: 100dvh; min-height: -webkit-fill-available;
-      overflow: hidden; background: #020617; font-family: system-ui, sans-serif; color: #fff;
+      overflow: hidden; background: #022c22; font-family: system-ui, -apple-system, sans-serif; color: #fff;
     }
 
     .farm-shell {
       max-width: 650px; height: 100dvh; margin: 0 auto;
       background: #064e3b; display: flex; flex-direction: column;
-      border-left: 1px solid #047857; border-right: 1px solid #047857; position: relative;
+      position: relative; border-left: 1px solid #047857; border-right: 1px solid #047857;
+      box-shadow: 0 0 35px rgba(0,0,0,0.85);
     }
 
+    /* ÜST PANEL */
     .farm-nav {
       flex-shrink: 0; background: #022c22; border-bottom: 2px solid #047857;
-      padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; z-index: 20;
+      padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; z-index: 30;
     }
-
     .stats-bar {
-      display: flex; gap: 8px; font-size: 11px; font-weight: bold; background: #064e3b;
-      padding: 6px 12px; border-bottom: 1px solid #059669; justify-content: space-around;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; font-size: 10px; font-weight: bold;
+      background: #044434; padding: 6px 10px; border-bottom: 1px solid #059669; text-align: center;
     }
 
+    /* GÖVDE & KAYDIRMA */
     .farm-body {
-      flex: 1; min-height: 0; overflow-y: auto; padding: 10px;
-      display: flex; flex-direction: column; gap: 10px;
+      flex: 1; min-height: 0; overflow-y: auto; padding: 8px;
+      display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch;
     }
     .farm-body::-webkit-scrollbar { width: 4px; }
-    .farm-body::-webkit-scrollbar-thumb { background: #047857; border-radius: 4px; }
+    .farm-body::-webkit-scrollbar-thumb { background: #059669; border-radius: 4px; }
 
-    /* SU TANKI (ANİMASYONLU) */
-    .water-tower {
-      background: #022c22; border: 2px solid #38bdf8; border-radius: 10px;
-      padding: 8px; display: flex; align-items: center; gap: 12px; position: relative;
+    /* SAĞA-SOLA KAYAN TOHUM & ENVANTER MENÜSÜ */
+    .scroll-tray-wrap {
+      display: flex; flex-direction: column; gap: 3px; background: #022c22;
+      padding: 6px; border-radius: 8px; border: 1px solid #047857;
     }
-    .water-gauge {
-      width: 40px; height: 50px; background: #082f49; border: 1px solid #38bdf8;
-      border-radius: 6px; position: relative; overflow: hidden;
+    .scroll-tray {
+      display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: thin;
     }
-    .water-fill {
-      position: absolute; bottom: 0; left: 0; right: 0; background: #0284c7;
-      transition: height 0.4s ease;
-    }
-    .water-wave {
-      position: absolute; top: -4px; left: 0; right: 0; height: 6px;
-      background: #38bdf8; border-radius: 50%; opacity: 0.8;
-      animation: waveMove 1.5s infinite alternate;
-    }
-    @keyframes waveMove { from { transform: scaleX(0.9); } to { transform: scaleX(1.1); } }
+    .scroll-tray::-webkit-scrollbar { height: 4px; }
+    .scroll-tray::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
 
-    /* TARLA PARSELLERİ */
+    .tray-item-card {
+      flex-shrink: 0; width: 68px; height: 74px; background: #064e3b;
+      border: 1px solid #059669; border-radius: 8px; display: flex;
+      flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 10px; position: relative; transition: 0.15s;
+    }
+    .tray-item-card.selected { border-color: #f59e0b; background: #1e3a2f; transform: scale(1.04); }
+    .tray-item-card.locked { opacity: 0.45; filter: grayscale(1); }
+
+    /* TARLA PARSELLERİ & GENİŞLETME */
+    .plots-zone {
+      background: #3f1d0b; border: 2px solid #78350f; border-radius: 10px; padding: 8px;
+    }
     .plots-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
     }
-    .plot-card {
+    .plot-tile {
       background: #78350f; border: 2px solid #b45309; border-radius: 8px;
-      height: 75px; display: flex; flex-direction: column; align-items: center;
-      justify-content: center; position: relative; cursor: pointer; transition: transform 0.1s;
+      height: 72px; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; cursor: pointer; position: relative;
     }
-    .plot-card.wet { background: #451a03; border-color: #38bdf8; }
-    .plot-card:active { transform: scale(0.95); }
+    .plot-tile.wet { background: #451a03; border-color: #38bdf8; box-shadow: inset 0 0 10px #0284c7; }
+    .plot-tile.ready { border-color: #22c55e; animation: pulseReady 1.2s infinite alternate; }
+    @keyframes pulseReady { from { border-color: #22c55e; } to { border-color: #facc15; } }
 
-    /* TİCARET GEMİSİ BÖLÜMÜ */
-    .ship-dock {
-      background: #022c22; border: 2px solid #f59e0b; border-radius: 10px; padding: 10px;
+    /* AĞIL & HAYVANLAR */
+    .barns-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
     }
-    .dock-crates {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px;
+    .barn-card {
+      background: #1e293b; border: 1px solid #475569; border-radius: 8px;
+      padding: 6px; display: flex; align-items: center; justify-content: space-between;
     }
-    .crate-box {
-      background: #0f172a; border: 1px solid #334155; border-radius: 6px;
-      padding: 6px; text-align: center; font-size: 10px; cursor: pointer;
-    }
-    .crate-box.loaded { background: #064e3b; border-color: #10b981; color: #6ee7b7; }
 
-    /* UÇUŞAN EFEKTLER */
-    .flying-crop {
-      position: absolute; font-size: 24px; animation: harvestFly 0.8s ease-out forwards;
-      pointer-events: none; z-index: 50;
+    /* HAY DAY YOL KENARI PAZARI */
+    .market-shelf {
+      display: flex; gap: 8px; overflow-x: auto; padding: 10px 4px;
     }
-    @keyframes harvestFly {
+    .market-slot {
+      flex-shrink: 0; width: 88px; height: 110px; background: #78350f;
+      border: 2px dashed #d97706; border-radius: 8px; display: flex;
+      flex-direction: column; align-items: center; justify-content: center;
+      position: relative; font-size: 10px; cursor: pointer; text-align: center;
+    }
+    .market-slot.sold {
+      background: #1e1b4b; border-color: #ef4444; border-style: solid;
+    }
+    .stamp-sold {
+      position: absolute; background: #ef4444; color: #fff; font-size: 9px;
+      font-weight: 900; padding: 2px 4px; border-radius: 3px; transform: rotate(-15deg);
+      box-shadow: 0 0 6px rgba(0,0,0,0.6);
+    }
+
+    /* SU TANKI & GEMİ DOKU */
+    .water-bar-box {
+      background: #0f172a; border: 1px solid #38bdf8; border-radius: 8px;
+      padding: 6px 10px; display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .btn-action {
+      background: #0284c7; border: none; color: #fff; font-weight: bold;
+      border-radius: 6px; padding: 6px 10px; font-size: 10px; cursor: pointer;
+    }
+    .btn-action:active { transform: scale(0.96); }
+
+    /* UÇAN HASAT ANİMASYONU */
+    .fly-effect {
+      position: absolute; font-size: 26px; pointer-events: none;
+      animation: floatUp 0.8s ease-out forwards; z-index: 100;
+    }
+    @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0) scale(1); }
       100% { opacity: 0; transform: translateY(-40px) scale(1.4); }
     }
 
-    .btn-farm {
-      background: #0284c7; border: none; color: #fff; border-radius: 6px;
-      padding: 6px 12px; font-weight: bold; font-size: 10px; cursor: pointer;
+    /* BİLDİRİM TOAST */
+    #notif-toast {
+      position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+      background: #1e1b4b; border: 1px solid #f59e0b; color: #fff;
+      padding: 6px 14px; border-radius: 20px; font-size: 10px; font-weight: bold;
+      display: none; z-index: 999; box-shadow: 0 0 15px rgba(0,0,0,0.6);
     }
-    .btn-harvest { background: #16a34a; }
   </style>
 </head>
 <body>
+  <div id="notif-toast"></div>
+
   <div class="farm-shell">
     
     <!-- Üst Bar -->
     <div class="farm-nav">
-      <a href="menu.html" style="border: 1px solid #ef4444; color:#ef4444; padding:3px 8px; font-size:10px; text-decoration:none; border-radius:4px;">‹ Ana Menü</a>
-      <div style="font-weight:900; font-size:12.5px; color:#f59e0b;">🌾 Kutu Çiftliği & Liman</div>
-      <button onclick="openAchievements()" style="background:#f59e0b; border:none; color:#000; font-weight:bold; font-size:10px; padding:3px 7px; border-radius:4px; cursor:pointer;">🏆 Başarımlar</button>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button id="btn-back-menu" class="btn-action" style="background:#ef4444;" onclick="handleBackAction()">‹ Menü</button>
+        <div id="ui-farm-title" style="font-size:12px; font-weight:900; color:#f59e0b;">🚜 Çiftliğim</div>
+      </div>
+      <div style="display:flex; gap:5px;">
+        <button class="btn-action" style="background:#8b5cf6;" onclick="openNeighborsModal()">👥 Sıralama</button>
+        <button class="btn-action" style="background:#f59e0b; color:#000;" onclick="openMarketModal()">🏪 Pazar</button>
+      </div>
     </div>
 
-    <!-- Durum Çubuğu -->
+    <!-- İstatistik Şeridi -->
     <div class="stats-bar">
-      <div>💰 Altın: <span id="lbl-gold" style="color:#facc15;">0</span></div>
-      <div>⭐ Seviye: <span id="lbl-lvl" style="color:#38bdf8;">1</span></div>
-      <div>📦 Ambar: <span id="lbl-storage" style="color:#a7f3d0;">0/50</span></div>
+      <div>💰 <span id="lbl-gold">0</span></div>
+      <div>💎 <span id="lbl-gems">0</span></div>
+      <div>⭐ Lv.<span id="lbl-lvl">1</span></div>
+      <div>📦 <span id="lbl-storage">0/60</span></div>
     </div>
 
+    <!-- Ana Çiftlik Alanı -->
     <div class="farm-body">
       
       <!-- 1. HAREKETLİ SU TANKI -->
-      <div class="water-tower">
-        <div class="water-gauge">
-          <div class="water-fill" id="tank-water-fill" style="height: 60%;">
-            <div class="water-wave"></div>
-          </div>
+      <div class="water-bar-box">
+        <div>
+          <div style="font-size:11px; font-weight:bold; color:#38bdf8;">💧 Basınçlı Su Kulesi</div>
+          <div style="font-size:8.5px; color:#94a3b8;">Sulanan tarlalar %50 daha hızlı büyür.</div>
+          <div style="font-size:10px; font-weight:bold; margin-top:2px;">Mevcut Su: <span id="lbl-water" style="color:#38bdf8;">30/60L</span></div>
         </div>
-        <div style="flex:1;">
-          <div style="font-size:11px; font-weight:bold; color:#38bdf8;">💧 Basınçlı Su Tankı</div>
-          <div style="font-size:9px; color:#94a3b8; margin:2px 0;">Tarlaları sulamak ürün süresini yarıya indirir.</div>
-          <div style="font-size:10px;">Su: <b id="lbl-water">30/50 L</b></div>
-        </div>
-        <button class="btn-farm" onclick="pumpWater()">Kuyu Çek 🪣</button>
+        <button class="btn-action" style="background:#0284c7;" onclick="pumpWater()">Kuyu Çek 🪣</button>
       </div>
 
-      <!-- 2. HAY DAY SÜRELİ TİCARET GEMİSİ -->
-      <div class="ship-dock">
+      <!-- 2. SAĞA-SOLA KAYAN TOHUM & EKİN ÇEKMECESİ -->
+      <div class="scroll-tray-wrap">
+        <div style="font-size:8.5px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Ekim Yapılacak Ekinler (Sağa Kaydır)</div>
+        <div class="scroll-tray" id="tray-crops"></div>
+      </div>
+
+      <!-- 3. TARLA PARSELLERİ & GENİŞLETME -->
+      <div class="plots-zone">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <span style="font-size:9.5px; font-weight:bold; color:#fde68a;">TARLALAR (<span id="lbl-plot-count">9</span> Parsel)</span>
+          <button id="btn-expand-land" class="btn-action" style="background:#16a34a; font-size:8.5px;" onclick="expandLand()">➕ Tarla Genişlet (500 Altın)</button>
+        </div>
+        <div class="plots-grid" id="grid-plots"></div>
+      </div>
+
+      <!-- 4. AĞILLAR & ÇİFTLİK HAYVANLARI -->
+      <div class="scroll-tray-wrap">
+        <div style="font-size:8.5px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Ağıllar & Üretim Hayvanları</div>
+        <div class="barns-grid" id="grid-barns"></div>
+      </div>
+
+      <!-- 5. 6 KASALI HAY DAY TİCARET GEMİSİ -->
+      <div style="background:#022c22; border:2px solid #f59e0b; border-radius:10px; padding:8px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <b style="font-size:11px; color:#f59e0b;">🚢 Ticaret Gemisi (Liman)</b>
-            <div style="font-size:8.5px; color:#94a3b8;">Kalkışa Kalan: <span id="lbl-ship-timer" style="color:#f87171;">03:45</span></div>
+            <b style="font-size:10.5px; color:#f59e0b;">🚢 Liman Ticaret Gemisi</b>
+            <div style="font-size:8px; color:#94a3b8;">Kalkış Sayacı: <span id="lbl-ship-timer" style="color:#ef4444;">04:00</span></div>
           </div>
-          <button class="btn-farm" style="background:#eab308; color:#000;" onclick="sendShipEarly()">Gemiyi Gönder</button>
+          <button class="btn-action" style="background:#eab308; color:#000; font-size:8.5px;" onclick="sendShipEarly()">Gemiyi Kaldır</button>
         </div>
-
-        <div class="dock-crates" id="ship-crates-container">
-          <!-- 6 Koli Buraya Çizilir -->
-        </div>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; margin-top:6px;" id="ship-crates-box"></div>
       </div>
 
-      <!-- 3. EKİM / TOHUM ÇUBUĞU -->
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-        <span style="font-size:9px; font-weight:800; color:#a7f3d0; text-transform:uppercase;">Tarlalar (Ekim Yap)</span>
-        <div style="display:flex; gap:4px;">
-          <button class="btn-farm" id="seed-wheat" style="background:#b45309;" onclick="selectSeed('wheat')">🌾 Buğday</button>
-          <button class="btn-farm" id="seed-corn" style="background:#15803d;" onclick="selectSeed('corn')">🌽 Mısır</button>
-          <button class="btn-farm" id="seed-carrot" style="background:#c2410c;" onclick="selectSeed('carrot')">🥕 Havuç</button>
-        </div>
+      <!-- 6. PRESTİJ ALANI -->
+      <div style="background:#1e1b4b; border:1px solid #a855f7; border-radius:8px; padding:8px; text-align:center;">
+        <div style="font-size:10px; font-weight:bold; color:#c084fc;">🌟 Prestij & Rebirth</div>
+        <div style="font-size:8px; color:#cbd5e1; margin:2px 0;">Prestij Puanı: <b id="lbl-prestige-pts">0</b> (+%5 Kalıcı Hasat Hızı)</div>
+        <button class="btn-action" style="background:#7c3aed; font-size:9px;" onclick="doPrestige()">Prestij Yap (Gereksinim: Lv.15)</button>
       </div>
-
-      <!-- TARLA PARSELLERİ -->
-      <div class="plots-grid" id="farm-plots"></div>
 
     </div>
   </div>
 
-  <!-- BAŞARIMLAR PENCERESİ -->
-  <div id="modal-achievements" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:100; padding:15px;">
-    <div style="background:#022c22; border:2px solid #f59e0b; border-radius:12px; padding:15px; width:100%; max-width:340px;">
-      <div style="font-size:13px; font-weight:bold; color:#f59e0b; text-align:center; margin-bottom:10px;">🏆 Hay Day Tarzı Çiftlik Başarımları</div>
+  <!-- HAY DAY YOL KENARI PAZARI MODALI -->
+  <div id="modal-market" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:200; padding:15px;">
+    <div style="background:#451a03; border:2px solid #d97706; border-radius:12px; padding:12px; width:100%; max-width:380px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #78350f; padding-bottom:6px;">
+        <b style="font-size:12px; color:#facc15;" id="lbl-market-title">🏪 Yol Kenarı Pazarı</b>
+        <button class="btn-action" style="background:#ef4444; padding:2px 6px;" onclick="document.getElementById('modal-market').style.display='none'">X</button>
+      </div>
+      <div style="font-size:8.5px; color:#fde68a; margin-top:4px;">Sağa kaydırarak tezgâhları incele. Boş slota basıp ürün sat!</div>
       
-      <div style="display:flex; flex-direction:column; gap:8px; font-size:10px;">
-        <div style="background:#064e3b; padding:8px; border-radius:6px; border:1px solid #047857;">
-          <b>🚜 Bereketli Topraklar I</b>
-          <div>20 Adet Hasat Yap (<span id="ach-harvest-count">0</span>/20)</div>
-          <div style="color:#facc15; margin-top:2px;">Ödül: +50 Altın</div>
-        </div>
-        <div style="background:#064e3b; padding:8px; border-radius:6px; border:1px solid #047857;">
-          <b>🚢 Usta Tüccar I</b>
-          <div>6 Kasalı 1 Gemi Tamamla (<span id="ach-ship-count">0</span>/1)</div>
-          <div style="color:#facc15; margin-top:2px;">Ödül: +100 Altın</div>
+      <div class="market-shelf" id="shelf-market"></div>
+
+      <!-- Ürün Satış Paneli -->
+      <div id="box-create-sale" style="display:none; background:#291305; padding:8px; border-radius:6px; margin-top:8px; border:1px solid #78350f;">
+        <div style="font-size:9.5px; font-weight:bold; color:#f59e0b;">Tezgâha Ürün Ekle</div>
+        <div style="display:flex; gap:6px; margin-top:5px;">
+          <select id="sel-sale-item" class="btn-action" style="background:#0f172a; flex:1;"></select>
+          <input type="number" id="in-sale-price" placeholder="Fiyat (Altın)" style="width:75px; background:#0f172a; color:#fff; border:1px solid #334155; border-radius:4px; font-size:10px; padding:4px;">
+          <button class="btn-action" style="background:#16a34a;" onclick="confirmAddSale()">Sat</button>
         </div>
       </div>
+    </div>
+  </div>
 
-      <button class="btn-farm" style="background:#ef4444; width:100%; margin-top:12px;" onclick="document.getElementById('modal-achievements').style.display='none'">Kapat</button>
+  <!-- SIRALAMA & KOMŞU ZİYARETİ MODALI -->
+  <div id="modal-neighbors" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:200; padding:15px;">
+    <div style="background:#022c22; border:2px solid #059669; border-radius:12px; padding:12px; width:100%; max-width:340px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b style="font-size:12px; color:#f59e0b;">👥 Çiftçi Sıralaması & Ziyaret</b>
+        <button class="btn-action" style="background:#ef4444; padding:2px 6px;" onclick="document.getElementById('modal-neighbors').style.display='none'">X</button>
+      </div>
+      <div id="neighbors-list" style="display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:240px; overflow-y:auto;"></div>
     </div>
   </div>
 
   <script>
+    let rtdb = null;
     let activeUser = null;
-    let farmData = {
-      gold: 100,
+    let visitingTarget = null; // null ise kendi çiftliğimiz
+    let selectedCropKey = 'wheat';
+    let targetSlotIndex = null;
+
+    // BOT ALICI LİSTESİ (Çevrimdışı ya da rastgele alım simülasyonu için)
+    const BOT_BUYERS = ["Furkan", "Hüseyin", "Ömer", "İmam", "Ahmet Efe", "Miyasan", "Köy Muhtarı"];
+
+    // KAPSAMLI EKİN LİSTESİ (Seviyeli)
+    const CROPS_DEF = {
+      wheat:      { name: "Buğday",      icon: "🌾", level: 1,  duration: 8,   minP: 2,  maxP: 8,   xp: 3 },
+      corn:       { name: "Mısır",       icon: "🌽", level: 2,  duration: 18,  minP: 5,  maxP: 18,  xp: 7 },
+      carrot:     { name: "Havuç",       icon: "🥕", level: 3,  duration: 35,  minP: 10, maxP: 30,  xp: 12 },
+      soy:        { name: "Soya",        icon: "🌱", level: 5,  duration: 60,  minP: 18, maxP: 55,  xp: 20 },
+      sugarcane:  { name: "Şeker Kamışı",icon: "🎋", level: 7,  duration: 90,  minP: 25, maxP: 80,  xp: 30 },
+      strawberry: { name: "Çilek",       icon: "🍓", level: 10, duration: 150, minP: 40, maxP: 130, xp: 50 },
+      pumpkin:    { name: "Balkabağı",   icon: "🎃", level: 15, duration: 240, minP: 70, maxP: 220, xp: 85 }
+    };
+
+    // AĞIL HAYVANLARI LİSTESİ
+    const BARNS_DEF = {
+      chicken: { name: "Kümes (Tavuk)", icon: "🐔", product: "Yumurta", prodIcon: "🥚", dur: 20, feed: "wheat" },
+      cow:     { name: "Ağıl (İnek)",   icon: "🐄", product: "Süt",     prodIcon: "🥛", dur: 45, feed: "corn" },
+      sheep:   { name: "Koyun Yatağı",  icon: "🐑", product: "Yün",     prodIcon: "🧶", dur: 90, feed: "soy" },
+      bee:     { name: "Arılık",        icon: "🐝", product: "Bal",     prodIcon: "🍯", dur: 140,feed: "strawberry" }
+    };
+
+    // ÇİFTLİK ANA VERİ MODELİ
+    let farmState = {
+      gold: 250,
+      gems: 10,
       level: 1,
-      water: 30,
-      maxWater: 50,
-      inventory: { wheat: 5, corn: 2, carrot: 0 },
-      harvestCount: 0,
-      shipCount: 0,
-      plots: [
-        { state: 'empty', crop: null, readyAt: 0, wet: false },
-        { state: 'empty', crop: null, readyAt: 0, wet: false },
-        { state: 'empty', crop: null, readyAt: 0, wet: false },
-        { state: 'empty', crop: null, readyAt: 0, wet: false },
-        { state: 'empty', crop: null, readyAt: 0, wet: false },
-        { state: 'empty', crop: null, readyAt: 0, wet: false }
-      ],
+      xp: 0,
+      prestige: 0,
+      water: 40,
+      maxWater: 60,
+      inventory: { wheat: 10, corn: 5 },
+      plots: Array(9).fill(null).map(() => ({ state: 'empty', crop: null, readyAt: 0, wet: false })),
+      barns: {
+        chicken: { count: 2, state: 'idle', readyAt: 0 },
+        cow:     { count: 1, state: 'idle', readyAt: 0 },
+        sheep:   { count: 0, state: 'idle', readyAt: 0 },
+        bee:     { count: 0, state: 'idle', readyAt: 0 }
+      },
+      market: Array(6).fill(null).map(() => ({ item: null, qty: 0, price: 0, status: 'empty', buyer: null })),
       ship: {
         timeLeft: 240,
         crates: [
-          { crop: 'wheat', amount: 3, done: false },
-          { crop: 'wheat', amount: 3, done: false },
-          { crop: 'corn', amount: 2, done: false },
-          { crop: 'corn', amount: 2, done: false },
-          { crop: 'carrot', amount: 1, done: false },
-          { crop: 'wheat', amount: 4, done: false }
+          { crop: 'wheat', qty: 5, done: false },
+          { crop: 'wheat', qty: 5, done: false },
+          { crop: 'corn', qty: 3, done: false },
+          { crop: 'corn', qty: 3, done: false },
+          { crop: 'carrot', qty: 2, done: false },
+          { crop: 'wheat', qty: 6, done: false }
         ]
-      }
+      },
+      helpTokens: 3, // 1 saatte max 3 yardım
+      lastHelpReset: Date.now()
     };
 
-    let selectedCrop = 'wheat';
-    const CROP_INFO = {
-      wheat: { name: 'Buğday', icon: '🌾', duration: 10 },
-      corn: { name: 'Mısır', icon: '🌽', duration: 20 },
-      carrot: { name: 'Havuç', icon: '🥕', duration: 35 }
-    };
+    function sanitizeUserKey(username) {
+      if (!username) return "anonim_" + Math.floor(Math.random() * 1000);
+      return String(username).toLowerCase().replace(/[.#$\[\]\/ ]/g, "_");
+    }
+
+    function initDatabase() {
+      if (window.db) return window.db;
+      if (window.database) return window.database;
+      if (typeof firebase !== "undefined" && firebase.apps.length > 0) return firebase.database();
+      return null;
+    }
 
     window.addEventListener("DOMContentLoaded", () => {
-      loadFarm();
-      renderUI();
+      rtdb = initDatabase();
+      if (typeof getActiveUser === "function") activeUser = getActiveUser();
+      if (!activeUser) activeUser = JSON.parse(localStorage.getItem("active_user") || localStorage.getItem("currentUser") || "null");
+
+      if (!activeUser) {
+        activeUser = { username: "mecaga", displayName: "Mecaga" };
+      }
+
+      loadFarmData();
+      listenLiveNotifications();
+      renderAll();
       setInterval(farmLoop, 1000);
+      setInterval(checkRandomBotMarketPurchase, 15000); // 15 saniyede bir bot pazarı denetler
     });
 
-    function selectSeed(s) {
-      selectedCrop = s;
-      document.querySelectorAll("[id^='seed-']").forEach(b => b.style.opacity = '0.6');
-      document.getElementById('seed-' + s).style.opacity = '1';
+    // VERİ SENKRONİZASYONU
+    function saveFarmData() {
+      if (visitingTarget) return; // Ziyaretteyken başkasının verisini kendi yerelimize yazmayız
+      localStorage.setItem("kutu_farm_save", JSON.stringify(farmState));
+      if (rtdb && activeUser) {
+        const myKey = sanitizeUserKey(activeUser.username);
+        rtdb.ref("farm_users/" + myKey).set({
+          profile: { name: activeUser.displayName || activeUser.username, level: farmState.level, gold: farmState.gold },
+          farm: farmState,
+          lastActive: Date.now()
+        });
+      }
     }
 
-    function renderUI() {
-      document.getElementById("lbl-gold").innerText = farmData.gold;
-      document.getElementById("lbl-lvl").innerText = farmData.level;
+    function loadFarmData() {
+      const local = localStorage.getItem("kutu_farm_save");
+      if (local) {
+        try { Object.assign(farmState, JSON.parse(local)); } catch(e){}
+      }
+      if (rtdb && activeUser) {
+        const myKey = sanitizeUserKey(activeUser.username);
+        rtdb.ref("farm_users/" + myKey + "/farm").once("value", snap => {
+          if (snap.exists()) {
+            farmState = Object.assign(farmState, snap.val());
+            renderAll();
+          }
+        });
+      }
+    }
+
+    // ARAYÜZ ÇİZDİRME MERKEZİ
+    function renderAll() {
+      document.getElementById("lbl-gold").innerText = farmState.gold;
+      document.getElementById("lbl-gems").innerText = farmState.gems;
+      document.getElementById("lbl-lvl").innerText = farmState.level;
       
-      const totalInv = Object.values(farmData.inventory).reduce((a, b) => a + b, 0);
-      document.getElementById("lbl-storage").innerText = `${totalInv}/50`;
+      const invCount = Object.values(farmState.inventory || {}).reduce((a, b) => a + b, 0);
+      document.getElementById("lbl-storage").innerText = `${invCount}/60`;
 
-      // Su Tankı
-      const pct = (farmData.water / farmData.maxWater) * 100;
-      document.getElementById("tank-water-fill").style.height = pct + "%";
-      document.getElementById("lbl-water").innerText = `${farmData.water}/${farmData.maxWater} L`;
+      document.getElementById("lbl-water").innerText = `${farmState.water}/${farmState.maxWater}L`;
+      document.getElementById("lbl-plot-count").innerText = farmState.plots.length;
+      document.getElementById("lbl-prestige-pts").innerText = farmState.prestige;
 
-      // Tarlalar
-      const plotsBox = document.getElementById("farm-plots");
-      plotsBox.innerHTML = "";
-      farmData.plots.forEach((p, idx) => {
-        const d = document.createElement("div");
-        d.className = "plot-card" + (p.wet ? " wet" : "");
-        
+      renderCropsTray();
+      renderPlots();
+      renderBarns();
+      renderShip();
+    }
+
+    // SAĞA-SOLA KAYAN TOHUM MENÜSÜ
+    function renderCropsTray() {
+      const tray = document.getElementById("tray-crops");
+      tray.innerHTML = "";
+      Object.keys(CROPS_DEF).forEach(k => {
+        const c = CROPS_DEF[k];
+        const locked = farmState.level < c.level;
+        const count = farmState.inventory[k] || 0;
+
+        const card = document.createElement("div");
+        card.className = "tray-item-card" + (selectedCropKey === k ? " selected" : "") + (locked ? " locked" : "");
+        card.innerHTML = `
+          <div style="font-size:18px;">${c.icon}</div>
+          <div style="font-size:8.5px; font-weight:bold;">${c.name}</div>
+          <div style="font-size:7.5px; color:${count > 0 ? '#38bdf8' : '#ef4444'};">x${count}</div>
+          ${locked ? `<span style="font-size:7px; color:#f87171;">Lv.${c.level}</span>` : ''}
+        `;
+        if (!locked) {
+          card.onclick = () => {
+            selectedCropKey = k;
+            renderCropsTray();
+          };
+        }
+        tray.appendChild(card);
+      });
+    }
+
+    // TARLA PARSELLERİ
+    function renderPlots() {
+      const grid = document.getElementById("grid-plots");
+      grid.innerHTML = "";
+      const now = Date.now();
+
+      farmState.plots.forEach((p, idx) => {
+        const tile = document.createElement("div");
+        tile.className = "plot-tile" + (p.wet ? " wet" : "");
+
         if (p.state === 'empty') {
-          d.innerHTML = `<span style="font-size:10px; color:#d97706;">Boş Tarla</span><span style="font-size:8px; color:#94a3b8;">Ekmek için dokun</span>`;
-          d.onclick = (e) => plantPlot(idx, e);
+          tile.innerHTML = `<span style="font-size:9px; color:#fde68a;">Boş</span><span style="font-size:7.5px; color:#cbd5e1;">Ekim Yap</span>`;
+          tile.onclick = (e) => onPlotClick(idx, e);
         } else if (p.state === 'growing') {
-          const now = Date.now();
-          const left = Math.max(0, Math.ceil((p.readyAt - now) / 1000));
-          d.innerHTML = `<span style="font-size:16px;">🌱</span><span style="font-size:8.5px;">${left}s</span>`;
-          if (!p.wet) {
-            d.innerHTML += `<button class="btn-farm" style="font-size:7px; padding:2px 4px; margin-top:2px;" onclick="waterPlot(${idx}, event)">Sula 💧</button>`;
+          const leftSec = Math.max(0, Math.ceil((p.readyAt - now) / 1000));
+          tile.innerHTML = `
+            <span style="font-size:16px;">🌱</span>
+            <span style="font-size:8px;">${leftSec}s</span>
+            ${!p.wet ? `<button class="btn-action" style="font-size:7px; padding:2px 4px; margin-top:2px;" onclick="waterPlot(${idx}, event)">Sula 💧</button>` : ''}
+          `;
+          if (visitingTarget) {
+            tile.onclick = () => boostFriendPlot(idx);
           }
         } else if (p.state === 'ready') {
-          d.innerHTML = `<span style="font-size:22px;">${CROP_INFO[p.crop].icon}</span><span style="font-size:8px; color:#a7f3d0; font-weight:bold;">HASAT ET</span>`;
-          d.onclick = (e) => harvestPlot(idx, e);
+          tile.className += " ready";
+          const crop = CROPS_DEF[p.crop];
+          tile.innerHTML = `
+            <span style="font-size:20px;">${crop.icon}</span>
+            <span style="font-size:8px; font-weight:bold; color:#22c55e;">TOPLA</span>
+          `;
+          tile.onclick = (e) => onPlotClick(idx, e);
         }
-        plotsBox.appendChild(d);
-      });
-
-      // Gemi Kasaları (6 Adet)
-      const shipBox = document.getElementById("ship-crates-container");
-      shipBox.innerHTML = "";
-      farmData.ship.crates.forEach((c, idx) => {
-        const cr = document.createElement("div");
-        cr.className = "crate-box" + (c.done ? " loaded" : "");
-        cr.innerHTML = `
-          <div>${CROP_INFO[c.crop].icon} x${c.amount}</div>
-          <div style="font-size:7.5px; margin-top:2px;">${c.done ? '✓ YÜKLENDİ' : 'Yükle (+15 Altın)'}</div>
-        `;
-        if (!c.done) cr.onclick = () => fillShipCrate(idx);
-        shipBox.appendChild(cr);
+        grid.appendChild(tile);
       });
     }
 
-    function plantPlot(idx, e) {
-      const now = Date.now();
-      const dur = CROP_INFO[selectedCrop].duration * 1000;
-      farmData.plots[idx] = {
-        state: 'growing',
-        crop: selectedCrop,
-        readyAt: now + dur,
-        wet: false
-      };
-      saveFarm();
-      renderUI();
+    function onPlotClick(idx, e) {
+      if (visitingTarget) return;
+      const p = farmState.plots[idx];
+
+      if (p.state === 'empty') {
+        const c = CROPS_DEF[selectedCropKey];
+        const dur = (c.duration / (1 + farmState.prestige * 0.05)) * 1000;
+        farmState.plots[idx] = {
+          state: 'growing',
+          crop: selectedCropKey,
+          readyAt: Date.now() + dur,
+          wet: false
+        };
+        saveFarmData();
+        renderPlots();
+      } else if (p.state === 'ready') {
+        const cropKey = p.crop;
+        const c = CROPS_DEF[cropKey];
+
+        // Hasat
+        farmState.inventory[cropKey] = (farmState.inventory[cropKey] || 0) + 2;
+        addXp(c.xp);
+        farmState.plots[idx] = { state: 'empty', crop: null, readyAt: 0, wet: false };
+
+        flyAnimation(c.icon, e.clientX, e.clientY);
+        saveFarmData();
+        renderAll();
+      }
     }
 
     function waterPlot(idx, e) {
       e.stopPropagation();
-      if (farmData.water < 5) return alert("Su tankında yeterli su yok! Kuyudan su çek.");
-      farmData.water -= 5;
-      
-      // Sulama süreyi yarıya indirir
-      const p = farmData.plots[idx];
-      const now = Date.now();
-      const rem = p.readyAt - now;
-      p.readyAt = now + Math.floor(rem / 2);
+      if (farmState.water < 5) return alert("Su kulesinde yeterli su yok! Kuyu çek.");
+      farmState.water -= 5;
+      const p = farmState.plots[idx];
+      const rem = p.readyAt - Date.now();
+      p.readyAt = Date.now() + Math.floor(rem / 2); // %50 Hızlandırma
       p.wet = true;
-
-      saveFarm();
-      renderUI();
+      saveFarmData();
+      renderAll();
     }
 
-    function harvestPlot(idx, e) {
-      const p = farmData.plots[idx];
-      const crop = p.crop;
-      
-      // Ambar Kontrolü
-      const totalInv = Object.values(farmData.inventory).reduce((a, b) => a + b, 0);
-      if (totalInv >= 50) return alert("Ambar tamamen dolu! Ürünleri gemiye yükle.");
-
-      farmData.inventory[crop] = (farmData.inventory[crop] || 0) + 2;
-      farmData.harvestCount++;
-      farmData.plots[idx] = { state: 'empty', crop: null, readyAt: 0, wet: false };
-
-      // Uçan Ürün Animasyonu
-      createFlyingEffect(CROP_INFO[crop].icon, e.clientX, e.clientY);
-
-      saveFarm();
-      renderUI();
-    }
-
-    function fillShipCrate(crateIdx) {
-      const crate = farmData.ship.crates[crateIdx];
-      if ((farmData.inventory[crate.crop] || 0) < crate.amount) {
-        return alert(`Yetersiz ${CROP_INFO[crate.crop].name}! Önce tarlada üretmelisin.`);
+    // TARLA GENİŞLETME (GRID EXPANSION)
+    function expandLand() {
+      if (visitingTarget) return;
+      const cost = farmState.plots.length * 75;
+      if (farmState.gold < cost) return alert(`Yetersiz Altın! Genişletme ücreti: ${cost} Altın.`);
+      farmState.gold -= cost;
+      // 3 yeni tarla parseli ekle
+      for (let i = 0; i < 3; i++) {
+        farmState.plots.push({ state: 'empty', crop: null, readyAt: 0, wet: false });
       }
+      saveFarmData();
+      renderAll();
+    }
 
-      farmData.inventory[crate.crop] -= crate.amount;
+    // AĞIL VE HAYVANLARIN YÖNETİMİ
+    function renderBarns() {
+      const box = document.getElementById("grid-barns");
+      box.innerHTML = "";
+      const now = Date.now();
+
+      Object.keys(BARNS_DEF).forEach(k => {
+        const b = BARNS_DEF[k];
+        const data = farmState.barns[k] || { count: 0, state: 'idle', readyAt: 0 };
+        const card = document.createElement("div");
+        card.className = "barn-card";
+
+        let statusText = "Yem Bekliyor";
+        if (data.count === 0) statusText = "Kilitli (Satın Al)";
+        else if (data.state === 'producing') {
+          const s = Math.max(0, Math.ceil((data.readyAt - now)/1000));
+          statusText = `Üretiyor: ${s}s`;
+        } else if (data.state === 'ready') {
+          statusText = "Topla!";
+        }
+
+        card.innerHTML = `
+          <div>
+            <b style="font-size:9.5px; color:#facc15;">${b.icon} ${b.name}</b>
+            <div style="font-size:7.5px; color:#94a3b8;">Ürün: ${b.prodIcon} ${b.product} (Adet: ${data.count})</div>
+            <div style="font-size:8px; color:#38bdf8; font-weight:bold;">${statusText}</div>
+          </div>
+          <button class="btn-action" style="font-size:8px; padding:3px 6px;" onclick="interactBarn('${k}')">
+            ${data.count === 0 ? 'Satın Al (200A)' : (data.state === 'ready' ? 'Topla' : 'Yemle')}
+          </button>
+        `;
+        box.appendChild(card);
+      });
+    }
+
+    function interactBarn(k) {
+      if (visitingTarget) return;
+      const b = BARNS_DEF[k];
+      const data = farmState.barns[k];
+
+      if (data.count === 0) {
+        if (farmState.gold < 200) return alert("Yetersiz Altın!");
+        farmState.gold -= 200;
+        data.count = 1;
+      } else if (data.state === 'idle') {
+        if ((farmState.inventory[b.feed] || 0) < 1) return alert(`Yem yetersiz! Gerekli: 1x ${CROPS_DEF[b.feed].name}`);
+        farmState.inventory[b.feed]--;
+        data.state = 'producing';
+        data.readyAt = Date.now() + (b.dur * 1000);
+      } else if (data.state === 'ready') {
+        farmState.inventory[b.product] = (farmState.inventory[b.product] || 0) + (data.count * 2);
+        data.state = 'idle';
+        addXp(15);
+      }
+      saveFarmData();
+      renderAll();
+    }
+
+    // HAY DAY YOL KENARI PAZARI
+    function openMarketModal() {
+      const shelf = document.getElementById("shelf-market");
+      shelf.innerHTML = "";
+      const isOwner = !visitingTarget;
+      document.getElementById("lbl-market-title").innerText = isOwner ? "🏪 Pazarı Yönet (Senin Tezgâhın)" : `🏪 ${visitingTarget.name} Pazarı`;
+
+      const targetMarket = isOwner ? farmState.market : (visitingTarget.farm.market || []);
+
+      targetMarket.forEach((slot, idx) => {
+        const div = document.createElement("div");
+        div.className = "market-slot" + (slot.status === 'sold' ? " sold" : "");
+
+        if (slot.status === 'empty') {
+          div.innerHTML = `<span style="font-size:16px;">➕</span><span style="font-size:8px;">Boş Tezgâh</span>`;
+          if (isOwner) div.onclick = () => openSaleCreator(idx);
+        } else if (slot.status === 'on_sale') {
+          const itemDef = CROPS_DEF[slot.item] || { icon: "📦", name: slot.item };
+          div.innerHTML = `
+            <div style="font-size:22px;">${itemDef.icon}</div>
+            <div style="font-size:8.5px; font-weight:bold;">${slot.qty}x ${itemDef.name}</div>
+            <div style="font-size:9.5px; color:#facc15; font-weight:bold;">${slot.price} Altın</div>
+            <div style="font-size:7px; color:#94a3b8; margin-top:2px;">${isOwner ? '(Geri Almak İçin Bas)' : '(Satın Al)'}</div>
+          `;
+          if (isOwner) {
+            div.onclick = () => cancelSale(idx);
+          } else {
+            div.onclick = () => buyMarketItem(idx, slot);
+          }
+        } else if (slot.status === 'sold') {
+          div.innerHTML = `
+            <div class="stamp-sold">SATILDI</div>
+            <div style="font-size:20px;">💰</div>
+            <div style="font-size:9.5px; font-weight:bold; color:#22c55e;">+${slot.price} Altın</div>
+            <div style="font-size:7.5px; color:#fde68a;">Alan: ${slot.buyer || 'Bilinmiyor'}</div>
+          `;
+          if (isOwner) div.onclick = () => collectSoldGold(idx);
+        }
+        shelf.appendChild(div);
+      });
+
+      document.getElementById("modal-market").style.display = "flex";
+    }
+
+    function openSaleCreator(idx) {
+      targetSlotIndex = idx;
+      const sel = document.getElementById("sel-sale-item");
+      sel.innerHTML = "";
+      Object.keys(farmState.inventory).forEach(k => {
+        if (farmState.inventory[k] > 0) {
+          const opt = document.createElement("option");
+          opt.value = k;
+          opt.innerText = `${k} (Stok: ${farmState.inventory[k]})`;
+          sel.appendChild(opt);
+        }
+      });
+      document.getElementById("box-create-sale").style.display = sel.children.length > 0 ? "block" : "none";
+    }
+
+    function confirmAddSale() {
+      const item = document.getElementById("sel-sale-item").value;
+      const price = parseInt(document.getElementById("in-sale-price").value);
+      if (!item || isNaN(price) || price <= 0) return alert("Geçerli bir fiyat belirle!");
+
+      farmState.inventory[item]--;
+      farmState.market[targetSlotIndex] = {
+        item: item,
+        qty: 1,
+        price: price,
+        status: 'on_sale',
+        buyer: null
+      };
+
+      document.getElementById("box-create-sale").style.display = "none";
+      saveFarmData();
+      openMarketModal();
+      renderAll();
+    }
+
+    function cancelSale(idx) {
+      if (confirm("Ürünü tezgâhtan geri ambarına almak istiyor musun?")) {
+        const slot = farmState.market[idx];
+        farmState.inventory[slot.item] = (farmState.inventory[slot.item] || 0) + slot.qty;
+        farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty', buyer: null };
+        saveFarmData();
+        openMarketModal();
+        renderAll();
+      }
+    }
+
+    function buyMarketItem(idx, slot) {
+      if (farmState.gold < slot.price) return alert("Yetersiz Altın!");
+      farmState.gold -= slot.price;
+      farmState.inventory[slot.item] = (farmState.inventory[slot.item] || 0) + slot.qty;
+
+      // Karşı tarafın Firebase'ine SATILDI olarak işaretle
+      const targetUserKey = sanitizeUserKey(visitingTarget.key);
+      rtdb.ref(`farm_users/${targetUserKey}/farm/market/${idx}`).update({
+        status: 'sold',
+        buyer: activeUser.displayName || activeUser.username
+      });
+
+      alert("Ürün başarıyla satın alındı!");
+      saveFarmData();
+      document.getElementById("modal-market").style.display = "none";
+      renderAll();
+    }
+
+    function collectSoldGold(idx) {
+      const slot = farmState.market[idx];
+      farmState.gold += slot.price;
+      farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty', buyer: null };
+      saveFarmData();
+      openMarketModal();
+      renderAll();
+    }
+
+    // RASTGELE BOT ALIŞVERİŞ SİMÜLASYONU (Pazarda ürün beklemesin)
+    function checkRandomBotMarketPurchase() {
+      if (visitingTarget) return;
+      let changed = false;
+      farmState.market.forEach(slot => {
+        if (slot.status === 'on_sale' && Math.random() < 0.4) {
+          slot.status = 'sold';
+          slot.buyer = BOT_BUYERS[Math.floor(Math.random() * BOT_BUYERS.length)];
+          changed = true;
+        }
+      });
+      if (changed) {
+        saveFarmData();
+        showNotification("🏪 Pazarındaki ürünlerden biri satın alındı!");
+      }
+    }
+
+    // SIRALAMA, KOMŞU ZİYARETİ VE YARDIM ETME
+    function openNeighborsModal() {
+      if (!rtdb) return alert("Veritabanı bağlı değil!");
+      const list = document.getElementById("neighbors-list");
+      list.innerHTML = "<div style='font-size:10px; text-align:center;'>Çiftçiler aranıyor...</div>";
+
+      rtdb.ref("farm_users").limitToLast(10).once("value", snap => {
+        list.innerHTML = "";
+        const myKey = sanitizeUserKey(activeUser.username);
+
+        snap.forEach(c => {
+          const uKey = c.key;
+          const uData = c.val();
+          if (uKey === myKey) return;
+
+          const row = document.createElement("div");
+          row.style.background = "#064e3b";
+          row.style.padding = "6px 10px";
+          row.style.borderRadius = "6px";
+          row.style.display = "flex";
+          row.style.justifyContent = "space-between";
+          row.style.alignItems = "center";
+
+          row.innerHTML = `
+            <div>
+              <b style="font-size:10px; color:#38bdf8;">${uData.profile.name || uKey}</b>
+              <div style="font-size:8px; color:#facc15;">Lv.${uData.profile.level || 1} • ${uData.profile.gold || 0} Altın</div>
+            </div>
+            <button class="btn-action" style="background:#0284c7; font-size:8px;" onclick="visitNeighbor('${uKey}')">Ziyaret Et 🚀</button>
+          `;
+          list.appendChild(row);
+        });
+      });
+
+      document.getElementById("modal-neighbors").style.display = "flex";
+    }
+
+    function visitNeighbor(targetKey) {
+      rtdb.ref("farm_users/" + targetKey).once("value", snap => {
+        if (!snap.exists()) return alert("Çiftlik bulunamadı!");
+        const data = snap.val();
+        visitingTarget = { key: targetKey, name: data.profile.name || targetKey, farm: data.farm };
+
+        document.getElementById("modal-neighbors").style.display = "none";
+        document.getElementById("ui-farm-title").innerText = `🚜 ${visitingTarget.name} Çiftliği`;
+        document.getElementById("btn-back-menu").innerText = "‹ Çiftliğime Dön";
+        document.getElementById("btn-expand-land").style.display = "none";
+
+        // Ziyaret edilen çiftliğin verisini ekrana bas
+        farmState.plots = visitingTarget.farm.plots || [];
+        renderPlots();
+      });
+    }
+
+    function boostFriendPlot(idx) {
+      if (farmState.helpTokens <= 0) return alert("1 saat içindeki tüm yardım haklarını (3/3) kullandın!");
+      farmState.helpTokens--;
+
+      // Karşı tarafın tarlasını %30 hızlandır
+      const targetUserKey = sanitizeUserKey(visitingTarget.key);
+      const plot = farmState.plots[idx];
+      const rem = Math.max(0, plot.readyAt - Date.now());
+      plot.readyAt = Date.now() + Math.floor(rem * 0.7);
+
+      rtdb.ref(`farm_users/${targetUserKey}/farm/plots/${idx}`).update({ readyAt: plot.readyAt });
+
+      // Karşı tarafa bildirim gönder
+      rtdb.ref(`farm_notifications/${targetUserKey}`).push({
+        msg: `${activeUser.displayName || activeUser.username} tarlana yardım ederek ekinini hızlandırdı! 💧`,
+        time: Date.now()
+      });
+
+      addXp(20);
+      alert("Arkadaşının tarlasına yardım ettin! +20 XP kazandın.");
+      renderPlots();
+    }
+
+    function handleBackAction() {
+      if (visitingTarget) {
+        visitingTarget = null;
+        document.getElementById("ui-farm-title").innerText = "🚜 Çiftliğim";
+        document.getElementById("btn-back-menu").innerText = "‹ Menü";
+        document.getElementById("btn-expand-land").style.display = "block";
+        loadFarmData();
+      } else {
+        location.href = "menu.html";
+      }
+    }
+
+    // BİLDİRİM VE DİĞER FONKSİYONLAR
+    function listenLiveNotifications() {
+      if (!rtdb || !activeUser) return;
+      const myKey = sanitizeUserKey(activeUser.username);
+      rtdb.ref(`farm_notifications/${myKey}`).limitToLast(1).on("child_added", snap => {
+        const val = snap.val();
+        if (val && Date.now() - val.time < 10000) {
+          showNotification(val.msg);
+        }
+      });
+    }
+
+    function showNotification(msg) {
+      const t = document.getElementById("notif-toast");
+      t.innerText = msg;
+      t.style.display = "block";
+      setTimeout(() => t.style.display = "none", 4000);
+    }
+
+    function pumpWater() {
+      if (farmState.water >= farmState.maxWater) return alert("Su kulesi zaten dolu!");
+      farmState.water = Math.min(farmState.maxWater, farmState.water + 15);
+      saveFarmData();
+      renderAll();
+    }
+
+    function addXp(val) {
+      farmState.xp += val;
+      if (farmState.xp >= farmState.level * 60) {
+        farmState.xp = 0;
+        farmState.level++;
+        farmState.gems += 2;
+        alert(`🎉 TEBRİKLER! Seviye Atladın: Lv.${farmState.level}! (+2 Elmas)`);
+      }
+    }
+
+    function doPrestige() {
+      if (farmState.level < 15) return alert("Prestij yapabilmek için en az 15. Seviyeye ulaşmalısın!");
+      if (confirm("Çiftliği sıfırlayıp kalıcı %5 hasat hız bonusu almak istiyor musun?")) {
+        farmState.prestige++;
+        farmState.level = 1;
+        farmState.xp = 0;
+        farmState.gold = 300;
+        farmState.plots = Array(9).fill(null).map(() => ({ state: 'empty', crop: null, readyAt: 0, wet: false }));
+        saveFarmData();
+        renderAll();
+      }
+    }
+
+    function renderShip() {
+      const box = document.getElementById("ship-crates-box");
+      box.innerHTML = "";
+      farmState.ship.crates.forEach((c, idx) => {
+        const cr = document.createElement("div");
+        cr.style.background = c.done ? "#064e3b" : "#0f172a";
+        cr.style.border = "1px solid " + (c.done ? "#10b981" : "#334155");
+        cr.style.borderRadius = "6px";
+        cr.style.padding = "5px";
+        cr.style.textAlign = "center";
+        cr.style.fontSize = "8.5px";
+        cr.style.cursor = "pointer";
+
+        const cropDef = CROPS_DEF[c.crop] || { icon: "📦", name: c.crop };
+        cr.innerHTML = `
+          <div>${cropDef.icon} ${c.qty}x ${cropDef.name}</div>
+          <div style="font-size:7.5px; color:${c.done ? '#6ee7b7' : '#facc15'};">${c.done ? '✓ YÜKLENDİ' : 'Yükle'}</div>
+        `;
+        if (!c.done && !visitingTarget) cr.onclick = () => fillShipCrate(idx);
+        box.appendChild(cr);
+      });
+    }
+
+    function fillShipCrate(idx) {
+      const crate = farmState.ship.crates[idx];
+      if ((farmState.inventory[crate.crop] || 0) < crate.qty) return alert("Ambarında yeterli ürün yok!");
+      farmState.inventory[crate.crop] -= crate.qty;
       crate.done = true;
-      farmData.gold += 15; // Az para kazancı
+      farmState.gold += 20;
 
-      // 6 kasa da bitti mi?
-      const allDone = farmData.ship.crates.every(c => c.done);
-      if (allDone) {
-        alert("🎉 TEBRİKLER! Tüm 6 kasayı yükledin! Gemi düdüğü çaldı, +100 Altın Bonus!");
-        farmData.gold += 100;
-        farmData.shipCount++;
-        generateNewShip();
+      if (farmState.ship.crates.every(c => c.done)) {
+        alert("🚢 DÜDÜK ÇALDI! Tüm kasalar doldu, gemi kalkıyor! (+150 Altın, +3 Elmas)");
+        farmState.gold += 150;
+        farmState.gems += 3;
+        resetShip();
       }
-
-      saveFarm();
-      renderUI();
+      saveFarmData();
+      renderAll();
     }
 
-    function generateNewShip() {
-      farmData.ship.timeLeft = 240;
-      farmData.ship.crates = [
-        { crop: 'wheat', amount: 3, done: false },
-        { crop: 'wheat', amount: 2, done: false },
-        { crop: 'corn', amount: 2, done: false },
-        { crop: 'corn', amount: 3, done: false },
-        { crop: 'carrot', amount: 1, done: false },
-        { crop: 'wheat', amount: 4, done: false }
+    function resetShip() {
+      farmState.ship.timeLeft = 240;
+      farmState.ship.crates = [
+        { crop: 'wheat', qty: 6, done: false },
+        { crop: 'wheat', qty: 6, done: false },
+        { crop: 'corn', qty: 4, done: false },
+        { crop: 'corn', qty: 4, done: false },
+        { crop: 'carrot', qty: 3, done: false },
+        { crop: 'soy', qty: 2, done: false }
       ];
     }
 
     function sendShipEarly() {
-      if (confirm("Gemi tamamlanmadan erkenden ayrılsın mı?")) {
-        generateNewShip();
-        saveFarm();
-        renderUI();
+      if (confirm("Gemi tamamlanmadan kalksın mı?")) {
+        resetShip();
+        saveFarmData();
+        renderAll();
       }
-    }
-
-    function pumpWater() {
-      if (farmData.water >= farmData.maxWater) return alert("Su tankı zaten ağzına kadar dolu!");
-      farmData.water = Math.min(farmData.maxWater, farmData.water + 10);
-      saveFarm();
-      renderUI();
     }
 
     function farmLoop() {
       let changed = false;
       const now = Date.now();
 
-      // Tarla Büyüme Kontrolü
-      farmData.plots.forEach(p => {
+      // Tarlalar
+      farmState.plots.forEach(p => {
         if (p.state === 'growing' && now >= p.readyAt) {
           p.state = 'ready';
           changed = true;
         }
       });
 
-      // Gemi Geri Sayımı
-      if (farmData.ship.timeLeft > 0) {
-        farmData.ship.timeLeft--;
-        const m = Math.floor(farmData.ship.timeLeft / 60).toString().padStart(2, '0');
-        const s = (farmData.ship.timeLeft % 60).toString().padStart(2, '0');
+      // Ağıllar
+      Object.keys(farmState.barns).forEach(k => {
+        const b = farmState.barns[k];
+        if (b.state === 'producing' && now >= b.readyAt) {
+          b.state = 'ready';
+          changed = true;
+        }
+      });
+
+      // Gemi Sayacı
+      if (farmState.ship.timeLeft > 0) {
+        farmState.ship.timeLeft--;
+        const m = Math.floor(farmState.ship.timeLeft / 60).toString().padStart(2, '0');
+        const s = (farmState.ship.timeLeft % 60).toString().padStart(2, '0');
         document.getElementById("lbl-ship-timer").innerText = `${m}:${s}`;
       } else {
-        generateNewShip();
+        resetShip();
         changed = true;
       }
 
-      if (changed) {
-        saveFarm();
-        renderUI();
+      if (changed && !visitingTarget) {
+        saveFarmData();
+        renderAll();
       }
     }
 
-    function createFlyingEffect(icon, x, y) {
+    function flyAnimation(icon, x, y) {
       const span = document.createElement("span");
-      span.className = "flying-crop";
+      span.className = "fly-effect";
       span.innerText = icon;
-      span.style.left = (x || (window.innerWidth / 2)) + "px";
-      span.style.top = (y || (window.innerHeight / 2)) + "px";
+      span.style.left = (x || window.innerWidth / 2) + "px";
+      span.style.top = (y || window.innerHeight / 2) + "px";
       document.body.appendChild(span);
       setTimeout(() => span.remove(), 800);
-    }
-
-    function openAchievements() {
-      document.getElementById("ach-harvest-count").innerText = farmData.harvestCount;
-      document.getElementById("ach-ship-count").innerText = farmData.shipCount;
-      document.getElementById("modal-achievements").style.display = "flex";
-    }
-
-    function saveFarm() {
-      localStorage.setItem("farm_data", JSON.stringify(farmData));
-    }
-
-    function loadFarm() {
-      const raw = localStorage.getItem("farm_data");
-      if (raw) {
-        try { farmData = Object.assign(farmData, JSON.parse(raw)); } catch(e) {}
-      }
     }
   </script>
 </body>
