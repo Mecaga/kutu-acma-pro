@@ -49,18 +49,18 @@
     </div>
 
     <div class="lb-modes-scroll">
-      <button class="lb-chip active" id="btn-all" onclick="switchMode('all')">🌟 Genel (Tümü)</button>
-      <button class="lb-chip" id="btn-standard" onclick="switchMode('standard')">⚔️ Normal Kasa</button>
-      <button class="lb-chip" id="btn-catch_open" onclick="switchMode('catch_open')">🎯 Yakala & Aç</button>
-      <button class="lb-chip" id="btn-mines_mode" onclick="switchMode('mines_mode')">💣 Mayın Tarlası</button>
-      <button class="lb-chip" id="btn-speedrun_mode" onclick="switchMode('speedrun_mode')">⚡ Speedrun (Süre)</button>
-      <button class="lb-chip" id="btn-double_mode" onclick="switchMode('double_mode')">🎰 Çift Rulet</button>
+      <button type="button" class="lb-chip active" id="btn-all" onclick="switchMode('all')">🌟 Genel (Tümü)</button>
+      <button type="button" class="lb-chip" id="btn-standard" onclick="switchMode('standard')">⚔️ Normal Kasa</button>
+      <button type="button" class="lb-chip" id="btn-catch_open" onclick="switchMode('catch_open')">🎯 Yakala & Aç</button>
+      <button type="button" class="lb-chip" id="btn-mines_mode" onclick="switchMode('mines_mode')">💣 Mayın Tarlası</button>
+      <button type="button" class="lb-chip" id="btn-speedrun_mode" onclick="switchMode('speedrun_mode')">⚡ Speedrun (Süre)</button>
+      <button type="button" class="lb-chip" id="btn-double_mode" onclick="switchMode('double_mode')">🎰 Çift Rulet</button>
     </div>
 
     <div class="lb-list-area" id="lb-container"></div>
   </div>
 
-  <!-- 1. MAÇ DETAY MODALI -->
+  <!-- MAÇ DETAY MODALI -->
   <div id="modal-score-detail" class="custom-modal-overlay">
     <div class="custom-modal-card">
       <div style="font-size:8.5px; color:#94a3b8; margin-bottom:2px;">Oyuncunun Profilini Açmak İçin İsme Tıkla:</div>
@@ -73,18 +73,15 @@
     </div>
   </div>
 
-  <!-- 2. KULLANICI PROFİLİ MODALI (BİZDEKİ user.html İLE BİREBİR AYNI VERİLER) -->
+  <!-- KULLANICI PROFİLİ MODALI -->
   <div id="modal-user-profile" class="custom-modal-overlay">
     <div class="custom-modal-card">
       <div class="modal-scroll-area">
-        
-        <!-- Üst Bar: Başlık ve Arkadaş Ekle Butonu -->
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div style="font-size:10px; font-weight:bold; color:#94a3b8;">Oyuncu Profili</div>
           <div id="friend-action-container"></div>
         </div>
 
-        <!-- Profil Kartı & Kayıt Tarihi -->
         <div style="background:linear-gradient(135deg, #1e1b4b, #0f172a); border:1px solid #334155; border-radius:10px; padding:10px; display:flex; align-items:center; gap:10px;">
           <div id="uprof-avatar" style="width:48px; height:48px; background:#060913; border:2px solid var(--neon-gold); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0;">👤</div>
           <div style="flex:1;">
@@ -96,13 +93,11 @@
           </div>
         </div>
 
-        <!-- Toplam Oynama -->
         <div style="background:#0b1329; border:1px solid #1e293b; border-radius:6px; padding:8px; text-align:center;">
           <div style="font-size:7.5px; color:#94a3b8; font-weight:bold;">TOPLAM OYNAMA</div>
           <b style="font-size:16px; color:#38bdf8;" id="uprof-played">0 Maç</b>
         </div>
 
-        <!-- Mayın Karnesi -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
           <div style="background:#0b1329; border:1px solid #1e293b; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:2px;">
             <span style="font-size:7px; color:#94a3b8;">OYNAMA / KAZANMA</span>
@@ -114,7 +109,6 @@
           </div>
         </div>
 
-        <!-- En Yüksek Skorlar -->
         <div>
           <div style="font-size:8px; font-weight:800; color:#94a3b8; text-transform:uppercase; margin-bottom:4px;">🏆 En Yüksek Skorları</div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:8px;">
@@ -126,9 +120,8 @@
           </div>
         </div>
 
-        <!-- Mod Oynanma Sayıları -->
         <div>
-          <div style="font-size:8px; font-weight:800; color:#94a3b8; text-transform:uppercase; margin-bottom:4px;">🎮 Mod Oynama Sayıları</div>
+          <div style="font-size:8px; font-weight:800; color:#94a3b8; text-transform:uppercase; margin-bottom:4px;">🎮 Mod Oynanma Sayıları</div>
           <div style="display:flex; flex-direction:column; gap:3px; background:#070d1e; padding:5px; border-radius:6px; font-size:8.5px;">
             <div style="display:flex; justify-content:space-between;"><span>⚔️ Normal Kasa:</span><b id="uprof-c-std">0</b></div>
             <div style="display:flex; justify-content:space-between;"><span>🎯 Yakala & Aç:</span><b id="uprof-c-cat">0</b></div>
@@ -338,7 +331,6 @@
       document.getElementById("modal-score-detail").style.display = "flex";
     }
 
-    // 🎯 KULLANICI PROFİLİNİ user.html İLE BİREBİR AÇAN FONKSİYON
     function openOtherUserProfile(targetUsername, displayName) {
       const u = getActiveUser();
       const myKey = u ? String(u.username || u.name).trim().toLowerCase() : "";
@@ -369,7 +361,6 @@
         document.getElementById("uprof-mines-record").innerText = `${min} / ${minW}`;
         document.getElementById("uprof-mines-rate").innerText = `%${mRate}`;
 
-        // En İyi Skorlar
         document.getElementById("uprof-best-std").innerText = ((stats["standard"] && stats["standard"].bestScore) || 0) + " P";
         document.getElementById("uprof-best-cat").innerText = ((stats["catch_open"] && stats["catch_open"].bestScore) || 0) + " P";
         document.getElementById("uprof-best-min").innerText = ((stats["mines_mode"] && stats["mines_mode"].bestScore) || 0) + " P";
@@ -377,7 +368,6 @@
         const bSpeed = stats["speedrun_mode"] && stats["speedrun_mode"].bestTime;
         document.getElementById("uprof-best-spd").innerText = (bSpeed && bSpeed < 999) ? parseFloat(bSpeed).toFixed(1) + "s" : "-";
 
-        // Mod Oynanma Sayıları
         document.getElementById("uprof-c-std").innerText = std;
         document.getElementById("uprof-c-cat").innerText = cat;
         document.getElementById("uprof-c-min").innerText = min;
@@ -389,11 +379,10 @@
       });
     }
 
-    // 🤝 ARKADAŞ EKLEME VE İSTEK SİSTEMİ
     function renderFriendButton(myKey, targetKey) {
       const box = document.getElementById("friend-action-container");
       box.innerHTML = "";
-      if (!myKey || myKey === targetKey) return; // Kendimize bakınca buton çıkmaz
+      if (!myKey || myKey === targetKey) return;
 
       db.ref(`friends/${myKey}/${targetKey}`).once("value").then(fSnap => {
         if (fSnap.exists() && fSnap.val() === true) {
@@ -416,7 +405,7 @@
       const payload = {
         from: myKey,
         username: myKey,
-        displayName: u.displayName || u.name || u.username,
+        displayName: `${u.displayName} ${u.tag || ''}`,
         avatar: u.avatar || "👤",
         title: u.title || "Çaylak",
         timestamp: Date.now()
