@@ -134,11 +134,11 @@
       width: 100%;
       background: #16a34a;
       font-size: 11px;
-      padding: 11px;
+      padding: 12px;
       box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4);
     }
 
-    /* Arena */
+    /* Arena Bölümü */
     #arena-view {
       display: none;
       flex: 1;
@@ -162,19 +162,19 @@
       text-align: center;
     }
 
-    /* Emoji Reaksiyon Çubuğu */
+    /* Emoji Reaksiyon Alanı */
     .reaction-bar {
       display: flex;
       justify-content: center;
-      gap: 12px;
-      padding: 6px;
+      gap: 14px;
+      padding: 8px;
       background: #090d1a;
       border-top: 1px solid #1e293b;
     }
     .react-btn {
       background: none;
       border: none;
-      font-size: 20px;
+      font-size: 22px;
       cursor: pointer;
       transition: transform 0.15s;
     }
@@ -182,17 +182,17 @@
 
     .floating-emoji {
       position: absolute;
-      font-size: 32px;
+      font-size: 34px;
       animation: floatUp 1.8s ease-out forwards;
       pointer-events: none;
       z-index: 99;
     }
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0) scale(0.8); }
-      100% { opacity: 0; transform: translateY(-120px) scale(1.4); }
+      100% { opacity: 0; transform: translateY(-130px) scale(1.4); }
     }
 
-    /* Slot Çarkı */
+    /* Slot Makinesi */
     .slot-wrapper {
       width: 100%;
       max-width: 320px;
@@ -282,13 +282,12 @@
 <body>
   <div class="shell" id="app-shell">
     
-    <!-- 1. LOBİ GÖRÜNÜMÜ -->
+    <!-- LOBİ EKRANI -->
     <div id="lobby-view" style="display:flex; flex-direction:column; height:100%;">
       <div class="nav-bar">
-        <!-- menu.html yönlendirmesi sağlandı -->
-        <a href="menu.html" style="border: 1px solid #ef4444; color:#ef4444; padding:3px 8px; font-size:10px; text-decoration:none; border-radius:4px;">‹ Ana Menü</a>
+        <a href="menu.html" style="border: 1px solid #ef4444; color:#ef4444; padding:4px 9px; font-size:10px; text-decoration:none; border-radius:4px;">‹ Ana Menü</a>
         <div style="font-weight:900; font-size:12.5px; color:#f59e0b;">⚔️ 1v1 PvP Lobisi</div>
-        <div id="status-tag" style="font-size:8.5px; color:#22c55e;">● Canlı</div>
+        <div id="status-tag" style="font-size:8.5px; color:#22c55e;">● Çevrimiçi</div>
       </div>
 
       <div class="body-content">
@@ -296,23 +295,23 @@
         <div class="mode-grid">
           <div class="mode-card selected" id="card-classic" onclick="setMode('classic')">
             <b style="font-size:11px; color:#38bdf8;">📦 Normal Kasa Açma</b>
-            <span style="font-size:8px; color:#94a3b8;">Klasik kasa yarışı</span>
+            <span style="font-size:8px; color:#94a3b8;">Hızlı kasa kapışması</span>
           </div>
           <div class="mode-card" id="card-mega" onclick="setMode('mega')">
             <b style="font-size:11px; color:#ec4899;">🎁 Mega Kasa Açma</b>
-            <span style="font-size:8px; color:#94a3b8;">Dev çarpanlar & ödüller</span>
+            <span style="font-size:8px; color:#94a3b8;">2x katlı dev ödüller</span>
           </div>
           <div class="mode-card" id="card-speedrun" onclick="setMode('speedrun')">
             <b style="font-size:11px; color:#f59e0b;">⚡ 1v1 Speedrun</b>
-            <span style="font-size:8px; color:#94a3b8;">Hedefe ilk ulaşan kazanır</span>
+            <span style="font-size:8px; color:#94a3b8;">Hedefe ilk varan alır</span>
           </div>
           <div class="mode-card" id="card-mines" onclick="setMode('mines')">
             <b style="font-size:11px; color:#ef4444;">💣 3×3 Mayın Tarlası</b>
-            <span style="font-size:8px; color:#94a3b8;">Elmas bul, çekil veya patla</span>
+            <span style="font-size:8px; color:#94a3b8;">Elmas topla veya patla</span>
           </div>
           <div class="mode-card" id="card-battleship" onclick="setMode('battleship')" style="grid-column: span 2;">
             <b style="font-size:11px; color:#38bdf8;">🚢 Amiral Battı Düellosu</b>
-            <span style="font-size:8px; color:#94a3b8;">Rakibin 3 gizli gemisini ilk vuran kazanır</span>
+            <span style="font-size:8px; color:#94a3b8;">Rakibin 3 gizli savaş gemisini batır</span>
           </div>
         </div>
 
@@ -322,8 +321,8 @@
           <button type="button" class="btn-action" style="background:#0284c7; font-size:10px;" onclick="joinByCode()">Katıl</button>
         </div>
 
-        <!-- MODAL OLMADAN DİREKT ODA KURAN BUTON -->
-        <button type="button" class="btn-action btn-start" onclick="directCreateRoom()">➕ Seçili Modda Hızlı Oda Kur</button>
+        <!-- MODALSIZ DİREKT KURULUM -->
+        <button type="button" class="btn-action btn-start" onclick="directCreateRoom()">➕ Seçili Modda Odayı Hemen Kur</button>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
           <div class="sec-tag">Canlı Açık Odalar</div>
@@ -335,38 +334,38 @@
       </div>
     </div>
 
-    <!-- 2. ARENA GÖRÜNÜMÜ -->
+    <!-- ARENA EKRANI -->
     <div id="arena-view">
       <div class="nav-bar">
         <button onclick="leaveRoom()" style="background:#ef4444; border:none; color:#fff; padding:4px 10px; border-radius:4px; font-size:10px; cursor:pointer;">‹ Odadan Çık</button>
         
-        <!-- TAM ORTADA KANAL ADI VE #ID -->
-        <div id="arena-room-header" style="font-size:12px; font-weight:bold; color:#f59e0b; text-align:center;">
+        <!-- ORTADAKİ DEV KANAL ADI VE #ID -->
+        <div id="arena-room-header" style="font-size:13px; font-weight:900; color:#f59e0b; letter-spacing:0.5px; text-align:center;">
           Kanal #0000
         </div>
         
         <div id="arena-mode-badge" style="font-size:9px; color:#38bdf8; font-weight:bold;">MOD</div>
       </div>
 
-      <!-- Skor Paneli -->
+      <!-- Skor ve Hazır Paneli -->
       <div class="scoreboard">
         <div class="player-card" id="card-p1">
           <div id="p1-name" style="font-size:11px; font-weight:bold; color:#38bdf8;">Oyuncu 1</div>
           <div id="p1-score" style="font-size:18px; font-weight:900; color:#fff;">0</div>
-          <div id="p1-ready-status" style="font-size:8.5px; color:#eab308;">Hazır Değil</div>
+          <div id="p1-ready-status" style="font-size:8.5px; color:#eab308; margin-top:2px;">Hazır Değil</div>
         </div>
         <div style="font-weight:900; color:#ef4444; font-size:13px;">VS</div>
         <div class="player-card" id="card-p2">
           <div id="p2-name" style="font-size:11px; font-weight:bold; color:#f87171;">Bekleniyor...</div>
           <div id="p2-score" style="font-size:18px; font-weight:900; color:#fff;">0</div>
-          <div id="p2-ready-status" style="font-size:8.5px; color:#eab308;">Hazır Değil</div>
+          <div id="p2-ready-status" style="font-size:8.5px; color:#eab308; margin-top:2px;">Hazır Değil</div>
         </div>
       </div>
 
-      <!-- Oyun Alanı -->
+      <!-- Oyun Motorunun Çizildiği Dinamik Alan -->
       <div class="body-content" id="arena-dynamic-content" style="align-items:center; justify-content:center;"></div>
 
-      <!-- EMOJİ TEPKİ PANELİ -->
+      <!-- CANLI EMOJİ REAKSİYON BARI -->
       <div class="reaction-bar">
         <button class="react-btn" onclick="sendReaction('🔥')">🔥</button>
         <button class="react-btn" onclick="sendReaction('😂')">😂</button>
@@ -411,9 +410,9 @@
       if (typeof getActiveUser === "function") activeUser = getActiveUser();
       if (!activeUser) activeUser = JSON.parse(localStorage.getItem("active_user") || localStorage.getItem("currentUser") || "null");
 
+      // Giriş yapmamışsa sessizce geçici profil ata, index.html'ye fırlatma
       if (!activeUser) {
-        // Oturumu yoksa menu.html'ye yönlendir
-        return location.href = "menu.html";
+        activeUser = { username: "Oyuncu_" + Math.floor(1000 + Math.random() * 9000), displayName: "Maceracı" };
       }
 
       streamRooms();
@@ -461,7 +460,7 @@
       });
     }
 
-    // MODAL OLMADAN DOĞRUDAN ODA KURULUMU
+    // MODALSIZ DİREKT ODA KURMA
     function directCreateRoom() {
       const uName = activeUser.displayName || activeUser.username;
       const generatedTag = "#" + Math.floor(1000 + Math.random() * 9000);
@@ -555,7 +554,7 @@
 
         const room = snap.val();
 
-        // ORTADA KANAL ADI VE #ID
+        // TAM ORTADA KANAL ADI VE #ID
         document.getElementById("arena-room-header").innerText = `${room.roomName} ${room.roomTag}`;
         document.getElementById("arena-mode-badge").innerText = room.mode.toUpperCase();
 
@@ -583,9 +582,9 @@
       if (pKeys.length < 2) {
         area.innerHTML = `
           <div style="text-align:center;">
-            <div style="font-size:28px; margin-bottom:8px;">⏳</div>
+            <div style="font-size:30px; margin-bottom:8px;">⏳</div>
             <div style="font-size:12px; color:#94a3b8;">Rakibin odaya katılması bekleniyor...</div>
-            <div style="font-size:13px; color:#f59e0b; margin-top:6px; font-weight:bold;">${room.roomName} ${room.roomTag}</div>
+            <div style="font-size:14px; color:#f59e0b; margin-top:6px; font-weight:bold;">${room.roomName} ${room.roomTag}</div>
           </div>
         `;
         return;
@@ -601,16 +600,16 @@
         let controlsHtml = "";
         if (!isHost) {
           controlsHtml = `
-            <button class="btn-action" style="background:${me.ready ? '#ef4444' : '#16a34a'}; width:200px; padding:12px;" onclick="toggleReady(!${me.ready})">
+            <button class="btn-action" style="background:${me.ready ? '#ef4444' : '#16a34a'}; width:220px; padding:12px; font-size:12px;" onclick="toggleReady(!${me.ready})">
               ${me.ready ? '❌ Hazır Durumunu Kaldır' : '✅ Hazırım'}
             </button>
           `;
         } else {
           controlsHtml = `
-            <button class="btn-action btn-start" style="width:200px; padding:12px; opacity:${allReady ? '1' : '0.5'};" ${allReady ? '' : 'disabled'} onclick="startGame()">
+            <button class="btn-action btn-start" style="width:220px; padding:12px; font-size:12px; opacity:${allReady ? '1' : '0.5'};" ${allReady ? '' : 'disabled'} onclick="startGame()">
               🎮 Maçı Başlat
             </button>
-            <div style="font-size:9px; color:#94a3b8; margin-top:5px;">${allReady ? 'Her iki oyuncu da hazır!' : 'Rakibin hazır olması bekleniyor...'}</div>
+            <div style="font-size:9.5px; color:#94a3b8; margin-top:6px;">${allReady ? 'Her iki oyuncu da hazır!' : 'Rakibin hazır olması bekleniyor...'}</div>
           `;
         }
 
@@ -628,13 +627,13 @@
           <div style="text-align:center;">
             <div style="font-size:36px;">🏆</div>
             <div style="font-size:14px; font-weight:bold; color:#f59e0b; margin:8px 0;">MAÇ BİTTİ!</div>
-            <button class="btn-action" style="background:#0284c7;" onclick="leaveRoom()">Lobiye Dön</button>
+            <button class="btn-action" style="background:#0284c7; padding:10px 20px;" onclick="leaveRoom()">Lobiye Dön</button>
           </div>
         `;
         return;
       }
 
-      // OYUN MODLARININ ÇALIŞTIRILMASI
+      // MODLAR
       if (room.mode === "classic" || room.mode === "mega" || room.mode === "speedrun") {
         if (!document.getElementById("slot-wrapper-box")) setupSlotUI(area, room, myKey);
       } else if (room.mode === "mines") {
@@ -674,7 +673,7 @@
       });
     }
 
-    /* KASA AÇMA MOTORU (Normal, Mega ve Speedrun) */
+    /* KASA AÇMA MOTORU (Normal, Mega, Speedrun) */
     function setupSlotUI(area, room, myKey) {
       const isMega = room.mode === "mega";
       area.innerHTML = `
@@ -748,7 +747,7 @@
       }, 50);
     }
 
-    /* 3x3 MAYIN TARLASI MOTORU */
+    /* 3x3 MAYIN MOTORU */
     let currentMineMultiplier = 1.0;
     let currentMinePot = 0;
     let localMines = [];
@@ -814,7 +813,7 @@
     }
 
     function cashoutMines() {
-      if (currentMinePot <= 20 && currentMineMultiplier === 1.0) return alert("Önce risk alıp kutu açmalısın!");
+      if (currentMinePot <= 20 && currentMineMultiplier === 1.0) return alert("Önce kutu açarak risk al!");
       const myKey = sanitizeUserKey(activeUser.username);
       const pRef = rtdb.ref(`pvp_rooms/${currentRoomId}/players/${myKey}/score`);
       
@@ -890,7 +889,7 @@
       });
     }
 
-    /* CANLI EMOJİ REAKSİYONLARI */
+    /* REAKSİYONLAR */
     function sendReaction(emoji) {
       if (!currentRoomId || !rtdb) return;
       const myKey = sanitizeUserKey(activeUser.username);
