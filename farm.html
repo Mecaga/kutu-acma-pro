@@ -709,7 +709,6 @@
       if (local) {
         try { 
           const parsed = JSON.parse(local);
-          // Eksik anahtarları güvenceye alarak birleştir (migration)
           farmState = Object.assign(farmState, parsed);
           if (!farmState.machines) farmState.machines = {};
           if (!farmState.truckOrders) farmState.truckOrders = [];
@@ -883,8 +882,9 @@
         const cropKey = p.crop;
         const c = ALL_ITEMS[cropKey];
 
-        farmState.inventory[cropKey] = (farmState.inventory[cropKey] || 0) + 2;
-        farmState.stats.harvested += 2;
+        // 1 tohum eken 1 ürün alır (Düzeltildi)
+        farmState.inventory[cropKey] = (farmState.inventory[cropKey] || 0) + 1;
+        farmState.stats.harvested += 1;
         addXp(c.xp);
 
         p.state = 'empty';
@@ -1030,7 +1030,7 @@
             ${locked ? `<span style="font-size:7px; color:#ef4444; font-weight:bold;">Lv.${a.level}'de Açılır</span>` : ''}
           </div>
           <button class="btn-action" ${locked ? 'disabled' : ''} onclick="interactAnimal('${k}')">
-            ${data.count === 0 ? `Satın Al (${a.cost}₺)` : (data.state === 'ready' ? 'Topla' : 'Yemle')}
+            ${data.count === 0 ? `Satın Al (${a.cost}₺)` : (data.state === 'ready' ? 'Topla' : (data.state === 'producing' ? 'Üretiyor' : 'Yemle'))}
           </button>
         `;
         box.appendChild(row);
@@ -1046,6 +1046,7 @@
         if (farmState.gold < a.cost) return alert("Yetersiz Altın!");
         farmState.gold -= a.cost;
         data.count = 1;
+        data.state = 'idle';
       } else if (data.state === 'idle') {
         if ((farmState.inventory[a.feed] || 0) < 1) return alert(`Yem yetersiz! 1x ${ALL_ITEMS[a.feed].name} gerekli.`);
         farmState.inventory[a.feed]--;
@@ -1055,6 +1056,7 @@
         if (getTotalBagCount() >= farmState.bagMax) return alert("Çantan dolu!");
         farmState.inventory[a.prod] = (farmState.inventory[a.prod] || 0) + (data.count * 2);
         data.state = 'idle';
+        data.readyAt = 0;
         farmState.stats.harvested += (data.count * 2);
         addXp(ALL_ITEMS[a.prod].xp);
       }
@@ -1091,7 +1093,7 @@
             ${locked ? `<span style="font-size:7px; color:#ef4444; font-weight:bold;">Lv.${m.level}'de Açılır</span>` : ''}
           </div>
           <button class="btn-action" ${locked ? 'disabled' : ''} onclick="interactKitchen('${k}')">
-            ${!data.built ? `İnşa Et (${m.cost}₺)` : (data.state === 'ready' ? 'Al' : 'Pişir')}
+            ${!data.built ? `İnşa Et (${m.cost}₺)` : (data.state === 'ready' ? 'Al' : (data.state === 'producing' ? 'Pişiyor' : 'Pişir'))}
           </button>
         `;
         box.appendChild(row);
@@ -1107,6 +1109,7 @@
         if (farmState.gold < m.cost) return alert("Yetersiz Altın!");
         farmState.gold -= m.cost;
         data.built = true;
+        data.state = 'idle';
       } else if (data.state === 'idle') {
         if ((farmState.inventory[m.inItem] || 0) < m.inQty) return alert(`Hammadde yetersiz! ${m.inQty}x ${ALL_ITEMS[m.inItem].name} gerekli.`);
         farmState.inventory[m.inItem] -= m.inQty;
@@ -1116,6 +1119,7 @@
         if (getTotalBagCount() >= farmState.bagMax) return alert("Çantan dolu!");
         farmState.inventory[m.outItem] = (farmState.inventory[m.outItem] || 0) + 1;
         data.state = 'idle';
+        data.readyAt = 0;
         farmState.stats.crafted++;
         addXp(ALL_ITEMS[m.outItem].xp);
       }
@@ -1315,7 +1319,6 @@
       document.getElementById("lbl-market-subdesc").innerText = visitingTarget ? "Yalnızca bu çiftliğin satışa koyduğu ürünler listelenir." : "Tezgâhlarına ürün koy veya satılanların parasını topla!";
 
       marketSource.forEach((slot, idx) => {
-        // Ziyaretteyken boş slotları gösterme
         if (visitingTarget && slot.status === 'empty') return;
 
         const div = document.createElement("div");
@@ -1656,6 +1659,7 @@
         }
       });
 
+      // Hayvanlar: Zaman damgası kontrolüyle sekmede olmasan bile süre tamamlanır
       Object.keys(farmState.animals).forEach(k => {
         const a = farmState.animals[k];
         if (a.state === 'producing' && now >= a.readyAt) {
@@ -1664,6 +1668,7 @@
         }
       });
 
+      // İmalathaneler: Zaman damgası kontrolüyle arka planda üretim biter
       Object.keys(farmState.machines).forEach(k => {
         const m = farmState.machines[k];
         if (m.state === 'producing' && now >= m.readyAt) {
