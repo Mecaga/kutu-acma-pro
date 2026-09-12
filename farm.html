@@ -523,9 +523,8 @@
     // BOT MÜŞTERİ HAVUZU
     const BOT_NAMES = ["Köylü Ahmet", "Tüccar Selim", "Değirmenci Ali", "Kasap Mehmet", "Fırıncı Veli", "Hancı Hasan", "👨‍🌾 Çiftçi Bob"];
 
-    // 1. ÖNCE ALL_ITEMS TANIMLANIR
+    // 1. ALL_ITEMS TANIMLARI
     const ALL_ITEMS = {
-      // Tohumlar
       wheat_seed:     { name: "Buğday Tohumu",   icon: "🌾", type: "seed",  cropKey: "wheat",      cost: 2,   minP: 2,   maxP: 6,   level: 1 },
       corn_seed:      { name: "Mısır Tohumu",     icon: "🌽", type: "seed",  cropKey: "corn",       cost: 4,   minP: 3,   maxP: 10,  level: 2 },
       carrot_seed:    { name: "Havuç Tohumu",     icon: "🥕", type: "seed",  cropKey: "carrot",     cost: 6,   minP: 5,   maxP: 16,  level: 3 },
@@ -536,7 +535,6 @@
       tomato_seed:    { name: "Domates Tohumu",   icon: "🍅", type: "seed",  cropKey: "tomato",     cost: 40,  minP: 35,  maxP: 105, level: 7 },
       pepper_seed:    { name: "Biber Tohumu",     icon: "🫑", type: "seed",  cropKey: "pepper",     cost: 50,  minP: 42,  maxP: 130, level: 8 },
 
-      // Mahsuller
       wheat:          { name: "Buğday",           icon: "🌾", type: "crop",  dur: 6,   xp: 2,   minP: 2,   maxP: 8,   level: 1 },
       corn:           { name: "Mısır",            icon: "🌽", type: "crop",  dur: 14,  xp: 5,   minP: 4,   maxP: 16,  level: 2 },
       carrot:         { name: "Havuç",            icon: "🥕", type: "crop",  dur: 25,  xp: 8,   minP: 8,   maxP: 25,  level: 3 },
@@ -547,7 +545,6 @@
       tomato:         { name: "Domates",          icon: "🍅", type: "crop",  dur: 90,  xp: 25,  minP: 35,  maxP: 110, level: 7 },
       pepper:         { name: "Biber",            icon: "🫑", type: "crop",  dur: 110, xp: 30,  minP: 45,  maxP: 135, level: 8 },
 
-      // Meyveler
       apple:          { name: "Elma",             icon: "🍎", type: "fruit", minP: 10,  maxP: 30,  xp: 10, level: 3 },
       cherry:         { name: "Kiraz",            icon: "🍒", type: "fruit", minP: 15,  maxP: 45,  xp: 15, level: 4 },
       orange:         { name: "Portakal",         icon: "🍊", type: "fruit", minP: 22,  maxP: 65,  xp: 20, level: 5 },
@@ -555,7 +552,6 @@
       banana:         { name: "Muz",              icon: "🍌", type: "fruit", minP: 30,  maxP: 90,  xp: 25, level: 6 },
       lemon:          { name: "Limon",            icon: "🍋", type: "fruit", minP: 35,  maxP: 105, xp: 30, level: 7 },
 
-      // Hayvansal
       egg:            { name: "Yumurta",          icon: "🥚", type: "animal",minP: 5,   maxP: 20,  xp: 6,  level: 2 },
       milk:           { name: "Süt",              icon: "🥛", type: "animal",minP: 12,  maxP: 45,  xp: 12, level: 4 },
       wool:           { name: "Koyun Yünü",       icon: "🧶", type: "animal",minP: 25,  maxP: 85,  xp: 22, level: 6 },
@@ -563,7 +559,6 @@
       honey:          { name: "Bal Peteği",       icon: "🍯", type: "animal",minP: 45,  maxP: 140, xp: 35, level: 7 },
       rabbit_wool:    { name: "Tavşan Tüyü",      icon: "🪶", type: "animal",minP: 55,  maxP: 170, xp: 45, level: 8 },
 
-      // Mutfak & Mamül
       bread:          { name: "Köy Ekmeği",       icon: "🍞", type: "food",  minP: 12,  maxP: 45,  xp: 15, level: 2 },
       cheese:         { name: "Taze Peynir",      icon: "🧀", type: "food",  minP: 22,  maxP: 75,  xp: 22, level: 4 },
       olive_oil:      { name: "Zeytinyağı",       icon: "🫙", type: "food",  minP: 45,  maxP: 140, xp: 35, level: 6 },
@@ -611,7 +606,6 @@
       water_saver:   { name: "Bereketli Toprak (Su)",       icon: "💧", step: 0.005,unit: " Şans",   baseCost: 1 }
     };
 
-    // 2. ALL_ITEMS SONRASINDA BOB MARKET FONKSİYONU ÇALIŞTIRILIR
     let bobMarketTimer = 600;
     const BOB_POOL_ITEMS = ['wheat', 'corn', 'carrot', 'soy', 'apple', 'bread', 'cheese', 'egg', 'milk', 'coffee', 'icecream'];
 
@@ -652,12 +646,7 @@
       xp: 0,
       prestige: 0,
       prestigeStars: 0,
-      perks: {
-        xp_boost: 0,
-        speed_boost: 0,
-        sell_bonus: 0,
-        water_saver: 0
-      },
+      perks: { xp_boost: 0, speed_boost: 0, sell_bonus: 0, water_saver: 0 },
       water: 30,
       maxWater: 50,
       bagMax: 10,
@@ -717,14 +706,19 @@
     };
 
     function sanitizeUserKey(username) {
-      if (!username) return "oyuncu_" + Math.floor(Math.random() * 1000);
-      return String(username).toLowerCase().replace(/[.#$\[\]\/ ]/g, "_");
+      if (!username) return "oyuncu_misafir";
+      return String(username).toLowerCase().trim().replace(/[.#$\[\]\/ ]/g, "_");
+    }
+
+    function getStorageKey() {
+      const uKey = sanitizeUserKey(activeUser?.username || "misafir");
+      return "kutu_farm_hayday_" + uKey;
     }
 
     function initDatabase() {
       if (window.db) return window.db;
       if (window.database) return window.database;
-      if (typeof firebase !== "undefined" && firebase.apps.length > 0) return firebase.database();
+      if (typeof firebase !== "undefined" && firebase.apps && firebase.apps.length > 0) return firebase.database();
       return null;
     }
 
@@ -737,9 +731,11 @@
 
     window.addEventListener("DOMContentLoaded", () => {
       rtdb = initDatabase();
+
+      // ANA MENÜ KULLANICI YÖNETİMİYLE TAM UYUM
       if (typeof getActiveUser === "function") activeUser = getActiveUser();
       if (!activeUser) activeUser = JSON.parse(localStorage.getItem("active_user") || localStorage.getItem("currentUser") || "null");
-      if (!activeUser) activeUser = { username: "mecaga", displayName: "Mecaga" };
+      if (!activeUser) activeUser = { username: "oyuncu", displayName: "Maceracı" };
 
       loadFarmData();
       listenMarketSoldEvents();
@@ -774,16 +770,19 @@
     }
 
     function saveFarmData() {
-      if (visitingTarget) return;
-      localStorage.setItem("kutu_farm_hayday_v10", JSON.stringify(farmState));
+      if (visitingTarget) return; // Ziyaretteyken ana çiftliği bozma
+      
+      const sKey = getStorageKey();
+      localStorage.setItem(sKey, JSON.stringify(farmState));
+
       if (rtdb && activeUser) {
         const myKey = sanitizeUserKey(activeUser.username);
-        const unlockedPlotsCount = farmState.plots.filter(p => p.unlocked).length;
+        const unlockedPlotsCount = (farmState.plots || []).filter(p => p && p.unlocked).length;
         rtdb.ref("farm_users/" + myKey).set({
           profile: { 
             name: activeUser.displayName || activeUser.username, 
-            level: farmState.level, 
-            gold: farmState.gold,
+            level: farmState.level || 1, 
+            gold: farmState.gold || 0,
             prestige: farmState.prestige || 0,
             plotsCount: unlockedPlotsCount
           },
@@ -794,22 +793,25 @@
     }
 
     function loadFarmData() {
-      const local = localStorage.getItem("kutu_farm_hayday_v10") || localStorage.getItem("kutu_farm_hayday_v9") || localStorage.getItem("kutu_farm_hayday_v8");
+      const sKey = getStorageKey();
+      const local = localStorage.getItem(sKey);
       if (local) {
         try { 
           const parsed = JSON.parse(local);
           farmState = Object.assign(farmState, parsed);
-          if (!farmState.machines) farmState.machines = {};
-          if (!farmState.truckOrders) farmState.truckOrders = [];
-          if (!farmState.trees) farmState.trees = {};
-          if (!farmState.animals) farmState.animals = {};
-          if (!farmState.perks) farmState.perks = { xp_boost: 0, speed_boost: 0, sell_bonus: 0, water_saver: 0 };
-          if (!farmState.stats) farmState.stats = { planted: 0, harvested: 0, crafted: 0, sold: 0, bought: 0, ships: 0, trucks: 0, totalEarned: 50, totalSpent: 0, fruits: 0, fedAnimals: 0 };
-          if (!farmState.market || farmState.market.length < 6) {
-            farmState.market = Array(6).fill(null).map(() => ({ item: null, qty: 0, price: 0, status: 'empty', buyerName: '' }));
-          }
         } catch(e){}
       }
+
+      if (!farmState.machines) farmState.machines = {};
+      if (!farmState.truckOrders) farmState.truckOrders = [];
+      if (!farmState.trees) farmState.trees = {};
+      if (!farmState.animals) farmState.animals = {};
+      if (!farmState.perks) farmState.perks = { xp_boost: 0, speed_boost: 0, sell_bonus: 0, water_saver: 0 };
+      if (!farmState.stats) farmState.stats = { planted: 0, harvested: 0, crafted: 0, sold: 0, bought: 0, ships: 0, trucks: 0, totalEarned: 50, totalSpent: 0, fruits: 0, fedAnimals: 0 };
+      if (!farmState.market || farmState.market.length < 6) {
+        farmState.market = Array(6).fill(null).map(() => ({ item: null, qty: 0, price: 0, status: 'empty', buyerName: '' }));
+      }
+
       if (rtdb && activeUser) {
         const myKey = sanitizeUserKey(activeUser.username);
         rtdb.ref("farm_users/" + myKey + "/farm").once("value", snap => {
@@ -828,7 +830,6 @@
         const val = snap.val();
         if (val && val.status === 'sold') {
           showLiveToast(`🔔 Pazarında ${val.buyerName ? val.buyerName : 'biri'} ürün satın aldı!`);
-          farmState.stats.sold++;
           loadFarmData();
           renderAll();
         }
@@ -872,7 +873,7 @@
       renderCareerStats();
     }
 
-    // 1. TARLALAR & SAYFALAMA
+    // 1. TARLALAR
     function renderCropsTray() {
       const tray = document.getElementById("tray-crops");
       tray.innerHTML = "";
@@ -1077,7 +1078,7 @@
       renderAll();
     }
 
-    // 2. TOHUM DÜKKANI
+    // 2. TOHUM PAZARI
     function renderSeedsShop() {
       const box = document.getElementById("box-seeds-list");
       box.innerHTML = "";
@@ -1112,7 +1113,7 @@
       renderAll();
     }
 
-    // 3. MEYVE AĞAÇLARI
+    // 3. AĞAÇLAR
     function renderTrees() {
       const box = document.getElementById("box-trees-list");
       box.innerHTML = "";
@@ -1174,7 +1175,7 @@
       renderAll();
     }
 
-    // 4. AĞILLAR & HAYVANLAR
+    // 4. HAYVANLAR
     function renderAnimals() {
       const box = document.getElementById("box-animals-list");
       box.innerHTML = "";
@@ -1246,7 +1247,7 @@
       renderAll();
     }
 
-    // 5. MUTFAK & İMALATHANELER
+    // 5. İMALATHANELER
     function renderKitchen() {
       const box = document.getElementById("box-machines-list");
       box.innerHTML = "";
@@ -1317,7 +1318,7 @@
       renderAll();
     }
 
-    // 6. KAMYONET SİPARİŞLERİ
+    // 6. KAMYONET
     function renderTruckOrders() {
       const box = document.getElementById("box-truck-orders");
       box.innerHTML = "";
@@ -1364,7 +1365,6 @@
 
     function collectTruckReward(idx) {
       const ord = farmState.truckOrders[idx];
-      
       const sellMultiplier = 1 + ((farmState.perks.sell_bonus || 0) * PRESTIGE_PERKS_DEF.sell_bonus.step);
       const finalReward = Math.round(ord.reward * sellMultiplier);
 
@@ -1388,7 +1388,7 @@
       renderAll();
     }
 
-    // 7. GEMİ DÖNGÜSÜ
+    // 7. TİCARET GEMİSİ
     function renderShipDock() {
       const dActive = document.getElementById("box-ship-active");
       const dWait = document.getElementById("box-ship-waiting");
@@ -1459,7 +1459,7 @@
       }
     }
 
-    // 8. MERKEZİ ÇANTA VE AMBAR
+    // 8. AMBAR
     function renderBag() {
       const box = document.getElementById("box-bag-items");
       box.innerHTML = "";
@@ -1509,7 +1509,7 @@
       renderAll();
     }
 
-    // 9. PRESTİJ & YETENEKLER
+    // 9. PRESTİJ
     function renderPrestigePerks() {
       const box = document.getElementById("box-prestige-perks");
       if (!box) return;
@@ -1607,9 +1607,8 @@
     function resetAllFarmData() {
       if (confirm("🚨 DİKKAT: Bütün çiftlik verilerin, seviyen, paran ve eşyaların silinecektir. Devam etmek istiyor musun?")) {
         if (confirm("Son onay: Bu işlem kesinlikle geri alınamaz!")) {
-          localStorage.removeItem("kutu_farm_hayday_v10");
-          localStorage.removeItem("kutu_farm_hayday_v9");
-          localStorage.removeItem("kutu_farm_hayday_v8");
+          const sKey = getStorageKey();
+          localStorage.removeItem(sKey);
           if (rtdb && activeUser) {
             const myKey = sanitizeUserKey(activeUser.username);
             rtdb.ref("farm_users/" + myKey).remove();
@@ -1789,6 +1788,7 @@
       renderAll();
     }
 
+    // PAZARDAN ÜRÜN SATIN ALMA
     function buyNeighborMarketItem(idx, slot, canBuy) {
       if (!slot || slot.status !== 'on_sale') return alert("Bu ürün zaten satılmış!");
       if (!canBuy) return alert(`Seviyen yetersiz! En az Seviye ${ALL_ITEMS[slot.item]?.level || 1} olmalısın.`);
@@ -1797,6 +1797,7 @@
 
       const myName = activeUser.displayName || activeUser.username || "Maceracı";
 
+      // 1. Kendi harcama ve envanterimize ekle
       farmState.gold -= Number(slot.price);
       farmState.stats.totalSpent = (farmState.stats.totalSpent || 0) + Number(slot.price);
       
@@ -1804,12 +1805,23 @@
       farmState.inventory[itemKey] = Number(farmState.inventory[itemKey] || 0) + Number(slot.qty);
       farmState.stats.bought++;
 
+      // Kendi verimizi hemen diske ve firebase'e yaz
+      const mySKey = getStorageKey();
+      localStorage.setItem(mySKey, JSON.stringify(farmState));
+      if (rtdb && activeUser) {
+        const myUKey = sanitizeUserKey(activeUser.username);
+        rtdb.ref(`farm_users/${myUKey}/farm`).set(farmState);
+      }
+
+      // 2. Satıcının kasasını "SATILDI" ve satın alan ismiyle güncelle
       if (visitingTarget.key === 'bob_farmer') {
         BOB_FARM.farm.market[idx].status = 'sold';
         BOB_FARM.farm.market[idx].buyerName = myName;
       } else {
-        visitingTarget.farm.market[idx].status = 'sold';
-        visitingTarget.farm.market[idx].buyerName = myName;
+        if (visitingTarget.farm && visitingTarget.farm.market && visitingTarget.farm.market[idx]) {
+          visitingTarget.farm.market[idx].status = 'sold';
+          visitingTarget.farm.market[idx].buyerName = myName;
+        }
         if (rtdb) {
           rtdb.ref(`farm_users/${visitingTarget.key}/farm/market/${idx}`).update({
             status: 'sold',
@@ -1818,7 +1830,6 @@
         }
       }
 
-      saveFarmData();
       openMarketModal();
       renderAll();
       alert(`🎉 ${slot.qty}x ${ALL_ITEMS[slot.item]?.name || slot.item} başarıyla çantana eklendi!`);
@@ -1841,7 +1852,7 @@
 
           if (now - (slot.placedAt || 0) >= requiredWaitMs) {
             slot.status = 'sold';
-            const randomBot = Math.random() < 0.20 ? "👨‍🌾 Çiftçi Bob" : BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
+            const randomBot = Math.random() < 0.25 ? "👨‍🌾 Çiftçi Bob" : BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
             slot.buyerName = randomBot;
             farmState.stats.sold++;
             changed = true;
@@ -2032,7 +2043,6 @@
       let changed = false;
       const now = Date.now();
 
-      // Bob Market 10dk Sayaç
       if (bobMarketTimer > 0) {
         bobMarketTimer--;
       } else {
