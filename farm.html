@@ -523,42 +523,9 @@
     // BOT MÜŞTERİ HAVUZU
     const BOT_NAMES = ["Köylü Ahmet", "Tüccar Selim", "Değirmenci Ali", "Kasap Mehmet", "Fırıncı Veli", "Hancı Hasan", "👨‍🌾 Çiftçi Bob"];
 
-    // BOB AMCA ÇİFTLİĞİ VE 10 DK MARKET YENİLENMESİ
-    let bobMarketTimer = 600; // 10 Dakika = 600 saniye
-    const BOB_POOL_ITEMS = ['wheat', 'corn', 'carrot', 'soy', 'apple', 'bread', 'cheese', 'egg', 'milk', 'coffee', 'icecream'];
-
-    const BOB_FARM = {
-      profile: { name: "👨‍🌾 Çiftçi Bob", level: 50, prestige: 10, gold: 99999 },
-      farm: {
-        stats: { planted: 450, harvested: 430, crafted: 210, sold: 160, bought: 80, ships: 45, trucks: 95, totalEarned: 18500, totalSpent: 9200, fruits: 120, fedAnimals: 180 },
-        plots: Array(49).fill(null).map((_, i) => ({
-          unlocked: true,
-          state: i % 2 === 0 ? 'ready' : 'growing',
-          crop: i % 3 === 0 ? 'wheat' : (i % 3 === 1 ? 'corn' : 'carrot'),
-          readyAt: Date.now() - 1000,
-          wet: true
-        })),
-        market: generateBobMarketItems()
-      }
-    };
-
-    function generateBobMarketItems() {
-      return Array(6).fill(null).map(() => {
-        const itmKey = BOB_POOL_ITEMS[Math.floor(Math.random() * BOB_POOL_ITEMS.length)];
-        const qty = Math.floor(Math.random() * 4) + 1;
-        const itemInfo = ALL_ITEMS[itmKey] || { minP: 5 };
-        return {
-          item: itmKey,
-          qty: qty,
-          price: itemInfo.minP * qty,
-          status: 'on_sale',
-          buyerName: ''
-        };
-      });
-    }
-
+    // 1. ÖNCE ALL_ITEMS TANIMLANIR
     const ALL_ITEMS = {
-      // 1. Tohumlar
+      // Tohumlar
       wheat_seed:     { name: "Buğday Tohumu",   icon: "🌾", type: "seed",  cropKey: "wheat",      cost: 2,   minP: 2,   maxP: 6,   level: 1 },
       corn_seed:      { name: "Mısır Tohumu",     icon: "🌽", type: "seed",  cropKey: "corn",       cost: 4,   minP: 3,   maxP: 10,  level: 2 },
       carrot_seed:    { name: "Havuç Tohumu",     icon: "🥕", type: "seed",  cropKey: "carrot",     cost: 6,   minP: 5,   maxP: 16,  level: 3 },
@@ -569,7 +536,7 @@
       tomato_seed:    { name: "Domates Tohumu",   icon: "🍅", type: "seed",  cropKey: "tomato",     cost: 40,  minP: 35,  maxP: 105, level: 7 },
       pepper_seed:    { name: "Biber Tohumu",     icon: "🫑", type: "seed",  cropKey: "pepper",     cost: 50,  minP: 42,  maxP: 130, level: 8 },
 
-      // 2. Mahsuller
+      // Mahsuller
       wheat:          { name: "Buğday",           icon: "🌾", type: "crop",  dur: 6,   xp: 2,   minP: 2,   maxP: 8,   level: 1 },
       corn:           { name: "Mısır",            icon: "🌽", type: "crop",  dur: 14,  xp: 5,   minP: 4,   maxP: 16,  level: 2 },
       carrot:         { name: "Havuç",            icon: "🥕", type: "crop",  dur: 25,  xp: 8,   minP: 8,   maxP: 25,  level: 3 },
@@ -580,7 +547,7 @@
       tomato:         { name: "Domates",          icon: "🍅", type: "crop",  dur: 90,  xp: 25,  minP: 35,  maxP: 110, level: 7 },
       pepper:         { name: "Biber",            icon: "🫑", type: "crop",  dur: 110, xp: 30,  minP: 45,  maxP: 135, level: 8 },
 
-      // 3. Meyveler
+      // Meyveler
       apple:          { name: "Elma",             icon: "🍎", type: "fruit", minP: 10,  maxP: 30,  xp: 10, level: 3 },
       cherry:         { name: "Kiraz",            icon: "🍒", type: "fruit", minP: 15,  maxP: 45,  xp: 15, level: 4 },
       orange:         { name: "Portakal",         icon: "🍊", type: "fruit", minP: 22,  maxP: 65,  xp: 20, level: 5 },
@@ -588,7 +555,7 @@
       banana:         { name: "Muz",              icon: "🍌", type: "fruit", minP: 30,  maxP: 90,  xp: 25, level: 6 },
       lemon:          { name: "Limon",            icon: "🍋", type: "fruit", minP: 35,  maxP: 105, xp: 30, level: 7 },
 
-      // 4. Hayvansal
+      // Hayvansal
       egg:            { name: "Yumurta",          icon: "🥚", type: "animal",minP: 5,   maxP: 20,  xp: 6,  level: 2 },
       milk:           { name: "Süt",              icon: "🥛", type: "animal",minP: 12,  maxP: 45,  xp: 12, level: 4 },
       wool:           { name: "Koyun Yünü",       icon: "🧶", type: "animal",minP: 25,  maxP: 85,  xp: 22, level: 6 },
@@ -596,7 +563,7 @@
       honey:          { name: "Bal Peteği",       icon: "🍯", type: "animal",minP: 45,  maxP: 140, xp: 35, level: 7 },
       rabbit_wool:    { name: "Tavşan Tüyü",      icon: "🪶", type: "animal",minP: 55,  maxP: 170, xp: 45, level: 8 },
 
-      // 5. Mutfak & Mamül
+      // Mutfak & Mamül
       bread:          { name: "Köy Ekmeği",       icon: "🍞", type: "food",  minP: 12,  maxP: 45,  xp: 15, level: 2 },
       cheese:         { name: "Taze Peynir",      icon: "🧀", type: "food",  minP: 22,  maxP: 75,  xp: 22, level: 4 },
       olive_oil:      { name: "Zeytinyağı",       icon: "🫙", type: "food",  minP: 45,  maxP: 140, xp: 35, level: 6 },
@@ -642,6 +609,40 @@
       speed_boost:   { name: "Üretim Hızı (Süre Azaltma)",  icon: "⏱️", step: 0.01, unit: " Hız",   baseCost: 1 },
       sell_bonus:    { name: "Tüccar Pazarlığı (Gelir)",    icon: "💰", step: 0.01, unit: "x Gelir",baseCost: 1 },
       water_saver:   { name: "Bereketli Toprak (Su)",       icon: "💧", step: 0.005,unit: " Şans",   baseCost: 1 }
+    };
+
+    // 2. ALL_ITEMS SONRASINDA BOB MARKET FONKSİYONU ÇALIŞTIRILIR
+    let bobMarketTimer = 600;
+    const BOB_POOL_ITEMS = ['wheat', 'corn', 'carrot', 'soy', 'apple', 'bread', 'cheese', 'egg', 'milk', 'coffee', 'icecream'];
+
+    function generateBobMarketItems() {
+      return Array(6).fill(null).map(() => {
+        const itmKey = BOB_POOL_ITEMS[Math.floor(Math.random() * BOB_POOL_ITEMS.length)];
+        const qty = Math.floor(Math.random() * 4) + 1;
+        const itemInfo = ALL_ITEMS[itmKey] || { minP: 5 };
+        return {
+          item: itmKey,
+          qty: qty,
+          price: (itemInfo.minP || 5) * qty,
+          status: 'on_sale',
+          buyerName: ''
+        };
+      });
+    }
+
+    const BOB_FARM = {
+      profile: { name: "👨‍🌾 Çiftçi Bob", level: 50, prestige: 10, gold: 99999 },
+      farm: {
+        stats: { planted: 450, harvested: 430, crafted: 210, sold: 160, bought: 80, ships: 45, trucks: 95, totalEarned: 18500, totalSpent: 9200, fruits: 120, fedAnimals: 180 },
+        plots: Array(49).fill(null).map((_, i) => ({
+          unlocked: true,
+          state: i % 2 === 0 ? 'ready' : 'growing',
+          crop: i % 3 === 0 ? 'wheat' : (i % 3 === 1 ? 'corn' : 'carrot'),
+          readyAt: Date.now() - 1000,
+          wet: true
+        })),
+        market: generateBobMarketItems()
+      }
     };
 
     let farmState = {
@@ -766,6 +767,7 @@
 
     function showLiveToast(msg) {
       const t = document.getElementById("live-toast");
+      if (!t) return;
       t.innerText = msg;
       t.style.display = "block";
       setTimeout(() => t.style.display = "none", 3500);
@@ -792,7 +794,7 @@
     }
 
     function loadFarmData() {
-      const local = localStorage.getItem("kutu_farm_hayday_v10") || localStorage.getItem("kutu_farm_hayday_v9");
+      const local = localStorage.getItem("kutu_farm_hayday_v10") || localStorage.getItem("kutu_farm_hayday_v9") || localStorage.getItem("kutu_farm_hayday_v8");
       if (local) {
         try { 
           const parsed = JSON.parse(local);
@@ -943,7 +945,7 @@
             if (!visitingTarget) cell.onclick = (e) => onPlotClick(globalIdx, e);
           } else if (p.state === 'ready') {
             cell.className += " ready";
-            cell.innerHTML = `<span style="font-size:14px;">${ALL_ITEMS[p.crop].icon}</span>`;
+            cell.innerHTML = `<span style="font-size:14px;">${ALL_ITEMS[p.crop]?.icon || '🌾'}</span>`;
             if (!visitingTarget) cell.onclick = (e) => onPlotClick(globalIdx, e);
           }
         }
@@ -1663,7 +1665,7 @@
           if (!visitingTarget) div.onclick = () => openSaleCreator(idx);
         } else if (currentSlot.status === 'on_sale') {
           const itm = ALL_ITEMS[currentSlot.item] || { name: currentSlot.item, icon: "📦", level: 1 };
-          const canBuy = visitingTarget ? (farmState.level >= itm.level) : true;
+          const canBuy = visitingTarget ? (farmState.level >= (itm.level || 1)) : true;
 
           div.innerHTML = `
             <div style="font-size:18px;">${itm.icon}</div>
@@ -1787,7 +1789,6 @@
       renderAll();
     }
 
-    // PAZARDAN ÜRÜN SATIN ALMA (GARANTİ ÇANTA + SENKRONİZASYON)
     function buyNeighborMarketItem(idx, slot, canBuy) {
       if (!slot || slot.status !== 'on_sale') return alert("Bu ürün zaten satılmış!");
       if (!canBuy) return alert(`Seviyen yetersiz! En az Seviye ${ALL_ITEMS[slot.item]?.level || 1} olmalısın.`);
@@ -1796,7 +1797,6 @@
 
       const myName = activeUser.displayName || activeUser.username || "Maceracı";
 
-      // 1. Kendi harcama ve envanterimize ekle
       farmState.gold -= Number(slot.price);
       farmState.stats.totalSpent = (farmState.stats.totalSpent || 0) + Number(slot.price);
       
@@ -1804,7 +1804,6 @@
       farmState.inventory[itemKey] = Number(farmState.inventory[itemKey] || 0) + Number(slot.qty);
       farmState.stats.bought++;
 
-      // 2. Satıcının kasasını "SATILDI" ve satın alan ismiyle işaretle
       if (visitingTarget.key === 'bob_farmer') {
         BOB_FARM.farm.market[idx].status = 'sold';
         BOB_FARM.farm.market[idx].buyerName = myName;
@@ -1842,7 +1841,6 @@
 
           if (now - (slot.placedAt || 0) >= requiredWaitMs) {
             slot.status = 'sold';
-            // %20 şansla Bob Amca bizim pazardan ürün alır
             const randomBot = Math.random() < 0.20 ? "👨‍🌾 Çiftçi Bob" : BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
             slot.buyerName = randomBot;
             farmState.stats.sold++;
@@ -1857,7 +1855,6 @@
       }
     }
 
-    // 12. SIRALAMA ALGORİTMASI (ÖNCE PRESTİJ, SONRA SEVİYE)
     function openNeighborsModal() {
       const list = document.getElementById("neighbors-list");
       list.innerHTML = "<div style='font-size:10px; text-align:center;'>Sıralama yükleniyor...</div>";
@@ -2035,7 +2032,7 @@
       let changed = false;
       const now = Date.now();
 
-      // Bob Market 10dk Yenileme Döngüsü
+      // Bob Market 10dk Sayaç
       if (bobMarketTimer > 0) {
         bobMarketTimer--;
       } else {
