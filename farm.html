@@ -521,9 +521,12 @@
     let modalSelectedPrice = 5;
 
     // BOT MÜŞTERİ HAVUZU
-    const BOT_NAMES = ["Köylü Ahmet", "Tüccar Selim", "Değirmenci Ali", "Kasap Mehmet", "Fırıncı Veli", "Hancı Hasan", "Çiftçi Bob"];
+    const BOT_NAMES = ["Köylü Ahmet", "Tüccar Selim", "Değirmenci Ali", "Kasap Mehmet", "Fırıncı Veli", "Hancı Hasan", "👨‍🌾 Çiftçi Bob"];
 
-    // BOB AMCA ÇİFTLİĞİ
+    // BOB AMCA ÇİFTLİĞİ VE 10 DK MARKET YENİLENMESİ
+    let bobMarketTimer = 600; // 10 Dakika = 600 saniye
+    const BOB_POOL_ITEMS = ['wheat', 'corn', 'carrot', 'soy', 'apple', 'bread', 'cheese', 'egg', 'milk', 'coffee', 'icecream'];
+
     const BOB_FARM = {
       profile: { name: "👨‍🌾 Çiftçi Bob", level: 50, prestige: 10, gold: 99999 },
       farm: {
@@ -535,16 +538,24 @@
           readyAt: Date.now() - 1000,
           wet: true
         })),
-        market: [
-          { item: 'wheat', qty: 10, price: 6, status: 'on_sale', buyerName: '' },
-          { item: 'bread', qty: 3, price: 15, status: 'on_sale', buyerName: '' },
-          { item: 'coffee', qty: 2, price: 30, status: 'on_sale', buyerName: '' },
-          { item: 'apple', qty: 4, price: 20, status: 'on_sale', buyerName: '' },
-          { item: 'icecream', qty: 1, price: 40, status: 'on_sale', buyerName: '' },
-          { item: 'cheese', qty: 2, price: 25, status: 'on_sale', buyerName: '' }
-        ]
+        market: generateBobMarketItems()
       }
     };
+
+    function generateBobMarketItems() {
+      return Array(6).fill(null).map(() => {
+        const itmKey = BOB_POOL_ITEMS[Math.floor(Math.random() * BOB_POOL_ITEMS.length)];
+        const qty = Math.floor(Math.random() * 4) + 1;
+        const itemInfo = ALL_ITEMS[itmKey] || { minP: 5 };
+        return {
+          item: itmKey,
+          qty: qty,
+          price: itemInfo.minP * qty,
+          status: 'on_sale',
+          buyerName: ''
+        };
+      });
+    }
 
     const ALL_ITEMS = {
       // 1. Tohumlar
@@ -750,7 +761,7 @@
     }
 
     function getTotalBagCount() {
-      return Object.values(farmState.inventory || {}).reduce((a, b) => a + b, 0);
+      return Object.values(farmState.inventory || {}).reduce((a, b) => a + Number(b || 0), 0);
     }
 
     function showLiveToast(msg) {
@@ -1776,19 +1787,21 @@
       renderAll();
     }
 
-    // BAŞKASININ PAZARINDAN EŞYA ALMA (GARANTİLİ SENKRONİZASYON)
+    // PAZARDAN ÜRÜN SATIN ALMA (GARANTİ ÇANTA + SENKRONİZASYON)
     function buyNeighborMarketItem(idx, slot, canBuy) {
       if (!slot || slot.status !== 'on_sale') return alert("Bu ürün zaten satılmış!");
       if (!canBuy) return alert(`Seviyen yetersiz! En az Seviye ${ALL_ITEMS[slot.item]?.level || 1} olmalısın.`);
-      if (getTotalBagCount() + slot.qty > farmState.bagMax) return alert("Çantan dolu! Yeterli yer yok.");
+      if (getTotalBagCount() + Number(slot.qty) > farmState.bagMax) return alert("Çantan dolu! Yeterli yer yok.");
       if (farmState.gold < slot.price) return alert("Yetersiz Altın!");
 
       const myName = activeUser.displayName || activeUser.username || "Maceracı";
 
       // 1. Kendi harcama ve envanterimize ekle
-      farmState.gold -= slot.price;
-      farmState.stats.totalSpent = (farmState.stats.totalSpent || 0) + slot.price;
-      farmState.inventory[slot.item] = (farmState.inventory[slot.item] || 0) + slot.qty;
+      farmState.gold -= Number(slot.price);
+      farmState.stats.totalSpent = (farmState.stats.totalSpent || 0) + Number(slot.price);
+      
+      const itemKey = slot.item;
+      farmState.inventory[itemKey] = Number(farmState.inventory[itemKey] || 0) + Number(slot.qty);
       farmState.stats.bought++;
 
       // 2. Satıcının kasasını "SATILDI" ve satın alan ismiyle işaretle
@@ -1807,7 +1820,7 @@
       }
 
       saveFarmData();
-      openMarketModal(); // Pazarı güncelle
+      openMarketModal();
       renderAll();
       alert(`🎉 ${slot.qty}x ${ALL_ITEMS[slot.item]?.name || slot.item} başarıyla çantana eklendi!`);
     }
@@ -1829,7 +1842,8 @@
 
           if (now - (slot.placedAt || 0) >= requiredWaitMs) {
             slot.status = 'sold';
-            const randomBot = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
+            // %20 şansla Bob Amca bizim pazardan ürün alır
+            const randomBot = Math.random() < 0.20 ? "👨‍🌾 Çiftçi Bob" : BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
             slot.buyerName = randomBot;
             farmState.stats.sold++;
             changed = true;
@@ -1886,7 +1900,6 @@
         }
       });
 
-      // SIRALAMA: 1. Prestij (büyükten küçüğe), 2. Seviye, 3. Altın
       users.sort((a, b) => {
         const presA = a.profile?.prestige || 0;
         const presB = b.profile?.prestige || 0;
@@ -2021,6 +2034,17 @@
     function farmLoop() {
       let changed = false;
       const now = Date.now();
+
+      // Bob Market 10dk Yenileme Döngüsü
+      if (bobMarketTimer > 0) {
+        bobMarketTimer--;
+      } else {
+        bobMarketTimer = 600;
+        BOB_FARM.farm.market = generateBobMarketItems();
+        if (visitingTarget && visitingTarget.key === 'bob_farmer') {
+          openMarketModal();
+        }
+      }
 
       farmState.plots.forEach(p => {
         if (p.unlocked && p.state === 'growing' && now >= p.readyAt) {
