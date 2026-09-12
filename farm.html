@@ -329,7 +329,7 @@
           
           <div class="grid-7x7" id="grid-7x7-container"></div>
 
-          <!-- Sayfalama Okları (İlk 49 parsel açılınca veya çoklu sayfada görünür) -->
+          <!-- Sayfalama Okları -->
           <div id="ui-grid-pagination" style="display:none; justify-content:space-between; align-items:center; width:100%; margin-top:4px;">
             <button class="btn-action" onclick="changeGridPage(-1)">‹ Önceki Alan</button>
             <span style="font-size:9px; font-weight:bold; color:#facc15;" id="lbl-grid-page-text">Alan: 1 / 1</span>
@@ -411,7 +411,7 @@
             <span style="font-size:10px; color:#fde68a;">Prestij Derecesi: <b style="color:#f59e0b; font-size:13px;">★ <span id="lbl-pres-count">0</span></b></span>
             <span style="font-size:10px; color:#38bdf8;">Kullanılabilir Yıldız: <b style="color:#facc15; font-size:13px;" id="lbl-stars-count">0</b></span>
           </div>
-          <div style="font-size:8px; color:#cbd5e1;">Prestij atladığında çiftliğindeki tüm ekinler, makineler ve paran sıfırlanır ancak 1 Prestij Yıldızı kazanırsın. Bu yıldızlarla aşağıdaki kalıcı pasif bonusları azar azar güçlendirebilirsin.</div>
+          <div style="font-size:8px; color:#cbd5e1;">Prestij atladığında ekinler, binalar ve paran sıfırlanır, 1 Prestij Yıldızı kazanırsın. Bu yıldızlarla pasif bonusları güçlendirebilirsin.</div>
           <button class="btn-action" style="background:#f59e0b; color:#000; width:100%; padding:8px; font-weight:900;" onclick="performPrestige()">🌟 Prestij Atla (Gereksinim: Min Lv.10 + 500₺ + 💎10)</button>
         </div>
 
@@ -491,7 +491,7 @@
   <div id="modal-neighbors" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:200; padding:15px;">
     <div style="background:#022c22; border:2px solid #059669; border-radius:12px; padding:12px; width:100%; max-width:340px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <b style="font-size:11.5px; color:#f59e0b;">👥 Çiftçi Sıralaması</b>
+        <b style="font-size:11.5px; color:#f59e0b;">👥 Çiftçi Sıralaması (Prestij & Lv)</b>
         <button class="btn-action" style="background:#ef4444; padding:2px 6px;" onclick="document.getElementById('modal-neighbors').style.display='none'">X</button>
       </div>
       <div id="neighbors-list" style="display:flex; flex-direction:column; gap:5px; margin-top:8px; max-height:260px; overflow-y:auto;"></div>
@@ -515,14 +515,17 @@
     let visitingTarget = null;
     let selectedCropKey = 'wheat_seed';
     let targetSlotIndex = null;
-    let currentGridPage = 0; // 0: ilk 49 arsa, 1: sonraki 49 arsa...
+    let currentGridPage = 0;
 
     let modalSelectedQty = 1;
     let modalSelectedPrice = 5;
 
+    // BOT MÜŞTERİ HAVUZU
+    const BOT_NAMES = ["Köylü Ahmet", "Tüccar Selim", "Değirmenci Ali", "Kasap Mehmet", "Fırıncı Veli", "Hancı Hasan", "Çiftçi Bob"];
+
     // BOB AMCA ÇİFTLİĞİ
     const BOB_FARM = {
-      profile: { name: "👨‍🌾 Çiftçi Bob", level: 50, prestige: 10, gold: 99999, rankScore: 99999 },
+      profile: { name: "👨‍🌾 Çiftçi Bob", level: 50, prestige: 10, gold: 99999 },
       farm: {
         stats: { planted: 450, harvested: 430, crafted: 210, sold: 160, bought: 80, ships: 45, trucks: 95, totalEarned: 18500, totalSpent: 9200, fruits: 120, fedAnimals: 180 },
         plots: Array(49).fill(null).map((_, i) => ({
@@ -533,12 +536,12 @@
           wet: true
         })),
         market: [
-          { item: 'wheat', qty: 10, price: 6, status: 'on_sale' },
-          { item: 'bread', qty: 3, price: 15, status: 'on_sale' },
-          { item: 'coffee', qty: 2, price: 30, status: 'on_sale' },
-          { item: 'apple', qty: 4, price: 20, status: 'on_sale' },
-          { item: 'icecream', qty: 1, price: 40, status: 'on_sale' },
-          { item: 'cheese', qty: 2, price: 25, status: 'on_sale' }
+          { item: 'wheat', qty: 10, price: 6, status: 'on_sale', buyerName: '' },
+          { item: 'bread', qty: 3, price: 15, status: 'on_sale', buyerName: '' },
+          { item: 'coffee', qty: 2, price: 30, status: 'on_sale', buyerName: '' },
+          { item: 'apple', qty: 4, price: 20, status: 'on_sale', buyerName: '' },
+          { item: 'icecream', qty: 1, price: 40, status: 'on_sale', buyerName: '' },
+          { item: 'cheese', qty: 2, price: 25, status: 'on_sale', buyerName: '' }
         ]
       }
     };
@@ -623,7 +626,6 @@
       ice_cr: { name: "Dondurmacı",       icon: "🍦", cost: 1300,inItem: "milk",    inQty: 2, outItem: "icecream",  dur: 70, level: 7 }
     };
 
-    // PRESTİJ PASİF TANIMLARI
     const PRESTIGE_PERKS_DEF = {
       xp_boost:      { name: "Hasat Bilgeliği (XP Bonusu)", icon: "✨", step: 0.02, unit: "x Kat", baseCost: 1 },
       speed_boost:   { name: "Üretim Hızı (Süre Azaltma)",  icon: "⏱️", step: 0.01, unit: " Hız",   baseCost: 1 },
@@ -687,7 +689,7 @@
         { item: 'wheat', qty: 3, reward: 15, xp: 8, status: 'ready', timer: 0 },
         { item: 'corn',  qty: 2, reward: 18, xp: 12, status: 'ready', timer: 0 }
       ],
-      market: Array(6).fill(null).map(() => ({ item: null, qty: 0, price: 0, status: 'empty' })),
+      market: Array(6).fill(null).map(() => ({ item: null, qty: 0, price: 0, status: 'empty', buyerName: '' })),
       ship: {
         dockState: 'active',
         timer: 240,
@@ -760,7 +762,7 @@
 
     function saveFarmData() {
       if (visitingTarget) return;
-      localStorage.setItem("kutu_farm_hayday_v9", JSON.stringify(farmState));
+      localStorage.setItem("kutu_farm_hayday_v10", JSON.stringify(farmState));
       if (rtdb && activeUser) {
         const myKey = sanitizeUserKey(activeUser.username);
         const unlockedPlotsCount = farmState.plots.filter(p => p.unlocked).length;
@@ -769,9 +771,8 @@
             name: activeUser.displayName || activeUser.username, 
             level: farmState.level, 
             gold: farmState.gold,
-            prestige: farmState.prestige,
-            plotsCount: unlockedPlotsCount,
-            rankScore: (farmState.prestige * 1000) + (farmState.level * 20) + farmState.gold
+            prestige: farmState.prestige || 0,
+            plotsCount: unlockedPlotsCount
           },
           farm: farmState,
           lastActive: Date.now()
@@ -780,7 +781,7 @@
     }
 
     function loadFarmData() {
-      const local = localStorage.getItem("kutu_farm_hayday_v9") || localStorage.getItem("kutu_farm_hayday_v8");
+      const local = localStorage.getItem("kutu_farm_hayday_v10") || localStorage.getItem("kutu_farm_hayday_v9");
       if (local) {
         try { 
           const parsed = JSON.parse(local);
@@ -792,7 +793,7 @@
           if (!farmState.perks) farmState.perks = { xp_boost: 0, speed_boost: 0, sell_bonus: 0, water_saver: 0 };
           if (!farmState.stats) farmState.stats = { planted: 0, harvested: 0, crafted: 0, sold: 0, bought: 0, ships: 0, trucks: 0, totalEarned: 50, totalSpent: 0, fruits: 0, fedAnimals: 0 };
           if (!farmState.market || farmState.market.length < 6) {
-            farmState.market = Array(6).fill(null).map(() => ({ item: null, qty: 0, price: 0, status: 'empty' }));
+            farmState.market = Array(6).fill(null).map(() => ({ item: null, qty: 0, price: 0, status: 'empty', buyerName: '' }));
           }
         } catch(e){}
       }
@@ -813,7 +814,7 @@
       rtdb.ref(`farm_users/${myKey}/farm/market`).on("child_changed", snap => {
         const val = snap.val();
         if (val && val.status === 'sold') {
-          showLiveToast("🔔 Pazarında ürün satıldı! Parayı toplamak için tezgâha bas.");
+          showLiveToast(`🔔 Pazarında ${val.buyerName ? val.buyerName : 'biri'} ürün satın aldı!`);
           farmState.stats.sold++;
           loadFarmData();
           renderAll();
@@ -825,19 +826,17 @@
       document.getElementById("lbl-gold").innerText = farmState.gold + "₺";
       document.getElementById("lbl-gems").innerText = farmState.gems;
       document.getElementById("lbl-lvl").innerText = farmState.level;
-      document.getElementById("lbl-prestige").innerText = farmState.prestige;
-      document.getElementById("lbl-pres-count").innerText = farmState.prestige;
+      document.getElementById("lbl-prestige").innerText = farmState.prestige || 0;
+      document.getElementById("lbl-pres-count").innerText = farmState.prestige || 0;
       document.getElementById("lbl-stars-count").innerText = farmState.prestigeStars || 0;
       document.getElementById("lbl-water").innerText = `${farmState.water}/${farmState.maxWater}L`;
       
-      // Su Tankı Fulle Butonu kontrolü (Doluysa basılmaz)
       const btnWaterGem = document.getElementById("btn-water-gems");
       if (btnWaterGem) btnWaterGem.disabled = (farmState.water >= farmState.maxWater);
 
       const bagTotal = getTotalBagCount();
       document.getElementById("lbl-bag-count").innerText = `${bagTotal < 10 ? '0' + bagTotal : bagTotal}/${farmState.bagMax}`;
 
-      // Çanta Büyütme Maliyeti Dinamik Güncelleme
       const currentBagCost = 150 + ((farmState.bagUpgradeCount || 0) * 75);
       const btnBagGold = document.getElementById("btn-upgrade-bag-gold");
       if (btnBagGold) btnBagGold.innerText = `Büyüt (${currentBagCost}₺)`;
@@ -903,10 +902,9 @@
       const totalPlotsCount = activePlots.length;
       const unlockedCount = activePlots.filter(p => p.unlocked).length;
 
-      const totalPages = Math.ceil(totalPlotsCount / 49);
+      const totalPages = Math.max(1, Math.ceil(totalPlotsCount / 49));
       const pageWrapper = document.getElementById("ui-grid-pagination");
       
-      // İlk 49 parsel açıldığında veya birden çok sayfa varsa okları göster
       if (totalPages > 1 || unlockedCount >= 49) {
         pageWrapper.style.display = "flex";
         document.getElementById("lbl-grid-page-text").innerText = `Alan: ${currentGridPage + 1} / ${totalPages}`;
@@ -968,7 +966,6 @@
       farmState.stats.totalSpent += cost;
       farmState.plots[idx].unlocked = true;
 
-      // Eğer 49 arsanın hepsi açıldıysa ve sırada yeni sayfa yoksa yeni bir 7x7 alan (49 arsa) ekle
       if (farmState.plots.every(p => p.unlocked)) {
         const newPlots = Array(49).fill(null).map(() => ({
           unlocked: false,
@@ -978,7 +975,7 @@
           wet: false
         }));
         farmState.plots = farmState.plots.concat(newPlots);
-        showLiveToast("🎉 Tebrikler! Yeni 7x7 Tarla Alanı Açıldı! Oklardan geçiş yapabilirsin.");
+        showLiveToast("🎉 Tebrikler! Yeni 7x7 Tarla Alanı Açıldı!");
       }
 
       saveFarmData();
@@ -998,7 +995,6 @@
         p.state = 'growing';
         p.crop = s.cropKey;
 
-        // Prestij Hız Bonusu
         const speedMultiplier = Math.max(0.5, 1 - ((farmState.perks.speed_boost || 0) * PRESTIGE_PERKS_DEF.speed_boost.step));
         p.readyAt = Date.now() + Math.floor(ALL_ITEMS[s.cropKey].dur * 1000 * speedMultiplier);
         
@@ -1009,7 +1005,6 @@
       } else if (p.state === 'growing') {
         if (p.wet) return alert("Bu tarla zaten sulandı!");
         
-        // Su tasarrufu şansı
         const saveChance = (farmState.perks.water_saver || 0) * PRESTIGE_PERKS_DEF.water_saver.step;
         const savedWater = Math.random() < saveChance;
 
@@ -1032,11 +1027,9 @@
         const cropKey = p.crop;
         const c = ALL_ITEMS[cropKey];
 
-        // 1 tohum -> 1 hasat ürünü
         farmState.inventory[cropKey] = (farmState.inventory[cropKey] || 0) + 1;
         farmState.stats.harvested += 1;
 
-        // Prestij XP Bonusu
         const xpBonus = 1 + ((farmState.perks.xp_boost || 0) * PRESTIGE_PERKS_DEF.xp_boost.step);
         addXp(Math.round(c.xp * xpBonus));
 
@@ -1512,7 +1505,7 @@
       Object.keys(PRESTIGE_PERKS_DEF).forEach(key => {
         const def = PRESTIGE_PERKS_DEF[key];
         const currentLv = farmState.perks[key] || 0;
-        const reqStar = def.baseCost + currentLv; // Her seviyede gereken yıldız artar
+        const reqStar = def.baseCost + currentLv;
 
         const row = document.createElement("div");
         row.className = "shop-row-card";
@@ -1555,7 +1548,6 @@
         farmState.prestige = (farmState.prestige || 0) + 1;
         farmState.prestigeStars = (farmState.prestigeStars || 0) + 1;
         
-        // Sıfırlamalar
         farmState.level = 1;
         farmState.xp = 0;
         farmState.gold = 50;
@@ -1602,6 +1594,7 @@
     function resetAllFarmData() {
       if (confirm("🚨 DİKKAT: Bütün çiftlik verilerin, seviyen, paran ve eşyaların silinecektir. Devam etmek istiyor musun?")) {
         if (confirm("Son onay: Bu işlem kesinlikle geri alınamaz!")) {
+          localStorage.removeItem("kutu_farm_hayday_v10");
           localStorage.removeItem("kutu_farm_hayday_v9");
           localStorage.removeItem("kutu_farm_hayday_v8");
           if (rtdb && activeUser) {
@@ -1622,7 +1615,7 @@
 
       if (!marketSource || marketSource.length < 6) {
         while (marketSource.length < 6) {
-          marketSource.push({ item: null, qty: 0, price: 0, status: 'empty' });
+          marketSource.push({ item: null, qty: 0, price: 0, status: 'empty', buyerName: '' });
         }
       }
 
@@ -1637,7 +1630,7 @@
         div.style.flexShrink = "0";
         div.style.width = "85px";
         div.style.minWidth = "85px";
-        div.style.height = "110px";
+        div.style.height = "115px";
         div.style.background = currentSlot.status === 'sold' ? "#1e1b4b" : "#78350f";
         div.style.border = "2px " + (currentSlot.status === 'sold' ? "solid #ef4444" : "dashed #d97706");
         div.style.borderRadius = "8px";
@@ -1648,6 +1641,7 @@
         div.style.cursor = "pointer";
         div.style.textAlign = "center";
         div.style.userSelect = "none";
+        div.style.padding = "4px";
 
         if (currentSlot.status === 'empty' || !currentSlot.status) {
           div.innerHTML = `
@@ -1664,7 +1658,7 @@
             <div style="font-size:18px;">${itm.icon}</div>
             <b style="font-size:8px;">${currentSlot.qty}x ${itm.name}</b>
             <div style="font-size:9px; color:#facc15; font-weight:bold;">${currentSlot.price}₺</div>
-            ${visitingTarget ? (canBuy ? `<span style="font-size:7px; color:#38bdf8;">Satın Al</span>` : `<span style="font-size:6.5px; color:#ef4444; font-weight:bold;">Lv.${itm.level} Gerekli</span>`) : `<span style="font-size:6.5px; color:#94a3b8;">(Geri Çek)</span>`}
+            ${visitingTarget ? (canBuy ? `<span style="font-size:7px; color:#38bdf8; font-weight:bold;">Satın Al</span>` : `<span style="font-size:6.5px; color:#ef4444; font-weight:bold;">Lv.${itm.level} Gerekli</span>`) : `<span style="font-size:6.5px; color:#94a3b8;">(Geri Çek)</span>`}
           `;
           if (visitingTarget) {
             div.onclick = () => buyNeighborMarketItem(idx, currentSlot, canBuy);
@@ -1673,10 +1667,13 @@
           }
         } else if (currentSlot.status === 'sold') {
           div.innerHTML = `
-            <div style="background:#ef4444; color:#fff; font-size:7.5px; font-weight:900; padding:1px 3px; border-radius:3px;">SATILDI</div>
-            <div style="font-size:16px; margin-top:2px;">💰</div>
-            <div style="font-size:9px; color:#22c55e; font-weight:bold;">+${currentSlot.price}₺</div>
-            <div style="font-size:6.5px; color:#fde68a;">Parayı Al</div>
+            <div style="background:#ef4444; color:#fff; font-size:7px; font-weight:900; padding:1px 3px; border-radius:3px;">SATILDI</div>
+            <div style="font-size:16px; margin-top:1px;">💰</div>
+            <div style="font-size:8.5px; color:#22c55e; font-weight:bold;">+${currentSlot.price}₺</div>
+            <div style="font-size:6.5px; color:#cbd5e1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:75px;">
+              👤 ${currentSlot.buyerName || 'Müşteri'}
+            </div>
+            ${!visitingTarget ? `<div style="font-size:6.5px; color:#fde68a; font-weight:bold;">Parayı Al</div>` : ''}
           `;
           if (!visitingTarget) div.onclick = () => collectSoldGold(idx);
         }
@@ -1748,6 +1745,7 @@
         qty: modalSelectedQty, 
         price: modalSelectedPrice, 
         status: 'on_sale',
+        buyerName: '',
         placedAt: Date.now()
       };
       document.getElementById("box-create-sale").style.display = "none";
@@ -1762,7 +1760,7 @@
         return alert("Çantanda yeterli yer yok! Önce yer aç veya ambarı büyüt.");
       }
       farmState.inventory[slot.item] = (farmState.inventory[slot.item] || 0) + slot.qty;
-      farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty' };
+      farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty', buyerName: '' };
       saveFarmData();
       openMarketModal();
       renderAll();
@@ -1772,35 +1770,46 @@
       const slot = farmState.market[idx];
       farmState.gold += slot.price;
       farmState.stats.totalEarned = (farmState.stats.totalEarned || 0) + slot.price;
-      farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty' };
+      farmState.market[idx] = { item: null, qty: 0, price: 0, status: 'empty', buyerName: '' };
       saveFarmData();
       openMarketModal();
       renderAll();
     }
 
-    // BOB VE KOMŞULARDAN ÜRÜN SATIN ALMA
+    // BAŞKASININ PAZARINDAN EŞYA ALMA (GARANTİLİ SENKRONİZASYON)
     function buyNeighborMarketItem(idx, slot, canBuy) {
+      if (!slot || slot.status !== 'on_sale') return alert("Bu ürün zaten satılmış!");
       if (!canBuy) return alert(`Seviyen yetersiz! En az Seviye ${ALL_ITEMS[slot.item]?.level || 1} olmalısın.`);
       if (getTotalBagCount() + slot.qty > farmState.bagMax) return alert("Çantan dolu! Yeterli yer yok.");
       if (farmState.gold < slot.price) return alert("Yetersiz Altın!");
 
+      const myName = activeUser.displayName || activeUser.username || "Maceracı";
+
+      // 1. Kendi harcama ve envanterimize ekle
       farmState.gold -= slot.price;
       farmState.stats.totalSpent = (farmState.stats.totalSpent || 0) + slot.price;
-      
-      // Ürünü doğrudan oyuncunun envanterine ekle
       farmState.inventory[slot.item] = (farmState.inventory[slot.item] || 0) + slot.qty;
       farmState.stats.bought++;
 
+      // 2. Satıcının kasasını "SATILDI" ve satın alan ismiyle işaretle
       if (visitingTarget.key === 'bob_farmer') {
-        BOB_FARM.farm.market[idx] = { item: null, qty: 0, price: 0, status: 'empty' };
+        BOB_FARM.farm.market[idx].status = 'sold';
+        BOB_FARM.farm.market[idx].buyerName = myName;
       } else {
-        rtdb.ref(`farm_users/${visitingTarget.key}/farm/market/${idx}`).update({ status: 'sold' });
+        visitingTarget.farm.market[idx].status = 'sold';
+        visitingTarget.farm.market[idx].buyerName = myName;
+        if (rtdb) {
+          rtdb.ref(`farm_users/${visitingTarget.key}/farm/market/${idx}`).update({
+            status: 'sold',
+            buyerName: myName
+          });
+        }
       }
 
-      alert(`🎉 ${slot.qty}x ${ALL_ITEMS[slot.item]?.name || slot.item} başarıyla çantana eklendi!`);
       saveFarmData();
-      document.getElementById("modal-market").style.display = "none";
+      openMarketModal(); // Pazarı güncelle
       renderAll();
+      alert(`🎉 ${slot.qty}x ${ALL_ITEMS[slot.item]?.name || slot.item} başarıyla çantana eklendi!`);
     }
 
     function simulateSmartPazarPurchases() {
@@ -1816,10 +1825,12 @@
           const maxPrice = itm.maxP * slot.qty;
           
           const priceRatio = Math.max(0, Math.min(1, (slot.price - minPrice) / Math.max(1, (maxPrice - minPrice))));
-          const requiredWaitMs = (20 + (priceRatio * 35)) * 1000;
+          const requiredWaitMs = (15 + (priceRatio * 25)) * 1000;
 
           if (now - (slot.placedAt || 0) >= requiredWaitMs) {
             slot.status = 'sold';
+            const randomBot = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
+            slot.buyerName = randomBot;
             farmState.stats.sold++;
             changed = true;
           }
@@ -1832,10 +1843,10 @@
       }
     }
 
-    // 12. SIRALAMA & ZİYARET
+    // 12. SIRALAMA ALGORİTMASI (ÖNCE PRESTİJ, SONRA SEVİYE)
     function openNeighborsModal() {
       const list = document.getElementById("neighbors-list");
-      list.innerHTML = "<div style='font-size:10px; text-align:center;'>Sıralama taranıyor...</div>";
+      list.innerHTML = "<div style='font-size:10px; text-align:center;'>Sıralama yükleniyor...</div>";
       document.getElementById("modal-neighbors").style.display = "flex";
 
       let users = [];
@@ -1850,6 +1861,8 @@
               }
             });
           }
+          renderNeighborsList(users);
+        }).catch(() => {
           renderNeighborsList(users);
         });
       } else {
@@ -1867,13 +1880,26 @@
         profile: {
           name: activeUser.displayName || activeUser.username,
           level: farmState.level,
-          prestige: farmState.prestige,
+          prestige: farmState.prestige || 0,
           gold: farmState.gold,
           plotsCount: farmState.plots.filter(p => p.unlocked).length
         }
       });
 
-      users.sort((a, b) => (b.profile?.rankScore || 0) - (a.profile?.rankScore || 0));
+      // SIRALAMA: 1. Prestij (büyükten küçüğe), 2. Seviye, 3. Altın
+      users.sort((a, b) => {
+        const presA = a.profile?.prestige || 0;
+        const presB = b.profile?.prestige || 0;
+        if (presB !== presA) return presB - presA;
+
+        const lvlA = a.profile?.level || 1;
+        const lvlB = b.profile?.level || 1;
+        if (lvlB !== lvlA) return lvlB - lvlA;
+
+        const goldA = a.profile?.gold || 0;
+        const goldB = b.profile?.gold || 0;
+        return goldB - goldA;
+      });
 
       users.forEach((u, i) => {
         const isMe = (u.key === myKey);
@@ -1894,7 +1920,7 @@
               #${i + 1} ${prof.name || u.key} ${isMe ? '(BEN)' : ''}
             </b>
             <div style="font-size:7.5px; color:#cbd5e1;">
-              ⭐ Lv.${prof.level || 1} | 🌟 P.${prof.prestige || 0} | 💰 ${prof.gold || 0}₺
+              🌟 P.<b style="color:#f59e0b;">${prof.prestige || 0}</b> | ⭐ Lv.<b style="color:#facc15;">${prof.level || 1}</b> | 💰 ${prof.gold || 0}₺
             </div>
           </div>
           ${!isMe ? `<button class="btn-action" style="font-size:8px; background:${isBob ? '#f59e0b' : '#0284c7'}; color:${isBob ? '#000' : '#fff'};" onclick="visitNeighbor('${u.key}')">Ziyaret 🚀</button>` : ''}
